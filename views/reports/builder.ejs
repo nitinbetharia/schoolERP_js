@@ -1,0 +1,1555 @@
+<!-- Advanced Report Builder -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - School ERP</title>
+
+    <!-- CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css" rel="stylesheet" />
+    <link href="/css/dashboard.css" rel="stylesheet" />
+
+    <style>
+      .builder-container {
+        background: #f8f9fa;
+        min-height: calc(100vh - 120px);
+      }
+
+      .builder-step {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+      }
+
+      .step-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: bold;
+      }
+
+      .step-content {
+        padding: 1.5rem;
+      }
+
+      .table-selector,
+      .field-selector {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .table-selector:hover,
+      .field-selector:hover {
+        border-color: #007bff;
+        background: #f8f9ff;
+      }
+
+      .table-selector.selected,
+      .field-selector.selected {
+        border-color: #007bff;
+        background: #e7f1ff;
+      }
+
+      .field-item {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        cursor: move;
+        transition: all 0.3s ease;
+      }
+
+      .field-item:hover {
+        background: #e9ecef;
+        border-color: #007bff;
+      }
+
+      .field-item.selected {
+        background: #e7f1ff;
+        border-color: #007bff;
+      }
+
+      .filter-group {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .preview-container {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        border: 1px solid #dee2e6;
+      }
+
+      .sql-preview {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .chart-preview {
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 6px;
+        margin-top: 1rem;
+      }
+
+      .drag-zone {
+        min-height: 100px;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+      }
+
+      .drag-zone.drag-over {
+        border-color: #007bff;
+        background: #f8f9ff;
+      }
+
+      .progress-indicator {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+
+      .progress-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 15px;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 1;
+      }
+
+      .progress-step.completed::after {
+        background: #28a745;
+      }
+
+      .progress-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #dee2e6;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        position: relative;
+        z-index: 2;
+      }
+
+      .progress-step.active .progress-circle {
+        background: #007bff;
+      }
+
+      .progress-step.completed .progress-circle {
+        background: #28a745;
+      }
+
+      .join-diagram {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+      }
+
+      .table-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin: 0.5rem;
+        display: inline-block;
+        min-width: 120px;
+        text-align: center;
+      }
+
+      .join-line {
+        display: inline-block;
+        width: 50px;
+        height: 2px;
+        background: #007bff;
+        margin: 0 10px;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid">
+      <div class="row">
+        <%- include('../partials/sidebar') %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <!-- Header -->
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+          >
+            <h1 class="h2"><i class="fas fa-tools me-2"></i><%= pageTitle %></h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <button class="btn btn-outline-secondary" onclick="resetBuilder()">
+                  <i class="fas fa-undo me-1"></i>Reset
+                </button>
+                <button class="btn btn-outline-primary" onclick="previewReport()">
+                  <i class="fas fa-eye me-1"></i>Preview
+                </button>
+                <button class="btn btn-success" onclick="saveReport()">
+                  <i class="fas fa-save me-1"></i>Save Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="builder-container">
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+              <div class="progress-step active" id="step1Indicator">
+                <div class="progress-circle">1</div>
+                <div class="step-label">Select Tables</div>
+              </div>
+              <div class="progress-step" id="step2Indicator">
+                <div class="progress-circle">2</div>
+                <div class="step-label">Choose Fields</div>
+              </div>
+              <div class="progress-step" id="step3Indicator">
+                <div class="progress-circle">3</div>
+                <div class="step-label">Add Filters</div>
+              </div>
+              <div class="progress-step" id="step4Indicator">
+                <div class="progress-circle">4</div>
+                <div class="step-label">Configure Chart</div>
+              </div>
+              <div class="progress-step" id="step5Indicator">
+                <div class="progress-circle">5</div>
+                <div class="step-label">Finalize</div>
+              </div>
+            </div>
+
+            <!-- Step 1: Table Selection -->
+            <div class="builder-step" id="step1">
+              <div class="step-header">
+                <i class="fas fa-table me-2"></i>Step 1: Select Tables and Joins
+              </div>
+              <div class="step-content">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Available Tables</h6>
+                    <div id="availableTables" class="mb-3">
+                      <div class="text-center py-3">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading tables...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Selected Tables & Joins</h6>
+                    <div class="join-diagram" id="joinDiagram">
+                      <div class="text-muted text-center py-3">
+                        Select a main table to get started
+                      </div>
+                    </div>
+
+                    <div class="mt-3" id="joinControls" style="display: none">
+                      <h6>Add Join</h6>
+                      <div class="row g-2">
+                        <div class="col-md-4">
+                          <select class="form-select form-select-sm" id="joinType">
+                            <option value="LEFT">LEFT JOIN</option>
+                            <option value="INNER">INNER JOIN</option>
+                            <option value="RIGHT">RIGHT JOIN</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <select class="form-select form-select-sm" id="joinTable">
+                            <option value="">Select table...</option>
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <button class="btn btn-primary btn-sm" onclick="addJoin()">
+                            <i class="fas fa-plus"></i> Add
+                          </button>
+                        </div>
+                      </div>
+                      <div class="mt-2">
+                        <input
+                          type="text"
+                          class="form-control form-control-sm"
+                          id="joinCondition"
+                          placeholder="e.g., table1.id = table2.foreign_id"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Field Selection -->
+            <div class="builder-step" id="step2" style="display: none">
+              <div class="step-header">
+                <i class="fas fa-columns me-2"></i>Step 2: Select Fields and Aggregations
+              </div>
+              <div class="step-content">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Available Fields</h6>
+                    <div class="mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="fieldSearch"
+                        placeholder="Search fields..."
+                        onkeyup="filterFields()"
+                      />
+                    </div>
+                    <div id="availableFields" style="max-height: 400px; overflow-y: auto">
+                      <div class="text-center py-3 text-muted">
+                        Select tables first to see available fields
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Selected Fields</h6>
+                    <div class="drag-zone" id="selectedFields">
+                      <span class="text-muted">Drag fields here or click to add</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Filters -->
+            <div class="builder-step" id="step3" style="display: none">
+              <div class="step-header">
+                <i class="fas fa-filter me-2"></i>Step 3: Add Filters and Conditions
+              </div>
+              <div class="step-content">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="mb-0">Filters</h6>
+                  <button class="btn btn-primary btn-sm" onclick="addFilter()">
+                    <i class="fas fa-plus me-1"></i>Add Filter
+                  </button>
+                </div>
+                <div id="filtersContainer">
+                  <div class="text-center py-3 text-muted">
+                    No filters added yet. Click "Add Filter" to get started.
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <h6>Grouping & Sorting</h6>
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Group By</label>
+                      <select class="form-select" id="groupByField" multiple>
+                        <!-- Populated dynamically -->
+                      </select>
+                      <small class="text-muted">Hold Ctrl to select multiple fields</small>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Order By</label>
+                      <div id="orderByContainer">
+                        <div class="d-flex gap-2 mb-2">
+                          <select class="form-select" id="orderByField">
+                            <option value="">Select field...</option>
+                          </select>
+                          <select
+                            class="form-select"
+                            id="orderByDirection"
+                            style="max-width: 120px"
+                          >
+                            <option value="ASC">Ascending</option>
+                            <option value="DESC">Descending</option>
+                          </select>
+                          <button class="btn btn-primary" onclick="addOrderBy()">
+                            <i class="fas fa-plus"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Chart Configuration -->
+            <div class="builder-step" id="step4" style="display: none">
+              <div class="step-header">
+                <i class="fas fa-chart-bar me-2"></i>Step 4: Configure Visualization
+              </div>
+              <div class="step-content">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Chart Settings</h6>
+                    <div class="mb-3">
+                      <label class="form-label">Chart Type</label>
+                      <div class="btn-group w-100" role="group">
+                        <input
+                          type="radio"
+                          class="btn-check"
+                          name="chartType"
+                          id="chartBar"
+                          value="bar"
+                          checked
+                        />
+                        <label class="btn btn-outline-primary" for="chartBar">
+                          <i class="fas fa-chart-bar"></i> Bar
+                        </label>
+                        <input
+                          type="radio"
+                          class="btn-check"
+                          name="chartType"
+                          id="chartLine"
+                          value="line"
+                        />
+                        <label class="btn btn-outline-primary" for="chartLine">
+                          <i class="fas fa-chart-line"></i> Line
+                        </label>
+                        <input
+                          type="radio"
+                          class="btn-check"
+                          name="chartType"
+                          id="chartPie"
+                          value="pie"
+                        />
+                        <label class="btn btn-outline-primary" for="chartPie">
+                          <i class="fas fa-chart-pie"></i> Pie
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Label Field</label>
+                      <select class="form-select" id="chartLabelField">
+                        <option value="">Select field for labels...</option>
+                      </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Value Field</label>
+                      <select class="form-select" id="chartValueField">
+                        <option value="">Select field for values...</option>
+                      </select>
+                    </div>
+
+                    <div class="form-check mb-3">
+                      <input class="form-check-input" type="checkbox" id="enableChart" />
+                      <label class="form-check-label" for="enableChart">
+                        Enable chart visualization for this report
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Chart Preview</h6>
+                    <div class="chart-preview" id="chartPreview">
+                      <span class="text-muted">Configure chart settings to see preview</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 5: Finalize -->
+            <div class="builder-step" id="step5" style="display: none">
+              <div class="step-header">
+                <i class="fas fa-check me-2"></i>Step 5: Finalize Report
+              </div>
+              <div class="step-content">
+                <div class="row">
+                  <div class="col-md-8">
+                    <div class="mb-3">
+                      <label class="form-label">Report Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="reportName"
+                        placeholder="Enter report name..."
+                        required
+                      />
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Description</label>
+                      <textarea
+                        class="form-control"
+                        id="reportDescription"
+                        rows="3"
+                        placeholder="Describe what this report shows..."
+                      ></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Permissions</label>
+                      <div class="row">
+                        <div class="col-md-6">
+                          <label class="form-label small">Allowed Roles</label>
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="roleSystemAdmin"
+                              value="SYSTEM_ADMIN"
+                            />
+                            <label class="form-check-label" for="roleSystemAdmin"
+                              >System Admin</label
+                            >
+                          </div>
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="roleTrustAdmin"
+                              value="TRUST_ADMIN"
+                            />
+                            <label class="form-check-label" for="roleTrustAdmin">Trust Admin</label>
+                          </div>
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="roleSchoolAdmin"
+                              value="SCHOOL_ADMIN"
+                            />
+                            <label class="form-check-label" for="roleSchoolAdmin"
+                              >School Admin</label
+                            >
+                          </div>
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="roleTeacher"
+                              value="TEACHER"
+                            />
+                            <label class="form-check-label" for="roleTeacher">Teacher</label>
+                          </div>
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="roleStaff"
+                              value="STAFF"
+                            />
+                            <label class="form-check-label" for="roleStaff">Staff</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <h6>SQL Preview</h6>
+                    <div class="sql-preview" id="finalSqlPreview">
+                      <!-- Generated SQL will be shown here -->
+                    </div>
+
+                    <div class="mt-3">
+                      <h6>Report Summary</h6>
+                      <ul class="list-unstyled small" id="reportSummary">
+                        <li><strong>Tables:</strong> <span id="summaryTables">-</span></li>
+                        <li><strong>Fields:</strong> <span id="summaryFields">-</span></li>
+                        <li><strong>Filters:</strong> <span id="summaryFilters">-</span></li>
+                        <li><strong>Chart:</strong> <span id="summaryChart">-</span></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="d-flex justify-content-between mt-3">
+              <button
+                class="btn btn-secondary"
+                id="prevBtn"
+                onclick="previousStep()"
+                style="display: none"
+              >
+                <i class="fas fa-arrow-left me-1"></i>Previous
+              </button>
+              <div class="ms-auto">
+                <button class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                  Next<i class="fas fa-arrow-right ms-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Modal -->
+          <div class="modal fade" id="previewModal" tabindex="-1">
+            <div class="modal-dialog modal-xl">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Report Preview</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-md-8">
+                      <h6>Data Preview (First 10 rows)</h6>
+                      <div class="table-responsive">
+                        <table class="table table-sm table-striped" id="previewTable">
+                          <thead id="previewTableHead"></thead>
+                          <tbody id="previewTableBody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <h6>Chart Preview</h6>
+                      <canvas id="previewChart" height="200"></canvas>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                  </button>
+                  <button type="button" class="btn btn-success" onclick="saveReport()">
+                    <i class="fas fa-save me-1"></i>Save Report
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script>
+      // Report Builder State
+      let builderState = {
+        currentStep: 1,
+        tables: {
+          main: null,
+          joins: []
+        },
+        fields: [],
+        filters: [],
+        groupBy: [],
+        orderBy: [],
+        chartConfig: null,
+        reportConfig: {}
+      };
+
+      let availableTablesData = [];
+      let availableFieldsData = {};
+
+      // Initialize builder
+      document.addEventListener('DOMContentLoaded', function () {
+        loadAvailableTables();
+        initializeDragAndDrop();
+      });
+
+      // Load available tables
+      async function loadAvailableTables() {
+        try {
+          const response = await fetch('/api/enhanced-reports/builder/tables');
+          const data = await response.json();
+
+          if (data.success) {
+            availableTablesData = data.tables;
+            renderAvailableTables();
+          }
+        } catch (error) {
+          console.error('Error loading tables:', error);
+          showError('Failed to load available tables');
+        }
+      }
+
+      // Render available tables
+      function renderAvailableTables() {
+        const container = document.getElementById('availableTables');
+        container.innerHTML = '';
+
+        availableTablesData.forEach(table => {
+          const tableElement = document.createElement('div');
+          tableElement.className = 'table-selector mb-2';
+          tableElement.innerHTML = `
+                    <div class="fw-bold">${table.name}</div>
+                    <small class="text-muted">${table.description || 'No description'}</small>
+                `;
+
+          tableElement.onclick = () => selectMainTable(table.name);
+          container.appendChild(tableElement);
+        });
+      }
+
+      // Select main table
+      async function selectMainTable(tableName) {
+        builderState.tables.main = tableName;
+
+        // Update UI
+        document.querySelectorAll('.table-selector').forEach(el => el.classList.remove('selected'));
+        event.target.closest('.table-selector').classList.add('selected');
+
+        // Update join diagram
+        updateJoinDiagram();
+
+        // Show join controls
+        document.getElementById('joinControls').style.display = 'block';
+
+        // Load fields for this table
+        await loadTableFields(tableName);
+
+        // Populate join table selector
+        populateJoinTableSelector();
+
+        // Update step indicator
+        updateStepIndicator(1, 'completed');
+      }
+
+      // Update join diagram
+      function updateJoinDiagram() {
+        const diagram = document.getElementById('joinDiagram');
+        let html = `<div class="table-box">${builderState.tables.main}</div>`;
+
+        builderState.tables.joins.forEach(join => {
+          html += `<span class="join-line"></span>`;
+          html += `<div class="table-box">${join.table}</div>`;
+        });
+
+        diagram.innerHTML = html;
+      }
+
+      // Populate join table selector
+      function populateJoinTableSelector() {
+        const select = document.getElementById('joinTable');
+        select.innerHTML = '<option value="">Select table...</option>';
+
+        availableTablesData.forEach(table => {
+          if (
+            table.name !== builderState.tables.main &&
+            !builderState.tables.joins.find(j => j.table === table.name)
+          ) {
+            const option = document.createElement('option');
+            option.value = table.name;
+            option.textContent = table.name;
+            select.appendChild(option);
+          }
+        });
+      }
+
+      // Add join
+      async function addJoin() {
+        const joinType = document.getElementById('joinType').value;
+        const joinTable = document.getElementById('joinTable').value;
+        const joinCondition = document.getElementById('joinCondition').value;
+
+        if (!joinTable || !joinCondition) {
+          showError('Please select a table and specify join condition');
+          return;
+        }
+
+        // Add join to state
+        builderState.tables.joins.push({
+          type: joinType,
+          table: joinTable,
+          condition: joinCondition
+        });
+
+        // Load fields for joined table
+        await loadTableFields(joinTable);
+
+        // Update UI
+        updateJoinDiagram();
+        populateJoinTableSelector();
+
+        // Clear form
+        document.getElementById('joinTable').value = '';
+        document.getElementById('joinCondition').value = '';
+
+        showSuccess('Join added successfully');
+      }
+
+      // Load table fields
+      async function loadTableFields(tableName) {
+        try {
+          const response = await fetch(`/api/enhanced-reports/builder/tables/${tableName}/columns`);
+          const data = await response.json();
+
+          if (data.success) {
+            availableFieldsData[tableName] = data.columns;
+            renderAvailableFields();
+            updateFieldSelectors();
+          }
+        } catch (error) {
+          console.error('Error loading fields:', error);
+          showError(`Failed to load fields for table ${tableName}`);
+        }
+      }
+
+      // Render available fields
+      function renderAvailableFields() {
+        const container = document.getElementById('availableFields');
+        container.innerHTML = '';
+
+        Object.entries(availableFieldsData).forEach(([tableName, fields]) => {
+          const tableGroup = document.createElement('div');
+          tableGroup.innerHTML = `<h6 class="text-primary">${tableName}</h6>`;
+
+          fields.forEach(field => {
+            const fieldElement = document.createElement('div');
+            fieldElement.className = 'field-item';
+            fieldElement.draggable = true;
+            fieldElement.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">${field.name}</div>
+                                <small class="text-muted">${field.type}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addField('${tableName}', '${field.name}', '${field.type}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    `;
+
+            // Add drag event listeners
+            fieldElement.addEventListener('dragstart', e => {
+              e.dataTransfer.setData(
+                'text/plain',
+                JSON.stringify({
+                  table: tableName,
+                  field: field.name,
+                  type: field.type
+                })
+              );
+            });
+
+            tableGroup.appendChild(fieldElement);
+          });
+
+          container.appendChild(tableGroup);
+        });
+      }
+
+      // Add field to selection
+      function addField(tableName, fieldName, fieldType, aggregate = null) {
+        const fieldConfig = {
+          table: tableName,
+          column: fieldName,
+          type: fieldType,
+          alias: null,
+          aggregate: aggregate
+        };
+
+        builderState.fields.push(fieldConfig);
+        renderSelectedFields();
+        updateFieldSelectors();
+      }
+
+      // Render selected fields
+      function renderSelectedFields() {
+        const container = document.getElementById('selectedFields');
+
+        if (builderState.fields.length === 0) {
+          container.innerHTML = '<span class="text-muted">Drag fields here or click to add</span>';
+          container.className = 'drag-zone';
+          return;
+        }
+
+        container.className = '';
+        container.innerHTML = '';
+
+        builderState.fields.forEach((field, index) => {
+          const fieldElement = document.createElement('div');
+          fieldElement.className = 'field-item mb-2';
+          fieldElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">
+                                ${field.aggregate ? `${field.aggregate}(` : ''}${field.table}.${field.column}${field.aggregate ? ')' : ''}
+                            </div>
+                            <div class="d-flex gap-2 mt-1">
+                                <input type="text" class="form-control form-control-sm" 
+                                       placeholder="Alias" value="${field.alias || ''}" 
+                                       onchange="updateFieldAlias(${index}, this.value)">
+                                <select class="form-select form-select-sm" 
+                                        onchange="updateFieldAggregate(${index}, this.value)">
+                                    <option value="">No aggregate</option>
+                                    <option value="COUNT" ${field.aggregate === 'COUNT' ? 'selected' : ''}>COUNT</option>
+                                    <option value="SUM" ${field.aggregate === 'SUM' ? 'selected' : ''}>SUM</option>
+                                    <option value="AVG" ${field.aggregate === 'AVG' ? 'selected' : ''}>AVG</option>
+                                    <option value="MIN" ${field.aggregate === 'MIN' ? 'selected' : ''}>MIN</option>
+                                    <option value="MAX" ${field.aggregate === 'MAX' ? 'selected' : ''}>MAX</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeField(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+          container.appendChild(fieldElement);
+        });
+      }
+
+      // Update field alias
+      function updateFieldAlias(index, alias) {
+        builderState.fields[index].alias = alias || null;
+      }
+
+      // Update field aggregate
+      function updateFieldAggregate(index, aggregate) {
+        builderState.fields[index].aggregate = aggregate || null;
+        renderSelectedFields();
+      }
+
+      // Remove field
+      function removeField(index) {
+        builderState.fields.splice(index, 1);
+        renderSelectedFields();
+        updateFieldSelectors();
+      }
+
+      // Initialize drag and drop
+      function initializeDragAndDrop() {
+        const selectedFields = document.getElementById('selectedFields');
+
+        selectedFields.addEventListener('dragover', e => {
+          e.preventDefault();
+          selectedFields.classList.add('drag-over');
+        });
+
+        selectedFields.addEventListener('dragleave', () => {
+          selectedFields.classList.remove('drag-over');
+        });
+
+        selectedFields.addEventListener('drop', e => {
+          e.preventDefault();
+          selectedFields.classList.remove('drag-over');
+
+          try {
+            const fieldData = JSON.parse(e.dataTransfer.getData('text/plain'));
+            addField(fieldData.table, fieldData.field, fieldData.type);
+          } catch (error) {
+            console.error('Error adding field:', error);
+          }
+        });
+      }
+
+      // Filter fields
+      function filterFields() {
+        const searchTerm = document.getElementById('fieldSearch').value.toLowerCase();
+        const fieldItems = document.querySelectorAll('#availableFields .field-item');
+
+        fieldItems.forEach(item => {
+          const text = item.textContent.toLowerCase();
+          item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+        });
+      }
+
+      // Step navigation
+      function nextStep() {
+        if (validateCurrentStep()) {
+          builderState.currentStep++;
+          showStep(builderState.currentStep);
+          updateStepIndicator(builderState.currentStep - 1, 'completed');
+          updateStepIndicator(builderState.currentStep, 'active');
+        }
+      }
+
+      function previousStep() {
+        if (builderState.currentStep > 1) {
+          updateStepIndicator(builderState.currentStep, '');
+          builderState.currentStep--;
+          showStep(builderState.currentStep);
+          updateStepIndicator(builderState.currentStep, 'active');
+        }
+      }
+
+      function showStep(stepNumber) {
+        // Hide all steps
+        document.querySelectorAll('.builder-step').forEach(step => {
+          step.style.display = 'none';
+        });
+
+        // Show current step
+        document.getElementById(`step${stepNumber}`).style.display = 'block';
+
+        // Update navigation buttons
+        document.getElementById('prevBtn').style.display = stepNumber > 1 ? 'inline-block' : 'none';
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (stepNumber === 5) {
+          nextBtn.innerHTML = '<i class="fas fa-save me-1"></i>Save Report';
+          nextBtn.onclick = saveReport;
+        } else {
+          nextBtn.innerHTML = 'Next<i class="fas fa-arrow-right ms-1"></i>';
+          nextBtn.onclick = nextStep;
+        }
+
+        // Step-specific initialization
+        if (stepNumber === 2 && builderState.fields.length === 0) {
+          renderAvailableFields();
+        } else if (stepNumber === 3) {
+          updateFieldSelectors();
+        } else if (stepNumber === 4) {
+          updateChartFieldSelectors();
+        } else if (stepNumber === 5) {
+          updateReportSummary();
+          generateSQLPreview();
+        }
+      }
+
+      function validateCurrentStep() {
+        switch (builderState.currentStep) {
+          case 1:
+            if (!builderState.tables.main) {
+              showError('Please select a main table');
+              return false;
+            }
+            break;
+          case 2:
+            if (builderState.fields.length === 0) {
+              showError('Please select at least one field');
+              return false;
+            }
+            break;
+          case 3:
+            // Filters are optional
+            break;
+          case 4:
+            // Chart is optional
+            break;
+          case 5:
+            const reportName = document.getElementById('reportName').value;
+            if (!reportName.trim()) {
+              showError('Please enter a report name');
+              return false;
+            }
+            break;
+        }
+        return true;
+      }
+
+      function updateStepIndicator(stepNumber, status) {
+        const indicator = document.getElementById(`step${stepNumber}Indicator`);
+        indicator.className = `progress-step ${status}`;
+      }
+
+      // Add filter functionality
+      function addFilter() {
+        const filterIndex = builderState.filters.length;
+        const filterHtml = `
+                <div class="filter-group" id="filter_${filterIndex}">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3">
+                            <select class="form-select" onchange="updateFilter(${filterIndex}, 'field', this.value)">
+                                <option value="">Select field...</option>
+                                ${getFieldOptions()}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select" onchange="updateFilter(${filterIndex}, 'operator', this.value)">
+                                <option value="equals">Equals</option>
+                                <option value="not_equals">Not equals</option>
+                                <option value="contains">Contains</option>
+                                <option value="starts_with">Starts with</option>
+                                <option value="ends_with">Ends with</option>
+                                <option value="greater_than">Greater than</option>
+                                <option value="less_than">Less than</option>
+                                <option value="between">Between</option>
+                                <option value="in">In list</option>
+                                <option value="is_null">Is null</option>
+                                <option value="is_not_null">Is not null</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" class="form-control" placeholder="Value..." 
+                                   onchange="updateFilter(${filterIndex}, 'value', this.value)">
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-danger" onclick="removeFilter(${filterIndex})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        const container = document.getElementById('filtersContainer');
+        if (container.innerHTML.includes('No filters added')) {
+          container.innerHTML = '';
+        }
+        container.insertAdjacentHTML('beforeend', filterHtml);
+
+        // Add filter to state
+        builderState.filters.push({
+          field: '',
+          operator: 'equals',
+          value: ''
+        });
+      }
+
+      function getFieldOptions() {
+        let options = '';
+        builderState.fields.forEach(field => {
+          const fieldName = `${field.table}.${field.column}`;
+          options += `<option value="${fieldName}">${fieldName}</option>`;
+        });
+        return options;
+      }
+
+      function updateFilter(index, property, value) {
+        if (!builderState.filters[index]) {
+          builderState.filters[index] = {};
+        }
+        builderState.filters[index][property] = value;
+      }
+
+      function removeFilter(index) {
+        document.getElementById(`filter_${index}`).remove();
+        builderState.filters.splice(index, 1);
+
+        if (builderState.filters.length === 0) {
+          document.getElementById('filtersContainer').innerHTML =
+            '<div class="text-center py-3 text-muted">No filters added yet. Click "Add Filter" to get started.</div>';
+        }
+      }
+
+      // Update field selectors for grouping/sorting
+      function updateFieldSelectors() {
+        const groupBySelect = document.getElementById('groupByField');
+        const orderBySelect = document.getElementById('orderByField');
+
+        // Clear existing options
+        groupBySelect.innerHTML = '';
+        orderBySelect.innerHTML = '<option value="">Select field...</option>';
+
+        // Add field options
+        builderState.fields.forEach(field => {
+          const fieldName = `${field.table}.${field.column}`;
+          const displayName = field.alias || fieldName;
+
+          // Group by options
+          const groupOption = document.createElement('option');
+          groupOption.value = fieldName;
+          groupOption.textContent = displayName;
+          groupBySelect.appendChild(groupOption);
+
+          // Order by options
+          const orderOption = document.createElement('option');
+          orderOption.value = fieldName;
+          orderOption.textContent = displayName;
+          orderBySelect.appendChild(orderOption);
+        });
+      }
+
+      // Update chart field selectors
+      function updateChartFieldSelectors() {
+        const labelSelect = document.getElementById('chartLabelField');
+        const valueSelect = document.getElementById('chartValueField');
+
+        labelSelect.innerHTML = '<option value="">Select field for labels...</option>';
+        valueSelect.innerHTML = '<option value="">Select field for values...</option>';
+
+        builderState.fields.forEach(field => {
+          const fieldName = `${field.table}.${field.column}`;
+          const displayName = field.alias || fieldName;
+
+          const labelOption = document.createElement('option');
+          labelOption.value = fieldName;
+          labelOption.textContent = displayName;
+          labelSelect.appendChild(labelOption);
+
+          const valueOption = document.createElement('option');
+          valueOption.value = fieldName;
+          valueOption.textContent = displayName;
+          valueSelect.appendChild(valueOption);
+        });
+      }
+
+      // Add order by
+      function addOrderBy() {
+        const field = document.getElementById('orderByField').value;
+        const direction = document.getElementById('orderByDirection').value;
+
+        if (!field) {
+          showError('Please select a field for ordering');
+          return;
+        }
+
+        builderState.orderBy.push({ field, direction });
+
+        // Add visual indicator
+        const container = document.getElementById('orderByContainer');
+        const orderItem = document.createElement('div');
+        orderItem.className = 'badge bg-primary me-1 mb-1';
+        orderItem.innerHTML = `${field} ${direction} <i class="fas fa-times ms-1" onclick="removeOrderBy(${builderState.orderBy.length - 1})"></i>`;
+        container.appendChild(orderItem);
+
+        // Reset form
+        document.getElementById('orderByField').value = '';
+      }
+
+      function removeOrderBy(index) {
+        builderState.orderBy.splice(index, 1);
+        // Re-render order by items
+        const container = document.getElementById('orderByContainer');
+        const items = container.querySelectorAll('.badge');
+        items.forEach(item => item.remove());
+
+        builderState.orderBy.forEach((order, i) => {
+          const orderItem = document.createElement('div');
+          orderItem.className = 'badge bg-primary me-1 mb-1';
+          orderItem.innerHTML = `${order.field} ${order.direction} <i class="fas fa-times ms-1" onclick="removeOrderBy(${i})"></i>`;
+          container.appendChild(orderItem);
+        });
+      }
+
+      // Generate SQL preview
+      function generateSQLPreview() {
+        try {
+          let sql = 'SELECT ';
+
+          // Fields
+          const fieldStrings = builderState.fields.map(field => {
+            let fieldStr = `${field.table}.${field.column}`;
+            if (field.aggregate) {
+              fieldStr = `${field.aggregate}(${fieldStr})`;
+            }
+            if (field.alias) {
+              fieldStr += ` AS ${field.alias}`;
+            }
+            return fieldStr;
+          });
+          sql += fieldStrings.join(', ');
+
+          // FROM clause
+          sql += `\nFROM ${builderState.tables.main}`;
+
+          // JOINs
+          builderState.tables.joins.forEach(join => {
+            sql += `\n${join.type} JOIN ${join.table} ON ${join.condition}`;
+          });
+
+          // WHERE clause
+          if (builderState.filters.length > 0) {
+            const whereConditions = builderState.filters
+              .filter(filter => filter.field && filter.value)
+              .map(
+                filter => `${filter.field} ${getOperatorSQL(filter.operator)} '${filter.value}'`
+              );
+
+            if (whereConditions.length > 0) {
+              sql += `\nWHERE ${whereConditions.join(' AND ')}`;
+            }
+          }
+
+          // GROUP BY
+          if (builderState.groupBy.length > 0) {
+            sql += `\nGROUP BY ${builderState.groupBy.join(', ')}`;
+          }
+
+          // ORDER BY
+          if (builderState.orderBy.length > 0) {
+            const orderStrings = builderState.orderBy.map(
+              order => `${order.field} ${order.direction}`
+            );
+            sql += `\nORDER BY ${orderStrings.join(', ')}`;
+          }
+
+          document.getElementById('finalSqlPreview').textContent = sql;
+        } catch (error) {
+          console.error('Error generating SQL:', error);
+          document.getElementById('finalSqlPreview').textContent = 'Error generating SQL preview';
+        }
+      }
+
+      function getOperatorSQL(operator) {
+        switch (operator) {
+          case 'equals':
+            return '=';
+          case 'not_equals':
+            return '!=';
+          case 'contains':
+            return 'LIKE';
+          case 'starts_with':
+            return 'LIKE';
+          case 'ends_with':
+            return 'LIKE';
+          case 'greater_than':
+            return '>';
+          case 'less_than':
+            return '<';
+          case 'between':
+            return 'BETWEEN';
+          case 'in':
+            return 'IN';
+          case 'is_null':
+            return 'IS NULL';
+          case 'is_not_null':
+            return 'IS NOT NULL';
+          default:
+            return '=';
+        }
+      }
+
+      // Update report summary
+      function updateReportSummary() {
+        document.getElementById('summaryTables').textContent =
+          `${builderState.tables.main}${builderState.tables.joins.length > 0 ? ` + ${builderState.tables.joins.length} joins` : ''}`;
+        document.getElementById('summaryFields').textContent = builderState.fields.length;
+        document.getElementById('summaryFilters').textContent = builderState.filters.length;
+        document.getElementById('summaryChart').textContent = document.getElementById('enableChart')
+          .checked
+          ? 'Enabled'
+          : 'Disabled';
+      }
+
+      // Preview report
+      async function previewReport() {
+        try {
+          // Build report configuration
+          const reportConfig = buildReportConfig();
+
+          // Send request to build and preview
+          const response = await fetch('/api/enhanced-reports/builder/build', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reportConfig)
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showPreviewModal(data);
+          } else {
+            showError('Failed to generate preview: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Error previewing report:', error);
+          showError('Failed to generate preview');
+        }
+      }
+
+      // Show preview modal
+      function showPreviewModal(previewData) {
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+
+        // Populate table preview
+        const thead = document.getElementById('previewTableHead');
+        const tbody = document.getElementById('previewTableBody');
+
+        if (previewData.sampleData && previewData.sampleData.length > 0) {
+          // Headers
+          const headers = Object.keys(previewData.sampleData[0]);
+          thead.innerHTML = '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+          // Data rows
+          tbody.innerHTML = '';
+          previewData.sampleData.slice(0, 10).forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = headers.map(h => `<td>${row[h] || ''}</td>`).join('');
+            tbody.appendChild(tr);
+          });
+        } else {
+          thead.innerHTML = '<tr><th>No data</th></tr>';
+          tbody.innerHTML = '<tr><td>No data available for preview</td></tr>';
+        }
+
+        modal.show();
+      }
+
+      // Build report configuration
+      function buildReportConfig() {
+        // Get form values
+        const reportName = document.getElementById('reportName').value;
+        const reportDescription = document.getElementById('reportDescription').value;
+
+        // Get permissions
+        const roles = [];
+        document
+          .querySelectorAll('input[type="checkbox"][id^="role"]:checked')
+          .forEach(checkbox => {
+            roles.push(checkbox.value);
+          });
+
+        // Get chart configuration
+        let chartConfig = null;
+        if (document.getElementById('enableChart').checked) {
+          chartConfig = {
+            type: document.querySelector('input[name="chartType"]:checked').value,
+            labelField: document.getElementById('chartLabelField').value,
+            valueField: document.getElementById('chartValueField').value
+          };
+        }
+
+        return {
+          name: reportName || 'Custom Report',
+          description: reportDescription,
+          tables: builderState.tables,
+          fields: builderState.fields,
+          filters: builderState.filters,
+          groupBy: Array.from(document.getElementById('groupByField').selectedOptions).map(
+            option => option.value
+          ),
+          orderBy: builderState.orderBy,
+          chartConfig: chartConfig,
+          permissions: { roles }
+        };
+      }
+
+      // Save report
+      async function saveReport() {
+        try {
+          if (!validateCurrentStep()) {
+            return;
+          }
+
+          const reportConfig = buildReportConfig();
+
+          const response = await fetch('/api/enhanced-reports/builder/build', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reportConfig)
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showSuccess('Report saved successfully!');
+            setTimeout(() => {
+              window.location.href = `/reports/view/${data.reportId}`;
+            }, 2000);
+          } else {
+            showError('Failed to save report: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Error saving report:', error);
+          showError('Failed to save report');
+        }
+      }
+
+      // Reset builder
+      function resetBuilder() {
+        if (
+          confirm('Are you sure you want to reset the report builder? All progress will be lost.')
+        ) {
+          builderState = {
+            currentStep: 1,
+            tables: { main: null, joins: [] },
+            fields: [],
+            filters: [],
+            groupBy: [],
+            orderBy: [],
+            chartConfig: null,
+            reportConfig: {}
+          };
+
+          // Reset UI
+          showStep(1);
+          updateStepIndicator(1, 'active');
+          for (let i = 2; i <= 5; i++) {
+            updateStepIndicator(i, '');
+          }
+
+          // Clear selections
+          document
+            .querySelectorAll('.table-selector')
+            .forEach(el => el.classList.remove('selected'));
+          document.getElementById('joinDiagram').innerHTML =
+            '<div class="text-muted text-center py-3">Select a main table to get started</div>';
+          document.getElementById('joinControls').style.display = 'none';
+          document.getElementById('selectedFields').innerHTML =
+            '<span class="text-muted">Drag fields here or click to add</span>';
+          document.getElementById('filtersContainer').innerHTML =
+            '<div class="text-center py-3 text-muted">No filters added yet. Click "Add Filter" to get started.</div>';
+
+          showSuccess('Report builder reset');
+        }
+      }
+
+      // Utility functions
+      function showSuccess(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 5000);
+      }
+
+      function showError(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

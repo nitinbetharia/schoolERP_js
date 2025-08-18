@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bulk Communication - School ERP</title>
+    <%- include('../partials/head') %>
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid">
+      <div class="row">
+        <%- include('../partials/sidebar') %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+          >
+            <h1 class="h2">Bulk Communication</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary me-2"
+                onclick="loadQueueStatus()"
+              >
+                <i class="fas fa-sync"></i> Refresh Queue
+              </button>
+              <button type="button" class="btn btn-sm btn-info" onclick="viewHistory()">
+                <i class="fas fa-history"></i> View History
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Communication Form -->
+            <div class="col-lg-8">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">
+                    <i class="fas fa-paper-plane"></i> Send Bulk Communication
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <form id="bulkCommunicationForm">
+                    <!-- Communication Type -->
+                    <div class="row mb-3">
+                      <div class="col-md-6">
+                        <label for="communicationType" class="form-label"
+                          >Communication Type *</label
+                        >
+                        <select class="form-select" id="communicationType" name="type" required>
+                          <option value="">Select Type</option>
+                          <option value="email">Email</option>
+                          <option value="sms">SMS</option>
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label for="priority" class="form-label">Priority</label>
+                        <select class="form-select" id="priority" name="priority">
+                          <option value="normal">Normal</option>
+                          <option value="high">High</option>
+                          <option value="low">Low</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <!-- Recipients -->
+                    <div class="mb-3">
+                      <label for="recipientType" class="form-label">Recipients *</label>
+                      <select class="form-select" id="recipientType" name="recipient_type" required>
+                        <option value="">Select Recipients</option>
+                        <option value="all_students">All Students</option>
+                        <option value="class_students">Specific Classes</option>
+                        <option value="fee_defaulters">Fee Defaulters</option>
+                        <option value="custom_list">Custom List</option>
+                      </select>
+                    </div>
+
+                    <!-- Class Selection -->
+                    <div id="classSelection" style="display: none">
+                      <div class="mb-3">
+                        <label class="form-label">Select Classes *</label>
+                        <div id="classCheckboxes" class="border rounded p-3">
+                          <!-- Class checkboxes will be loaded here -->
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Custom Recipients -->
+                    <div id="customSelection" style="display: none">
+                      <div class="mb-3">
+                        <label for="customRecipients" class="form-label"
+                          >Student IDs (comma separated) *</label
+                        >
+                        <textarea
+                          class="form-control"
+                          id="customRecipients"
+                          name="recipient_list"
+                          rows="3"
+                          placeholder="1001, 1002, 1003..."
+                        ></textarea>
+                        <div class="form-text">Enter student IDs separated by commas</div>
+                      </div>
+                    </div>
+
+                    <!-- Template Selection -->
+                    <div class="mb-3">
+                      <label for="templateSelect" class="form-label">Use Template (Optional)</label>
+                      <select class="form-select" id="templateSelect" name="template_id">
+                        <option value="">Select Template</option>
+                        <!-- Templates will be loaded here -->
+                      </select>
+                      <div class="form-text">
+                        Select a template to auto-fill subject and message
+                      </div>
+                    </div>
+
+                    <!-- Subject (Email only) -->
+                    <div id="subjectSection" style="display: none">
+                      <div class="mb-3">
+                        <label for="emailSubject" class="form-label">Subject *</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="emailSubject"
+                          name="subject"
+                          placeholder="Subject with variables like {{student_name}}"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Message -->
+                    <div class="mb-3">
+                      <label for="messageContent" class="form-label">Message *</label>
+                      <textarea
+                        class="form-control"
+                        id="messageContent"
+                        name="message"
+                        rows="6"
+                        required
+                        placeholder="Message content with variables like {{student_name}}, {{amount}}, etc."
+                      ></textarea>
+                      <div class="form-text">
+                        Use variables like {{student_name}}, {{amount}}, {{due_date}} for
+                        personalized messages
+                      </div>
+                    </div>
+
+                    <!-- Template Variables -->
+                    <div class="mb-3">
+                      <div class="card bg-light">
+                        <div class="card-header">
+                          <button
+                            class="btn btn-sm btn-outline-primary"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#variablesCollapse"
+                          >
+                            <i class="fas fa-tags"></i> Template Variables
+                          </button>
+                        </div>
+                        <div class="collapse" id="variablesCollapse">
+                          <div class="card-body">
+                            <div class="row">
+                              <div class="col-md-6">
+                                <strong>Student Variables:</strong>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{student_name}}</span
+                                  >
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{first_name}}</span
+                                  >
+                                  <span class="badge bg-secondary variable-tag">{{last_name}}</span>
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{student_id}}</span
+                                  >
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{class_name}}</span
+                                  >
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <strong>Common Variables:</strong>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                  <span class="badge bg-secondary variable-tag">{{amount}}</span>
+                                  <span class="badge bg-secondary variable-tag">{{due_date}}</span>
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{payment_date}}</span
+                                  >
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{transaction_id}}</span
+                                  >
+                                  <span class="badge bg-secondary variable-tag"
+                                    >{{academic_year}}</span
+                                  >
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Additional Template Variables -->
+                    <div class="mb-3">
+                      <label class="form-label">Additional Variables (Optional)</label>
+                      <div id="additionalVariables">
+                        <div class="row variable-row">
+                          <div class="col-md-5">
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Variable name (e.g., school_name)"
+                            />
+                          </div>
+                          <div class="col-md-5">
+                            <input type="text" class="form-control" placeholder="Variable value" />
+                          </div>
+                          <div class="col-md-2">
+                            <button
+                              type="button"
+                              class="btn btn-outline-primary btn-sm"
+                              onclick="addVariableRow()"
+                            >
+                              <i class="fas fa-plus"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Scheduling -->
+                    <div class="mb-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="scheduleDelivery" />
+                        <label class="form-check-label" for="scheduleDelivery">
+                          Schedule for later delivery
+                        </label>
+                      </div>
+                    </div>
+
+                    <div id="schedulingSection" style="display: none">
+                      <div class="mb-3">
+                        <label for="deliveryTime" class="form-label">Delivery Time</label>
+                        <input
+                          type="datetime-local"
+                          class="form-control"
+                          id="deliveryTime"
+                          name="delivery_time"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Preview and Send -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                      <button
+                        type="button"
+                        class="btn btn-outline-info"
+                        onclick="previewCommunication()"
+                      >
+                        <i class="fas fa-eye"></i> Preview
+                      </button>
+                      <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Communication
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Queue Status -->
+            <div class="col-lg-4">
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h6 class="card-title mb-0"><i class="fas fa-queue"></i> Queue Status</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row text-center">
+                    <div class="col-6">
+                      <div class="border-end">
+                        <h4 class="text-primary" id="emailQueueCount">0</h4>
+                        <small class="text-muted">Email Queue</small>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <h4 class="text-info" id="smsQueueCount">0</h4>
+                      <small class="text-muted">SMS Queue</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-3">
+                <div class="card-header">
+                  <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar"></i> Today's Statistics
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Emails Sent:</span>
+                      <strong id="emailsSentToday">0</strong>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>SMS Sent:</span>
+                      <strong id="smsSentToday">0</strong>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                      <span>Delivery Rate:</span>
+                      <strong id="deliveryRate">0%</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h6 class="card-title mb-0"><i class="fas fa-clock"></i> Recent Jobs</h6>
+                </div>
+                <div class="card-body">
+                  <div id="recentJobs">
+                    <!-- Recent jobs will be loaded here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div
+      class="modal fade"
+      id="previewModal"
+      tabindex="-1"
+      aria-labelledby="previewModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="previewModalLabel">Communication Preview</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div id="previewContent">
+              <!-- Preview content will be shown here -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>
+    <script>
+      $(document).ready(function () {
+        loadClasses();
+        loadTemplates();
+        loadQueueStatus();
+        initializeFormHandlers();
+      });
+
+      function initializeFormHandlers() {
+        // Communication type change
+        $('#communicationType').change(function () {
+          const type = $(this).val();
+          if (type === 'email') {
+            $('#subjectSection').show();
+            $('#emailSubject').attr('required', true);
+          } else {
+            $('#subjectSection').hide();
+            $('#emailSubject').attr('required', false);
+          }
+          loadTemplates();
+        });
+
+        // Recipient type change
+        $('#recipientType').change(function () {
+          const type = $(this).val();
+          $('#classSelection, #customSelection').hide();
+
+          if (type === 'class_students') {
+            $('#classSelection').show();
+          } else if (type === 'custom_list') {
+            $('#customSelection').show();
+          }
+        });
+
+        // Template selection
+        $('#templateSelect').change(function () {
+          const templateId = $(this).val();
+          if (templateId) {
+            loadTemplate(templateId);
+          }
+        });
+
+        // Schedule delivery toggle
+        $('#scheduleDelivery').change(function () {
+          $('#schedulingSection').toggle(this.checked);
+        });
+
+        // Form submission
+        $('#bulkCommunicationForm').submit(function (e) {
+          e.preventDefault();
+          sendBulkCommunication();
+        });
+
+        // Variable tag clicks
+        $(document).on('click', '.variable-tag', function () {
+          const variable = $(this).text();
+          insertAtCursor($('#messageContent')[0], variable);
+        });
+      }
+
+      function loadClasses() {
+        $.get('/api/classes')
+          .done(function (response) {
+            if (response.success) {
+              displayClasses(response.data);
+            }
+          })
+          .fail(function () {
+            $('#classCheckboxes').html('<p class="text-muted">Failed to load classes</p>');
+          });
+      }
+
+      function displayClasses(classes) {
+        const container = $('#classCheckboxes');
+        container.empty();
+
+        if (classes.length === 0) {
+          container.html('<p class="text-muted">No classes found</p>');
+          return;
+        }
+
+        classes.forEach(cls => {
+          const checkbox = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="${cls.id}" id="class_${cls.id}">
+                        <label class="form-check-label" for="class_${cls.id}">
+                            ${cls.name} (${cls.student_count || 0} students)
+                        </label>
+                    </div>
+                `;
+          container.append(checkbox);
+        });
+      }
+
+      function loadTemplates() {
+        const type = $('#communicationType').val();
+        if (!type) return;
+
+        $.get('/api/communication/templates', { type: type })
+          .done(function (response) {
+            if (response.success) {
+              displayTemplates(response.data);
+            }
+          })
+          .fail(function () {
+            $('#templateSelect').html('<option value="">No templates available</option>');
+          });
+      }
+
+      function displayTemplates(templates) {
+        const select = $('#templateSelect');
+        select.html('<option value="">Select Template</option>');
+
+        templates.forEach(template => {
+          if (template.is_active) {
+            select.append(`<option value="${template.id}">${template.name}</option>`);
+          }
+        });
+      }
+
+      function loadTemplate(templateId) {
+        $.get(`/api/communication/templates/${templateId}`)
+          .done(function (response) {
+            if (response.success) {
+              const template = response.data;
+              if (template.subject) {
+                $('#emailSubject').val(template.subject);
+              }
+              $('#messageContent').val(template.content);
+            }
+          })
+          .fail(function (xhr) {
+            console.error('Failed to load template:', xhr.responseJSON);
+          });
+      }
+
+      function loadQueueStatus() {
+        $.get('/api/communication/queue/status')
+          .done(function (response) {
+            if (response.success) {
+              updateQueueStatus(response.data);
+            }
+          })
+          .fail(function () {
+            console.error('Failed to load queue status');
+          });
+      }
+
+      function updateQueueStatus(status) {
+        $('#emailQueueCount').text(status.queueLengths?.email || 0);
+        $('#smsQueueCount').text(status.queueLengths?.sms || 0);
+        $('#emailsSentToday').text(status.email?.sent || 0);
+        $('#smsSentToday').text(status.sms?.sent || 0);
+
+        const totalSent = (status.email?.sent || 0) + (status.sms?.sent || 0);
+        const totalDelivered =
+          (status.email?.sent || 0) +
+          (status.sms?.sent || 0) -
+          (status.email?.failed || 0) -
+          (status.sms?.failed || 0);
+        const deliveryRate = totalSent > 0 ? Math.round((totalDelivered / totalSent) * 100) : 0;
+        $('#deliveryRate').text(deliveryRate + '%');
+      }
+
+      function addVariableRow() {
+        const newRow = `
+                <div class="row variable-row mt-2">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" placeholder="Variable name">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" placeholder="Variable value">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeVariableRow(this)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        $('#additionalVariables').append(newRow);
+      }
+
+      function removeVariableRow(button) {
+        $(button).closest('.variable-row').remove();
+      }
+
+      function previewCommunication() {
+        const type = $('#communicationType').val();
+        const subject = $('#emailSubject').val();
+        const message = $('#messageContent').val();
+
+        if (!type || !message) {
+          showAlert('warning', 'Please fill in the required fields before previewing');
+          return;
+        }
+
+        // Sample data for preview
+        const sampleData = {
+          student_name: 'John Doe',
+          first_name: 'John',
+          last_name: 'Doe',
+          student_id: 'STD001',
+          class_name: 'Class 10-A',
+          amount: '₹5,000',
+          due_date: new Date().toLocaleDateString(),
+          payment_date: new Date().toLocaleDateString(),
+          transaction_id: 'TXN123456789',
+          academic_year: '2024-25'
+        };
+
+        // Add custom variables
+        $('.variable-row').each(function () {
+          const varName = $(this).find('input').eq(0).val();
+          const varValue = $(this).find('input').eq(1).val();
+          if (varName && varValue) {
+            sampleData[varName] = varValue;
+          }
+        });
+
+        let previewContent = message;
+        let previewSubject = subject;
+
+        Object.keys(sampleData).forEach(key => {
+          const regex = new RegExp(`{{${key}}}`, 'g');
+          previewContent = previewContent.replace(regex, sampleData[key]);
+          if (previewSubject) {
+            previewSubject = previewSubject.replace(regex, sampleData[key]);
+          }
+        });
+
+        let previewHtml = '<div class="preview-communication">';
+
+        if (type === 'email' && previewSubject) {
+          previewHtml += `<div class="mb-3"><strong>Subject:</strong> ${previewSubject}</div>`;
+        }
+
+        if (type === 'email') {
+          previewHtml += `<div class="email-content">${previewContent}</div>`;
+        } else {
+          previewHtml += `<div class="sms-content border p-3 rounded">${previewContent}</div>`;
+        }
+
+        previewHtml += '</div>';
+
+        $('#previewContent').html(previewHtml);
+        $('#previewModal').modal('show');
+      }
+
+      function sendBulkCommunication() {
+        const formData = collectFormData();
+
+        if (!validateFormData(formData)) {
+          return;
+        }
+
+        showAlert('info', 'Sending bulk communication...');
+
+        $.ajax({
+          url: '/api/communication/send/bulk',
+          method: 'POST',
+          data: JSON.stringify(formData),
+          contentType: 'application/json',
+          success: function (response) {
+            if (response.success) {
+              showAlert(
+                'success',
+                `Communication queued successfully! Job ID: ${response.data.jobId}`
+              );
+              resetForm();
+              loadQueueStatus();
+            } else {
+              showAlert('danger', response.error.message || 'Failed to send communication');
+            }
+          },
+          error: function (xhr) {
+            const error = xhr.responseJSON || {};
+            showAlert('danger', error.message || 'Failed to send communication');
+          }
+        });
+      }
+
+      function collectFormData() {
+        const formData = {
+          type: $('#communicationType').val(),
+          recipient_type: $('#recipientType').val(),
+          subject: $('#emailSubject').val(),
+          message: $('#messageContent').val(),
+          template_id: $('#templateSelect').val() || null,
+          priority: $('#priority').val(),
+          delivery_time: $('#scheduleDelivery').is(':checked') ? $('#deliveryTime').val() : null
+        };
+
+        // Add recipient-specific data
+        if (formData.recipient_type === 'class_students') {
+          formData.class_ids = [];
+          $('#classCheckboxes input:checked').each(function () {
+            formData.class_ids.push(parseInt($(this).val()));
+          });
+        } else if (formData.recipient_type === 'custom_list') {
+          const recipientList = $('#customRecipients')
+            .val()
+            .split(',')
+            .map(id => parseInt(id.trim()))
+            .filter(id => !isNaN(id));
+          formData.recipient_list = recipientList;
+        }
+
+        // Add custom variables
+        const templateVariables = {};
+        $('.variable-row').each(function () {
+          const varName = $(this).find('input').eq(0).val();
+          const varValue = $(this).find('input').eq(1).val();
+          if (varName && varValue) {
+            templateVariables[varName] = varValue;
+          }
+        });
+        if (Object.keys(templateVariables).length > 0) {
+          formData.template_variables = templateVariables;
+        }
+
+        return formData;
+      }
+
+      function validateFormData(data) {
+        if (!data.type) {
+          showAlert('warning', 'Please select communication type');
+          return false;
+        }
+
+        if (!data.recipient_type) {
+          showAlert('warning', 'Please select recipients');
+          return false;
+        }
+
+        if (
+          data.recipient_type === 'class_students' &&
+          (!data.class_ids || data.class_ids.length === 0)
+        ) {
+          showAlert('warning', 'Please select at least one class');
+          return false;
+        }
+
+        if (
+          data.recipient_type === 'custom_list' &&
+          (!data.recipient_list || data.recipient_list.length === 0)
+        ) {
+          showAlert('warning', 'Please provide valid student IDs');
+          return false;
+        }
+
+        if (data.type === 'email' && !data.subject) {
+          showAlert('warning', 'Please provide email subject');
+          return false;
+        }
+
+        if (!data.message) {
+          showAlert('warning', 'Please provide message content');
+          return false;
+        }
+
+        return true;
+      }
+
+      function resetForm() {
+        $('#bulkCommunicationForm')[0].reset();
+        $('#classSelection, #customSelection, #subjectSection, #schedulingSection').hide();
+        $('#additionalVariables').html(`
+                <div class="row variable-row">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" placeholder="Variable name (e.g., school_name)">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" placeholder="Variable value">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="addVariableRow()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+      }
+
+      function viewHistory() {
+        window.location.href = '/communication/history';
+      }
+
+      function insertAtCursor(textArea, text) {
+        const startPos = textArea.selectionStart;
+        const endPos = textArea.selectionEnd;
+        const beforeText = textArea.value.substring(0, startPos);
+        const afterText = textArea.value.substring(endPos, textArea.value.length);
+
+        textArea.value = beforeText + text + afterText;
+        textArea.selectionStart = textArea.selectionEnd = startPos + text.length;
+        textArea.focus();
+      }
+
+      function showAlert(type, message) {
+        const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+        $('.alert').remove();
+        $('main').prepend(alertHtml);
+
+        setTimeout(function () {
+          $('.alert').fadeOut();
+        }, 5000);
+      }
+
+      // Auto-refresh queue status every 30 seconds
+      setInterval(loadQueueStatus, 30000);
+    </script>
+
+    <style>
+      .variable-tag {
+        cursor: pointer;
+      }
+
+      .variable-tag:hover {
+        background-color: #0d6efd !important;
+      }
+
+      .preview-communication {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+      }
+
+      .email-content {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border-left: 4px solid #0d6efd;
+      }
+
+      .sms-content {
+        background: #e3f2fd;
+        font-family: monospace;
+        font-size: 0.9rem;
+      }
+    </style>
+  </body>
+</html>

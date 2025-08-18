@@ -1,0 +1,11 @@
+node_modules/
+dist/
+logs/
+*.log
+coverage/
+.nyc_output/
+public/js/vendor/
+public/css/vendor/
+package-lock.json
+*.min.js
+*.min.css

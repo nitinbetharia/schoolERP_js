@@ -1,0 +1,938 @@
+<%- include('../partials/header') %>
+
+<div class="payment-history-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-history"></i>
+        Payment Transaction History
+      </h1>
+      <div class="header-actions">
+        <button class="btn btn-outline-primary" onclick="exportTransactions()">
+          <i class="fas fa-download"></i> Export
+        </button>
+        <button class="btn btn-primary" onclick="refreshTransactions()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-card">
+    <div class="card-header">
+      <h3><i class="fas fa-filter"></i> Filters</h3>
+      <button class="btn btn-sm btn-outline-secondary" onclick="clearFilters()">
+        <i class="fas fa-times"></i> Clear
+      </button>
+    </div>
+    <div class="card-body">
+      <form id="filter-form" class="filter-form">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="student-search">Student</label>
+            <input
+              type="text"
+              id="student-search"
+              name="student_search"
+              placeholder="Search by name or ID..."
+              class="form-control"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label for="payment-status">Status</label>
+            <select id="payment-status" name="status" class="form-control">
+              <option value="">All Statuses</option>
+              <option value="INITIATED">Initiated</option>
+              <option value="PENDING">Pending</option>
+              <option value="SUCCESS">Successful</option>
+              <option value="FAILED">Failed</option>
+              <option value="CANCELLED">Cancelled</option>
+              <option value="REFUNDED">Refunded</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="payment-method">Payment Method</label>
+            <select id="payment-method" name="payment_method" class="form-control">
+              <option value="">All Methods</option>
+              <option value="CASH">Cash</option>
+              <option value="CHEQUE">Cheque</option>
+              <option value="ONLINE">Online</option>
+              <option value="UPI">UPI</option>
+              <option value="CARD">Card</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="gateway-name">Gateway</label>
+            <select id="gateway-name" name="gateway_name" class="form-control">
+              <option value="">All Gateways</option>
+              <option value="RAZORPAY">Razorpay</option>
+              <option value="PAYTM">Paytm</option>
+              <option value="PAYU">PayU</option>
+              <option value="CCAVENUE">CCAvenue</option>
+              <option value="INSTAMOJO">Instamojo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="start-date">Start Date</label>
+            <input type="date" id="start-date" name="start_date" class="form-control" />
+          </div>
+
+          <div class="filter-group">
+            <label for="end-date">End Date</label>
+            <input type="date" id="end-date" name="end_date" class="form-control" />
+          </div>
+
+          <div class="filter-group">
+            <label for="amount-min">Min Amount</label>
+            <input
+              type="number"
+              id="amount-min"
+              name="amount_min"
+              placeholder="₹0"
+              class="form-control"
+              min="0"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label for="amount-max">Max Amount</label>
+            <input
+              type="number"
+              id="amount-max"
+              name="amount_max"
+              placeholder="₹100000"
+              class="form-control"
+              min="0"
+            />
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-search"></i> Apply Filters
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="summary-card">
+      <div class="card-icon success">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Successful Payments</div>
+        <div class="card-value" id="successful-count">-</div>
+        <div class="card-amount" id="successful-amount">₹-</div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon pending">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Pending Payments</div>
+        <div class="card-value" id="pending-count">-</div>
+        <div class="card-amount" id="pending-amount">₹-</div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon failed">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Failed Payments</div>
+        <div class="card-value" id="failed-count">-</div>
+        <div class="card-amount" id="failed-amount">₹-</div>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="card-icon refunded">
+        <i class="fas fa-undo"></i>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Refunded Payments</div>
+        <div class="card-value" id="refunded-count">-</div>
+        <div class="card-amount" id="refunded-amount">₹-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="transactions-card">
+    <div class="card-header">
+      <h3><i class="fas fa-table"></i> Transactions</h3>
+      <div class="table-actions">
+        <div class="entries-per-page">
+          <label
+            >Show
+            <select id="entries-per-page" class="form-control-sm">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+            </select>
+            entries
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover" id="transactions-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('transaction_id')">
+                Transaction ID <i class="fas fa-sort"></i>
+              </th>
+              <th onclick="sortTable('student_name')">Student <i class="fas fa-sort"></i></th>
+              <th onclick="sortTable('amount')">Amount <i class="fas fa-sort"></i></th>
+              <th onclick="sortTable('payment_method')">Method <i class="fas fa-sort"></i></th>
+              <th onclick="sortTable('gateway_name')">Gateway <i class="fas fa-sort"></i></th>
+              <th onclick="sortTable('status')">Status <i class="fas fa-sort"></i></th>
+              <th onclick="sortTable('created_at')">Date <i class="fas fa-sort"></i></th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody">
+            <tr>
+              <td colspan="8" class="text-center loading">
+                <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-container">
+        <div class="pagination-info">
+          <span id="pagination-info">Showing 0 of 0 entries</span>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn btn-sm btn-outline-primary" id="prev-page" disabled>
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <div class="page-numbers" id="page-numbers"></div>
+          <button class="btn btn-sm btn-outline-primary" id="next-page" disabled>
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction Details Modal -->
+<div class="modal fade" id="transaction-modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Transaction Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="transaction-details">
+        <!-- Transaction details will be loaded here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .payment-history-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .page-header {
+    margin-bottom: 30px;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .filters-card,
+  .transactions-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+  }
+
+  .card-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .filter-group label {
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+  }
+
+  .form-control,
+  .form-control-sm {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-control-sm:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .filter-actions {
+    text-align: right;
+  }
+
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+  }
+
+  .card-icon.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+  }
+  .card-icon.pending {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+  }
+  .card-icon.failed {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+  }
+  .card-icon.refunded {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+  }
+
+  .card-content {
+    flex: 1;
+  }
+
+  .card-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  .card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2px;
+  }
+
+  .card-amount {
+    font-size: 16px;
+    color: #28a745;
+    font-weight: 600;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    margin-bottom: 0;
+  }
+
+  .table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    border-top: none;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding: 15px 12px;
+  }
+
+  .table th:hover {
+    background: #e9ecef;
+  }
+
+  .table td {
+    vertical-align: middle;
+    padding: 12px;
+  }
+
+  .table-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .entries-per-page {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-numbers {
+    display: flex;
+    gap: 5px;
+  }
+
+  .page-number {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .page-number:hover {
+    background: #f8f9fa;
+  }
+
+  .page-number.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+  }
+
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-outline-primary {
+    background: transparent;
+    border: 1px solid #667eea;
+    color: #667eea;
+  }
+
+  .btn-outline-primary:hover {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .loading {
+    padding: 40px !important;
+    color: #666;
+  }
+
+  @media (max-width: 768px) {
+    .payment-history-container {
+      padding: 10px;
+    }
+
+    .header-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-title {
+      font-size: 24px;
+    }
+
+    .filter-row {
+      grid-template-columns: 1fr;
+    }
+
+    .summary-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .pagination-container {
+      flex-direction: column;
+      gap: 15px;
+    }
+  }
+</style>
+
+<script>
+  let currentPage = 1;
+  let totalPages = 1;
+  let currentFilters = {};
+  let sortColumn = 'created_at';
+  let sortDirection = 'desc';
+
+  document.addEventListener('DOMContentLoaded', function () {
+    loadTransactions();
+    initializeEventListeners();
+  });
+
+  function initializeEventListeners() {
+    // Filter form submission
+    document.getElementById('filter-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      currentPage = 1;
+      applyFilters();
+    });
+
+    // Entries per page change
+    document.getElementById('entries-per-page').addEventListener('change', function () {
+      currentPage = 1;
+      loadTransactions();
+    });
+
+    // Pagination controls
+    document.getElementById('prev-page').addEventListener('click', function () {
+      if (currentPage > 1) {
+        currentPage--;
+        loadTransactions();
+      }
+    });
+
+    document.getElementById('next-page').addEventListener('click', function () {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadTransactions();
+      }
+    });
+  }
+
+  function applyFilters() {
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+
+    currentFilters = {};
+    for (let [key, value] of formData.entries()) {
+      if (value.trim()) {
+        currentFilters[key] = value.trim();
+      }
+    }
+
+    loadTransactions();
+  }
+
+  function clearFilters() {
+    document.getElementById('filter-form').reset();
+    currentFilters = {};
+    currentPage = 1;
+    loadTransactions();
+  }
+
+  function loadTransactions() {
+    const params = new URLSearchParams({
+      page: currentPage,
+      limit: document.getElementById('entries-per-page').value,
+      sort_column: sortColumn,
+      sort_direction: sortDirection,
+      ...currentFilters
+    });
+
+    showLoading(true);
+
+    fetch(`/api/fees/transactions?${params}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayTransactions(data.transactions);
+          updatePagination(data.pagination);
+          updateSummary(data.summary);
+        } else {
+          showError('Failed to load transactions');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading transactions:', error);
+        showError('Error loading transactions');
+      })
+      .finally(() => {
+        showLoading(false);
+      });
+  }
+
+  function displayTransactions(transactions) {
+    const tbody = document.getElementById('transactions-tbody');
+
+    if (transactions.length === 0) {
+      tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center">
+                    <i class="fas fa-inbox"></i> No transactions found
+                </td>
+            </tr>
+        `;
+      return;
+    }
+
+    tbody.innerHTML = transactions
+      .map(
+        transaction => `
+        <tr>
+            <td>
+                <button class="btn btn-link p-0" onclick="showTransactionDetails('${transaction.transaction_id}')">
+                    ${transaction.transaction_id}
+                </button>
+            </td>
+            <td>
+                <div class="student-cell">
+                    <div class="student-name">${transaction.student_name}</div>
+                    <div class="student-id">ID: ${transaction.student_id}</div>
+                </div>
+            </td>
+            <td>
+                <span class="amount">₹${transaction.amount.toLocaleString('en-IN')}</span>
+            </td>
+            <td>
+                <span class="method-badge method-${transaction.payment_method.toLowerCase()}">
+                    ${transaction.payment_method}
+                </span>
+            </td>
+            <td>
+                ${transaction.gateway_name || '-'}
+            </td>
+            <td>
+                <%- include('../partials/payment-status', { 
+                    status: '${transaction.status}',
+                    showDetails: false
+                }) %>
+            </td>
+            <td>
+                <div class="date-cell">
+                    <div class="date">${new Date(transaction.created_at).toLocaleDateString('en-IN')}</div>
+                    <div class="time">${new Date(transaction.created_at).toLocaleTimeString('en-IN')}</div>
+                </div>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="showTransactionDetails('${transaction.transaction_id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    ${
+                      transaction.status === 'SUCCESS'
+                        ? `
+                        <button class="btn btn-sm btn-outline-success" onclick="downloadReceipt('${transaction.transaction_id}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    `
+                        : ''
+                    }
+                </div>
+            </td>
+        </tr>
+    `
+      )
+      .join('');
+  }
+
+  function updatePagination(pagination) {
+    totalPages = pagination.total_pages;
+    currentPage = pagination.current_page;
+
+    // Update pagination info
+    document.getElementById('pagination-info').textContent =
+      `Showing ${pagination.start_entry} to ${pagination.end_entry} of ${pagination.total_entries} entries`;
+
+    // Update pagination controls
+    document.getElementById('prev-page').disabled = currentPage <= 1;
+    document.getElementById('next-page').disabled = currentPage >= totalPages;
+
+    // Update page numbers
+    const pageNumbers = document.getElementById('page-numbers');
+    pageNumbers.innerHTML = generatePageNumbers(currentPage, totalPages);
+  }
+
+  function generatePageNumbers(current, total) {
+    let pages = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (current > 4) {
+        pages.push('...');
+      }
+
+      let start = Math.max(2, current - 2);
+      let end = Math.min(total - 1, current + 2);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < total - 3) {
+        pages.push('...');
+      }
+
+      pages.push(total);
+    }
+
+    return pages
+      .map(page => {
+        if (page === '...') {
+          return '<span class="page-ellipsis">...</span>';
+        }
+
+        return `
+            <button class="page-number ${page === current ? 'active' : ''}" 
+                    onclick="goToPage(${page})">
+                ${page}
+            </button>
+        `;
+      })
+      .join('');
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    loadTransactions();
+  }
+
+  function updateSummary(summary) {
+    document.getElementById('successful-count').textContent = summary.successful.count;
+    document.getElementById('successful-amount').textContent =
+      `₹${summary.successful.amount.toLocaleString('en-IN')}`;
+
+    document.getElementById('pending-count').textContent = summary.pending.count;
+    document.getElementById('pending-amount').textContent =
+      `₹${summary.pending.amount.toLocaleString('en-IN')}`;
+
+    document.getElementById('failed-count').textContent = summary.failed.count;
+    document.getElementById('failed-amount').textContent =
+      `₹${summary.failed.amount.toLocaleString('en-IN')}`;
+
+    document.getElementById('refunded-count').textContent = summary.refunded.count;
+    document.getElementById('refunded-amount').textContent =
+      `₹${summary.refunded.amount.toLocaleString('en-IN')}`;
+  }
+
+  function sortTable(column) {
+    if (sortColumn === column) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortColumn = column;
+      sortDirection = 'desc';
+    }
+
+    currentPage = 1;
+    loadTransactions();
+  }
+
+  function showTransactionDetails(transactionId) {
+    fetch(`/api/fees/transactions/${transactionId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayTransactionDetails(data.transaction);
+          const modal = new bootstrap.Modal(document.getElementById('transaction-modal'));
+          modal.show();
+        } else {
+          alert('Failed to load transaction details');
+        }
+      })
+      .catch(error => {
+        console.error('Error loading transaction details:', error);
+        alert('Error loading transaction details');
+      });
+  }
+
+  function displayTransactionDetails(transaction) {
+    const detailsContainer = document.getElementById('transaction-details');
+    detailsContainer.innerHTML = `
+        <%- include('../partials/payment-status', { 
+            status: '${transaction.status}',
+            showDetails: true,
+            showActions: true,
+            transactionId: '${transaction.transaction_id}',
+            gatewayPaymentId: '${transaction.gateway_payment_id || ''}',
+            amount: ${transaction.amount},
+            paymentMethod: '${transaction.payment_method}',
+            gatewayName: '${transaction.gateway_name || ''}',
+            createdAt: '${transaction.created_at}',
+            failureReason: '${transaction.failure_reason || ''}',
+            refundAmount: ${transaction.refund_amount || 0},
+            allowRefund: ${transaction.status === 'SUCCESS'}
+        }) %>
+    `;
+  }
+
+  function downloadReceipt(transactionId) {
+    window.open(`/api/fees/transactions/${transactionId}/receipt`, '_blank');
+  }
+
+  function exportTransactions() {
+    const params = new URLSearchParams({
+      format: 'excel',
+      ...currentFilters
+    });
+
+    window.open(`/api/fees/transactions/export?${params}`, '_blank');
+  }
+
+  function refreshTransactions() {
+    loadTransactions();
+  }
+
+  function showLoading(show) {
+    const tbody = document.getElementById('transactions-tbody');
+    if (show) {
+      tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+                </td>
+            </tr>
+        `;
+    }
+  }
+
+  function showError(message) {
+    const tbody = document.getElementById('transactions-tbody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center">
+                <i class="fas fa-exclamation-triangle text-warning"></i> ${message}
+            </td>
+        </tr>
+    `;
+  }
+</script>
+
+<%- include('../partials/footer') %>

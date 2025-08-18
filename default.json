@@ -1,0 +1,49 @@
+{
+  "app": {
+    "port": 3000,
+    "baseUrl": "http://localhost:3000",
+    "trustProxy": true
+  },
+  "security": {
+    "session": {
+      "cookieName": "sid",
+      "cookieMaxAgeMs": 1800000,
+      "sameSite": "lax"
+    },
+    "rateLimit": {
+      "windowMs": 900000,
+      "max": 100
+    }
+  },
+  "logging": {
+    "level": "info",
+    "dir": "./logs",
+    "rotate": {
+      "datePattern": "YYYY-MM-DD",
+      "maxFiles": "14d"
+    }
+  },
+  "databases": {
+    "master": {
+      "host": "localhost",
+      "port": 3306,
+      "database": "school_erp_master",
+      "user": "${DB_USER}",
+      "password": "${DB_PASSWORD}",
+      "url": "${DB_URL_MASTER:-}"
+    },
+    "trustTemplate": {
+      "host": "localhost",
+      "port": 3306,
+      "databasePrefix": "school_erp_trust_",
+      "user": "${DB_USER}",
+      "password": "${DB_PASSWORD}",
+      "url": "${DB_URL_TRUST:-}"
+    }
+  },
+  "features": {
+    "enable2FA": true,
+    "enableEmail": true,
+    "enableSMS": false
+  }
+}

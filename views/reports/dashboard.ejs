@@ -1,0 +1,857 @@
+<!-- Enhanced Reports Dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> - School ERP</title>
+
+    <!-- CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.css" rel="stylesheet" />
+    <link href="/css/dashboard.css" rel="stylesheet" />
+
+    <style>
+      .report-card {
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+
+      .quick-action-btn {
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: #495057;
+        transition: all 0.3s ease;
+        display: block;
+        text-align: center;
+      }
+
+      .quick-action-btn:hover {
+        border-color: #007bff;
+        color: #007bff;
+        transform: translateY(-2px);
+      }
+
+      .recent-reports-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+      }
+
+      .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+      }
+
+      .template-category {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .template-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #007bff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .template-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid">
+      <div class="row">
+        <%- include('../partials/sidebar') %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <!-- Breadcrumb -->
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+          >
+            <h1 class="h2"><i class="fas fa-chart-bar me-2"></i><%= pageTitle %></h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <% if (['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'].includes(userRole)) { %>
+              <div class="btn-group me-2">
+                <a href="/reports/builder" class="btn btn-primary">
+                  <i class="fas fa-plus me-1"></i>Create Report
+                </a>
+                <a href="/reports/schedules" class="btn btn-outline-primary">
+                  <i class="fas fa-clock me-1"></i>Schedules
+                </a>
+                <a href="/reports/analytics" class="btn btn-outline-info">
+                  <i class="fas fa-analytics me-1"></i>Analytics
+                </a>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+              <div class="stat-card">
+                <div class="stat-number" id="totalReports">--</div>
+                <div class="stat-label">Total Reports</div>
+                <small class="opacity-75">Active reports in system</small>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div
+                class="stat-card"
+                style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+              >
+                <div class="stat-number" id="recentExecutions">--</div>
+                <div class="stat-label">Recent Executions</div>
+                <small class="opacity-75">Last 30 days</small>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div
+                class="stat-card"
+                style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+              >
+                <div class="stat-number" id="activeSchedules">--</div>
+                <div class="stat-label">Scheduled Reports</div>
+                <small class="opacity-75">Active schedules</small>
+              </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <div
+                class="stat-card"
+                style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)"
+              >
+                <div class="stat-number" id="activeUsers">--</div>
+                <div class="stat-label">Active Users</div>
+                <small class="opacity-75">Users this month</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <h4 class="mb-3">Quick Actions</h4>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="/reports/templates" class="quick-action-btn">
+                <i class="fas fa-file-alt fa-2x mb-2 text-primary"></i>
+                <div class="fw-bold">Templates</div>
+                <small class="text-muted">Pre-built reports</small>
+              </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="/reports/my-reports" class="quick-action-btn">
+                <i class="fas fa-user-chart fa-2x mb-2 text-success"></i>
+                <div class="fw-bold">My Reports</div>
+                <small class="text-muted">Your created reports</small>
+              </a>
+            </div>
+            <% if (['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'].includes(userRole)) { %>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="/reports/builder" class="quick-action-btn">
+                <i class="fas fa-tools fa-2x mb-2 text-warning"></i>
+                <div class="fw-bold">Builder</div>
+                <small class="text-muted">Create custom</small>
+              </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="/reports/dashboard-builder" class="quick-action-btn">
+                <i class="fas fa-th-large fa-2x mb-2 text-info"></i>
+                <div class="fw-bold">Dashboard</div>
+                <small class="text-muted">Build dashboard</small>
+              </a>
+            </div>
+            <% } %>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="#" onclick="showExportDialog()" class="quick-action-btn">
+                <i class="fas fa-download fa-2x mb-2 text-secondary"></i>
+                <div class="fw-bold">Export</div>
+                <small class="text-muted">Download reports</small>
+              </a>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+              <a href="#" onclick="showHelpDialog()" class="quick-action-btn">
+                <i class="fas fa-question-circle fa-2x mb-2 text-dark"></i>
+                <div class="fw-bold">Help</div>
+                <small class="text-muted">Get started</small>
+              </a>
+            </div>
+          </div>
+
+          <!-- Main Content Grid -->
+          <div class="row">
+            <!-- Charts Section -->
+            <div class="col-lg-8">
+              <!-- Daily Executions Chart -->
+              <div class="chart-container">
+                <h5 class="mb-3">
+                  <i class="fas fa-chart-line me-2"></i>Report Executions Trend
+                  <span class="badge bg-secondary ms-2">Last 30 Days</span>
+                </h5>
+                <canvas id="executionTrendChart" height="100"></canvas>
+              </div>
+
+              <!-- Popular Reports Chart -->
+              <div class="chart-container">
+                <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Most Popular Reports</h5>
+                <canvas id="popularReportsChart" height="100"></canvas>
+              </div>
+
+              <!-- Recent Reports Table -->
+              <div class="recent-reports-table">
+                <div class="table-header p-3 bg-light">
+                  <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Recent Report Executions</h5>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover mb-0" id="recentReportsTable">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Report Name</th>
+                        <th>Executed By</th>
+                        <th>Execution Time</th>
+                        <th>Rows</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colspan="6" class="text-center py-4">
+                          <div class="loading-spinner">
+                            <div class="spinner-border text-primary" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="col-lg-4">
+              <!-- Report Templates -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                  <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>Featured Templates</h6>
+                </div>
+                <div class="card-body">
+                  <div id="featuredTemplates">
+                    <div class="text-center py-3">
+                      <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-center mt-3">
+                    <a href="/reports/templates" class="btn btn-outline-primary btn-sm">
+                      View All Templates
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- System Status -->
+              <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                  <h6 class="mb-0"><i class="fas fa-server me-2"></i>System Status</h6>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Database Connection</span>
+                    <span class="badge bg-success">Active</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Report Engine</span>
+                    <span class="badge bg-success">Running</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Scheduler</span>
+                    <span class="badge bg-success" id="schedulerStatus">Active</span>
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span>Cache Status</span>
+                    <span class="badge bg-warning">Optimizing</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Stats -->
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-info text-white">
+                  <h6 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Quick Stats</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row text-center">
+                    <div class="col-6">
+                      <div class="fw-bold text-primary fs-4" id="todayExecutions">--</div>
+                      <small class="text-muted">Today's Runs</small>
+                    </div>
+                    <div class="col-6">
+                      <div class="fw-bold text-success fs-4" id="avgExecutionTime">--</div>
+                      <small class="text-muted">Avg Time (s)</small>
+                    </div>
+                  </div>
+                  <hr />
+                  <div class="row text-center">
+                    <div class="col-6">
+                      <div class="fw-bold text-warning fs-4" id="totalExports">--</div>
+                      <small class="text-muted">Exports Today</small>
+                    </div>
+                    <div class="col-6">
+                      <div class="fw-bold text-danger fs-4" id="errorRate">--%</div>
+                      <small class="text-muted">Error Rate</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Export Dialog -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Export Reports</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Select Report</label>
+              <select class="form-select" id="exportReportSelect">
+                <option value="">Choose a report...</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Export Format</label>
+              <div class="btn-group w-100" role="group">
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="exportFormat"
+                  id="formatExcel"
+                  value="excel"
+                  checked
+                />
+                <label class="btn btn-outline-primary" for="formatExcel">
+                  <i class="fas fa-file-excel me-1"></i>Excel
+                </label>
+                <input
+                  type="radio"
+                  class="btn-check"
+                  name="exportFormat"
+                  id="formatPDF"
+                  value="pdf"
+                />
+                <label class="btn btn-outline-primary" for="formatPDF">
+                  <i class="fas fa-file-pdf me-1"></i>PDF
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="exportReport()">
+              <i class="fas fa-download me-1"></i>Export
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Dialog -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reports Help</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6><i class="fas fa-file-alt text-primary me-2"></i>Using Templates</h6>
+                <p class="small">
+                  Select from pre-built report templates for common use cases like student
+                  enrollment, fee collection, and attendance tracking.
+                </p>
+
+                <h6><i class="fas fa-tools text-warning me-2"></i>Report Builder</h6>
+                <p class="small">
+                  Create custom reports by selecting tables, fields, filters, and visualizations
+                  using our drag-and-drop interface.
+                </p>
+              </div>
+              <div class="col-md-6">
+                <h6><i class="fas fa-clock text-info me-2"></i>Scheduling</h6>
+                <p class="small">
+                  Automate report generation and delivery by setting up schedules with email
+                  notifications.
+                </p>
+
+                <h6><i class="fas fa-download text-success me-2"></i>Exporting</h6>
+                <p class="small">
+                  Export reports in Excel or PDF format. Use the export dialog to select specific
+                  reports and formats.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js"></script>
+    <script>
+      // Initialize dashboard
+      document.addEventListener('DOMContentLoaded', function () {
+        loadDashboardData();
+        initializeCharts();
+        loadRecentReports();
+        loadFeaturedTemplates();
+      });
+
+      // Load dashboard statistics
+      async function loadDashboardData() {
+        try {
+          const response = await fetch('/api/enhanced-reports/analytics/overview');
+          const data = await response.json();
+
+          if (data.success) {
+            const stats = data.overview.statistics;
+            document.getElementById('totalReports').textContent = stats.total_reports || 0;
+            document.getElementById('recentExecutions').textContent =
+              stats.executions_last_30_days || 0;
+            document.getElementById('activeSchedules').textContent = stats.active_schedules || 0;
+            document.getElementById('activeUsers').textContent = stats.active_users || 0;
+
+            // Update charts
+            updateExecutionTrendChart(data.overview.dailyTrend);
+            updatePopularReportsChart(data.overview.popularReports);
+          }
+        } catch (error) {
+          console.error('Error loading dashboard data:', error);
+          showError('Failed to load dashboard data');
+        }
+      }
+
+      // Initialize charts
+      let executionTrendChart, popularReportsChart;
+
+      function initializeCharts() {
+        // Execution trend chart
+        const trendCtx = document.getElementById('executionTrendChart').getContext('2d');
+        executionTrendChart = new Chart(trendCtx, {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Report Executions',
+                data: [],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+        });
+
+        // Popular reports chart
+        const popularCtx = document.getElementById('popularReportsChart').getContext('2d');
+        popularReportsChart = new Chart(popularCtx, {
+          type: 'bar',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Executions',
+                data: [],
+                backgroundColor: [
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 205, 86, 0.6)',
+                  'rgba(75, 192, 192, 0.6)',
+                  'rgba(153, 102, 255, 0.6)'
+                ],
+                borderColor: [
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(54, 162, 235, 1)',
+                  'rgba(255, 205, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          }
+        });
+      }
+
+      function updateExecutionTrendChart(data) {
+        const labels = data.map(item => new Date(item.date).toLocaleDateString());
+        const values = data.map(item => item.executions);
+
+        executionTrendChart.data.labels = labels;
+        executionTrendChart.data.datasets[0].data = values;
+        executionTrendChart.update();
+      }
+
+      function updatePopularReportsChart(data) {
+        const labels = data
+          .slice(0, 5)
+          .map(item => (item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name));
+        const values = data.slice(0, 5).map(item => item.execution_count);
+
+        popularReportsChart.data.labels = labels;
+        popularReportsChart.data.datasets[0].data = values;
+        popularReportsChart.update();
+      }
+
+      // Load recent reports
+      async function loadRecentReports() {
+        try {
+          const response = await fetch('/api/enhanced-reports?limit=10');
+          const data = await response.json();
+
+          if (data.success) {
+            const tbody = document.querySelector('#recentReportsTable tbody');
+            tbody.innerHTML = '';
+
+            if (data.reports.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="6" class="text-center py-4">No reports found</td></tr>';
+              return;
+            }
+
+            data.reports.forEach(report => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                            <td>
+                                <div class="fw-bold">${report.name}</div>
+                                <small class="text-muted">${report.description || 'No description'}</small>
+                            </td>
+                            <td>${report.created_by}</td>
+                            <td>
+                                ${
+                                  report.last_executed
+                                    ? new Date(report.last_executed).toLocaleString()
+                                    : '<span class="text-muted">Never</span>'
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">${report.execution_count}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">Active</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/reports/view/${report.id}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-outline-success btn-sm" onclick="runReport(${report.id})">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+              tbody.appendChild(row);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading recent reports:', error);
+        }
+      }
+
+      // Load featured templates
+      async function loadFeaturedTemplates() {
+        try {
+          const response = await fetch('/api/enhanced-reports/templates?limit=5');
+          const data = await response.json();
+
+          if (data.success) {
+            const container = document.getElementById('featuredTemplates');
+            container.innerHTML = '';
+
+            if (data.templates.length === 0) {
+              container.innerHTML = '<p class="text-muted text-center">No templates available</p>';
+              return;
+            }
+
+            data.templates.forEach(template => {
+              const templateElement = document.createElement('div');
+              templateElement.className = 'template-item';
+              templateElement.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fw-bold">${template.name}</div>
+                                    <small class="text-muted">${template.description}</small>
+                                </div>
+                                <span class="badge bg-primary">${template.category}</span>
+                            </div>
+                        `;
+              templateElement.onclick = () => useTemplate(template.id, template.name);
+              container.appendChild(templateElement);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading templates:', error);
+        }
+      }
+
+      // Utility functions
+      function showExportDialog() {
+        const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+        loadReportsForExport();
+        modal.show();
+      }
+
+      function showHelpDialog() {
+        const modal = new bootstrap.Modal(document.getElementById('helpModal'));
+        modal.show();
+      }
+
+      async function loadReportsForExport() {
+        try {
+          const response = await fetch('/api/enhanced-reports');
+          const data = await response.json();
+
+          if (data.success) {
+            const select = document.getElementById('exportReportSelect');
+            select.innerHTML = '<option value="">Choose a report...</option>';
+
+            data.reports.forEach(report => {
+              const option = document.createElement('option');
+              option.value = report.id;
+              option.textContent = report.name;
+              select.appendChild(option);
+            });
+          }
+        } catch (error) {
+          console.error('Error loading reports for export:', error);
+        }
+      }
+
+      async function exportReport() {
+        const reportId = document.getElementById('exportReportSelect').value;
+        const format = document.querySelector('input[name="exportFormat"]:checked').value;
+
+        if (!reportId) {
+          showError('Please select a report to export');
+          return;
+        }
+
+        try {
+          const url = `/api/enhanced-reports/${reportId}/export/${format}`;
+          window.open(url, '_blank');
+
+          const modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+          modal.hide();
+
+          showSuccess('Export started successfully');
+        } catch (error) {
+          console.error('Error exporting report:', error);
+          showError('Failed to export report');
+        }
+      }
+
+      async function runReport(reportId) {
+        try {
+          const response = await fetch(`/api/enhanced-reports/${reportId}/execute`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            showSuccess(`Report executed successfully. ${data.rowCount} rows returned.`);
+            loadRecentReports(); // Refresh the table
+          } else {
+            showError('Failed to execute report');
+          }
+        } catch (error) {
+          console.error('Error running report:', error);
+          showError('Failed to execute report');
+        }
+      }
+
+      async function useTemplate(templateId, templateName) {
+        if (confirm(`Create a new report from template "${templateName}"?`)) {
+          try {
+            const response = await fetch(`/api/enhanced-reports/templates/${templateId}/use`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                name: `${templateName} - ${new Date().toLocaleDateString()}`
+              })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+              showSuccess('Report created from template successfully');
+              setTimeout(() => {
+                window.location.href = `/reports/view/${data.reportId}`;
+              }, 1500);
+            } else {
+              showError('Failed to create report from template');
+            }
+          } catch (error) {
+            console.error('Error using template:', error);
+            showError('Failed to create report from template');
+          }
+        }
+      }
+
+      // Notification functions
+      function showSuccess(message) {
+        // Simple alert for now - can be replaced with toast notifications
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 5000);
+      }
+
+      function showError(message) {
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alert.style.top = '20px';
+        alert.style.right = '20px';
+        alert.style.zIndex = '9999';
+        alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+        document.body.appendChild(alert);
+
+        setTimeout(() => {
+          if (alert.parentNode) {
+            alert.parentNode.removeChild(alert);
+          }
+        }, 5000);
+      }
+
+      // Auto-refresh data every 5 minutes
+      setInterval(() => {
+        loadDashboardData();
+        loadRecentReports();
+      }, 300000);
+    </script>
+  </body>
+</html>

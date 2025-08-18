@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mysqlsh:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run setup:*)",
+      "Bash(mysql:*)",
+      "Bash(npm install:*)",
+      "Bash(mv:*)",
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(npm run:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,245 @@
+<nav class="navbar flex items-center justify-between p-4">
+  <div class="flex items-center gap-4">
+    <!-- Mobile menu toggle -->
+    <button type="button" class="btn btn-secondary btn-sm hidden" id="mobileMenuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Logo and brand -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-primary flex items-center justify-center rounded">
+        <i class="fas fa-graduation-cap text-white text-lg"></i>
+      </div>
+      <h1 class="text-xl font-bold text-primary"><%= appName || 'School ERP' %></h1>
+    </div>
+
+    <% if (trustCode && trustCode !== 'default') { %>
+    <div class="badge badge-primary"><%= trustCode.toUpperCase() %></div>
+    <% } %>
+  </div>
+
+  <!-- Navigation actions -->
+  <div class="flex items-center gap-3">
+    <!-- Theme toggle -->
+    <button type="button" class="btn btn-secondary btn-sm" id="themeToggle" title="Toggle theme">
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+
+    <!-- Notifications -->
+    <div class="relative">
+      <button
+        type="button"
+        class="btn btn-secondary btn-sm"
+        id="notificationsToggle"
+        title="Notifications"
+      >
+        <i class="fas fa-bell"></i>
+        <span
+          class="badge badge-error absolute -top-1 -right-1 text-xs"
+          id="notificationBadge"
+          style="display: none"
+          >0</span
+        >
+      </button>
+
+      <!-- Notifications dropdown -->
+      <div
+        class="absolute right-0 mt-2 w-80 bg-surface border border-border rounded-lg shadow-lg hidden"
+        id="notificationsDropdown"
+      >
+        <div class="p-4 border-b border-border">
+          <h3 class="font-semibold">Notifications</h3>
+        </div>
+        <div class="max-h-96 overflow-y-auto" id="notificationsList">
+          <div class="p-4 text-center text-muted">
+            <i class="fas fa-bell-slash text-2xl mb-2"></i>
+            <p>No notifications</p>
+          </div>
+        </div>
+        <div class="p-3 border-t border-border text-center">
+          <a href="/communication/messages" class="text-sm text-primary hover:underline"
+            >View all messages</a
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- User menu -->
+    <div class="relative">
+      <button
+        type="button"
+        class="flex items-center gap-2 p-2 rounded hover:bg-surface-alt transition-colors"
+        id="userMenuToggle"
+      >
+        <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-primary-700 text-sm"></i>
+        </div>
+        <div class="hidden md:block text-left">
+          <% if (user) { %>
+          <div class="text-sm font-medium"><%= user.firstName %> <%= user.lastName %></div>
+          <div class="text-xs text-muted"><%= userRole %></div>
+          <% } else { %>
+          <div class="text-sm font-medium">User</div>
+          <div class="text-xs text-muted">Role</div>
+          <% } %>
+        </div>
+        <i class="fas fa-chevron-down text-xs"></i>
+      </button>
+
+      <!-- User dropdown -->
+      <div
+        class="absolute right-0 mt-2 w-48 bg-surface border border-border rounded-lg shadow-lg hidden"
+        id="userDropdown"
+      >
+        <div class="p-2">
+          <a
+            href="/profile"
+            class="flex items-center gap-2 p-2 text-sm rounded hover:bg-surface-alt transition-colors"
+          >
+            <i class="fas fa-user text-muted"></i>
+            My Profile
+          </a>
+          <a
+            href="/profile/edit"
+            class="flex items-center gap-2 p-2 text-sm rounded hover:bg-surface-alt transition-colors"
+          >
+            <i class="fas fa-cog text-muted"></i>
+            Settings
+          </a>
+          <% if (userRole === 'SYSTEM_ADMIN' || userRole === 'TRUST_ADMIN') { %>
+          <a
+            href="/admin/settings"
+            class="flex items-center gap-2 p-2 text-sm rounded hover:bg-surface-alt transition-colors"
+          >
+            <i class="fas fa-tools text-muted"></i>
+            System Settings
+          </a>
+          <% } %>
+          <hr class="my-2 border-border" />
+          <button
+            type="button"
+            class="w-full flex items-center gap-2 p-2 text-sm rounded hover:bg-surface-alt transition-colors text-error"
+            onclick="logout()"
+          >
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Navbar functionality
+  document.addEventListener('DOMContentLoaded', function () {
+    // User menu toggle
+    const userMenuToggle = document.getElementById('userMenuToggle');
+    const userDropdown = document.getElementById('userDropdown');
+
+    if (userMenuToggle && userDropdown) {
+      userMenuToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('hidden');
+      });
+    }
+
+    // Notifications toggle
+    const notificationsToggle = document.getElementById('notificationsToggle');
+    const notificationsDropdown = document.getElementById('notificationsDropdown');
+
+    if (notificationsToggle && notificationsDropdown) {
+      notificationsToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        notificationsDropdown.classList.toggle('hidden');
+        loadNotifications();
+      });
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function () {
+      if (userDropdown) userDropdown.classList.add('hidden');
+      if (notificationsDropdown) notificationsDropdown.classList.add('hidden');
+    });
+
+    // Load notifications on page load
+    loadNotifications();
+  });
+
+  // Load notifications
+  async function loadNotifications() {
+    try {
+      const response = await api.get('/api/communication/notifications?limit=5');
+      if (response.success) {
+        updateNotificationsList(response.data);
+        updateNotificationBadge(response.data.length);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    }
+  }
+
+  // Update notifications list
+  function updateNotificationsList(notifications) {
+    const notificationsList = document.getElementById('notificationsList');
+    if (!notificationsList) return;
+
+    if (notifications.length === 0) {
+      notificationsList.innerHTML = `
+                <div class="p-4 text-center text-muted">
+                    <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                    <p>No notifications</p>
+                </div>
+            `;
+      return;
+    }
+
+    notificationsList.innerHTML = notifications
+      .map(
+        notification => `
+            <div class="p-3 border-b border-border hover:bg-surface-alt transition-colors cursor-pointer" 
+                 onclick="markNotificationAsRead('${notification.id}')">
+                <div class="font-medium text-sm">${notification.title || 'Notification'}</div>
+                <div class="text-xs text-muted mt-1">${notification.content}</div>
+                <div class="text-xs text-muted mt-1">${formatTimeAgo(notification.createdAt)}</div>
+            </div>
+        `
+      )
+      .join('');
+  }
+
+  // Update notification badge
+  function updateNotificationBadge(count) {
+    const badge = document.getElementById('notificationBadge');
+    if (!badge) return;
+
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : count;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Mark notification as read
+  async function markNotificationAsRead(notificationId) {
+    try {
+      await api.patch(`/api/communication/notifications/${notificationId}/read`);
+      loadNotifications(); // Refresh notifications
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  }
+
+  // Logout function
+  async function logout() {
+    try {
+      showLoading();
+      await api.post('/auth/logout');
+      window.location.href = '/auth/login';
+    } catch (error) {
+      hideLoading();
+      notifications.error('Logout failed', error.message);
+    }
+  }
+</script>

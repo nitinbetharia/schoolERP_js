@@ -1,0 +1,648 @@
+<!-- Create user page uses layouts/main layout automatically -->
+
+<!-- Create User Page -->
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a href="/users" class="btn btn-ghost btn-sm">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Users
+        </a>
+        <div>
+          <h1 class="page-title">Create New User</h1>
+          <p class="page-subtitle">Add a new user to the system</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button type="button" class="btn btn-outline" onclick="saveAsDraft()">
+          <i class="fas fa-save mr-2"></i>
+          Save as Draft
+        </button>
+        <button type="submit" form="createUserForm" class="btn btn-primary">
+          <i class="fas fa-user-plus mr-2"></i>
+          Create User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create User Form -->
+  <form id="createUserForm" data-autosave="true">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Basic Information -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="font-semibold">Basic Information</h3>
+            <p class="text-muted text-sm">Enter the user's personal details</p>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label required">Full Name</label>
+                <input type="text" name="full_name" class="form-input" required 
+                       placeholder="Enter full name">
+                <div class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label required">Email Address</label>
+                <input type="email" name="email" class="form-input" required 
+                       placeholder="Enter email address">
+                <div class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label required">Mobile Number</label>
+                <input type="tel" name="mobile" class="form-input" required 
+                       placeholder="Enter mobile number">
+                <div class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Alternate Phone</label>
+                <input type="tel" name="phone" class="form-input" 
+                       placeholder="Enter alternate phone">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" name="date_of_birth" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-select">
+                  <option value="">Select gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group md:col-span-2">
+                <label class="form-label">Address</label>
+                <textarea name="address" class="form-textarea" rows="3" 
+                          placeholder="Enter complete address"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role and Permissions -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="font-semibold">Role and Access</h3>
+            <p class="text-muted text-sm">Set user role and permissions</p>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label required">User Role</label>
+                <select name="role" class="form-select" required onchange="handleRoleChange(this.value)">
+                  <option value="">Select role</option>
+                  <option value="SYSTEM_ADMIN">System Administrator</option>
+                  <option value="TRUST_ADMIN">Trust Administrator</option>
+                  <option value="SCHOOL_ADMIN">School Administrator</option>
+                  <option value="TEACHER">Teacher</option>
+                  <option value="ACCOUNTANT">Accountant</option>
+                  <option value="PARENT">Parent</option>
+                </select>
+                <div class="error-message"></div>
+              </div>
+
+              <div class="form-group" id="schoolAssignmentGroup" style="display: none;">
+                <label class="form-label required">Assign to School</label>
+                <select name="school_id" class="form-select" id="schoolSelect">
+                  <option value="">Select school</option>
+                  <!-- Schools will be populated by JavaScript -->
+                </select>
+                <div class="error-message"></div>
+              </div>
+
+              <div class="form-group" id="employeeIdGroup" style="display: none;">
+                <label class="form-label">Employee ID</label>
+                <input type="text" name="employee_id" class="form-input" 
+                       placeholder="Enter employee ID (auto-generated if empty)">
+                <small class="form-help">Leave empty to auto-generate</small>
+              </div>
+
+              <div class="form-group" id="departmentGroup" style="display: none;">
+                <label class="form-label">Department</label>
+                <select name="department" class="form-select">
+                  <option value="">Select department</option>
+                  <option value="ACADEMIC">Academic</option>
+                  <option value="ADMINISTRATION">Administration</option>
+                  <option value="ACCOUNTS">Accounts</option>
+                  <option value="TRANSPORT">Transport</option>
+                  <option value="MAINTENANCE">Maintenance</option>
+                  <option value="LIBRARY">Library</option>
+                  <option value="LABORATORY">Laboratory</option>
+                </select>
+              </div>
+
+              <div class="form-group md:col-span-2" id="subjectsGroup" style="display: none;">
+                <label class="form-label">Subjects Teaching</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="subjectsCheckboxes">
+                  <!-- Subjects will be populated based on school -->
+                </div>
+              </div>
+
+              <div class="form-group md:col-span-2" id="classesGroup" style="display: none;">
+                <label class="form-label">Classes Assigned</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="classesCheckboxes">
+                  <!-- Classes will be populated based on school -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="font-semibold">Account Settings</h3>
+            <p class="text-muted text-sm">Configure account access and security</p>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="relative">
+                  <input type="password" name="password" class="form-input pr-10" 
+                         placeholder="Enter password (leave empty to auto-generate)">
+                  <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted hover:text-primary" 
+                          onclick="togglePassword('password')">
+                    <i class="fas fa-eye" id="passwordToggle"></i>
+                  </button>
+                </div>
+                <small class="form-help">Leave empty to auto-generate and send via email</small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Account Status</label>
+                <select name="status" class="form-select">
+                  <option value="ACTIVE" selected>Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="PENDING">Pending Activation</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Joining Date</label>
+                <input type="date" name="joining_date" class="form-input" 
+                       value="<%= new Date().toISOString().split('T')[0] %>">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Probation Period (months)</label>
+                <input type="number" name="probation_period" class="form-input" 
+                       placeholder="Enter probation period" min="0" max="24">
+              </div>
+
+              <div class="form-group md:col-span-2">
+                <div class="space-y-3">
+                  <label class="flex items-center gap-3">
+                    <input type="checkbox" name="send_welcome_email" checked>
+                    <span>Send welcome email with login credentials</span>
+                  </label>
+                  <label class="flex items-center gap-3">
+                    <input type="checkbox" name="force_password_change">
+                    <span>Force password change on first login</span>
+                  </label>
+                  <label class="flex items-center gap-3">
+                    <input type="checkbox" name="enable_2fa">
+                    <span>Enable two-factor authentication</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Profile Picture -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="font-semibold">Profile Picture</h3>
+          </div>
+          <div class="card-body">
+            <div class="text-center">
+              <div class="relative inline-block">
+                <img id="profilePreview" src="/images/default-avatar.png" 
+                     alt="Profile Preview" class="w-24 h-24 rounded-full mx-auto mb-4">
+                <button type="button" class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-2 shadow-lg"
+                        onclick="document.getElementById('profilePicture').click()">
+                  <i class="fas fa-camera text-sm"></i>
+                </button>
+              </div>
+              <input type="file" id="profilePicture" name="profile_picture" 
+                     accept="image/*" class="hidden" onchange="previewImage(this)">
+              <p class="text-sm text-muted">Click camera icon to upload</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="font-semibold">Quick Actions</h3>
+          </div>
+          <div class="card-body">
+            <div class="space-y-3">
+              <button type="button" class="btn btn-outline w-full" onclick="generateEmployeeId()">
+                <i class="fas fa-id-card mr-2"></i>
+                Generate Employee ID
+              </button>
+              <button type="button" class="btn btn-outline w-full" onclick="generatePassword()">
+                <i class="fas fa-key mr-2"></i>
+                Generate Password
+              </button>
+              <button type="button" class="btn btn-outline w-full" onclick="validateForm()">
+                <i class="fas fa-check-circle mr-2"></i>
+                Validate Form
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Role Information -->
+        <div class="card" id="roleInfo" style="display: none;">
+          <div class="card-header">
+            <h3 class="font-semibold">Role Permissions</h3>
+          </div>
+          <div class="card-body">
+            <div id="rolePermissions">
+              <!-- Role permissions will be displayed here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+/**
+ * Create User Form Handler
+ */
+class CreateUserForm {
+    constructor() {
+        this.form = document.getElementById('createUserForm');
+        this.schools = [];
+        this.subjects = [];
+        this.classes = [];
+        this.init();
+    }
+
+    async init() {
+        await this.loadData();
+        this.setupEventListeners();
+        this.setupValidation();
+    }
+
+    async loadData() {
+        try {
+            // Load schools
+            const schoolsResponse = await api.get('/api/schools');
+            if (schoolsResponse.success) {
+                this.schools = schoolsResponse.data;
+                this.populateSchools();
+            }
+        } catch (error) {
+            console.warn('Failed to load schools:', error);
+        }
+    }
+
+    populateSchools() {
+        const schoolSelect = document.getElementById('schoolSelect');
+        schoolSelect.innerHTML = '<option value="">Select school</option>';
+        
+        this.schools.forEach(school => {
+            const option = document.createElement('option');
+            option.value = school.id;
+            option.textContent = school.school_name;
+            schoolSelect.appendChild(option);
+        });
+    }
+
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.form.addEventListener('input', () => this.saveFormData());
+        
+        // School selection change
+        document.getElementById('schoolSelect').addEventListener('change', (e) => {
+            if (e.target.value) {
+                this.loadSchoolData(e.target.value);
+            }
+        });
+    }
+
+    setupValidation() {
+        const fields = this.form.querySelectorAll('input, select');
+        fields.forEach(field => {
+            field.addEventListener('blur', () => this.validateField(field));
+            field.addEventListener('input', () => this.clearFieldError(field));
+        });
+    }
+
+    async loadSchoolData(schoolId) {
+        try {
+            // Load subjects and classes for the selected school
+            const [subjectsResponse, classesResponse] = await Promise.all([
+                api.get(`/api/schools/${schoolId}/subjects`),
+                api.get(`/api/schools/${schoolId}/classes`)
+            ]);
+
+            if (subjectsResponse.success) {
+                this.subjects = subjectsResponse.data;
+                this.populateSubjects();
+            }
+
+            if (classesResponse.success) {
+                this.classes = classesResponse.data;
+                this.populateClasses();
+            }
+        } catch (error) {
+            console.warn('Failed to load school data:', error);
+        }
+    }
+
+    populateSubjects() {
+        const container = document.getElementById('subjectsCheckboxes');
+        container.innerHTML = this.subjects.map(subject => `
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="subjects" value="${subject.id}">
+                <span class="text-sm">${subject.subject_name}</span>
+            </label>
+        `).join('');
+    }
+
+    populateClasses() {
+        const container = document.getElementById('classesCheckboxes');
+        container.innerHTML = this.classes.map(cls => `
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="classes" value="${cls.id}">
+                <span class="text-sm">${cls.class_name}</span>
+            </label>
+        `).join('');
+    }
+
+    validateField(field) {
+        const group = field.closest('.form-group');
+        const errorDiv = group.querySelector('.error-message');
+        let isValid = true;
+        let message = '';
+
+        // Clear previous error
+        field.classList.remove('error');
+        errorDiv.textContent = '';
+
+        // Required field validation
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            isValid = false;
+            message = 'This field is required';
+        }
+
+        // Specific validations
+        if (field.value.trim()) {
+            switch (field.name) {
+                case 'email':
+                    if (!utils.isValidEmail(field.value)) {
+                        isValid = false;
+                        message = 'Please enter a valid email address';
+                    }
+                    break;
+                
+                case 'mobile':
+                case 'phone':
+                    if (field.value && !utils.isValidPhone(field.value)) {
+                        isValid = false;
+                        message = 'Please enter a valid phone number';
+                    }
+                    break;
+            }
+        }
+
+        if (!isValid) {
+            field.classList.add('error');
+            errorDiv.textContent = message;
+        }
+
+        return isValid;
+    }
+
+    clearFieldError(field) {
+        field.classList.remove('error');
+        const errorDiv = field.closest('.form-group').querySelector('.error-message');
+        errorDiv.textContent = '';
+    }
+
+    validateForm() {
+        let isValid = true;
+        const fields = this.form.querySelectorAll('input[required], select[required]');
+        
+        fields.forEach(field => {
+            if (!this.validateField(field)) {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            notifications.success('Validation Passed', 'All required fields are valid');
+        } else {
+            notifications.error('Validation Failed', 'Please correct the errors and try again');
+        }
+
+        return isValid;
+    }
+
+    saveFormData() {
+        const formData = new FormData(this.form);
+        const data = Object.fromEntries(formData);
+        localStorage.setItem('createUserFormData', JSON.stringify(data));
+    }
+
+    async handleSubmit(event) {
+        event.preventDefault();
+
+        if (!this.validateForm()) {
+            return;
+        }
+
+        const submitBtn = this.form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Creating User...';
+
+        try {
+            const formData = new FormData(this.form);
+            const response = await api.postFormData('/api/users', formData);
+
+            if (response.success) {
+                localStorage.removeItem('createUserFormData');
+                notifications.success('User Created', 'User has been created successfully');
+                
+                setTimeout(() => {
+                    window.location.href = `/users/${response.data.id}`;
+                }, 2000);
+            } else {
+                throw new Error(response.message || 'User creation failed');
+            }
+        } catch (error) {
+            notifications.error('Creation Failed', error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+}
+
+// Role change handler
+function handleRoleChange(role) {
+    const schoolGroup = document.getElementById('schoolAssignmentGroup');
+    const employeeGroup = document.getElementById('employeeIdGroup');
+    const departmentGroup = document.getElementById('departmentGroup');
+    const subjectsGroup = document.getElementById('subjectsGroup');
+    const classesGroup = document.getElementById('classesGroup');
+    const roleInfo = document.getElementById('roleInfo');
+
+    // Hide all role-specific groups first
+    [schoolGroup, employeeGroup, departmentGroup, subjectsGroup, classesGroup].forEach(group => {
+        group.style.display = 'none';
+    });
+
+    // Show relevant groups based on role
+    if (role && role !== 'SYSTEM_ADMIN') {
+        schoolGroup.style.display = 'block';
+        employeeGroup.style.display = 'block';
+    }
+
+    if (['SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT'].includes(role)) {
+        departmentGroup.style.display = 'block';
+    }
+
+    if (role === 'TEACHER') {
+        subjectsGroup.style.display = 'block';
+        classesGroup.style.display = 'block';
+    }
+
+    // Show role permissions
+    if (role) {
+        displayRolePermissions(role);
+        roleInfo.style.display = 'block';
+    } else {
+        roleInfo.style.display = 'none';
+    }
+}
+
+// Display role permissions
+function displayRolePermissions(role) {
+    const permissions = {
+        'SYSTEM_ADMIN': ['Full system access', 'Manage all trusts', 'System configuration'],
+        'TRUST_ADMIN': ['Manage trust schools', 'View trust reports', 'Manage trust users'],
+        'SCHOOL_ADMIN': ['Manage school data', 'View school reports', 'Manage school users'],
+        'TEACHER': ['Manage assigned classes', 'Mark attendance', 'View student data'],
+        'ACCOUNTANT': ['Manage fees', 'Generate financial reports', 'Process payments'],
+        'PARENT': ['View child data', 'Pay fees online', 'Receive notifications']
+    };
+
+    const container = document.getElementById('rolePermissions');
+    container.innerHTML = `
+        <div class="space-y-2">
+            ${(permissions[role] || []).map(permission => `
+                <div class="flex items-center gap-2 text-sm">
+                    <i class="fas fa-check text-success"></i>
+                    <span>${permission}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// Utility functions
+function togglePassword(fieldName) {
+    const field = document.querySelector(`[name="${fieldName}"]`);
+    const toggle = document.getElementById(`${fieldName}Toggle`);
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        toggle.classList.remove('fa-eye');
+        toggle.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        toggle.classList.remove('fa-eye-slash');
+        toggle.classList.add('fa-eye');
+    }
+}
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profilePreview').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function generateEmployeeId() {
+    const schoolSelect = document.getElementById('schoolSelect');
+    const roleSelect = document.querySelector('[name="role"]');
+    const employeeIdField = document.querySelector('[name="employee_id"]');
+    
+    if (!schoolSelect.value || !roleSelect.value) {
+        notifications.warning('Missing Information', 'Please select school and role first');
+        return;
+    }
+    
+    // Generate employee ID based on school and role
+    const schoolCode = createUserForm.schools.find(s => s.id == schoolSelect.value)?.school_code || 'SCH';
+    const rolePrefix = {
+        'SCHOOL_ADMIN': 'ADM',
+        'TEACHER': 'TCH',
+        'ACCOUNTANT': 'ACC'
+    }[roleSelect.value] || 'EMP';
+    
+    const timestamp = Date.now().toString().slice(-4);
+    const employeeId = `${schoolCode}${rolePrefix}${timestamp}`;
+    
+    employeeIdField.value = employeeId;
+    notifications.success('ID Generated', `Employee ID: ${employeeId}`);
+}
+
+function generatePassword() {
+    const passwordField = document.querySelector('[name="password"]');
+    const charset = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*';
+    let password = '';
+    
+    for (let i = 0; i < 12; i++) {
+        password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    
+    passwordField.value = password;
+    passwordField.type = 'text';
+    
+    setTimeout(() => {
+        passwordField.type = 'password';
+    }, 3000);
+    
+    notifications.success('Password Generated', 'Password has been generated and will be hidden in 3 seconds');
+}
+
+function saveAsDraft() {
+    createUserForm.saveFormData();
+    notifications.success('Draft Saved', 'Form data has been saved as draft');
+}
+
+// Initialize form
+let createUserForm;
+document.addEventListener('DOMContentLoaded', () => {
+    createUserForm = new CreateUserForm();
+});
+</script>

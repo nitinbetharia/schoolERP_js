@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Communication Setup - School ERP</title>
+    <%- include('../partials/head') %>
+  </head>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="container-fluid">
+      <div class="row">
+        <%- include('../partials/sidebar') %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+          >
+            <h1 class="h2">Communication Setup</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                onclick="testConfiguration()"
+              >
+                <i class="fas fa-test-tube"></i> Test Configuration
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Email Configuration -->
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">
+                    <i class="fas fa-envelope"></i> Email Configuration
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <form id="emailConfigForm">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="enableEmail"
+                          name="enable_email_notifications"
+                        />
+                        <label class="form-check-label" for="enableEmail">
+                          Enable Email Notifications
+                        </label>
+                      </div>
+                    </div>
+
+                    <div id="emailProviderSection" style="display: none">
+                      <div class="mb-3">
+                        <label for="emailProvider" class="form-label">Email Provider</label>
+                        <select class="form-select" id="emailProvider" name="email_provider">
+                          <option value="">Select Provider</option>
+                          <option value="SMTP">SMTP</option>
+                          <option value="SENDGRID">SendGrid</option>
+                          <option value="MAILGUN">Mailgun</option>
+                          <option value="GMAIL">Gmail</option>
+                        </select>
+                      </div>
+
+                      <div class="mb-3">
+                        <label for="fromEmail" class="form-label">From Email</label>
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="fromEmail"
+                          name="from_email"
+                          placeholder="noreply@school.com"
+                        />
+                      </div>
+
+                      <div class="mb-3">
+                        <label for="fromName" class="form-label">From Name</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="fromName"
+                          name="from_name"
+                          placeholder="School Name"
+                        />
+                      </div>
+
+                      <!-- Provider Specific Configurations -->
+                      <div id="smtpConfig" style="display: none">
+                        <h6>SMTP Configuration</h6>
+                        <div class="row">
+                          <div class="col-md-8">
+                            <div class="mb-3">
+                              <label for="smtpHost" class="form-label">SMTP Host</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="smtpHost"
+                                name="smtp_host"
+                                placeholder="smtp.gmail.com"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="mb-3">
+                              <label for="smtpPort" class="form-label">Port</label>
+                              <input
+                                type="number"
+                                class="form-control"
+                                id="smtpPort"
+                                name="smtp_port"
+                                placeholder="587"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mb-3">
+                          <label for="smtpUsername" class="form-label">Username</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="smtpUsername"
+                            name="smtp_username"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="smtpPassword" class="form-label">Password</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="smtpPassword"
+                            name="smtp_password"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              id="smtpSecure"
+                              name="smtp_secure"
+                              checked
+                            />
+                            <label class="form-check-label" for="smtpSecure">
+                              Use Secure Connection (TLS/SSL)
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div id="sendgridConfig" style="display: none">
+                        <h6>SendGrid Configuration</h6>
+                        <div class="mb-3">
+                          <label for="sendgridApiKey" class="form-label">API Key</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="sendgridApiKey"
+                            name="sendgrid_api_key"
+                          />
+                        </div>
+                      </div>
+
+                      <div id="mailgunConfig" style="display: none">
+                        <h6>Mailgun Configuration</h6>
+                        <div class="mb-3">
+                          <label for="mailgunApiKey" class="form-label">API Key</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="mailgunApiKey"
+                            name="mailgun_api_key"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="mailgunDomain" class="form-label">Domain</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="mailgunDomain"
+                            name="mailgun_domain"
+                            placeholder="mg.yourdomain.com"
+                          />
+                        </div>
+                      </div>
+
+                      <div id="gmailConfig" style="display: none">
+                        <h6>Gmail Configuration</h6>
+                        <div class="mb-3">
+                          <label for="gmailClientId" class="form-label">Client ID</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="gmailClientId"
+                            name="gmail_client_id"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="gmailClientSecret" class="form-label">Client Secret</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="gmailClientSecret"
+                            name="gmail_client_secret"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="gmailRefreshToken" class="form-label">Refresh Token</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="gmailRefreshToken"
+                            name="gmail_refresh_token"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-save"></i> Save Email Configuration
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- SMS Configuration -->
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0"><i class="fas fa-sms"></i> SMS Configuration</h5>
+                </div>
+                <div class="card-body">
+                  <form id="smsConfigForm">
+                    <div class="mb-3">
+                      <div class="form-check form-switch">
+                        <input
+                          class="form-check-input"
+                          type="checkbox"
+                          id="enableSMS"
+                          name="enable_sms_notifications"
+                        />
+                        <label class="form-check-label" for="enableSMS">
+                          Enable SMS Notifications
+                        </label>
+                      </div>
+                    </div>
+
+                    <div id="smsProviderSection" style="display: none">
+                      <div class="mb-3">
+                        <label for="smsProvider" class="form-label">SMS Provider</label>
+                        <select class="form-select" id="smsProvider" name="sms_provider">
+                          <option value="">Select Provider</option>
+                          <option value="TWILIO">Twilio</option>
+                          <option value="TEXTLOCAL">TextLocal</option>
+                          <option value="MSG91">MSG91</option>
+                          <option value="FAST2SMS">Fast2SMS</option>
+                        </select>
+                      </div>
+
+                      <!-- Provider Specific Configurations -->
+                      <div id="twilioConfig" style="display: none">
+                        <h6>Twilio Configuration</h6>
+                        <div class="mb-3">
+                          <label for="twilioAccountSid" class="form-label">Account SID</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="twilioAccountSid"
+                            name="twilio_account_sid"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="twilioAuthToken" class="form-label">Auth Token</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="twilioAuthToken"
+                            name="twilio_auth_token"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="twilioFromNumber" class="form-label">From Number</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="twilioFromNumber"
+                            name="twilio_from_number"
+                            placeholder="+1234567890"
+                          />
+                        </div>
+                      </div>
+
+                      <div id="textlocalConfig" style="display: none">
+                        <h6>TextLocal Configuration</h6>
+                        <div class="mb-3">
+                          <label for="textlocalApiKey" class="form-label">API Key</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="textlocalApiKey"
+                            name="textlocal_api_key"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="textlocalSender" class="form-label"
+                            >Sender ID (6 chars max)</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="textlocalSender"
+                            name="textlocal_sender"
+                            maxlength="6"
+                            placeholder="SCHOOL"
+                          />
+                        </div>
+                      </div>
+
+                      <div id="msg91Config" style="display: none">
+                        <h6>MSG91 Configuration</h6>
+                        <div class="mb-3">
+                          <label for="msg91AuthKey" class="form-label">Auth Key</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="msg91AuthKey"
+                            name="msg91_auth_key"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="msg91SenderId" class="form-label"
+                            >Sender ID (6 chars max)</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="msg91SenderId"
+                            name="msg91_sender_id"
+                            maxlength="6"
+                            placeholder="SCHOOL"
+                          />
+                        </div>
+                      </div>
+
+                      <div id="fast2smsConfig" style="display: none">
+                        <h6>Fast2SMS Configuration</h6>
+                        <div class="mb-3">
+                          <label for="fast2smsApiKey" class="form-label">API Key</label>
+                          <input
+                            type="password"
+                            class="form-control"
+                            id="fast2smsApiKey"
+                            name="fast2sms_api_key"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="fast2smsSenderId" class="form-label"
+                            >Sender ID (6 chars max)</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="fast2smsSenderId"
+                            name="fast2sms_sender_id"
+                            maxlength="6"
+                            placeholder="SCHOOL"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-save"></i> Save SMS Configuration
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configuration Status -->
+          <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Configuration Status
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <div id="emailStatusIcon" class="text-danger me-2">
+                          <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div>
+                          <strong>Email Service:</strong>
+                          <span id="emailStatus">Not Configured</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="d-flex align-items-center">
+                        <div id="smsStatusIcon" class="text-danger me-2">
+                          <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div>
+                          <strong>SMS Service:</strong>
+                          <span id="smsStatus">Not Configured</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <%- include('../partials/scripts') %>
+    <script>
+      // Communication Setup JavaScript
+      $(document).ready(function () {
+        loadCurrentConfiguration();
+        initializeFormHandlers();
+      });
+
+      function initializeFormHandlers() {
+        // Email enable/disable toggle
+        $('#enableEmail').change(function () {
+          $('#emailProviderSection').toggle(this.checked);
+        });
+
+        // SMS enable/disable toggle
+        $('#enableSMS').change(function () {
+          $('#smsProviderSection').toggle(this.checked);
+        });
+
+        // Email provider change
+        $('#emailProvider').change(function () {
+          showProviderConfig('email', $(this).val());
+        });
+
+        // SMS provider change
+        $('#smsProvider').change(function () {
+          showProviderConfig('sms', $(this).val());
+        });
+
+        // Email form submission
+        $('#emailConfigForm').submit(function (e) {
+          e.preventDefault();
+          saveEmailConfiguration();
+        });
+
+        // SMS form submission
+        $('#smsConfigForm').submit(function (e) {
+          e.preventDefault();
+          saveSMSConfiguration();
+        });
+      }
+
+      function showProviderConfig(type, provider) {
+        if (type === 'email') {
+          $('#smtpConfig, #sendgridConfig, #mailgunConfig, #gmailConfig').hide();
+          if (provider) {
+            $('#' + provider.toLowerCase() + 'Config').show();
+          }
+        } else if (type === 'sms') {
+          $('#twilioConfig, #textlocalConfig, #msg91Config, #fast2smsConfig').hide();
+          if (provider) {
+            $('#' + provider.toLowerCase() + 'Config').show();
+          }
+        }
+      }
+
+      function loadCurrentConfiguration() {
+        $.get('/api/communication/providers/status')
+          .done(function (response) {
+            if (response.success) {
+              updateConfigurationStatus(response.data);
+            }
+          })
+          .fail(function (xhr) {
+            console.error('Failed to load configuration:', xhr.responseJSON);
+          });
+      }
+
+      function updateConfigurationStatus(config) {
+        // Update email status
+        if (config.email && config.email.configured) {
+          $('#emailStatusIcon')
+            .removeClass('text-danger')
+            .addClass('text-success')
+            .html('<i class="fas fa-check-circle"></i>');
+          $('#emailStatus').text(`Configured (${config.email.provider})`);
+          $('#enableEmail').prop('checked', true);
+          $('#emailProviderSection').show();
+          $('#emailProvider').val(config.email.provider);
+          showProviderConfig('email', config.email.provider);
+        }
+
+        // Update SMS status
+        if (config.sms && config.sms.configured) {
+          $('#smsStatusIcon')
+            .removeClass('text-danger')
+            .addClass('text-success')
+            .html('<i class="fas fa-check-circle"></i>');
+          $('#smsStatus').text(`Configured (${config.sms.provider})`);
+          $('#enableSMS').prop('checked', true);
+          $('#smsProviderSection').show();
+          $('#smsProvider').val(config.sms.provider);
+          showProviderConfig('sms', config.sms.provider);
+        }
+      }
+
+      function saveEmailConfiguration() {
+        const formData = new FormData($('#emailConfigForm')[0]);
+        const configData = Object.fromEntries(formData.entries());
+
+        // Convert checkbox to boolean
+        configData.enable_email_notifications = $('#enableEmail').is(':checked');
+        configData.smtp_secure = $('#smtpSecure').is(':checked');
+
+        $.ajax({
+          url: '/api/communication/setup/email-provider',
+          method: 'POST',
+          data: JSON.stringify(configData),
+          contentType: 'application/json',
+          success: function (response) {
+            if (response.success) {
+              showAlert('success', 'Email configuration saved successfully!');
+              loadCurrentConfiguration();
+            } else {
+              showAlert('danger', response.error.message || 'Failed to save email configuration');
+            }
+          },
+          error: function (xhr) {
+            const error = xhr.responseJSON || {};
+            showAlert('danger', error.message || 'Failed to save email configuration');
+          }
+        });
+      }
+
+      function saveSMSConfiguration() {
+        const formData = new FormData($('#smsConfigForm')[0]);
+        const configData = Object.fromEntries(formData.entries());
+
+        // Convert checkbox to boolean
+        configData.enable_sms_notifications = $('#enableSMS').is(':checked');
+
+        $.ajax({
+          url: '/api/communication/setup/sms-provider',
+          method: 'POST',
+          data: JSON.stringify(configData),
+          contentType: 'application/json',
+          success: function (response) {
+            if (response.success) {
+              showAlert('success', 'SMS configuration saved successfully!');
+              loadCurrentConfiguration();
+            } else {
+              showAlert('danger', response.error.message || 'Failed to save SMS configuration');
+            }
+          },
+          error: function (xhr) {
+            const error = xhr.responseJSON || {};
+            showAlert('danger', error.message || 'Failed to save SMS configuration');
+          }
+        });
+      }
+
+      function testConfiguration() {
+        showAlert('info', 'Testing communication configuration...');
+
+        $.post('/api/communication/providers/test')
+          .done(function (response) {
+            if (response.success) {
+              let message = 'Configuration test completed:\n';
+              if (response.data.email) {
+                message += `Email: ${response.data.email.status === 'success' ? 'Passed' : 'Failed'}\n`;
+              }
+              if (response.data.sms) {
+                message += `SMS: ${response.data.sms.status === 'success' ? 'Passed' : 'Failed'}`;
+              }
+              showAlert('success', message);
+            } else {
+              showAlert('danger', response.error.message || 'Test failed');
+            }
+          })
+          .fail(function (xhr) {
+            const error = xhr.responseJSON || {};
+            showAlert('danger', error.message || 'Test failed');
+          });
+      }
+
+      function showAlert(type, message) {
+        const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+        // Remove existing alerts
+        $('.alert').remove();
+
+        // Add new alert at top of main content
+        $('main').prepend(alertHtml);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(function () {
+          $('.alert').fadeOut();
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

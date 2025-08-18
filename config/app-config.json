@@ -1,0 +1,207 @@
+{
+  "app": {
+    "name": "School ERP System",
+    "version": "1.0.0",
+    "description": "Bulletproof Simple School ERP",
+    "environment": "development",
+    "port": 3000,
+    "baseUrl": "http://localhost:3000",
+    "requestSizeLimit": "10mb"
+  },
+  "security": {
+    "bcryptRounds": 12,
+    "maxLoginAttempts": 5,
+    "lockoutTimeMs": 900000,
+    "sessionMaxAge": 86400000,
+    "rememberMeMaxAge": 2592000000,
+    "rateLimiting": {
+      "windowMs": 900000,
+      "maxRequests": 100,
+      "globalMaxRequests": 100,
+      "authMaxRequests": 5
+    },
+    "helmet": {
+      "contentSecurityPolicy": false,
+      "crossOriginEmbedderPolicy": false
+    }
+  },
+  "database": {
+    "host": "localhost",
+    "port": 3306,
+    "name": "school_erp",
+    "connectionLimit": 10,
+    "acquireTimeout": 60000,
+    "timeout": 60000,
+    "reconnect": true,
+    "charset": "utf8mb4"
+  },
+  "logging": {
+    "level": "info",
+    "maxSize": "20m",
+    "maxFiles": "14d",
+    "datePattern": "YYYY-MM-DD",
+    "categories": {
+      "app": {
+        "filename": "app-%DATE%.log",
+        "enabled": true
+      },
+      "auth": {
+        "filename": "auth-%DATE%.log",
+        "enabled": true
+      },
+      "security": {
+        "filename": "security-%DATE%.log",
+        "enabled": true
+      },
+      "error": {
+        "filename": "error-%DATE%.log",
+        "enabled": true
+      }
+    }
+  },
+  "validation": {
+    "email": {
+      "maxLength": 255,
+      "domains": []
+    },
+    "password": {
+      "minLength": 6,
+      "maxLength": 128,
+      "requireUppercase": false,
+      "requireLowercase": false,
+      "requireNumbers": false,
+      "requireSpecialChars": false
+    },
+    "names": {
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "roles": {
+    "system": ["SYSTEM_ADMIN", "GROUP_ADMIN"],
+    "trust": ["TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT", "PARENT", "STUDENT"],
+    "hierarchy": {
+      "SYSTEM_ADMIN": 100,
+      "GROUP_ADMIN": 90,
+      "TRUST_ADMIN": 80,
+      "SCHOOL_ADMIN": 70,
+      "TEACHER": 60,
+      "ACCOUNTANT": 50,
+      "PARENT": 30,
+      "STUDENT": 10
+    }
+  },
+  "ui": {
+    "pagination": {
+      "defaultPageSize": 20,
+      "maxPageSize": 100,
+      "allowedPageSizes": [10, 20, 50, 100]
+    },
+    "dateFormat": "YYYY-MM-DD",
+    "timeFormat": "HH:mm:ss",
+    "currency": {
+      "symbol": "₹",
+      "decimals": 2,
+      "locale": "en-IN"
+    },
+    "themes": {
+      "default": "light",
+      "available": ["light", "dark"]
+    }
+  },
+  "features": {
+    "multiTenant": true,
+    "subdomainRouting": true,
+    "trustContext": true,
+    "auditLogging": true,
+    "rateLimiting": true,
+    "sessionManagement": true,
+    "emailNotifications": false,
+    "smsNotifications": false,
+    "backupSystem": false,
+    "reportGeneration": true
+  },
+  "api": {
+    "version": "v1",
+    "prefix": "/api/v1",
+    "timeout": 30000,
+    "maxRequestSize": "10mb",
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:3000"],
+      "credentials": true
+    }
+  },
+  "modules": {
+    "auth": {
+      "enabled": true,
+      "routes": ["/auth", "/api/v1/auth"],
+      "features": ["login", "logout", "passwordChange", "forgotPassword"]
+    },
+    "user": {
+      "enabled": true,
+      "routes": ["/users", "/api/v1/users"],
+      "features": ["crud", "profile", "permissions"]
+    },
+    "student": {
+      "enabled": true,
+      "routes": ["/students", "/api/v1/students"],
+      "features": ["admission", "profile", "academics"]
+    },
+    "fees": {
+      "enabled": true,
+      "routes": ["/fees", "/api/v1/fees"],
+      "features": ["collection", "reports", "receipts"]
+    },
+    "attendance": {
+      "enabled": true,
+      "routes": ["/attendance", "/api/v1/attendance"],
+      "features": ["marking", "reports", "analytics"]
+    },
+    "reports": {
+      "enabled": true,
+      "routes": ["/reports", "/api/v1/reports"],
+      "features": ["generation", "scheduling", "export"]
+    }
+  },
+  "errors": {
+    "showStackTrace": true,
+    "logErrors": true,
+    "userFriendlyMessages": true,
+    "codes": {
+      "AUTHENTICATION_REQUIRED": {
+        "httpStatus": 401,
+        "message": "Authentication required"
+      },
+      "AUTHORIZATION_FAILED": {
+        "httpStatus": 403,
+        "message": "Access denied"
+      },
+      "VALIDATION_ERROR": {
+        "httpStatus": 422,
+        "message": "Validation failed"
+      },
+      "DATABASE_ERROR": {
+        "httpStatus": 500,
+        "message": "Database operation failed"
+      },
+      "RATE_LIMITED": {
+        "httpStatus": 429,
+        "message": "Too many requests"
+      }
+    }
+  },
+  "routes": {
+    "auth": {
+      "login": "/auth/login",
+      "logout": "/auth/logout",
+      "dashboard": "/dashboard",
+      "admin": "/admin"
+    },
+    "redirects": {
+      "afterLogin": "/dashboard",
+      "afterLogout": "/auth/login",
+      "unauthorized": "/auth/login"
+    }
+  }
+}

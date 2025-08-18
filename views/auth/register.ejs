@@ -1,0 +1,333 @@
+<!-- Register Page - School ERP -->
+<div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Header -->
+    <div class="text-center">
+      <!-- Logo -->
+      <div class="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center mb-6">
+        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </div>
+      
+      <h2 class="text-3xl font-extrabold text-gray-900">
+        Create Account
+      </h2>
+      <p class="mt-2 text-sm text-gray-600">
+        Join our School ERP system
+      </p>
+    </div>
+
+    <!-- Registration Form -->
+    <form class="mt-8 space-y-6" method="POST" action="/auth/register" id="registerForm">
+      <div class="space-y-4">
+        <!-- Full Name Field -->
+        <div>
+          <label for="fullName" class="block text-sm font-medium text-gray-700">
+            Full Name
+          </label>
+          <div class="mt-1 relative">
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              autocomplete="name"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              placeholder="Enter your full name"
+              value=""
+            >
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700">
+            Email Address
+          </label>
+          <div class="mt-1 relative">
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              placeholder="Enter your email address"
+              value=""
+            >
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <div class="mt-1 relative">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              placeholder="Create a password"
+            >
+            <button
+              type="button"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onclick="togglePassword('password')"
+            >
+              <svg id="password-icon-show" class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg id="password-icon-hide" class="h-5 w-5 text-gray-400 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+            Confirm Password
+          </label>
+          <div class="mt-1 relative">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+              placeholder="Confirm your password"
+            >
+          </div>
+        </div>
+
+        <!-- Role Field -->
+        <div>
+          <label for="role" class="block text-sm font-medium text-gray-700">
+            Role
+          </label>
+          <div class="mt-1">
+            <select
+              id="role"
+              name="role"
+              required
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
+            >
+              <option value="">Select your role</option>
+              <option value="TEACHER">Teacher</option>
+              <option value="ACCOUNTANT">Accountant</option>
+              <option value="PARENT">Parent</option>
+              <option value="STUDENT">Student</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="flex items-center">
+        <input
+          id="agreeTerms"
+          name="agreeTerms"
+          type="checkbox"
+          required
+          class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+        >
+        <label for="agreeTerms" class="ml-2 block text-sm text-gray-900">
+          I agree to the 
+          <a href="#" class="font-medium text-primary-600 hover:text-primary-500">
+            Terms and Conditions
+          </a>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button
+          type="submit"
+          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
+          data-loading-text="Creating account..."
+        >
+          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <svg class="h-5 w-5 text-primary-500 group-hover:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          Create Account
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="text-center">
+      <p class="text-sm text-gray-600">
+        Already have an account?
+        <a href="/auth/login" class="font-medium text-primary-600 hover:text-primary-500 transition-colors">
+          Sign in here
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('registerForm');
+  const fullNameInput = document.getElementById('fullName');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  const roleSelect = document.getElementById('role');
+  const agreeTermsInput = document.getElementById('agreeTerms');
+  
+  // Real-time validation
+  fullNameInput.addEventListener('blur', function() {
+    validateFullName(this);
+  });
+  
+  emailInput.addEventListener('blur', function() {
+    validateEmail(this);
+  });
+  
+  passwordInput.addEventListener('blur', function() {
+    validatePassword(this);
+  });
+  
+  confirmPasswordInput.addEventListener('blur', function() {
+    validateConfirmPassword(this);
+  });
+  
+  roleSelect.addEventListener('change', function() {
+    validateRole(this);
+  });
+  
+  // Form submission validation
+  form.addEventListener('submit', function(e) {
+    let isValid = true;
+    
+    if (!validateFullName(fullNameInput)) isValid = false;
+    if (!validateEmail(emailInput)) isValid = false;
+    if (!validatePassword(passwordInput)) isValid = false;
+    if (!validateConfirmPassword(confirmPasswordInput)) isValid = false;
+    if (!validateRole(roleSelect)) isValid = false;
+    if (!validateTerms(agreeTermsInput)) isValid = false;
+    
+    if (!isValid) {
+      e.preventDefault();
+      SchoolERP.showToast('Please fix the errors before submitting', 'error');
+    }
+  });
+  
+  function validateFullName(field) {
+    const value = field.value.trim();
+    
+    if (!value) {
+      showFieldError(field, 'Full name is required');
+      return false;
+    }
+    
+    if (value.length < 2) {
+      showFieldError(field, 'Full name must be at least 2 characters');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+  
+  function validateEmail(field) {
+    const value = field.value.trim();
+    
+    if (!value) {
+      showFieldError(field, 'Email address is required');
+      return false;
+    }
+    
+    if (!isValidEmail(value)) {
+      showFieldError(field, 'Please enter a valid email address');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+  
+  function validatePassword(field) {
+    const value = field.value;
+    
+    if (!value) {
+      showFieldError(field, 'Password is required');
+      return false;
+    }
+    
+    if (value.length < 8) {
+      showFieldError(field, 'Password must be at least 8 characters');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+  
+  function validateConfirmPassword(field) {
+    const value = field.value;
+    const passwordValue = passwordInput.value;
+    
+    if (!value) {
+      showFieldError(field, 'Please confirm your password');
+      return false;
+    }
+    
+    if (value !== passwordValue) {
+      showFieldError(field, 'Passwords do not match');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+  
+  function validateRole(field) {
+    if (!field.value) {
+      showFieldError(field, 'Please select a role');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+  
+  function validateTerms(field) {
+    if (!field.checked) {
+      showFieldError(field, 'You must agree to the terms and conditions');
+      return false;
+    }
+    
+    clearFieldError(field);
+    return true;
+  }
+});
+
+function togglePassword(fieldId) {
+  const field = document.getElementById(fieldId);
+  const showIcon = document.getElementById(fieldId + '-icon-show');
+  const hideIcon = document.getElementById(fieldId + '-icon-hide');
+  
+  if (field.type === 'password') {
+    field.type = 'text';
+    showIcon.classList.add('hidden');
+    hideIcon.classList.remove('hidden');
+  } else {
+    field.type = 'password';
+    showIcon.classList.remove('hidden');
+    hideIcon.classList.add('hidden');
+  }
+}
+</script>

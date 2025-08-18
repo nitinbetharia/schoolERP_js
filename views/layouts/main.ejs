@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= typeof title !== 'undefined' ? title : 'School ERP' %> | School ERP</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8'
+              }
+            }
+          }
+        }
+      };
+    </script>
+
+    <!-- Additional styles -->
+    <%- style %>
+    <style>
+      /* Custom animations */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Loading spinner */
+      .spinner {
+        border: 3px solid #f3f4f6;
+        border-top: 3px solid #3b82f6;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Form validation styles */
+      .field-error {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+      }
+
+      .field-success {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+      }
+    </style>
+
+    <!-- Meta tags -->
+    <meta
+      name="description"
+      content="<%= typeof description !== 'undefined' ? description : 'School ERP Management System' %>"
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#3b82f6" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+
+    <!-- Request ID for debugging -->
+    <meta name="request-id" content="<%= typeof requestId !== 'undefined' ? requestId : '' %>" />
+  </head>
+  <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'h-full' %>">
+    <!-- Navigation (if not hidden) -->
+    <% if (typeof hideNavigation === 'undefined' || !hideNavigation) { %> <% if (typeof user !==
+    'undefined' && user) { %> <%- include('../partials/navigation') %> <% } %> <% } %>
+
+    <!-- Flash Messages -->
+    <%- include('../partials/flash-messages') %>
+
+    <!-- Main Content -->
+    <main
+      class="<%= (typeof hideNavigation !== 'undefined' && hideNavigation) ? 'h-full' : 'pt-16' %>"
+    >
+      <%- body %>
+    </main>
+
+    <!-- Footer (if not hidden) -->
+    <% if (typeof hideFooter === 'undefined' || !hideFooter) { %> <%- include('../partials/footer')
+    %> <% } %>
+
+    <!-- Loading Overlay -->
+    <%- include('../partials/loading-overlay') %>
+
+    <!-- JavaScript -->
+    <script>
+      // Global utility functions
+      window.SchoolERP = {
+        // Show loading overlay
+        showLoading: function () {
+          document.getElementById('loading-overlay').classList.remove('hidden');
+        },
+
+        // Hide loading overlay
+        hideLoading: function () {
+          document.getElementById('loading-overlay').classList.add('hidden');
+        },
+
+        // Show toast notification
+        showToast: function (message, type = 'info') {
+          const toast = document.createElement('div');
+          toast.className = `fixed top-4 right-4 z-50 max-w-md bg-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-50 border border-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-200 rounded-lg p-4 shadow-lg fade-in`;
+          toast.innerHTML = `
+                    <div class="flex">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-800">
+                                ${message}
+                            </p>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-400 hover:text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-600">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+          document.body.appendChild(toast);
+
+          // Auto-remove after 5 seconds
+          setTimeout(() => {
+            if (toast.parentElement) {
+              toast.remove();
+            }
+          }, 5000);
+        },
+
+        // API helper
+        api: async function (url, options = {}) {
+          try {
+            const response = await fetch(url, {
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...options.headers
+              },
+              ...options
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+              throw new Error(data.error?.message || 'Request failed');
+            }
+
+            return data;
+          } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+          }
+        }
+      };
+
+      // Close flash messages
+      function closeFlash(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.remove();
+        }
+      }
+
+      // Auto-close flash messages after 8 seconds
+      setTimeout(() => {
+        const flashMessages = document.querySelectorAll('[id^="flash-"]');
+        flashMessages.forEach(msg => msg.remove());
+      }, 8000);
+
+      // Form submission loading states
+      document.addEventListener('DOMContentLoaded', function () {
+        // Add loading state to form submissions
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+          form.addEventListener('submit', function (e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+              submitBtn.disabled = true;
+              submitBtn.innerHTML =
+                '<div class="spinner mr-2"></div> ' +
+                (submitBtn.dataset.loadingText || 'Loading...');
+
+              // Re-enable after 10 seconds as fallback
+              setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = submitBtn.dataset.originalText || 'Submit';
+              }, 10000);
+            }
+          });
+        });
+
+        // Store original button text
+        const submitButtons = document.querySelectorAll('button[type="submit"]');
+        submitButtons.forEach(btn => {
+          btn.dataset.originalText = btn.innerHTML;
+        });
+      });
+
+      // Enhanced form validation
+      function validateField(field, rules) {
+        const value = field.value.trim();
+        const errors = [];
+
+        if (rules.required && !value) {
+          errors.push(`${field.name} is required`);
+        }
+
+        if (rules.email && value && !isValidEmail(value)) {
+          errors.push('Please enter a valid email address');
+        }
+
+        if (rules.minLength && value.length < rules.minLength) {
+          errors.push(`${field.name} must be at least ${rules.minLength} characters`);
+        }
+
+        if (rules.phone && value && !isValidPhone(value)) {
+          errors.push('Please enter a valid 10-digit phone number');
+        }
+
+        return errors;
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function isValidPhone(phone) {
+        return /^[6-9]\d{9}$/.test(phone);
+      }
+
+      function showFieldError(field, message) {
+        field.classList.add('field-error');
+        field.classList.remove('field-success');
+
+        // Remove existing error message
+        const existingError = field.parentElement.querySelector('.error-message');
+        if (existingError) {
+          existingError.remove();
+        }
+
+        // Add new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message text-red-600 text-sm mt-1';
+        errorDiv.textContent = message;
+        field.parentElement.appendChild(errorDiv);
+      }
+
+      function clearFieldError(field) {
+        field.classList.remove('field-error');
+        field.classList.add('field-success');
+
+        const errorMessage = field.parentElement.querySelector('.error-message');
+        if (errorMessage) {
+          errorMessage.remove();
+        }
+      }
+    </script>
+
+    <!-- Page-specific scripts -->
+    <%- typeof script !== 'undefined' ? script : '' %> <% if (typeof scripts !== 'undefined') { %>
+    <% scripts.forEach(script => { %>
+    <script src="<%= script %>"></script>
+    <% }); %> <% } %>
+  </body>
+</html>

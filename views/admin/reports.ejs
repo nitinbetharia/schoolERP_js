@@ -1,0 +1,247 @@
+<!-- Admin Reports Page -->
+<div class="container mx-auto px-6 py-8">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-purple-600 flex items-center gap-3">
+          <i class="<%= icons.REPORTS %> text-purple-500"></i>
+          System Reports
+        </h1>
+        <p class="text-gray-600 mt-2">Generate and view comprehensive reports across the system</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
+        >
+          <i class="fas fa-plus mr-2"></i>
+          Generate Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Categories -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="p-3 bg-blue-50 rounded-lg">
+          <i class="fas fa-users text-blue-500 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">User Reports</h3>
+          <p class="text-sm text-gray-600">User activity and management</p>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <button class="w-full text-left p-2 text-sm text-blue-600 hover:bg-blue-50 rounded">
+          Active Users Report
+        </button>
+        <button class="w-full text-left p-2 text-sm text-blue-600 hover:bg-blue-50 rounded">
+          User Registration Report
+        </button>
+        <button class="w-full text-left p-2 text-sm text-blue-600 hover:bg-blue-50 rounded">
+          Login Activity Report
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="p-3 bg-green-50 rounded-lg">
+          <i class="fas fa-graduation-cap text-green-500 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">Academic Reports</h3>
+          <p class="text-sm text-gray-600">Student and academic data</p>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <button class="w-full text-left p-2 text-sm text-green-600 hover:bg-green-50 rounded">
+          Student Enrollment
+        </button>
+        <button class="w-full text-left p-2 text-sm text-green-600 hover:bg-green-50 rounded">
+          Attendance Report
+        </button>
+        <button class="w-full text-left p-2 text-sm text-green-600 hover:bg-green-50 rounded">
+          Performance Report
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="p-3 bg-yellow-50 rounded-lg">
+          <i class="fas fa-rupee-sign text-yellow-500 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-800">Financial Reports</h3>
+          <p class="text-sm text-gray-600">Fee collection and finances</p>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <button class="w-full text-left p-2 text-sm text-yellow-600 hover:bg-yellow-50 rounded">
+          Fee Collection Report
+        </button>
+        <button class="w-full text-left p-2 text-sm text-yellow-600 hover:bg-yellow-50 rounded">
+          Outstanding Fees
+        </button>
+        <button class="w-full text-left p-2 text-sm text-yellow-600 hover:bg-yellow-50 rounded">
+          Revenue Analysis
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm font-medium">Total Reports</p>
+          <p class="text-2xl font-bold text-blue-600 mt-1">245</p>
+        </div>
+        <div class="p-3 bg-blue-50 rounded-lg">
+          <i class="fas fa-file-alt text-blue-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm font-medium">This Month</p>
+          <p class="text-2xl font-bold text-green-600 mt-1">23</p>
+        </div>
+        <div class="p-3 bg-green-50 rounded-lg">
+          <i class="fas fa-calendar text-green-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm font-medium">Scheduled</p>
+          <p class="text-2xl font-bold text-orange-600 mt-1">8</p>
+        </div>
+        <div class="p-3 bg-orange-50 rounded-lg">
+          <i class="fas fa-clock text-orange-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-500 text-sm font-medium">Downloads</p>
+          <p class="text-2xl font-bold text-purple-600 mt-1">1,856</p>
+        </div>
+        <div class="p-3 bg-purple-50 rounded-lg">
+          <i class="fas fa-download text-purple-500 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Reports -->
+  <div class="bg-white rounded-lg shadow-sm border">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h3 class="font-semibold flex items-center gap-2 text-gray-800">
+        <i class="fas fa-history text-blue-500"></i>
+        Recent Reports
+      </h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Report Name
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Type
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Generated By
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Date
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              Monthly Fee Collection
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Financial</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Admin User</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-08-18</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                >Complete</span
+              >
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button class="text-blue-600 hover:text-blue-900 mr-3">Download</button>
+              <button class="text-gray-600 hover:text-gray-900">View</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              Student Attendance Summary
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Academic</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">School Admin</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-08-17</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full"
+                >Processing</span
+              >
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button class="text-gray-400 cursor-not-allowed mr-3">Download</button>
+              <button class="text-gray-600 hover:text-gray-900">View</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              User Activity Report
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">System</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">System Admin</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-08-16</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+                >Complete</span
+              >
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button class="text-blue-600 hover:text-blue-900 mr-3">Download</button>
+              <button class="text-gray-600 hover:text-gray-900">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

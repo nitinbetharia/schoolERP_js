@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'School ERP' %></title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/theme-manager.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Meta -->
+    <meta name="description" content="Bulletproof School ERP Management System">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    
+    <style>
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--gray-300);
+            border-top: 4px solid var(--primary-500);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: var(--space-3);
+            padding: var(--space-4);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            border-left: 4px solid var(--success-500);
+        }
+        
+        .toast.error {
+            border-left: 4px solid var(--error-500);
+        }
+        
+        .toast.warning {
+            border-left: 4px solid var(--warning-500);
+        }
+        
+        .toast.info {
+            border-left: 4px solid var(--primary-500);
+        }
+        
+        .toast-icon {
+            font-size: var(--text-lg);
+            flex-shrink: 0;
+        }
+        
+        .toast.success .toast-icon {
+            color: var(--success-500);
+        }
+        
+        .toast.error .toast-icon {
+            color: var(--error-500);
+        }
+        
+        .toast.warning .toast-icon {
+            color: var(--warning-500);
+        }
+        
+        .toast.info .toast-icon {
+            color: var(--primary-500);
+        }
+        
+        .toast-content {
+            flex: 1;
+        }
+        
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+        }
+        
+        .toast-message {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: var(--space-1);
+            font-size: var(--text-lg);
+        }
+        
+        .toast-close:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <% if (!hideNavigation) { %>
+        <%- include('./partials/navbar') %>
+        <%- include('./partials/sidebar') %>
+        
+        <div class="main-content">
+            <main class="container p-6">
+                <%- body %>
+            </main>
+        </div>
+    <% } else { %>
+        <%- body %>
+    <% } %>
+    
+    <!-- Scripts -->
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/app.js"></script>
+    
+    <% if (typeof pageScript !== 'undefined') { %>
+        <script src="/static/js/<%= pageScript %>.js"></script>
+    <% } %>
+    
+    <script>
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof App !== 'undefined') {
+                App.init();
+            }
+        });
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            if (typeof notifications !== 'undefined') {
+                notifications.error('An unexpected error occurred', e.error.message);
+            }
+        });
+        
+        // Global unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            if (typeof notifications !== 'undefined') {
+                notifications.error('An unexpected error occurred', e.reason.message || 'Unknown error');
+            }
+        });
+    </script>
+</body>
+</html>
