@@ -1,9 +1,20 @@
 class RBACService {
   constructor() {
+    // Define role equivalencies
+    this.roleEquivalencies = {
+      SUPER_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
+      SYSTEM_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'], 
+      SYS_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
+      GROUP_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN'],
+      TRUST_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN']
+    };
+
     this.roles = {
+      SUPER_ADMIN: { level: 100, permissions: ['*'] },
       SYSTEM_ADMIN: { level: 100, permissions: ['*'] },
-      GROUP_ADMIN: { level: 90, permissions: ['trusts:*', 'system_users:*', 'reports:system'] },
-      TRUST_ADMIN: { level: 80, permissions: ['schools:*', 'users:*', 'students:*', 'fees:*', 'reports:trust'] },
+      SYS_ADMIN: { level: 100, permissions: ['*'] },
+      GROUP_ADMIN: { level: 90, permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*'] },
+      TRUST_ADMIN: { level: 90, permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*'] },
       SCHOOL_ADMIN: { level: 70, permissions: ['students:*', 'users:school', 'fees:*', 'attendance:*', 'reports:school'] },
       TEACHER: { level: 50, permissions: ['students:read', 'attendance:*', 'reports:class'] },
       ACCOUNTANT: { level: 60, permissions: ['fees:*', 'students:read', 'reports:financial'] },
@@ -19,12 +30,20 @@ class RBACService {
     this.actions = ['create', 'read', 'update', 'delete', 'approve', 'assign'];
   }
 
+  // Check if user role is equivalent to any of the allowed roles
+  isRoleEquivalent(userRole, allowedRoles) {
+    if (allowedRoles.includes(userRole)) return true;
+    
+    const equivalentRoles = this.roleEquivalencies[userRole] || [userRole];
+    return allowedRoles.some(role => equivalentRoles.includes(role));
+  }
+
   hasPermission(userRole, resource, action, context = {}) {
     const role = this.roles[userRole];
     if (!role) return false;
 
-    // System admin has all permissions
-    if (userRole === 'SYSTEM_ADMIN') return true;
+    // Super admin, system admin, and sys admin have all permissions
+    if (this.isRoleEquivalent(userRole, ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'])) return true;
 
     // Check wildcard permissions
     if (role.permissions.includes('*')) return true;

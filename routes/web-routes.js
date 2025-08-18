@@ -686,7 +686,7 @@ router.post(
 router.get(
   '/communication/setup',
   requireWebAuth,
-  authMiddleware.requireRole(['admin', 'super_admin']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('communication/setup', {
       title: 'Communication Setup - School ERP',
@@ -699,7 +699,7 @@ router.get(
 router.get(
   '/communication/templates',
   requireWebAuth,
-  authMiddleware.requireRole(['admin', 'super_admin']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('communication/templates', {
       title: 'Communication Templates - School ERP',
@@ -712,7 +712,7 @@ router.get(
 router.get(
   '/communication/bulk-send',
   requireWebAuth,
-  authMiddleware.requireRole(['admin', 'super_admin', 'staff']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('communication/bulk-send', {
       title: 'Bulk Communication - School ERP',
@@ -725,7 +725,7 @@ router.get(
 router.get(
   '/communication/analytics',
   requireWebAuth,
-  authMiddleware.requireRole(['admin', 'super_admin']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('communication/analytics', {
       title: 'Communication Analytics - School ERP',

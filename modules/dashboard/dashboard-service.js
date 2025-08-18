@@ -666,9 +666,9 @@ class DashboardService {
     try {
       let stats = {};
 
-      if (userRole === 'SUPER_ADMIN' || userRole === 'SYSTEM_ADMIN') {
+      if (userRole === 'SUPER_ADMIN' || userRole === 'SYSTEM_ADMIN' || userRole === 'SYS_ADMIN') {
         stats = await this.getSystemAdminStats();
-      } else if (userRole === 'SCHOOL_ADMIN' || userRole === 'TRUST_ADMIN') {
+      } else if (userRole === 'SCHOOL_ADMIN' || userRole === 'TRUST_ADMIN' || userRole === 'GROUP_ADMIN') {
         stats = await this.getSchoolAdminStats(trustCode, schoolId);
       } else if (userRole === 'TEACHER') {
         stats = await this.getTeacherStats(trustCode, userId);
@@ -933,7 +933,7 @@ class DashboardService {
 
   getFallbackStats(userRole) {
     // Fallback dummy data in case of database errors
-    if (userRole === 'SUPER_ADMIN' || userRole === 'SYSTEM_ADMIN') {
+    if (userRole === 'SUPER_ADMIN' || userRole === 'SYSTEM_ADMIN' || userRole === 'SYS_ADMIN') {
       return {
         totalUsers: 156,
         totalSchools: 12,

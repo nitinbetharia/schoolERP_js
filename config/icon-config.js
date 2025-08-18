@@ -90,6 +90,9 @@ const ICONS = {
   // Role Specific
   SYSTEM_ADMIN: 'fas fa-crown',
   SUPER_ADMIN: 'fas fa-shield-alt',
+  SYS_ADMIN: 'fas fa-crown',
+  GROUP_ADMIN: 'fas fa-users-cog',
+  TRUST_ADMIN: 'fas fa-users-cog',
   SCHOOL_ADMIN: 'fas fa-user-tie',
 
   // Statistics & Metrics

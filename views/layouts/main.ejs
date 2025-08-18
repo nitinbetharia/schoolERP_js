@@ -124,6 +124,24 @@
 
     <!-- JavaScript -->
     <script>
+      // Role equivalency helper for client-side checks
+      const roleEquivalencies = {
+        SUPER_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
+        SYSTEM_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'], 
+        SYS_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
+        GROUP_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN'],
+        TRUST_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN']
+      };
+      
+      function isRoleEquivalent(userRole, allowedRoles) {
+        if (!userRole || !allowedRoles) return false;
+        if (Array.isArray(allowedRoles) && allowedRoles.includes(userRole)) return true;
+        if (typeof allowedRoles === 'string' && allowedRoles === userRole) return true;
+        const equivalents = roleEquivalencies[userRole] || [userRole];
+        const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+        return rolesArray.some(role => equivalents.includes(role));
+      }
+      
       // Global utility functions
       window.SchoolERP = {
         // Show loading overlay

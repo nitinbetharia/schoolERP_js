@@ -106,7 +106,7 @@
             <i class="fas fa-cog text-muted"></i>
             Settings
           </a>
-          <% if (userRole === 'SYSTEM_ADMIN' || userRole === 'TRUST_ADMIN') { %>
+          <% if (userRole === 'SUPER_ADMIN' || userRole === 'SYSTEM_ADMIN' || userRole === 'SYS_ADMIN' || userRole === 'GROUP_ADMIN' || userRole === 'TRUST_ADMIN') { %>
           <a
             href="/admin/settings"
             class="flex items-center gap-2 p-2 text-sm rounded hover:bg-surface-alt transition-colors"
