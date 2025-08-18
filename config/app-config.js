@@ -28,6 +28,19 @@ const AppConfig = {
             }
           : false
     },
+    // Database names configuration
+    db_names: {
+      system: process.env.SYSTEM_DB_NAME || 'school_erp_system',
+      trust_prefix: process.env.TRUST_DB_PREFIX || 'school_erp_trust_',
+      // Helper methods to generate trust database names
+      getTrustDbName: trustCode => `${AppConfig.database.db_names.trust_prefix}${trustCode}`,
+      getSystemDbName: () => AppConfig.database.db_names.system,
+      // List all database name patterns
+      patterns: {
+        system: 'school_erp_system',
+        trust: 'school_erp_trust_*'
+      }
+    },
     // System database (for developers/super-admins)
     system: {
       name: process.env.SYSTEM_DB_NAME || 'school_erp_system',

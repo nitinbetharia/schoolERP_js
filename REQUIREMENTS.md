@@ -1,18 +1,50 @@
-# School ERP - Requirements & Decisions Log
+# School ERP - Requirements & Architecture Decisions (FINAL)
 
-## Latest Decisions & Updates
+## Latest Decisions & Updates - August 18, 2025
 
-### Core Architecture Decisions (2025-08-16)
-1. ✅ **Tech Stack**: Node.js + CommonJS (no TypeScript compilation issues)
+### ✅ FINALIZED TECH STACK DECISIONS
+
+Based on senior developer consultation and detailed technical decisions
+(Q1-Q32):
+
+1. **Database Access**: Sequelize ORM with `sequelize.define()` pattern
+2. **Connection Pooling**: `{ max: 15, min: 2, acquire: 60000, idle: 300000 }`
+3. **Model Associations**: Inline with model definition
+4. **Primary Keys**: Mixed - UUIDs for sensitive data, integers for lookup
+   tables
+5. **Timestamps**: Custom fields (`created_at`, `updated_at`, `deleted_at`)
+6. **Naming Convention**: Snake_case database, camelCase JavaScript
+   (`underscored: true`)
+7. **Password Security**: bcryptjs with salt rounds 12
+8. **Session Management**: Environment-based configuration (secure in
+   production)
+9. **Input Validation**: Joi schemas within model files + express-validator
+   sanitization
+10. **Error Handling**: Structured responses with error codes and timestamps
+11. **Middleware Chain**: Security-first (helmet → cors → rateLimiter → auth →
+    validation)
+12. **Multi-Tenant**: Middleware-based tenant detection via subdomain
+13. **Frontend**: Tailwind CSS (CDN) + EJS includes + Alpine.js reactive
+    components
+14. **File Uploads**: Multer (local default) + cloud storage option per tenant
+15. **Caching**: node-cache for in-memory caching (10-minute TTL)
+16. **Environment Config**: JSON files + .env for secrets only
+17. **Development**: Cloud MySQL + automatic migrations in dev mode
+
+### Core Architecture Decisions (UPDATED)
+
+1. ✅ **Tech Stack**: Node.js + CommonJS + Sequelize ORM
 2. ✅ **Database**: Two-database structure (master + per-trust databases)
-3. ✅ **Authentication**: Unified login with subdomain logic
+3. ✅ **Authentication**: Unified login with subdomain logic + Express sessions
 4. ✅ **RBAC**: Simple JSON config-driven role-based access control
-5. ✅ **Validation**: Multi-layer bulletproof validation (Joi + custom)
+5. ✅ **Validation**: Multi-layer bulletproof validation (Joi + Sequelize +
+   custom)
 6. ✅ **Dependencies**: Latest stable versions for long-term support
-7. ✅ **Error Handling**: Comprehensive with graceful degradation
+7. ✅ **Error Handling**: Winston logging with graceful degradation
 8. ✅ **Setup Module**: Wizard engine for initial configuration
 
 ### Unified Login Logic (Subdomain-Based)
+
 ```
 admin.domain.com     → System Admin Login (master database)
 system.domain.com    → System Admin Login (master database)
@@ -21,6 +53,7 @@ domain.com           → Default Trust Login or redirect
 ```
 
 ### Two-Database Architecture
+
 ```
 Master Database:
 - system_users (SYSTEM_ADMIN, GROUP_ADMIN)
@@ -36,19 +69,23 @@ Trust Database:
 ```
 
 ### RBAC Configuration
+
 - **File**: `config/rbac.json`
-- **Roles**: SYSTEM_ADMIN → GROUP_ADMIN → TRUST_ADMIN → SCHOOL_ADMIN → TEACHER/ACCOUNTANT → PARENT
+- **Roles**: SYSTEM_ADMIN → GROUP_ADMIN → TRUST_ADMIN → SCHOOL_ADMIN →
+  TEACHER/ACCOUNTANT → PARENT
 - **Permissions**: Resource:Action format (e.g., "students:read", "fees:create")
 - **Context Rules**: Own-data access for PARENT and TEACHER roles
 - **Route Protection**: Path-based access control
 
 ### Validation Strategy
+
 1. **Input Layer**: Joi schemas + XSS sanitization
 2. **Business Layer**: Custom validation rules
 3. **Database Layer**: Constraints and foreign keys
 4. **Runtime Layer**: Error recovery and circuit breakers
 
 ### Module Requirements (From Original Project)
+
 1. **Authentication Module (AUTH-02-xxx)**
    - ✅ Unified login (system/trust)
    - ✅ Session management
@@ -108,18 +145,21 @@ Trust Database:
 ## Simplicity Principles
 
 ### Code Organization
+
 - **DRY Principle**: Reusable utilities and components
 - **Single Responsibility**: Each module has one clear purpose
 - **Consistent Patterns**: Same structure across all modules
 - **Clear Naming**: Self-documenting code and variables
 
 ### Error Handling
+
 - **Fail Safe**: Always handle errors gracefully
 - **User Friendly**: Clear error messages for users
 - **Developer Friendly**: Detailed logs for debugging
 - **Recovery**: Automatic retry for transient failures
 
 ### Maintenance Considerations
+
 - **Documentation**: Inline comments and README files
 - **Testing**: Unit and integration tests
 - **Monitoring**: Health checks and performance metrics
@@ -128,6 +168,7 @@ Trust Database:
 ## Tailwind Components Strategy
 
 ### Reusable Components
+
 1. **Form Components**
    - Input fields with validation styling
    - Select dropdowns with search
@@ -147,6 +188,7 @@ Trust Database:
    - Action buttons
 
 ### CSS Organization
+
 ```
 public/css/
 ├── components/         # Reusable component styles
@@ -158,24 +200,28 @@ public/css/
 ## Security Requirements
 
 ### Authentication Security
+
 - Password hashing with bcrypt (12+ rounds)
 - Session-based authentication
 - Account lockout after failed attempts
 - Session timeout and rotation
 
 ### Authorization Security
+
 - Role-based access control
 - Permission-based resource access
 - Context-aware authorization
 - Audit logging for all actions
 
 ### Input Security
+
 - XSS prevention via sanitization
 - SQL injection prevention via parameterized queries
 - Rate limiting on all endpoints
 - CSRF protection for forms
 
 ### Data Security
+
 - Sensitive data masking in logs
 - Encrypted database connections
 - Secure session storage
@@ -184,18 +230,21 @@ public/css/
 ## Performance Requirements
 
 ### Response Time Targets
+
 - Page loads: < 2 seconds
 - API responses: < 500ms
 - Database queries: < 100ms
 - File uploads: < 5 seconds per MB
 
 ### Scalability Targets
+
 - 1000+ concurrent users per trust
 - 50,000+ students per trust
 - 1M+ fee transactions per year
 - 99.9% uptime requirement
 
 ### Resource Limits
+
 - Memory usage: < 512MB per process
 - CPU usage: < 70% average
 - Database connections: < 50 concurrent
@@ -204,18 +253,21 @@ public/css/
 ## Deployment Requirements
 
 ### Environment Support
+
 - Development: Local with Docker
 - Staging: Cloud VM with monitoring
 - Production: Load-balanced VMs
 - Backup: Automated daily backups
 
 ### Monitoring Requirements
+
 - Application performance monitoring
 - Database performance monitoring
 - Error tracking and alerting
 - User activity analytics
 
 ### Backup Requirements
+
 - Daily automated database backups
 - Weekly full system backups
 - Point-in-time recovery capability
@@ -224,12 +276,14 @@ public/css/
 ## Browser Support
 
 ### Supported Browsers
+
 - Chrome 90+
 - Firefox 88+
 - Safari 14+
 - Edge 90+
 
 ### Mobile Support
+
 - Responsive design for tablets
 - Basic mobile browser support
 - Touch-friendly interface elements
@@ -238,12 +292,14 @@ public/css/
 ## Compliance Requirements
 
 ### Data Protection
+
 - GDPR compliance for EU users
 - Data retention policies
 - Right to data deletion
 - Privacy policy compliance
 
 ### Educational Compliance
+
 - Student data protection
 - Parental consent management
 - Academic record security
@@ -252,6 +308,7 @@ public/css/
 ## Future Considerations
 
 ### Planned Enhancements
+
 - **Mobile app development** (requires comprehensive API documentation)
 - Advanced analytics and reporting
 - AI-powered insights and recommendations
@@ -259,6 +316,7 @@ public/css/
 - Multi-language support
 
 ### API Documentation Strategy
+
 - OpenAPI/Swagger documentation for all endpoints
 - Interactive API explorer for developers
 - SDK generation for mobile app development
@@ -266,6 +324,7 @@ public/css/
 - Rate limiting and authentication guides
 
 ### Technology Evolution
+
 - Regular dependency updates and security patches
 - Performance optimizations and caching strategies
 - Security enhancements and compliance updates
@@ -273,4 +332,5 @@ public/css/
 
 ---
 
-*This document is updated as requirements evolve and decisions are made during development.*
+_This document is updated as requirements evolve and decisions are made during
+development._
