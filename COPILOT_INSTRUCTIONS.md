@@ -5,15 +5,24 @@
 >
 > **🤖 GitHub Copilot: Always reference this file before generating any code.**
 
-## 🎯 PROJECT STATUS: ARCHITECTURE 100% COMPLETE - READY FOR IMPLEMENTATION
+## 🎯 PROJECT STATUS: ARCHITECTURE 100% COMPLETE - SINGLE SOURCE OF TRUTH ENFORCED
 
-**✅ All 56 Technical Decisions Finalized**  
+**✅ All 56 Technical Decisions Finalized in `config/SINGLE_SOURCE_OF_TRUTH.js`**  
 **✅ Business Logic Patterns Defined**  
 **✅ Complete Implementation Guide Available**  
-**✅ Development Environment Configured**
+**✅ Development Environment Configured**  
+**✅ Configuration Validation Enforced**
 
-**NEXT PHASE**: Begin implementation using `TECHNICAL_SPECIFICATION_COMPLETE.md`
-as primary reference
+**NEXT PHASE**: Begin implementation using enforced technical decisions
+
+## 🔒 SINGLE SOURCE OF TRUTH - IMMUTABLE DECISIONS
+
+**ALL technical decisions are FINAL and ENFORCED in `config/SINGLE_SOURCE_OF_TRUTH.js`**
+
+Before generating ANY code, you MUST:
+1. Check `config/SINGLE_SOURCE_OF_TRUTH.js` for the specific decision
+2. Use the exact implementation pattern specified
+3. Never use any pattern marked as "forbidden"
 
 ## Project Context
 
@@ -27,17 +36,28 @@ patterns for:
 - **Multi-channel communication system** (Email/SMS/WhatsApp)
 - **Academic calendar management** (semester/quarter/custom structures)
 
-## Mandatory Reading Order
+## Mandatory Reading Order (SINGLE SOURCE OF TRUTH)
 
-1. **COPILOT_INSTRUCTIONS.md** (this file) - Core rules
-2. **TECHNICAL_SPECIFICATION_COMPLETE.md** - Complete implementation guide with
-   code patterns
-3. **REQUIREMENTS_FINAL.md** - All 56 technical decisions finalized
-4. **IMPLEMENTATION_READY.md** - Phase-by-phase implementation roadmap
-5. **DEVELOPMENT_STANDARDS.md** - Detailed coding standards
-6. **ARCHITECTURE.md** - High-level system architecture
+**🔒 PRIMARY REFERENCE**: `SINGLE_SOURCE_OF_TRUTH.md` - ALL 56 Q&A decisions (IMMUTABLE)
+
+1. **SINGLE_SOURCE_OF_TRUTH.md** - ALL technical decisions (FINAL)
+2. **COPILOT_INSTRUCTIONS.md** (this file) - Development standards  
+3. **TECHNICAL_SPECIFICATION_COMPLETE.md** - Implementation patterns
+4. **REQUIREMENTS_FINAL.md** - Business requirements documentation
+5. **IMPLEMENTATION_READY.md** - Phase-by-phase roadmap
+
+**⚠️ CRITICAL**: Before writing ANY code, check `SINGLE_SOURCE_OF_TRUTH.md` for the specific decision.
 
 ---
+
+## Core Philosophy
+
+**Single source of truth with zero deviation allowed.**
+
+- ALL technical decisions are FINAL and ENFORCED
+- Any violation of Q&A decisions will cause build failure
+- Configuration validation prevents architectural drift
+- Simple, readable code with comprehensive patterns
 
 ## Core Philosophy
 

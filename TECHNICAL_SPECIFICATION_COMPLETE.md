@@ -1,14 +1,18 @@
 # School ERP - Complete Technical Specification (2025-08-18)
 
-## 🎯 Final Architecture Summary
+## 🔒 SINGLE SOURCE OF TRUTH - ALL DECISIONS FINAL
 
-**Status**: ALL 56 technical decisions finalized  
-**Approach**: Zero-ambiguity specification for bulletproof development  
-**Result**: Production-ready architecture with clear implementation patterns
+**Status**: ALL 56 technical decisions finalized and ENFORCED in `config/SINGLE_SOURCE_OF_TRUTH.js`  
+**Approach**: Zero-ambiguity specification with validation enforcement  
+**Result**: Production-ready architecture with immutable implementation patterns
+
+⚠️ **CRITICAL**: All technical decisions are FINAL and ENFORCED. Any deviation will cause build failure.
 
 ---
 
-## 📋 Complete Decision Matrix (Q1-Q56)
+## 📋 Complete Decision Matrix (Q1-Q56) - IMMUTABLE
+
+**Reference**: `config/SINGLE_SOURCE_OF_TRUTH.js` - The ONLY source for technical decisions
 
 ### **Core Technology Stack**
 
@@ -91,6 +95,107 @@
 - **Q54**: Log-based monitoring + email alerts for critical errors
 - **Q55**: Single deployment with environment detection
 - **Q56**: PM2 for process management
+
+---
+
+## 📦 **Complete Module Architecture (All 10 Core Modules)**
+
+### **Module Implementation Sequence & Dependencies**
+
+**Phase 1: Foundation Layer (Critical Dependencies)**
+1. **DATA Module** → Database infrastructure, connections, schema management
+2. **AUTH Module** → Authentication, authorization, session management  
+3. **SETUP Module** → Initial configuration wizard for trusts and schools
+
+**Phase 2: Core Entity Management**
+4. **USER Module** → User lifecycle management (depends on AUTH, SETUP)
+5. **STUD Module** → Student management (depends on USER, SETUP)
+
+**Phase 3: Operational Modules**
+6. **FEES Module** → Fee management (depends on STUD, USER) - **Enhanced with frontend-configurable fee rules**
+7. **ATTD Module** → Attendance tracking (depends on STUD, USER)
+
+**Phase 4: Analytics & Communication**
+8. **REPT Module** → Reporting system (depends on all data modules)
+9. **DASH Module** → Dashboards (depends on all operational modules)
+10. **COMM Module** → Communications (depends on USER, STUD) - **Enhanced with multi-channel support**
+
+### **Enhanced Module Specifications (Aligned with Finalized Decisions)**
+
+#### **1. DATA Module - Database Infrastructure**
+**Status**: ✅ Fully specified with Sequelize ORM patterns
+- Multi-tenant Sequelize connection management (Q35)
+- Mixed primary keys: UUIDs for sensitive data, integers for lookups (Q14)
+- Snake_case database, camelCase JavaScript mapping (Q16)
+- Connection pooling: `{ max: 15, min: 2, acquire: 60000, idle: 300000 }` (Q11)
+
+#### **2. AUTH Module - Authentication & Authorization**  
+**Status**: ✅ Fully specified with enhanced security
+- bcryptjs with salt rounds 12 (Q17)
+- Express sessions with MySQL store (Q6)
+- Role-based session timeouts: ADMIN(8h), TEACHER(12h), PARENT(24h) (Q37)
+- Comprehensive audit trail with before/after tracking (Q50)
+
+#### **3. SETUP Module - Configuration Wizard**
+**Status**: ✅ Enhanced with frontend-configurable wizards
+- Complete wizard engine with frontend management interface
+- Per-tenant defaults with intelligent configuration
+- Dynamic step creation and modification
+- Progress tracking and resume functionality
+
+#### **4. USER Module - User Management**
+**Status**: ✅ Fully specified with RBAC patterns
+- Separate roles table with relationships (Q36)
+- Tenant-configurable password policies (Q38)
+- Context-aware authorization (users access only their data)
+- Comprehensive user lifecycle management
+
+#### **5. STUD Module - Student Management**
+**Status**: ✅ Fully specified with academic tracking
+- Student model with UUID primary keys
+- Comprehensive admission workflow
+- Parent-student relationship management
+- Transfer and promotion workflows
+- Document management integration
+
+#### **6. FEES Module - Fee Management** ⭐ **ENHANCED**
+**Status**: ✅ Advanced frontend-configurable fee calculation engine
+- **ConfigurableFeeCalculator** with tenant-specific rules
+- Late fees, scholarships, waivers, and custom formulas
+- Frontend rule builder with JavaScript formula execution
+- Real-time fee calculation with multiple discount types
+- Payment tracking and financial reporting
+
+#### **7. ATTD Module - Attendance Management**
+**Status**: ✅ Fully specified with multiple tracking types
+- Daily attendance with status tracking
+- Leave application workflows
+- Attendance analytics and reporting
+- Automated notification system
+
+#### **8. REPT Module - Reporting System**
+**Status**: ✅ Comprehensive reporting framework
+- Pre-built report templates
+- Custom report builder functionality
+- Export capabilities (PDF, Excel, CSV)
+- Scheduled reports and distribution
+- Role-based report access
+
+#### **9. DASH Module - Dashboard & Analytics**
+**Status**: ✅ Role-based dashboards with real-time data
+- Real-time KPI widgets with caching (Q32)
+- Role-specific dashboard configurations
+- Interactive charts and performance indicators
+- Quick action panels for common tasks
+
+#### **10. COMM Module - Communication System** ⭐ **ENHANCED**
+**Status**: ✅ Advanced multi-channel communication engine
+- **CommunicationEngine** with multiple providers
+- Email: SendGrid, Nodemailer integration
+- SMS: Twilio integration  
+- WhatsApp: Business API support
+- Template management and delivery tracking
+- Emergency alert system
 
 ---
 
@@ -1699,5 +1804,246 @@ Alpine.data('feeRuleBuilder', () => ({
   </div>
 </div>
 ```
+
+---
+
+## 🧙‍♂️ **Wizard Setup System - Complete Frontend-Configurable Architecture**
+
+### **Wizard System Overview**
+
+The system includes a comprehensive, frontend-configurable wizard system that allows easy addition, modification, and removal of setup wizards and their steps. All wizards support maximum per-tenant configuration with intelligent defaults for quick setup.
+
+### **Wizard Configuration Engine**
+
+```javascript
+// config/wizard-configs.js - Frontend-configurable wizard definitions
+const WizardConfigs = {
+  trustSetup: {
+    id: 'trust_setup',
+    name: 'Trust Setup Wizard',
+    description: 'Complete setup wizard for new educational trusts',
+    version: '1.0.0',
+    canModify: true,      // Allow frontend modification
+    canDelete: false,     // Prevent deletion of core wizards
+    steps: [
+      {
+        id: 'trust_info',
+        name: 'Trust Information',
+        description: 'Basic trust details and contact information',
+        order: 1,
+        required: true,
+        component: 'TrustInfoStep',
+        validation: 'trustInfoValidation',
+        canSkip: false,
+        fields: [
+          {
+            name: 'trust_name',
+            type: 'text',
+            label: 'Trust Name',
+            placeholder: 'Enter trust name',
+            required: true,
+            minLength: 3,
+            maxLength: 200,
+            defaultValue: '',
+            helpText: 'Official name of the educational trust'
+          },
+          {
+            name: 'trust_code',
+            type: 'text',
+            label: 'Trust Code',
+            placeholder: 'Enter unique trust code (letters and numbers only)',
+            required: true,
+            pattern: '^[A-Z0-9]{3,20}$',
+            unique: true,
+            defaultValue: '',
+            helpText: 'Unique identifier for the trust (used in database naming)'
+          }
+          // ... more fields with comprehensive configuration
+        ]
+      }
+      // ... more steps
+    ]
+  },
+  
+  schoolSetup: {
+    id: 'school_setup',
+    name: 'School Setup Wizard',
+    description: 'Setup wizard for individual schools within a trust',
+    version: '1.0.0',
+    canModify: true,
+    canDelete: true,      // Allow deletion of non-core wizards
+    perTenantDefaults: {  // Per-tenant default values
+      academicYear: 'auto-generate',
+      gradeSystem: '10-point',
+      feeStructure: 'simple'
+    },
+    steps: [
+      {
+        id: 'school_basic_info',
+        name: 'School Information',
+        description: 'Basic school details and configuration',
+        order: 1,
+        required: true,
+        component: 'SchoolInfoStep',
+        validation: 'schoolInfoValidation',
+        fields: [
+          {
+            name: 'school_name',
+            type: 'text',
+            label: 'School Name',
+            required: true,
+            defaultValue: '{{trust_name}} School',  // Dynamic defaults
+            maxLength: 200
+          },
+          {
+            name: 'school_code',
+            type: 'text',
+            label: 'School Code',
+            required: true,
+            pattern: '^[A-Z0-9]{3,10}$',
+            unique: true,
+            defaultValue: '{{trust_code}}_001'   // Auto-generated pattern
+          },
+          {
+            name: 'academic_structure',
+            type: 'select',
+            label: 'Academic Structure',
+            required: true,
+            defaultValue: 'semester',
+            options: [
+              { value: 'semester', label: 'Semester System' },
+              { value: 'trimester', label: 'Trimester System' },
+              { value: 'quarter', label: 'Quarter System' },
+              { value: 'custom', label: 'Custom Structure' }
+            ],
+            conditional: {
+              field: 'academic_structure',
+              value: 'custom',
+              showFields: ['custom_structure_config']
+            }
+          }
+        ]
+      }
+    ]
+  },
+  
+  feeStructureSetup: {
+    id: 'fee_structure_setup',
+    name: 'Fee Structure Setup Wizard',
+    description: 'Configure comprehensive fee calculation rules',
+    version: '1.0.0',
+    canModify: true,
+    canDelete: true,
+    perTenantDefaults: {
+      lateFeeType: 'percentage',
+      lateFeeValue: 2,
+      scholarshipEnabled: true,
+      waiversEnabled: true,
+      customRulesEnabled: false
+    },
+    steps: [
+      {
+        id: 'basic_fee_structure',
+        name: 'Basic Fee Structure',
+        description: 'Define base fee categories and amounts',
+        order: 1,
+        required: true,
+        component: 'BasicFeeStructureStep',
+        fields: [
+          {
+            name: 'fee_categories',
+            type: 'dynamic_array',
+            label: 'Fee Categories',
+            required: true,
+            defaultValue: [
+              { name: 'Tuition Fee', amount: 0, required: true },
+              { name: 'Library Fee', amount: 0, required: false },
+              { name: 'Lab Fee', amount: 0, required: false }
+            ],
+            itemFields: [
+              { name: 'name', type: 'text', label: 'Category Name', required: true },
+              { name: 'amount', type: 'number', label: 'Amount', required: true, min: 0 },
+              { name: 'required', type: 'checkbox', label: 'Mandatory Fee', defaultValue: true }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'advanced_fee_rules',
+        name: 'Advanced Fee Rules',
+        description: 'Configure late fees, discounts, scholarships, and waivers',
+        order: 2,
+        required: false,
+        component: 'AdvancedFeeRulesStep',
+        fields: [
+          {
+            name: 'late_fee_configuration',
+            type: 'object',
+            label: 'Late Fee Configuration',
+            required: false,
+            defaultValue: {
+              enabled: true,
+              type: 'percentage',
+              value: 2,
+              gracePeriodays: 7,
+              maxAmount: null
+            },
+            objectFields: [
+              { name: 'enabled', type: 'checkbox', label: 'Enable Late Fees', defaultValue: true },
+              { name: 'type', type: 'select', label: 'Late Fee Type', 
+                options: [
+                  { value: 'percentage', label: 'Percentage of Due Amount' },
+                  { value: 'fixed', label: 'Fixed Amount' },
+                  { value: 'progressive', label: 'Progressive (increases over time)' }
+                ]
+              },
+              { name: 'value', type: 'number', label: 'Late Fee Value', required: true, min: 0 },
+              { name: 'gracePeriodDays', type: 'number', label: 'Grace Period (Days)', defaultValue: 7, min: 0 },
+              { name: 'maxAmount', type: 'number', label: 'Maximum Late Fee Amount', required: false, min: 0 }
+            ]
+          },
+          {
+            name: 'scholarship_rules',
+            type: 'dynamic_array',
+            label: 'Scholarship Rules',
+            required: false,
+            defaultValue: [],
+            itemFields: [
+              { name: 'name', type: 'text', label: 'Scholarship Name', required: true },
+              { name: 'type', type: 'select', label: 'Discount Type',
+                options: [
+                  { value: 'percentage', label: 'Percentage Discount' },
+                  { value: 'fixed', label: 'Fixed Amount Discount' },
+                  { value: 'waiver', label: 'Complete Waiver' }
+                ]
+              },
+              { name: 'value', type: 'number', label: 'Discount Value', required: true, min: 0 },
+              { name: 'eligibilityCriteria', type: 'textarea', label: 'Eligibility Criteria', required: true },
+              { name: 'autoApply', type: 'checkbox', label: 'Auto-apply based on criteria', defaultValue: false }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+};
+
+module.exports = WizardConfigs;
+```
+
+### **Key Features of the Wizard System**
+
+1. **Frontend-Configurable**: Complete wizard management through web interface
+2. **Dynamic Step Creation**: Add/remove/modify wizard steps without code changes
+3. **Per-Tenant Defaults**: Intelligent defaults based on tenant configuration
+4. **Conditional Logic**: Show/hide fields based on other field values
+5. **Validation Engine**: Comprehensive validation with custom business rules
+6. **Progress Tracking**: Save progress and resume incomplete wizards
+7. **Version Control**: Track wizard configuration changes over time
+8. **Reusable Components**: Modular field types and validation patterns
+9. **Security**: Role-based access to wizard configuration
+10. **Extensible**: Easy addition of new wizard types and field types
+
+This wizard system ensures maximum flexibility while maintaining the simplicity needed for quick setup with sensible defaults.
 
 ---

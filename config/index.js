@@ -1,6 +1,6 @@
 /**
- * Configuration Manager
- * Centralized configuration system to eliminate hardcoding
+ * Configuration Manager - Q&A DECISIONS ENFORCED
+ * All configurations must comply with SINGLE_SOURCE_OF_TRUTH.md
  */
 
 // Load environment variables first
@@ -13,6 +13,7 @@ class ConfigManager {
   constructor() {
     this.config = {};
     this.loadConfiguration();
+    this.enforceQandADecisions();
   }
 
   loadConfiguration() {
@@ -43,6 +44,54 @@ class ConfigManager {
       console.error('Failed to load configuration:', error.message);
       process.exit(1);
     }
+  }
+
+  /**
+   * Enforce Q&A technical decisions from SINGLE_SOURCE_OF_TRUTH.md
+   */
+  enforceQandADecisions() {
+    // Q11: Connection pooling must match decision
+    if (this.config.database && this.config.database.pool) {
+      this.config.database.pool = { max: 15, min: 2, acquire: 60000, idle: 300000 };
+    }
+
+    // Q17: Salt rounds must be 12
+    if (this.config.security && this.config.security.bcrypt) {
+      this.config.security.bcrypt.saltRounds = 12;
+    }
+
+    // Q37: Role-based session timeouts
+    if (this.config.session) {
+      this.config.session.timeouts = {
+        ADMIN: 8 * 60 * 60 * 1000,     // 8 hours
+        TEACHER: 12 * 60 * 60 * 1000,  // 12 hours  
+        PARENT: 24 * 60 * 60 * 1000    // 24 hours
+      };
+    }
+
+    // Q23: Middleware chain order enforcement
+    this.config.middleware = {
+      order: ['helmet', 'cors', 'rateLimiter', 'auth', 'validation'],
+      enforced: true
+    };
+
+    // Q26: Tailwind CSS via CDN
+    this.config.frontend = {
+      css: 'Tailwind CSS CDN',
+      javascript: 'Alpine.js',
+      templates: 'EJS with includes'
+    };
+
+    // Add technical decisions metadata
+    this.config._technicalDecisions = {
+      source: 'SINGLE_SOURCE_OF_TRUTH.md',
+      version: 'FINAL',
+      decisionCount: 56,
+      lastUpdated: '2025-08-18',
+      immutable: true
+    };
+
+    console.log('✅ Configuration enforced against Q&A technical decisions from SINGLE_SOURCE_OF_TRUTH.md');
   }
 
   applyEnvironmentOverrides() {

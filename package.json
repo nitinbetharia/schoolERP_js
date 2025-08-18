@@ -23,6 +23,8 @@
     "backup:tenant": "node scripts/orm-backup-tenant.js",
     "health": "curl -s http://localhost:3000/health",
     "validate": "node scripts/orm-validate.js",
+    "validate:decisions": "node scripts/validate-single-source-of-truth.js",
+    "validate:all": "npm run validate && npm run validate:decisions",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
     "db:seed": "npx sequelize-cli db:seed:all",
