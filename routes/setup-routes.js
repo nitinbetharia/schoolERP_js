@@ -11,7 +11,7 @@ const checkSetupPermission = authMiddleware.requirePermission('setup', 'create')
 
 // Get available wizard configurations
 router.get('/wizards', 
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     try {
       const wizards = await wizardEngine.getAvailableWizards();
@@ -24,7 +24,7 @@ router.get('/wizards',
 
 // Start a new wizard session
 router.post('/wizards/:wizardType/start',
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     try {
       const { wizardType } = req.params;
@@ -41,7 +41,7 @@ router.post('/wizards/:wizardType/start',
 
 // Get wizard session details
 router.get('/wizards/session/:sessionId',
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     try {
       const { sessionId } = req.params;
@@ -57,7 +57,7 @@ router.get('/wizards/session/:sessionId',
 
 // Process wizard step
 router.post('/wizards/session/:sessionId/step',
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   validationMiddleware.custom(async (req) => {
     const { sessionId } = req.params;
     const session = await wizardEngine.getWizardSession(sessionId);
@@ -93,7 +93,7 @@ router.post('/wizards/session/:sessionId/step',
 
 // Complete wizard
 router.post('/wizards/session/:sessionId/complete',
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     try {
       const { sessionId } = req.params;
@@ -109,7 +109,7 @@ router.post('/wizards/session/:sessionId/complete',
 
 // Create new trust
 router.post('/trusts',
-  authMiddleware.requireRole(['SYSTEM_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN']),
   validationMiddleware.validate('setup.createTrust'),
   errorHandler.asyncHandler(async (req, res) => {
     try {
@@ -127,7 +127,7 @@ router.post('/trusts',
 
 // Get all trusts
 router.get('/trusts',
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'GROUP_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     try {
       const filters = req.query;

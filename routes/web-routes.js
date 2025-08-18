@@ -505,7 +505,7 @@ router.get(
 // System Admin Dashboard (System admins only)
 router.get(
   '/admin/dashboard',
-  authMiddleware.requireRole(['SYSTEM_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('admin/dashboard', {
       title: 'System Dashboard - School ERP',
@@ -551,7 +551,7 @@ router.get(
 // System Health Monitoring
 router.get(
   '/admin/system-health',
-  authMiddleware.requireRole(['SYSTEM_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('admin/system-health', {
       title: 'System Health - School ERP',
@@ -587,7 +587,7 @@ router.get(
 // Backup Management
 router.get(
   '/admin/backup',
-  authMiddleware.requireRole(['SYSTEM_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('admin/backup', {
       title: 'Backup Management - School ERP',
@@ -599,7 +599,7 @@ router.get(
 // Audit Logs
 router.get(
   '/admin/audit-logs',
-  authMiddleware.requireRole(['SYSTEM_ADMIN']),
+  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'SYS_ADMIN']),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('admin/audit-logs', {
       title: 'Audit Logs - School ERP',
