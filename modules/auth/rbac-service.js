@@ -3,7 +3,7 @@ class RBACService {
     // Define role equivalencies
     this.roleEquivalencies = {
       SUPER_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
-      SYSTEM_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'], 
+      SYSTEM_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
       SYS_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
       GROUP_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN'],
       TRUST_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN']
@@ -13,9 +13,18 @@ class RBACService {
       SUPER_ADMIN: { level: 100, permissions: ['*'] },
       SYSTEM_ADMIN: { level: 100, permissions: ['*'] },
       SYS_ADMIN: { level: 100, permissions: ['*'] },
-      GROUP_ADMIN: { level: 90, permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*'] },
-      TRUST_ADMIN: { level: 90, permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*'] },
-      SCHOOL_ADMIN: { level: 70, permissions: ['students:*', 'users:school', 'fees:*', 'attendance:*', 'reports:school'] },
+      GROUP_ADMIN: {
+        level: 90,
+        permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*']
+      },
+      TRUST_ADMIN: {
+        level: 90,
+        permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*']
+      },
+      SCHOOL_ADMIN: {
+        level: 70,
+        permissions: ['students:*', 'users:school', 'fees:*', 'attendance:*', 'reports:school']
+      },
       TEACHER: { level: 50, permissions: ['students:read', 'attendance:*', 'reports:class'] },
       ACCOUNTANT: { level: 60, permissions: ['fees:*', 'students:read', 'reports:financial'] },
       PARENT: { level: 20, permissions: ['students:own', 'fees:own', 'attendance:own'] },
@@ -23,8 +32,17 @@ class RBACService {
     };
 
     this.resources = [
-      'trusts', 'schools', 'users', 'students', 'classes', 'sections',
-      'fees', 'attendance', 'reports', 'communications', 'documents'
+      'trusts',
+      'schools',
+      'users',
+      'students',
+      'classes',
+      'sections',
+      'fees',
+      'attendance',
+      'reports',
+      'communications',
+      'documents'
     ];
 
     this.actions = ['create', 'read', 'update', 'delete', 'approve', 'assign'];
@@ -33,7 +51,7 @@ class RBACService {
   // Check if user role is equivalent to any of the allowed roles
   isRoleEquivalent(userRole, allowedRoles) {
     if (allowedRoles.includes(userRole)) return true;
-    
+
     const equivalentRoles = this.roleEquivalencies[userRole] || [userRole];
     return allowedRoles.some(role => equivalentRoles.includes(role));
   }
@@ -60,22 +78,22 @@ class RBACService {
     switch (userRole) {
       case 'TRUST_ADMIN':
         return this.checkTrustAdminPermissions(resource, action, context);
-      
+
       case 'SCHOOL_ADMIN':
         return this.checkSchoolAdminPermissions(resource, action, context);
-      
+
       case 'TEACHER':
         return this.checkTeacherPermissions(resource, action, context);
-      
+
       case 'ACCOUNTANT':
         return this.checkAccountantPermissions(resource, action, context);
-      
+
       case 'PARENT':
         return this.checkParentPermissions(resource, action, context);
-      
+
       case 'STUDENT':
         return this.checkStudentPermissions(resource, action, context);
-      
+
       default:
         return false;
     }
@@ -88,7 +106,7 @@ class RBACService {
 
   checkSchoolAdminPermissions(resource, action, context) {
     const { schoolId, userSchoolId } = context;
-    
+
     // Can only access data from their assigned school
     if (schoolId && userSchoolId && schoolId !== userSchoolId) {
       return false;
@@ -126,7 +144,7 @@ class RBACService {
 
   checkAccountantPermissions(resource, action, context) {
     const { schoolId, userSchoolId } = context;
-    
+
     // Can only access data from their assigned school
     if (schoolId && userSchoolId && schoolId !== userSchoolId) {
       return false;
@@ -179,35 +197,38 @@ class RBACService {
   canAccessRoute(userRole, route, method = 'GET') {
     const routePermissions = {
       // System routes
-      '/api/trusts': { roles: ['SYSTEM_ADMIN', 'GROUP_ADMIN'], methods: ['GET', 'POST', 'PUT', 'DELETE'] },
+      '/api/trusts': {
+        roles: ['SYSTEM_ADMIN', 'GROUP_ADMIN'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE']
+      },
       '/api/system-users': { roles: ['SYSTEM_ADMIN'], methods: ['GET', 'POST', 'PUT', 'DELETE'] },
-      
+
       // Trust routes
       '/api/schools': { roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN'], methods: ['GET', 'POST', 'PUT'] },
       '/api/users': { roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN'], methods: ['GET', 'POST', 'PUT'] },
-      
+
       // Student routes
-      '/api/students': { 
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'], 
-        methods: ['GET', 'POST', 'PUT'] 
+      '/api/students': {
+        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'],
+        methods: ['GET', 'POST', 'PUT']
       },
-      
+
       // Fee routes
-      '/api/fees': { 
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'ACCOUNTANT', 'PARENT'], 
-        methods: ['GET', 'POST', 'PUT'] 
+      '/api/fees': {
+        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'ACCOUNTANT', 'PARENT'],
+        methods: ['GET', 'POST', 'PUT']
       },
-      
+
       // Attendance routes
-      '/api/attendance': { 
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'], 
-        methods: ['GET', 'POST', 'PUT'] 
+      '/api/attendance': {
+        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'],
+        methods: ['GET', 'POST', 'PUT']
       },
-      
+
       // Report routes
-      '/api/reports': { 
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT'], 
-        methods: ['GET'] 
+      '/api/reports': {
+        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT'],
+        methods: ['GET']
       }
     };
 
@@ -235,7 +256,7 @@ class RBACService {
   canManageUser(managerRole, targetRole) {
     const managerLevel = this.getRoleLevel(managerRole);
     const targetLevel = this.getRoleLevel(targetRole);
-    
+
     // Can only manage users with lower role level
     return managerLevel > targetLevel;
   }
@@ -267,7 +288,14 @@ class RBACService {
 
     // Group admin can manage trust and below
     if (managerRole === 'GROUP_ADMIN') {
-      const allowedRoles = ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'];
+      const allowedRoles = [
+        'TRUST_ADMIN',
+        'SCHOOL_ADMIN',
+        'TEACHER',
+        'ACCOUNTANT',
+        'PARENT',
+        'STUDENT'
+      ];
       return allowedRoles.includes(newRole);
     }
 
@@ -284,6 +312,25 @@ class RBACService {
     }
 
     return false;
+  }
+
+  // Check permission by user ID (looks up user role and calls hasPermission)
+  async checkPermission(userId, resource, action, context = {}) {
+    try {
+      // For now, get user role from the context or session
+      // In a full implementation, this would query the database for the user's role
+      const userRole = context.userRole || context.role;
+
+      if (!userRole) {
+        console.error('checkPermission: No user role found in context for userId:', userId);
+        return false;
+      }
+
+      return this.hasPermission(userRole, resource, action, context);
+    } catch (error) {
+      console.error('Error in checkPermission:', error);
+      return false;
+    }
   }
 }
 

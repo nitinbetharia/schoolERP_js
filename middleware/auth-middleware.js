@@ -277,11 +277,21 @@ class AuthMiddleware {
           return this.handleAuthError(res, 'Authentication required', 401, req);
         }
 
+        // Create enhanced context with user information
+        const enhancedContext = {
+          ...req.context,
+          userId: req.user.id,
+          userRole: req.user.role,
+          role: req.user.role,
+          trustCode: req.user.trustCode,
+          schoolId: req.user.schoolId
+        };
+
         const hasPermission = await rbacService.checkPermission(
           req.user.id,
           resource,
           action,
-          req.context
+          enhancedContext
         );
 
         if (!hasPermission) {
@@ -306,7 +316,7 @@ class AuthMiddleware {
 
         // Use RBAC service to check role equivalency
         const hasValidRole = rbacService.isRoleEquivalent(req.user.role, allowedRoles);
-        
+
         if (!hasValidRole) {
           return this.handleAuthError(
             res,
@@ -336,7 +346,14 @@ class AuthMiddleware {
         const userRole = req.user.role;
 
         // Admin roles can access any resource
-        const adminRoles = ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN', 'GROUP_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'];
+        const adminRoles = [
+          'SUPER_ADMIN',
+          'SYSTEM_ADMIN',
+          'SYS_ADMIN',
+          'GROUP_ADMIN',
+          'TRUST_ADMIN',
+          'SCHOOL_ADMIN'
+        ];
         if (rbacService.isRoleEquivalent(userRole, adminRoles)) {
           return next();
         }

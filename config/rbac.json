@@ -9,7 +9,7 @@
       "aliases": ["SYSTEM_ADMIN", "SYS_ADMIN"]
     },
     "SYSTEM_ADMIN": {
-      "name": "System Administrator", 
+      "name": "System Administrator",
       "description": "Full system access across all trusts (equivalent to SUPER_ADMIN, SYS_ADMIN)",
       "level": 0,
       "database": "master",
@@ -20,18 +20,18 @@
       "name": "System Administrator",
       "description": "Full system access across all trusts (equivalent to SUPER_ADMIN, SYSTEM_ADMIN)",
       "level": 0,
-      "database": "master", 
+      "database": "master",
       "permissions": ["*"],
       "aliases": ["SUPER_ADMIN", "SYSTEM_ADMIN"]
     },
     "GROUP_ADMIN": {
-      "name": "Group Administrator", 
+      "name": "Group Administrator",
       "description": "Manage multiple trusts under a group (equivalent to TRUST_ADMIN)",
       "level": 1,
       "database": "master",
       "permissions": [
         "trusts:read",
-        "trusts:create", 
+        "trusts:create",
         "trusts:update",
         "schools:read",
         "schools:create",
@@ -41,7 +41,7 @@
         "users:update",
         "students:read",
         "students:create",
-        "students:update", 
+        "students:update",
         "fees:read",
         "fees:create",
         "fees:update",
@@ -60,7 +60,7 @@
       "permissions": [
         "trusts:read",
         "trusts:create",
-        "trusts:update", 
+        "trusts:update",
         "schools:read",
         "schools:create",
         "schools:update",
@@ -90,7 +90,7 @@
         "users:create",
         "users:update",
         "students:read",
-        "students:create", 
+        "students:create",
         "students:update",
         "fees:read",
         "fees:create",
@@ -145,14 +145,14 @@
       ]
     }
   },
-  
+
   "resources": {
     "trusts": {
       "name": "Trust Management",
       "actions": ["read", "create", "update", "delete"]
     },
     "schools": {
-      "name": "School Management", 
+      "name": "School Management",
       "actions": ["read", "create", "update", "delete"]
     },
     "users": {
@@ -186,8 +186,21 @@
   },
 
   "permissionHierarchy": {
-    "SYSTEM_ADMIN": ["GROUP_ADMIN", "TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT", "PARENT"],
-    "GROUP_ADMIN": ["TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT", "PARENT"],
+    "SYSTEM_ADMIN": [
+      "GROUP_ADMIN",
+      "TRUST_ADMIN",
+      "SCHOOL_ADMIN",
+      "TEACHER",
+      "ACCOUNTANT",
+      "PARENT"
+    ],
+    "GROUP_ADMIN": [
+      "TRUST_ADMIN",
+      "SCHOOL_ADMIN",
+      "TEACHER",
+      "ACCOUNTANT",
+      "PARENT"
+    ],
     "TRUST_ADMIN": ["SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT", "PARENT"],
     "SCHOOL_ADMIN": ["TEACHER", "ACCOUNTANT", "PARENT"],
     "TEACHER": [],
@@ -202,7 +215,14 @@
     "/students": ["TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "PARENT"],
     "/fees": ["TRUST_ADMIN", "SCHOOL_ADMIN", "ACCOUNTANT", "PARENT"],
     "/attendance": ["TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "PARENT"],
-    "/reports": ["SYSTEM_ADMIN", "GROUP_ADMIN", "TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT"],
+    "/reports": [
+      "SYSTEM_ADMIN",
+      "GROUP_ADMIN",
+      "TRUST_ADMIN",
+      "SCHOOL_ADMIN",
+      "TEACHER",
+      "ACCOUNTANT"
+    ],
     "/users": ["SYSTEM_ADMIN", "GROUP_ADMIN", "TRUST_ADMIN", "SCHOOL_ADMIN"]
   },
 

@@ -114,6 +114,8 @@ async function optionalAuth(req, res, next) {
   }
 }
 
+const rbacService = require('../modules/auth/rbac-service');
+
 /**
  * Role-based access control middleware
  * Requires specific role(s) to access the route
@@ -124,7 +126,10 @@ function requireRole(...allowedRoles) {
       return next(new AuthenticationError('Authentication required'));
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    // Use RBAC service to check role equivalency
+    const hasValidRole = rbacService.isRoleEquivalent(req.user.role, allowedRoles);
+
+    if (!hasValidRole) {
       logger.security('Role access denied', 'medium', {
         userId: req.user.id,
         userRole: req.user.role,
@@ -134,7 +139,7 @@ function requireRole(...allowedRoles) {
       });
 
       return next(
-        new AuthorizationError(`Access denied. Required role: ${allowedRoles.join(' or ')}`)
+        new AuthorizationError(`Role ${req.user.role} not allowed. Required: ${allowedRoles.join(', ')}`)
       );
     }
 

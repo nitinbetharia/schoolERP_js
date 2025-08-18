@@ -712,7 +712,13 @@ router.get(
 router.get(
   '/communication/bulk-send',
   requireWebAuth,
-  authMiddleware.requireRole(['SYSTEM_ADMIN', 'SUPER_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER']),
+  authMiddleware.requireRole([
+    'SYSTEM_ADMIN',
+    'SUPER_ADMIN',
+    'TRUST_ADMIN',
+    'SCHOOL_ADMIN',
+    'TEACHER'
+  ]),
   errorHandler.asyncHandler(async (req, res) => {
     res.render('communication/bulk-send', {
       title: 'Bulk Communication - School ERP',
