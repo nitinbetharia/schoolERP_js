@@ -18,11 +18,7 @@ class ConfigManager {
 
   loadConfiguration() {
     try {
-      // Load main app configuration from JavaScript file
-      const appConfigPath = path.join(__dirname, 'app-config.js');
-      delete require.cache[require.resolve(appConfigPath)]; // Clear cache
-      const appConfig = require(appConfigPath);
-
+      // Q29: JSON config files only (no JS config files)
       // Load JSON-based configurations
       const appConfigJsonPath = path.join(__dirname, 'app-config.json');
       const appConfigJson = JSON.parse(fs.readFileSync(appConfigJsonPath, 'utf8'));
@@ -31,10 +27,9 @@ class ConfigManager {
       const rbacConfigPath = path.join(__dirname, 'rbac.json');
       const rbacConfig = JSON.parse(fs.readFileSync(rbacConfigPath, 'utf8'));
 
-      // Merge configurations (JS config takes precedence)
+      // Use JSON config as main configuration
       this.config = {
         ...appConfigJson,
-        ...appConfig,
         rbac: rbacConfig
       };
 
@@ -129,10 +124,9 @@ class ConfigManager {
 
   getDatabase() {
     return {
-      ...this.config.database,
-      // Secrets from environment
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || ''
+      ...this.config.database
+      // Q29: Secrets from environment only
+      // Note: user/password are secrets, everything else from JSON config
     };
   }
 

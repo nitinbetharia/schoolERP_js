@@ -235,8 +235,8 @@ node scripts/reset-database.js full --force
 
 #### Connection Errors
 ```bash
-# Verify database connection
-mysql -h localhost -u root -p
+# Verify database connection using MySQL Shell
+mysqlsh --uri=mysql://username:password@host:port
 
 # Check if MySQL service is running
 # Windows: services.msc -> MySQL80
@@ -282,7 +282,7 @@ npm run db:migrate
 # Restore from backup
 # Manual restore process:
 # 1. Extract backup ZIP file
-# 2. Import SQL files using mysql command
+# 2. Import SQL files using mysqlsh command
 # 3. Verify data integrity
 ```
 

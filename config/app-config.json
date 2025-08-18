@@ -8,6 +8,10 @@
     "baseUrl": "http://localhost:3000",
     "requestSizeLimit": "10mb"
   },
+  "multiTenant": {
+    "defaultTrustCode": "demo",
+    "strategy": "subdomain"
+  },
   "security": {
     "bcryptRounds": 12,
     "maxLoginAttempts": 5,
@@ -26,20 +30,36 @@
     }
   },
   "database": {
-    "host": "localhost",
-    "port": 3306,
-    "name": "school_erp",
-    "connectionLimit": 10,
-    "acquireTimeout": 60000,
-    "timeout": 60000,
-    "reconnect": true,
-    "charset": "utf8mb4"
+    "connection": {
+      "host": "140.238.167.36",
+      "port": 3306,
+      "timezone": "+00:00",
+      "connectTimeout": 60000,
+      "ssl": false
+    },
+    "system": {
+      "name": "school_erp_system",
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci"
+    },
+    "tenant": {
+      "prefix": "school_erp_trust_",
+      "charset": "utf8mb4",
+      "collation": "utf8mb4_unicode_ci"
+    },
+    "pool": {
+      "max": 15,
+      "min": 2,
+      "acquire": 60000,
+      "idle": 300000
+    }
   },
   "logging": {
     "level": "info",
     "maxSize": "20m",
     "maxFiles": "14d",
     "datePattern": "YYYY-MM-DD",
+    "logsDirectory": "logs",
     "categories": {
       "app": {
         "filename": "app-%DATE%.log",
@@ -79,7 +99,14 @@
   },
   "roles": {
     "system": ["SYSTEM_ADMIN", "GROUP_ADMIN"],
-    "trust": ["TRUST_ADMIN", "SCHOOL_ADMIN", "TEACHER", "ACCOUNTANT", "PARENT", "STUDENT"],
+    "trust": [
+      "TRUST_ADMIN",
+      "SCHOOL_ADMIN",
+      "TEACHER",
+      "ACCOUNTANT",
+      "PARENT",
+      "STUDENT"
+    ],
     "hierarchy": {
       "SYSTEM_ADMIN": 100,
       "GROUP_ADMIN": 90,
