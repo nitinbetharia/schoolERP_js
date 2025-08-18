@@ -63,9 +63,9 @@ class ConfigManager {
     // Q37: Role-based session timeouts
     if (this.config.session) {
       this.config.session.timeouts = {
-        ADMIN: 8 * 60 * 60 * 1000,     // 8 hours
-        TEACHER: 12 * 60 * 60 * 1000,  // 12 hours  
-        PARENT: 24 * 60 * 60 * 1000    // 24 hours
+        ADMIN: 8 * 60 * 60 * 1000, // 8 hours
+        TEACHER: 12 * 60 * 60 * 1000, // 12 hours
+        PARENT: 24 * 60 * 60 * 1000 // 24 hours
       };
     }
 
@@ -91,7 +91,9 @@ class ConfigManager {
       immutable: true
     };
 
-    console.log('✅ Configuration enforced against Q&A technical decisions from SINGLE_SOURCE_OF_TRUTH.md');
+    console.log(
+      '✅ Configuration enforced against Q&A technical decisions from SINGLE_SOURCE_OF_TRUTH.md'
+    );
   }
 
   applyEnvironmentOverrides() {

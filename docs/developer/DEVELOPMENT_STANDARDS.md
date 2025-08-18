@@ -1,8 +1,9 @@
 # School ERP Development Standards & Guidelines
 
 ## Table of Contents
+
 1. [Project Overview](#project-overview)
-2. [Architecture Standards](#architecture-standards)  
+2. [Architecture Standards](#architecture-standards)
 3. [Coding Standards](#coding-standards)
 4. [Database Standards](#database-standards)
 5. [Security Standards](#security-standards)
@@ -17,14 +18,20 @@
 ## Project Overview
 
 ### Core Principles
-- **Simple & Maintainable**: Code should be understandable by intermediate developers
-- **Bulletproof Design**: Comprehensive error handling and validation at every layer
-- **Multi-Tenant Architecture**: Scalable design supporting multiple educational trusts
+
+- **Simple & Maintainable**: Code should be understandable by intermediate
+  developers
+- **Bulletproof Design**: Comprehensive error handling and validation at every
+  layer
+- **Multi-Tenant Architecture**: Scalable design supporting multiple educational
+  trusts
 - **Security First**: Industry-standard security practices throughout
-- **Professional UI/UX**: Expert-level design with accessibility and responsiveness
+- **Professional UI/UX**: Expert-level design with accessibility and
+  responsiveness
 
 ### Technology Stack
-- **Runtime**: Node.js 18+ 
+
+- **Runtime**: Node.js 18+
 - **Framework**: Express.js 4.18+
 - **Database**: MySQL 8.0+
 - **Templating**: EJS 3.1+
@@ -37,10 +44,11 @@
 ## Architecture Standards
 
 ### Module Structure
+
 ```
 modules/
 ├── data/           # Database connections and utilities
-├── auth/           # Authentication and authorization  
+├── auth/           # Authentication and authorization
 ├── setup/          # Trust and school setup wizards
 ├── user/           # User management CRUD operations
 ├── student/        # Student lifecycle management
@@ -52,25 +60,27 @@ modules/
 ```
 
 ### Dependency Order
+
 ```
 DATA → AUTH → SETUP → USER → STUDENT → FEES → ATTENDANCE → REPORTS → DASHBOARD → COMMUNICATION
 ```
 
 ### Service Pattern
+
 ```javascript
 // modules/[module]/[module]-service.js
 class ModuleService {
-    constructor() {
-        this.db = require('../data/database-service');
-        this.validator = require('./validation-schemas');
-    }
-    
-    async create(data, context) {
-        // 1. Validate input
-        // 2. Business logic
-        // 3. Database transaction
-        // 4. Return result
-    }
+  constructor() {
+    this.db = require('../data/database-service');
+    this.validator = require('./validation-schemas');
+  }
+
+  async create(data, context) {
+    // 1. Validate input
+    // 2. Business logic
+    // 3. Database transaction
+    // 4. Return result
+  }
 }
 ```
 
@@ -81,6 +91,7 @@ class ModuleService {
 ### Naming Conventions
 
 #### Variables & Functions (camelCase)
+
 ```javascript
 const userName = 'john_doe';
 const studentId = 12345;
@@ -90,6 +101,7 @@ function getUserPermissions(userId, context) {}
 ```
 
 #### Database Fields (snake_case)
+
 ```sql
 CREATE TABLE students (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -101,6 +113,7 @@ CREATE TABLE students (
 ```
 
 #### Constants (UPPER_SNAKE_CASE)
+
 ```javascript
 const MAX_LOGIN_ATTEMPTS = 5;
 const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
@@ -108,19 +121,25 @@ const DEFAULT_PAGE_SIZE = 25;
 ```
 
 #### CSS Classes (kebab-case)
+
 ```css
-.form-input {}
-.btn-primary {}
-.card-header {}
-.navigation-menu {}
+.form-input {
+}
+.btn-primary {
+}
+.card-header {
+}
+.navigation-menu {
+}
 ```
 
 ### Code Organization
 
 #### File Structure
+
 ```
 /api/[module]/[action].js     # API route handlers
-/modules/[module]/            # Business logic services  
+/modules/[module]/            # Business logic services
 /middleware/                  # Express middleware
 /config/                      # Configuration files
 /public/                      # Static assets
@@ -129,72 +148,79 @@ const DEFAULT_PAGE_SIZE = 25;
 ```
 
 #### Function Design
+
 ```javascript
 // ✅ Good: Clear, single responsibility
 async function createStudent(studentData, context) {
-    try {
-        // Validate input
-        const validData = await this.validateStudentData(studentData);
-        
-        // Check permissions
-        this.rbac.enforcePermission(context.user, 'students', 'create');
-        
-        // Business logic
-        const admissionNumber = await this.generateAdmissionNumber(validData.schoolId);
-        
-        // Database operation
-        const result = await this.db.transaction(async (trx) => {
-            const studentId = await this.createStudentRecord(validData, trx);
-            await this.createStudentProfile(studentId, validData, trx);
-            return studentId;
-        });
-        
-        return { success: true, data: { id: result } };
-    } catch (error) {
-        throw new AppError(`Failed to create student: ${error.message}`, 'STUDENT_CREATE_FAILED');
-    }
+  try {
+    // Validate input
+    const validData = await this.validateStudentData(studentData);
+
+    // Check permissions
+    this.rbac.enforcePermission(context.user, 'students', 'create');
+
+    // Business logic
+    const admissionNumber = await this.generateAdmissionNumber(
+      validData.schoolId
+    );
+
+    // Database operation
+    const result = await this.db.transaction(async trx => {
+      const studentId = await this.createStudentRecord(validData, trx);
+      await this.createStudentProfile(studentId, validData, trx);
+      return studentId;
+    });
+
+    return { success: true, data: { id: result } };
+  } catch (error) {
+    throw new AppError(
+      `Failed to create student: ${error.message}`,
+      'STUDENT_CREATE_FAILED'
+    );
+  }
 }
 ```
 
 ### Error Handling Pattern
+
 ```javascript
 // Custom error class
 class AppError extends Error {
-    constructor(message, code, statusCode = 500) {
-        super(message);
-        this.code = code;
-        this.statusCode = statusCode;
-        this.isOperational = true;
-    }
+  constructor(message, code, statusCode = 500) {
+    super(message);
+    this.code = code;
+    this.statusCode = statusCode;
+    this.isOperational = true;
+  }
 }
 
 // Service layer error handling
 try {
-    const result = await someOperation();
-    return { success: true, data: result };
+  const result = await someOperation();
+  return { success: true, data: result };
 } catch (error) {
-    if (error.isOperational) {
-        throw error; // Re-throw operational errors
-    }
-    throw new AppError(`Unexpected error: ${error.message}`, 'INTERNAL_ERROR');
+  if (error.isOperational) {
+    throw error; // Re-throw operational errors
+  }
+  throw new AppError(`Unexpected error: ${error.message}`, 'INTERNAL_ERROR');
 }
 
-// Route layer error handling  
+// Route layer error handling
 app.use((error, req, res, next) => {
-    logger.error('Request error:', error);
-    
-    const statusCode = error.statusCode || 500;
-    const response = {
-        success: false,
-        error: error.message,
-        code: error.code || 'INTERNAL_ERROR'
-    };
-    
-    if (req.path.startsWith('/api/')) {
-        res.status(statusCode).json(response);
-    } else {
-        res.status(statusCode).render('error', { error });
-    }
+  logger.error('Request error:', error);
+
+  const statusCode = error.statusCode || 500;
+  const response = {
+    success: false,
+    error: error.message,
+    code: error.code || 'INTERNAL_ERROR'
+  };
+
+  if (req.path.startsWith('/api/')) {
+    res.status(statusCode).json(response);
+  } else {
+    res.status(statusCode).render('error', { error });
+  }
 });
 ```
 
@@ -205,16 +231,18 @@ app.use((error, req, res, next) => {
 ### Schema Design
 
 #### Table Naming
+
 - Plural nouns: `students`, `users`, `fee_structures`
 - Snake case: `admission_workflows`, `attendance_records`
 - Descriptive: `student_fee_assignments`, `user_role_permissions`
 
 #### Column Standards
+
 ```sql
 -- Primary Keys
 id INT AUTO_INCREMENT PRIMARY KEY
 
--- Foreign Keys  
+-- Foreign Keys
 school_id INT NOT NULL,
 FOREIGN KEY (school_id) REFERENCES schools(id)
 
@@ -235,6 +263,7 @@ FOREIGN KEY (created_by) REFERENCES users(id)
 ```
 
 #### Indexing Strategy
+
 ```sql
 -- Primary indexes on frequently queried columns
 CREATE INDEX idx_students_admission_number ON students(admission_number);
@@ -247,6 +276,7 @@ CREATE INDEX idx_users_email_status ON users(email, status);
 ```
 
 ### Query Patterns
+
 ```javascript
 // ✅ Parameterized queries (prevents SQL injection)
 const query = `
@@ -261,11 +291,16 @@ const query = `
 const results = await db.query(query, [schoolId, 'ACTIVE', limit, offset]);
 
 // ✅ Transaction pattern
-await db.transaction(async (trx) => {
-    const studentId = await trx.query('INSERT INTO students SET ?', [studentData]);
-    await trx.query('INSERT INTO student_profiles SET ?', [profileData]);
-    await trx.query('UPDATE admission_counters SET last_number = last_number + 1 WHERE school_id = ?', [schoolId]);
-    return studentId;
+await db.transaction(async trx => {
+  const studentId = await trx.query('INSERT INTO students SET ?', [
+    studentData
+  ]);
+  await trx.query('INSERT INTO student_profiles SET ?', [profileData]);
+  await trx.query(
+    'UPDATE admission_counters SET last_number = last_number + 1 WHERE school_id = ?',
+    [schoolId]
+  );
+  return studentId;
 });
 ```
 
@@ -274,83 +309,91 @@ await db.transaction(async (trx) => {
 ## Security Standards
 
 ### Authentication
+
 ```javascript
 // Password hashing
 const bcrypt = require('bcryptjs');
 const hashedPassword = await bcrypt.hash(password, 12);
 
 // Session management
-app.use(session({
+app.use(
+  session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 30 * 60 * 1000 // 30 minutes
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 30 * 60 * 1000 // 30 minutes
     },
     store: new MySQLStore({
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
     })
-}));
+  })
+);
 ```
 
 ### Input Validation
+
 ```javascript
 // Joi validation schemas
 const studentSchema = Joi.object({
-    full_name: Joi.string().trim().min(2).max(255).required(),
-    email: Joi.string().email().lowercase().trim(),
-    mobile: Joi.string().pattern(/^\d{10}$/).required(),
-    date_of_birth: Joi.date().max('now').iso(),
-    admission_date: Joi.date().default(() => new Date())
+  full_name: Joi.string().trim().min(2).max(255).required(),
+  email: Joi.string().email().lowercase().trim(),
+  mobile: Joi.string()
+    .pattern(/^\d{10}$/)
+    .required(),
+  date_of_birth: Joi.date().max('now').iso(),
+  admission_date: Joi.date().default(() => new Date())
 });
 
 // XSS sanitization
 const xss = require('xss');
 const sanitizedInput = xss(userInput, {
-    whiteList: {}, // No HTML allowed
-    stripIgnoreTag: true,
-    stripIgnoreTagBody: ['script']
+  whiteList: {}, // No HTML allowed
+  stripIgnoreTag: true,
+  stripIgnoreTagBody: ['script']
 });
 ```
 
 ### Authorization (RBAC)
+
 ```javascript
 // Permission checking
 function requirePermission(resource, action) {
-    return async (req, res, next) => {
-        try {
-            const hasPermission = await rbacService.checkPermission(
-                req.user.id,
-                resource,
-                action,
-                req.context
-            );
-            
-            if (!hasPermission) {
-                return res.status(403).json({
-                    success: false,
-                    error: 'Insufficient permissions'
-                });
-            }
-            
-            next();
-        } catch (error) {
-            next(error);
-        }
-    };
+  return async (req, res, next) => {
+    try {
+      const hasPermission = await rbacService.checkPermission(
+        req.user.id,
+        resource,
+        action,
+        req.context
+      );
+
+      if (!hasPermission) {
+        return res.status(403).json({
+          success: false,
+          error: 'Insufficient permissions'
+        });
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 // Usage in routes
-router.post('/students', 
-    requireAuth(),
-    requirePermission('students', 'create'),
-    validateInput(studentSchema),
-    createStudent
+router.post(
+  '/students',
+  requireAuth(),
+  requirePermission('students', 'create'),
+  validateInput(studentSchema),
+  createStudent
 );
 ```
 
@@ -359,9 +402,10 @@ router.post('/students',
 ## API Design Standards
 
 ### RESTful Endpoints
+
 ```
 GET    /api/students              # List students
-POST   /api/students              # Create student  
+POST   /api/students              # Create student
 GET    /api/students/:id          # Get student
 PUT    /api/students/:id          # Update student
 DELETE /api/students/:id          # Delete student
@@ -370,6 +414,7 @@ POST   /api/students/:id/promote  # Promote student
 ```
 
 ### Response Format
+
 ```javascript
 // Success Response
 {
@@ -399,25 +444,27 @@ POST   /api/students/:id/promote  # Promote student
 ```
 
 ### Middleware Chain
+
 ```javascript
-router.post('/students',
-    // 1. Authentication
-    requireAuth(),
-    
-    // 2. Context extraction
-    extractContext(),
-    
-    // 3. Authorization
-    requirePermission('students', 'create'),
-    
-    // 4. Rate limiting
-    rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
-    
-    // 5. Input validation
-    validateInput(studentSchema),
-    
-    // 6. Business logic
-    createStudent
+router.post(
+  '/students',
+  // 1. Authentication
+  requireAuth(),
+
+  // 2. Context extraction
+  extractContext(),
+
+  // 3. Authorization
+  requirePermission('students', 'create'),
+
+  // 4. Rate limiting
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }),
+
+  // 5. Input validation
+  validateInput(studentSchema),
+
+  // 6. Business logic
+  createStudent
 );
 ```
 
@@ -426,68 +473,88 @@ router.post('/students',
 ## Frontend Standards
 
 ### EJS Template Structure
+
 ```html
 <% layout('layout') -%>
 
 <!-- Page Header -->
 <div class="page-header">
-    <h1 class="page-title">Student Management</h1>
-    <p class="page-subtitle">Manage student admissions and profiles</p>
+  <h1 class="page-title">Student Management</h1>
+  <p class="page-subtitle">Manage student admissions and profiles</p>
 </div>
 
 <!-- Main Content -->
 <div class="page-container">
-    <!-- Content goes here -->
+  <!-- Content goes here -->
 </div>
 
 <script>
-// Page-specific JavaScript
-class StudentManager {
+  // Page-specific JavaScript
+  class StudentManager {
     constructor() {
-        this.init();
+      this.init();
     }
-    
-    async init() {
-        await this.loadStudents();
-        this.setupEventListeners();
-    }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
+    async init() {
+      await this.loadStudents();
+      this.setupEventListeners();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
     new StudentManager();
-});
+  });
 </script>
 ```
 
 ### CSS Class Conventions
+
 ```css
 /* Component Classes */
-.btn {}                    /* Base button */
-.btn-primary {}           /* Primary button variant */
-.btn-sm {}                /* Size modifier */
+.btn {
+} /* Base button */
+.btn-primary {
+} /* Primary button variant */
+.btn-sm {
+} /* Size modifier */
 
-.card {}                  /* Base card component */
-.card-header {}           /* Card subcomponent */
-.card-body {}             /* Card subcomponent */
+.card {
+} /* Base card component */
+.card-header {
+} /* Card subcomponent */
+.card-body {
+} /* Card subcomponent */
 
-.form-input {}            /* Form input element */
-.form-label {}            /* Form label element */
-.form-group {}            /* Form group container */
+.form-input {
+} /* Form input element */
+.form-label {
+} /* Form label element */
+.form-group {
+} /* Form group container */
 
 /* State Classes */
-.active {}                /* Active state */
-.disabled {}              /* Disabled state */
-.loading {}               /* Loading state */
-.error {}                 /* Error state */
+.active {
+} /* Active state */
+.disabled {
+} /* Disabled state */
+.loading {
+} /* Loading state */
+.error {
+} /* Error state */
 
 /* Layout Classes */
-.page-container {}        /* Main page wrapper */
-.page-header {}           /* Page header section */
-.grid {}                  /* Grid layout */
-.flex {}                  /* Flex layout */
+.page-container {
+} /* Main page wrapper */
+.page-header {
+} /* Page header section */
+.grid {
+} /* Grid layout */
+.flex {
+} /* Flex layout */
 ```
 
 ### JavaScript Standards
+
 ```javascript
 // API calls
 try {
@@ -504,12 +571,12 @@ try {
 validateField(field) {
     const value = field.value.trim();
     const rules = field.getAttribute('data-validation');
-    
+
     if (field.hasAttribute('required') && !value) {
         this.showFieldError(field, 'This field is required');
         return false;
     }
-    
+
     // Additional validation based on field type
     return true;
 }
@@ -522,10 +589,10 @@ setupEventListeners() {
             this.handleDelete(e.target);
         }
     });
-    
+
     // Debounce search inputs
     const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', 
+    searchInput.addEventListener('input',
         utils.debounce(() => this.performSearch(), 300)
     );
 }
@@ -536,62 +603,65 @@ setupEventListeners() {
 ## Testing Standards
 
 ### Unit Testing (Jest)
+
 ```javascript
 // modules/student/student-service.test.js
 describe('StudentService', () => {
-    let studentService;
-    
-    beforeEach(() => {
-        studentService = new StudentService();
-        // Mock database and dependencies
+  let studentService;
+
+  beforeEach(() => {
+    studentService = new StudentService();
+    // Mock database and dependencies
+  });
+
+  describe('createStudent', () => {
+    it('should create student with valid data', async () => {
+      const studentData = {
+        full_name: 'John Doe',
+        email: 'john@example.com',
+        school_id: 1
+      };
+
+      const result = await studentService.create(studentData, mockContext);
+
+      expect(result.success).toBe(true);
+      expect(result.data.id).toBeDefined();
     });
-    
-    describe('createStudent', () => {
-        it('should create student with valid data', async () => {
-            const studentData = {
-                full_name: 'John Doe',
-                email: 'john@example.com',
-                school_id: 1
-            };
-            
-            const result = await studentService.create(studentData, mockContext);
-            
-            expect(result.success).toBe(true);
-            expect(result.data.id).toBeDefined();
-        });
-        
-        it('should reject invalid email', async () => {
-            const studentData = {
-                full_name: 'John Doe',
-                email: 'invalid-email',
-                school_id: 1
-            };
-            
-            await expect(studentService.create(studentData, mockContext))
-                .rejects.toThrow('Invalid email format');
-        });
+
+    it('should reject invalid email', async () => {
+      const studentData = {
+        full_name: 'John Doe',
+        email: 'invalid-email',
+        school_id: 1
+      };
+
+      await expect(
+        studentService.create(studentData, mockContext)
+      ).rejects.toThrow('Invalid email format');
     });
+  });
 });
 ```
 
 ### Integration Testing
+
 ```javascript
 // api/student/create.test.js
 describe('POST /api/students', () => {
-    it('should create student when authenticated', async () => {
-        const response = await request(app)
-            .post('/api/students')
-            .set('Cookie', authCookie)
-            .send({
-                full_name: 'John Doe',
-                email: 'john@example.com',
-                school_id: 1
-            })
-            .expect(201);
-            
-        expect(response.body.success).toBe(true);
-        expect(response.body.data.id).toBeDefined();
-    });
+  it('should create student when authenticated', async () => {
+    const response = await request(app)
+      .post('/api/students')
+      .set('Cookie', authCookie)
+      .send({
+        full_name: 'John Doe',
+        email: 'john@example.com',
+        school_id: 1
+      })
+      .expect(201);
+
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.id).toBeDefined();
+  });
 });
 ```
 
@@ -600,6 +670,7 @@ describe('POST /api/students', () => {
 ## Documentation Standards
 
 ### Code Documentation
+
 ```javascript
 /**
  * Create a new student record with admission workflow
@@ -614,12 +685,13 @@ describe('POST /api/students', () => {
  * @throws {AppError} When validation fails or permission denied
  */
 async function createStudent(studentData, context) {
-    // Implementation
+  // Implementation
 }
 ```
 
 ### API Documentation
-```markdown
+
+````markdown
 ## Create Student
 
 Creates a new student record and initiates the admission workflow.
@@ -631,27 +703,31 @@ Creates a new student record and initiates the admission workflow.
 **Permissions:** `students:create`
 
 **Request Body:**
+
 ```json
 {
-    "full_name": "John Doe",
-    "email": "john@example.com", 
-    "mobile": "9876543210",
-    "school_id": 1,
-    "class_id": 5
+  "full_name": "John Doe",
+  "email": "john@example.com",
+  "mobile": "9876543210",
+  "school_id": 1,
+  "class_id": 5
+}
+```
+````
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": 123,
+    "admission_number": "2024-001"
+  }
 }
 ```
 
-**Response:**
-```json
-{
-    "success": true,
-    "data": {
-        "id": 123,
-        "admission_number": "2024-001"
-    }
-}
-```
-```
+````
 
 ---
 
@@ -672,7 +748,6 @@ DB_NAME=school_erp_master
 
 # Security
 SESSION_SECRET=your-super-secure-session-secret
-JWT_SECRET=your-jwt-secret
 ENCRYPTION_KEY=your-encryption-key
 
 # Features
@@ -684,41 +759,39 @@ ENABLE_SMS=false
 EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-```
+````
 
 ### Production Checklist
+
 ```markdown
-□ SSL certificate configured
-□ Database credentials secured
-□ Environment variables set
-□ Log aggregation configured
-□ Monitoring alerts setup
-□ Backup schedule configured
-□ Security headers enabled
-□ Rate limiting configured
-□ Error tracking enabled
-□ Health checks implemented
+□ SSL certificate configured □ Database credentials secured □ Environment
+variables set □ Log aggregation configured □ Monitoring alerts setup □ Backup
+schedule configured □ Security headers enabled □ Rate limiting configured □
+Error tracking enabled □ Health checks implemented
 ```
 
 ### PM2 Configuration
+
 ```javascript
 // ecosystem.config.js
 module.exports = {
-    apps: [{
-        name: 'school-erp',
-        script: './server.js',
-        instances: 'max',
-        exec_mode: 'cluster',
-        env: {
-            NODE_ENV: 'production',
-            PORT: 3000
-        },
-        error_file: './logs/err.log',
-        out_file: './logs/out.log',
-        log_file: './logs/combined.log',
-        time: true,
-        max_memory_restart: '1G'
-    }]
+  apps: [
+    {
+      name: 'school-erp',
+      script: './server.js',
+      instances: 'max',
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000
+      },
+      error_file: './logs/err.log',
+      out_file: './logs/out.log',
+      log_file: './logs/combined.log',
+      time: true,
+      max_memory_restart: '1G'
+    }
+  ]
 };
 ```
 
@@ -727,6 +800,7 @@ module.exports = {
 ## Best Practices Summary
 
 ### Development Workflow
+
 1. **Feature Branches**: Use feature branches for all development
 2. **Code Review**: All code must be reviewed before merging
 3. **Testing**: Write tests for all business logic
@@ -734,6 +808,7 @@ module.exports = {
 5. **Security**: Security review for all authentication/authorization changes
 
 ### Performance Guidelines
+
 1. **Database**: Always use indexed queries and avoid N+1 problems
 2. **Caching**: Cache frequently accessed data and computation results
 3. **Pagination**: Implement server-side pagination for all lists
@@ -741,6 +816,7 @@ module.exports = {
 5. **Assets**: Optimize and minify all static assets
 
 ### Security Guidelines
+
 1. **Input Validation**: Validate and sanitize all user input
 2. **Authentication**: Use strong password policies and session management
 3. **Authorization**: Implement role-based access control throughout
@@ -749,4 +825,6 @@ module.exports = {
 
 ---
 
-**This document serves as the authoritative guide for all School ERP development activities. All team members must follow these standards to ensure code quality, security, and maintainability.**
+**This document serves as the authoritative guide for all School ERP development
+activities. All team members must follow these standards to ensure code quality,
+security, and maintainability.**

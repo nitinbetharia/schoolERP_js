@@ -19,7 +19,7 @@
   "templating": "EJS 3.1.10",
   "styling": "Tailwind CSS 3.x (CDN)",
   "clientJS": "Alpine.js 3.x",
-  "validation": "Joi 18 + express-validator",
+  "validation": "Joi + Sequelize + custom rules",
   "authentication": "bcryptjs + express-session",
   "logging": "Winston 3.17",
   "caching": "node-cache",
@@ -51,7 +51,7 @@
 - **Passwords**: bcryptjs, salt rounds 12
 - **Sessions**: express-session with MySQL store, environment-based config
 - **Middleware Order**: helmet → cors → rateLimiter → auth → validation
-- **Input Sanitization**: express-validator + Joi transforms
+- **Input Sanitization**: Joi transforms + Sequelize validations
 
 #### Frontend Architecture
 
@@ -62,7 +62,8 @@
 
 #### Development Environment
 
-- **Database**: Cloud MySQL (shared team database)
+- **Database**: MySQL with separate databases per tenant
+  (`school_erp_trust_{trustCode}`)
 - **Configuration**: JSON files per environment + .env for secrets
 - **Hot Reload**: nodemon for development
 - **File Uploads**: Multer local default + cloud option per tenant

@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch School ERP",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"],
+      "restart": true,
+      "runtimeArgs": ["--inspect"]
+    },
+    {
+      "name": "Run Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "--detectOpenHandles", "--forceExit"],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "envFile": "${workspaceFolder}/.env.test"
+    },
+    {
+      "name": "Debug Setup Script",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/setup-database.js",
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}

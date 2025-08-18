@@ -7,7 +7,8 @@
 
 ## 🎯 PROJECT STATUS: ARCHITECTURE 100% COMPLETE - SINGLE SOURCE OF TRUTH ENFORCED
 
-**✅ All 56 Technical Decisions Finalized in `config/SINGLE_SOURCE_OF_TRUTH.js`**  
+**✅ All 56 Technical Decisions Finalized in
+`docs/architecture/SINGLE_SOURCE_OF_TRUTH.md`**  
 **✅ Business Logic Patterns Defined**  
 **✅ Complete Implementation Guide Available**  
 **✅ Development Environment Configured**  
@@ -17,10 +18,12 @@
 
 ## 🔒 SINGLE SOURCE OF TRUTH - IMMUTABLE DECISIONS
 
-**ALL technical decisions are FINAL and ENFORCED in `config/SINGLE_SOURCE_OF_TRUTH.js`**
+**ALL technical decisions are FINAL and ENFORCED in
+`docs/architecture/SINGLE_SOURCE_OF_TRUTH.md`**
 
 Before generating ANY code, you MUST:
-1. Check `config/SINGLE_SOURCE_OF_TRUTH.js` for the specific decision
+
+1. Check `docs/architecture/SINGLE_SOURCE_OF_TRUTH.md` for the specific decision
 2. Use the exact implementation pattern specified
 3. Never use any pattern marked as "forbidden"
 
@@ -38,15 +41,17 @@ patterns for:
 
 ## Mandatory Reading Order (SINGLE SOURCE OF TRUTH)
 
-**🔒 PRIMARY REFERENCE**: `SINGLE_SOURCE_OF_TRUTH.md` - ALL 56 Q&A decisions (IMMUTABLE)
+**🔒 PRIMARY REFERENCE**: `SINGLE_SOURCE_OF_TRUTH.md` - ALL 56 Q&A decisions
+(IMMUTABLE)
 
 1. **SINGLE_SOURCE_OF_TRUTH.md** - ALL technical decisions (FINAL)
-2. **COPILOT_INSTRUCTIONS.md** (this file) - Development standards  
+2. **COPILOT_INSTRUCTIONS.md** (this file) - Development standards
 3. **TECHNICAL_SPECIFICATION_COMPLETE.md** - Implementation patterns
 4. **REQUIREMENTS_FINAL.md** - Business requirements documentation
 5. **IMPLEMENTATION_READY.md** - Phase-by-phase roadmap
 
-**⚠️ CRITICAL**: Before writing ANY code, check `SINGLE_SOURCE_OF_TRUTH.md` for the specific decision.
+**⚠️ CRITICAL**: Before writing ANY code, check `SINGLE_SOURCE_OF_TRUTH.md` for
+the specific decision.
 
 ---
 
@@ -140,7 +145,7 @@ patterns for:
   config
 - **Middleware Chain**: helmet() → cors() → rateLimiter → authMiddleware →
   validationMiddleware
-- **Input Validation**: Joi transforms within model files + express-validator
+- **Input Validation**: Joi + Sequelize validations + custom business rules
   sanitization
 
 ### Frontend & UI Architecture
@@ -259,8 +264,8 @@ const sql = `SELECT * FROM ${TABLES.STUDENTS} WHERE id = ?`;
    etc.
 3. **RBAC + Validation chain**:
    `requireAuth → extractContext → requirePermission → rateLimit → validateInput(Joi) → handler`.
-4. **DB access**: mysql2 prepared statements. Transactions for multi-table
-   writes. Handle deadlocks with retry (max 2).
+4. **DB access**: Sequelize ORM only (NO raw mysql2). Transactions for
+   multi-table writes. Handle deadlocks with retry (max 2).
 5. **Audit**: Log who/what/when/IP/UA and old vs new for all mutations.
 6. **Logging**: Winston structured logs. No `console.log` in production paths.
 7. **Testing**: Add unit + integration tests for every new service and route.

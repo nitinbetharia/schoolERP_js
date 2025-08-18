@@ -18,7 +18,7 @@ Based on senior developer consultation and detailed technical decisions
 7. **Password Security**: bcryptjs with salt rounds 12
 8. **Session Management**: Environment-based configuration (secure in
    production)
-9. **Input Validation**: Joi schemas within model files + express-validator
+9. **Input Validation**: Joi + Sequelize validations + custom business rules
    sanitization
 10. **Error Handling**: Structured responses with error codes and timestamps
 11. **Middleware Chain**: Security-first (helmet → cors → rateLimiter → auth →
@@ -254,7 +254,7 @@ public/css/
 
 ### Environment Support
 
-- Development: Local with Docker
+- Development: Local Node.js with cloud MySQL
 - Staging: Cloud VM with monitoring
 - Production: Load-balanced VMs
 - Backup: Automated daily backups

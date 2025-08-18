@@ -52,7 +52,7 @@ class CodebaseValidator {
       this.filesChecked++;
 
       const violations = validateCodebase(content);
-      
+
       if (violations.length > 0) {
         this.violations.push({
           file: path.relative(process.cwd(), filePath),
@@ -62,7 +62,6 @@ class CodebaseValidator {
 
       // Additional specific checks
       await this.validateSpecificPatterns(filePath, content);
-
     } catch (error) {
       console.warn(`⚠️  Could not validate ${filePath}: ${error.message}`);
     }
@@ -91,8 +90,7 @@ class CodebaseValidator {
     }
 
     // Check for wrong connection pool settings (Q11 violation)
-    if (content.includes('pool') && content.includes('max') && 
-        !content.includes('max: 15')) {
+    if (content.includes('pool') && content.includes('max') && !content.includes('max: 15')) {
       violations.push({
         decision: 'Q11_CONNECTION_POOLING',
         violation: 'Incorrect connection pool settings',
@@ -101,8 +99,7 @@ class CodebaseValidator {
     }
 
     // Check for wrong bcrypt salt rounds (Q17 violation)
-    if (content.includes('bcrypt') && content.includes('hash') && 
-        !content.includes('12')) {
+    if (content.includes('bcrypt') && content.includes('hash') && !content.includes('12')) {
       violations.push({
         decision: 'Q17_PASSWORD_SECURITY',
         violation: 'Incorrect bcrypt salt rounds',

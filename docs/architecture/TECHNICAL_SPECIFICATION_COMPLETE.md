@@ -2,17 +2,20 @@
 
 ## 🔒 SINGLE SOURCE OF TRUTH - ALL DECISIONS FINAL
 
-**Status**: ALL 56 technical decisions finalized and ENFORCED in `config/SINGLE_SOURCE_OF_TRUTH.js`  
+**Status**: ALL 56 technical decisions finalized and ENFORCED in
+`docs/architecture/SINGLE_SOURCE_OF_TRUTH.md`  
 **Approach**: Zero-ambiguity specification with validation enforcement  
 **Result**: Production-ready architecture with immutable implementation patterns
 
-⚠️ **CRITICAL**: All technical decisions are FINAL and ENFORCED. Any deviation will cause build failure.
+⚠️ **CRITICAL**: All technical decisions are FINAL and ENFORCED. Any deviation
+will cause build failure.
 
 ---
 
 ## 📋 Complete Decision Matrix (Q1-Q56) - IMMUTABLE
 
-**Reference**: `config/SINGLE_SOURCE_OF_TRUTH.js` - The ONLY source for technical decisions
+**Reference**: `docs/architecture/SINGLE_SOURCE_OF_TRUTH.md` - The ONLY source
+for technical decisions
 
 ### **Core Technology Stack**
 
@@ -103,55 +106,66 @@
 ### **Module Implementation Sequence & Dependencies**
 
 **Phase 1: Foundation Layer (Critical Dependencies)**
+
 1. **DATA Module** → Database infrastructure, connections, schema management
-2. **AUTH Module** → Authentication, authorization, session management  
+2. **AUTH Module** → Authentication, authorization, session management
 3. **SETUP Module** → Initial configuration wizard for trusts and schools
 
-**Phase 2: Core Entity Management**
-4. **USER Module** → User lifecycle management (depends on AUTH, SETUP)
-5. **STUD Module** → Student management (depends on USER, SETUP)
+**Phase 2: Core Entity Management** 4. **USER Module** → User lifecycle
+management (depends on AUTH, SETUP) 5. **STUD Module** → Student management
+(depends on USER, SETUP)
 
-**Phase 3: Operational Modules**
-6. **FEES Module** → Fee management (depends on STUD, USER) - **Enhanced with frontend-configurable fee rules**
-7. **ATTD Module** → Attendance tracking (depends on STUD, USER)
+**Phase 3: Operational Modules** 6. **FEES Module** → Fee management (depends on
+STUD, USER) - **Enhanced with frontend-configurable fee rules** 7. **ATTD
+Module** → Attendance tracking (depends on STUD, USER)
 
-**Phase 4: Analytics & Communication**
-8. **REPT Module** → Reporting system (depends on all data modules)
-9. **DASH Module** → Dashboards (depends on all operational modules)
-10. **COMM Module** → Communications (depends on USER, STUD) - **Enhanced with multi-channel support**
+**Phase 4: Analytics & Communication** 8. **REPT Module** → Reporting system
+(depends on all data modules) 9. **DASH Module** → Dashboards (depends on all
+operational modules) 10. **COMM Module** → Communications (depends on USER,
+STUD) - **Enhanced with multi-channel support**
 
 ### **Enhanced Module Specifications (Aligned with Finalized Decisions)**
 
 #### **1. DATA Module - Database Infrastructure**
+
 **Status**: ✅ Fully specified with Sequelize ORM patterns
+
 - Multi-tenant Sequelize connection management (Q35)
 - Mixed primary keys: UUIDs for sensitive data, integers for lookups (Q14)
 - Snake_case database, camelCase JavaScript mapping (Q16)
 - Connection pooling: `{ max: 15, min: 2, acquire: 60000, idle: 300000 }` (Q11)
 
-#### **2. AUTH Module - Authentication & Authorization**  
+#### **2. AUTH Module - Authentication & Authorization**
+
 **Status**: ✅ Fully specified with enhanced security
+
 - bcryptjs with salt rounds 12 (Q17)
 - Express sessions with MySQL store (Q6)
 - Role-based session timeouts: ADMIN(8h), TEACHER(12h), PARENT(24h) (Q37)
 - Comprehensive audit trail with before/after tracking (Q50)
 
 #### **3. SETUP Module - Configuration Wizard**
+
 **Status**: ✅ Enhanced with frontend-configurable wizards
+
 - Complete wizard engine with frontend management interface
 - Per-tenant defaults with intelligent configuration
 - Dynamic step creation and modification
 - Progress tracking and resume functionality
 
 #### **4. USER Module - User Management**
+
 **Status**: ✅ Fully specified with RBAC patterns
+
 - Separate roles table with relationships (Q36)
 - Tenant-configurable password policies (Q38)
 - Context-aware authorization (users access only their data)
 - Comprehensive user lifecycle management
 
 #### **5. STUD Module - Student Management**
+
 **Status**: ✅ Fully specified with academic tracking
+
 - Student model with UUID primary keys
 - Comprehensive admission workflow
 - Parent-student relationship management
@@ -159,7 +173,9 @@
 - Document management integration
 
 #### **6. FEES Module - Fee Management** ⭐ **ENHANCED**
+
 **Status**: ✅ Advanced frontend-configurable fee calculation engine
+
 - **ConfigurableFeeCalculator** with tenant-specific rules
 - Late fees, scholarships, waivers, and custom formulas
 - Frontend rule builder with JavaScript formula execution
@@ -167,14 +183,18 @@
 - Payment tracking and financial reporting
 
 #### **7. ATTD Module - Attendance Management**
+
 **Status**: ✅ Fully specified with multiple tracking types
+
 - Daily attendance with status tracking
 - Leave application workflows
 - Attendance analytics and reporting
 - Automated notification system
 
 #### **8. REPT Module - Reporting System**
+
 **Status**: ✅ Comprehensive reporting framework
+
 - Pre-built report templates
 - Custom report builder functionality
 - Export capabilities (PDF, Excel, CSV)
@@ -182,17 +202,21 @@
 - Role-based report access
 
 #### **9. DASH Module - Dashboard & Analytics**
+
 **Status**: ✅ Role-based dashboards with real-time data
+
 - Real-time KPI widgets with caching (Q32)
 - Role-specific dashboard configurations
 - Interactive charts and performance indicators
 - Quick action panels for common tasks
 
 #### **10. COMM Module - Communication System** ⭐ **ENHANCED**
+
 **Status**: ✅ Advanced multi-channel communication engine
+
 - **CommunicationEngine** with multiple providers
 - Email: SendGrid, Nodemailer integration
-- SMS: Twilio integration  
+- SMS: Twilio integration
 - WhatsApp: Business API support
 - Template management and delivery tracking
 - Emergency alert system
@@ -793,12 +817,12 @@ class ConfigurableFeeCalculator {
 
   async calculateStudentFee(studentId, feeStructureId, options = {}) {
     const { academicYear, term, dueDate = new Date() } = options;
-    
+
     // Load student data with relationships
     const student = await this.loadStudentData(studentId);
     const feeStructure = await this.loadFeeStructure(feeStructureId);
     const rules = await this.loadTenantFeeRules();
-    
+
     // Initialize calculation
     let calculation = {
       baseFee: feeStructure.base_amount,
@@ -819,7 +843,7 @@ class ConfigurableFeeCalculator {
 
     // Apply rules in priority order
     const sortedRules = rules.sort((a, b) => a.priority - b.priority);
-    
+
     for (const rule of sortedRules) {
       if (await this.isRuleApplicable(rule, student, feeStructure, options)) {
         calculation = await this.applyRule(rule, calculation, student, options);
@@ -849,40 +873,40 @@ class ConfigurableFeeCalculator {
     switch (rule.type) {
       case 'late_fee':
         return await this.applyLateFee(rule, calculation, dueDate);
-      
+
       case 'scholarship':
         return await this.applyScholarship(rule, calculation, student);
-      
+
       case 'waiver':
         return await this.applyWaiver(rule, calculation, student);
-      
+
       case 'sibling_discount':
         return await this.applySiblingDiscount(rule, calculation, student);
-      
+
       case 'category_discount':
         return await this.applyCategoryDiscount(rule, calculation, student);
-      
+
       case 'early_payment_discount':
         return await this.applyEarlyPaymentDiscount(rule, calculation, dueDate);
-      
+
       case 'transport_fee':
         return await this.applyTransportFee(rule, calculation, student);
-      
+
       case 'hostel_fee':
         return await this.applyHostelFee(rule, calculation, student);
-      
+
       case 'custom_formula':
         return await this.applyCustomFormula(rule, calculation, student);
-      
+
       case 'conditional_discount':
         return await this.applyConditionalDiscount(rule, calculation, student);
-      
+
       case 'installment_charge':
         return await this.applyInstallmentCharge(rule, calculation, options);
-      
+
       case 'penalty':
         return await this.applyPenalty(rule, calculation, student, options);
-      
+
       default:
         console.warn(`Unknown fee rule type: ${rule.type}`);
         return calculation;
@@ -890,8 +914,11 @@ class ConfigurableFeeCalculator {
   }
 
   async applyLateFee(rule, calculation, dueDate) {
-    const daysPastDue = Math.max(0, Math.floor((new Date() - dueDate) / (1000 * 60 * 60 * 24)));
-    
+    const daysPastDue = Math.max(
+      0,
+      Math.floor((new Date() - dueDate) / (1000 * 60 * 60 * 24))
+    );
+
     if (daysPastDue <= rule.config.gracePeriodDays) return calculation;
 
     let lateFee = 0;
@@ -901,22 +928,26 @@ class ConfigurableFeeCalculator {
       case 'fixed':
         lateFee = config.fixedAmount;
         break;
-      
+
       case 'percentage':
         lateFee = calculation.baseFee * (config.percentageRate / 100);
         break;
-      
+
       case 'daily':
         const chargeableDays = daysPastDue - config.gracePeriodDays;
         lateFee = chargeableDays * config.dailyRate;
         break;
-      
+
       case 'tiered':
         lateFee = this.calculateTieredLateFee(daysPastDue, config.tiers);
         break;
-      
+
       case 'compound':
-        lateFee = this.calculateCompoundLateFee(calculation.baseFee, daysPastDue, config);
+        lateFee = this.calculateCompoundLateFee(
+          calculation.baseFee,
+          daysPastDue,
+          config
+        );
         break;
     }
 
@@ -927,7 +958,7 @@ class ConfigurableFeeCalculator {
 
     calculation.totalFee += lateFee;
     calculation.appliedCharges += lateFee;
-    
+
     this.appliedRules.push({
       ruleId: rule.id,
       ruleName: rule.name,
@@ -958,21 +989,24 @@ class ConfigurableFeeCalculator {
       case 'percentage':
         scholarshipAmount = calculation.baseFee * (config.percentage / 100);
         break;
-      
+
       case 'fixed':
         scholarshipAmount = config.fixedAmount;
         break;
-      
+
       case 'full_waiver':
         scholarshipAmount = calculation.totalFee;
         break;
-      
+
       case 'merit_based':
         scholarshipAmount = this.calculateMeritScholarship(student, config);
         break;
-      
+
       case 'need_based':
-        scholarshipAmount = await this.calculateNeedBasedScholarship(student, config);
+        scholarshipAmount = await this.calculateNeedBasedScholarship(
+          student,
+          config
+        );
         break;
     }
 
@@ -1010,7 +1044,7 @@ class ConfigurableFeeCalculator {
 
     // Check waiver conditions
     const conditions = config.conditions || {};
-    if (!await this.checkWaiverConditions(conditions, student)) {
+    if (!(await this.checkWaiverConditions(conditions, student))) {
       return calculation;
     }
 
@@ -1018,17 +1052,21 @@ class ConfigurableFeeCalculator {
       case 'percentage':
         waiverAmount = calculation.baseFee * (config.percentage / 100);
         break;
-      
+
       case 'fixed':
         waiverAmount = config.fixedAmount;
         break;
-      
+
       case 'component_specific':
         waiverAmount = await this.calculateComponentWaiver(config, calculation);
         break;
-      
+
       case 'conditional':
-        waiverAmount = await this.calculateConditionalWaiver(config, student, calculation);
+        waiverAmount = await this.calculateConditionalWaiver(
+          config,
+          student,
+          calculation
+        );
         break;
     }
 
@@ -1068,14 +1106,17 @@ class ConfigurableFeeCalculator {
 
     try {
       // Create safe execution environment
-      const formula = new Function('context', `
+      const formula = new Function(
+        'context',
+        `
         with(context) {
           ${config.formula}
         }
-      `);
+      `
+      );
 
       const result = formula(context);
-      
+
       if (typeof result !== 'number' || isNaN(result)) {
         throw new Error('Formula must return a valid number');
       }
@@ -1098,9 +1139,11 @@ class ConfigurableFeeCalculator {
         amount: Math.abs(adjustment),
         operation: adjustment >= 0 ? 'add' : 'subtract'
       });
-
     } catch (error) {
-      console.error(`Error executing custom formula for rule ${rule.id}:`, error);
+      console.error(
+        `Error executing custom formula for rule ${rule.id}:`,
+        error
+      );
     }
 
     return calculation;
@@ -1128,33 +1171,104 @@ class ConfigurableFeeCalculator {
       late_fee: {
         name: 'Late Fee Configuration',
         fields: [
-          { name: 'gracePeriodDays', type: 'number', label: 'Grace Period (Days)', default: 0 },
-          { name: 'calculationType', type: 'select', label: 'Calculation Type', 
-            options: ['fixed', 'percentage', 'daily', 'tiered', 'compound'] },
-          { name: 'fixedAmount', type: 'number', label: 'Fixed Amount', condition: 'calculationType=fixed' },
-          { name: 'percentageRate', type: 'number', label: 'Percentage Rate', condition: 'calculationType=percentage' },
-          { name: 'dailyRate', type: 'number', label: 'Daily Rate', condition: 'calculationType=daily' },
-          { name: 'maximumAmount', type: 'number', label: 'Maximum Amount (Optional)' }
+          {
+            name: 'gracePeriodDays',
+            type: 'number',
+            label: 'Grace Period (Days)',
+            default: 0
+          },
+          {
+            name: 'calculationType',
+            type: 'select',
+            label: 'Calculation Type',
+            options: ['fixed', 'percentage', 'daily', 'tiered', 'compound']
+          },
+          {
+            name: 'fixedAmount',
+            type: 'number',
+            label: 'Fixed Amount',
+            condition: 'calculationType=fixed'
+          },
+          {
+            name: 'percentageRate',
+            type: 'number',
+            label: 'Percentage Rate',
+            condition: 'calculationType=percentage'
+          },
+          {
+            name: 'dailyRate',
+            type: 'number',
+            label: 'Daily Rate',
+            condition: 'calculationType=daily'
+          },
+          {
+            name: 'maximumAmount',
+            type: 'number',
+            label: 'Maximum Amount (Optional)'
+          }
         ]
       },
       scholarship: {
         name: 'Scholarship Configuration',
         fields: [
-          { name: 'type', type: 'select', label: 'Scholarship Type',
-            options: ['percentage', 'fixed', 'full_waiver', 'merit_based', 'need_based'] },
-          { name: 'percentage', type: 'number', label: 'Percentage', condition: 'type=percentage' },
-          { name: 'fixedAmount', type: 'number', label: 'Fixed Amount', condition: 'type=fixed' },
+          {
+            name: 'type',
+            type: 'select',
+            label: 'Scholarship Type',
+            options: [
+              'percentage',
+              'fixed',
+              'full_waiver',
+              'merit_based',
+              'need_based'
+            ]
+          },
+          {
+            name: 'percentage',
+            type: 'number',
+            label: 'Percentage',
+            condition: 'type=percentage'
+          },
+          {
+            name: 'fixedAmount',
+            type: 'number',
+            label: 'Fixed Amount',
+            condition: 'type=fixed'
+          },
           { name: 'maximumAmount', type: 'number', label: 'Maximum Amount' },
-          { name: 'eligibilityCriteria', type: 'json', label: 'Eligibility Criteria' }
+          {
+            name: 'eligibilityCriteria',
+            type: 'json',
+            label: 'Eligibility Criteria'
+          }
         ]
       },
       waiver: {
         name: 'Fee Waiver Configuration',
         fields: [
-          { name: 'waiverType', type: 'select', label: 'Waiver Type',
-            options: ['percentage', 'fixed', 'component_specific', 'conditional'] },
-          { name: 'percentage', type: 'number', label: 'Percentage', condition: 'waiverType=percentage' },
-          { name: 'fixedAmount', type: 'number', label: 'Fixed Amount', condition: 'waiverType=fixed' },
+          {
+            name: 'waiverType',
+            type: 'select',
+            label: 'Waiver Type',
+            options: [
+              'percentage',
+              'fixed',
+              'component_specific',
+              'conditional'
+            ]
+          },
+          {
+            name: 'percentage',
+            type: 'number',
+            label: 'Percentage',
+            condition: 'waiverType=percentage'
+          },
+          {
+            name: 'fixedAmount',
+            type: 'number',
+            label: 'Fixed Amount',
+            condition: 'waiverType=fixed'
+          },
           { name: 'reason', type: 'text', label: 'Waiver Reason' },
           { name: 'conditions', type: 'json', label: 'Conditions' }
         ]
@@ -1162,8 +1276,12 @@ class ConfigurableFeeCalculator {
       custom_formula: {
         name: 'Custom Formula',
         fields: [
-          { name: 'formula', type: 'textarea', label: 'JavaScript Formula',
-            help: 'Use: baseFee, currentTotal, student object, Math functions' },
+          {
+            name: 'formula',
+            type: 'textarea',
+            label: 'JavaScript Formula',
+            help: 'Use: baseFee, currentTotal, student object, Math functions'
+          },
           { name: 'description', type: 'text', label: 'Formula Description' }
         ]
       }
@@ -1365,147 +1483,157 @@ class ConfigurableAcademicCalendar {
 
 ```javascript
 // Fee Rules Table - Stores all tenant-configurable fee calculation rules
-const FeeRule = sequelize.define('FeeRule', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
+const FeeRule = sequelize.define(
+  'FeeRule',
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
+    tenantId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'tenants', key: 'id' }
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: { len: [3, 100] }
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    type: {
+      type: DataTypes.ENUM([
+        'late_fee',
+        'scholarship',
+        'waiver',
+        'sibling_discount',
+        'category_discount',
+        'early_payment_discount',
+        'transport_fee',
+        'hostel_fee',
+        'custom_formula',
+        'conditional_discount',
+        'installment_charge',
+        'penalty'
+      ]),
+      allowNull: false
+    },
+    priority: {
+      type: DataTypes.INTEGER,
+      defaultValue: 100,
+      validate: { min: 1, max: 1000 }
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
+    config: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      comment:
+        'Rule-specific configuration (amounts, percentages, formulas, etc.)'
+    },
+    conditions: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment:
+        'Eligibility conditions (grade, category, academic performance, etc.)'
+    },
+    applicableToClasses: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: 'Array of class IDs this rule applies to'
+    },
+    applicableToCategories: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: 'Array of student categories this rule applies to'
+    },
+    effectiveFrom: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    effectiveTo: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    createdBy: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'users', key: 'id' }
+    },
+    lastModifiedBy: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: 'users', key: 'id' }
+    }
   },
-  tenantId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: { model: 'tenants', key: 'id' }
-  },
-  name: {
-    type: DataTypes.STRING(100),
-    allowNull: false,
-    validate: { len: [3, 100] }
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  type: {
-    type: DataTypes.ENUM([
-      'late_fee',
-      'scholarship', 
-      'waiver',
-      'sibling_discount',
-      'category_discount', 
-      'early_payment_discount',
-      'transport_fee',
-      'hostel_fee',
-      'custom_formula',
-      'conditional_discount',
-      'installment_charge',
-      'penalty'
-    ]),
-    allowNull: false
-  },
-  priority: {
-    type: DataTypes.INTEGER,
-    defaultValue: 100,
-    validate: { min: 1, max: 1000 }
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
-  },
-  config: {
-    type: DataTypes.JSON,
-    allowNull: false,
-    comment: 'Rule-specific configuration (amounts, percentages, formulas, etc.)'
-  },
-  conditions: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    comment: 'Eligibility conditions (grade, category, academic performance, etc.)'
-  },
-  applicableToClasses: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    comment: 'Array of class IDs this rule applies to'
-  },
-  applicableToCategories: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    comment: 'Array of student categories this rule applies to'
-  },
-  effectiveFrom: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  effectiveTo: {
-    type: DataTypes.DATE,
-    allowNull: true
-  },
-  createdBy: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: { model: 'users', key: 'id' }
-  },
-  lastModifiedBy: {
-    type: DataTypes.UUID,
-    allowNull: true,
-    references: { model: 'users', key: 'id' }
+  {
+    tableName: 'fee_rules',
+    underscored: true,
+    indexes: [
+      { fields: ['tenant_id', 'type'] },
+      { fields: ['tenant_id', 'is_active'] },
+      { fields: ['priority'] },
+      { fields: ['effective_from', 'effective_to'] }
+    ]
   }
-}, {
-  tableName: 'fee_rules',
-  underscored: true,
-  indexes: [
-    { fields: ['tenant_id', 'type'] },
-    { fields: ['tenant_id', 'is_active'] },
-    { fields: ['priority'] },
-    { fields: ['effective_from', 'effective_to'] }
-  ]
-});
+);
 
 // Fee Rule Applications - Track when rules are applied to student fees
-const FeeRuleApplication = sequelize.define('FeeRuleApplication', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true
+const FeeRuleApplication = sequelize.define(
+  'FeeRuleApplication',
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
+    },
+    feeCalculationId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'fee_calculations', key: 'id' }
+    },
+    feeRuleId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'fee_rules', key: 'id' }
+    },
+    studentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: { model: 'students', key: 'id' }
+    },
+    amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      comment: 'Positive for charges, negative for discounts/waivers'
+    },
+    details: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: 'Rule execution details and intermediate calculations'
+    },
+    appliedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    }
   },
-  feeCalculationId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: { model: 'fee_calculations', key: 'id' }
-  },
-  feeRuleId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: { model: 'fee_rules', key: 'id' }
-  },
-  studentId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: { model: 'students', key: 'id' }
-  },
-  amount: {
-    type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-    comment: 'Positive for charges, negative for discounts/waivers'
-  },
-  details: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    comment: 'Rule execution details and intermediate calculations'
-  },
-  appliedAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
+  {
+    tableName: 'fee_rule_applications',
+    underscored: true,
+    indexes: [
+      { fields: ['fee_calculation_id'] },
+      { fields: ['fee_rule_id'] },
+      { fields: ['student_id'] },
+      { fields: ['applied_at'] }
+    ]
   }
-}, {
-  tableName: 'fee_rule_applications',
-  underscored: true,
-  indexes: [
-    { fields: ['fee_calculation_id'] },
-    { fields: ['fee_rule_id'] },
-    { fields: ['student_id'] },
-    { fields: ['applied_at'] }
-  ]
-});
+);
 ```
 
 ## 🎛️ Frontend Configuration Interface Components
@@ -1524,17 +1652,25 @@ Alpine.data('feeRuleBuilder', () => ({
     { value: 'early_payment_discount', label: 'Early Payment Discount' },
     { value: 'custom_formula', label: 'Custom Formula' }
   ],
-  
+
   selectedType: '',
   ruleConfig: {},
   conditions: {},
-  
+
   // Dynamic field configurations based on rule type
   getFieldsForType(type) {
     const templates = {
       late_fee: [
-        { name: 'gracePeriodDays', label: 'Grace Period (Days)', type: 'number', default: 0 },
-        { name: 'calculationType', label: 'Calculation Method', type: 'select', 
+        {
+          name: 'gracePeriodDays',
+          label: 'Grace Period (Days)',
+          type: 'number',
+          default: 0
+        },
+        {
+          name: 'calculationType',
+          label: 'Calculation Method',
+          type: 'select',
           options: [
             { value: 'fixed', label: 'Fixed Amount' },
             { value: 'percentage', label: 'Percentage of Base Fee' },
@@ -1543,17 +1679,36 @@ Alpine.data('feeRuleBuilder', () => ({
             { value: 'compound', label: 'Compound Interest' }
           ]
         },
-        { name: 'fixedAmount', label: 'Fixed Amount', type: 'currency', 
-          condition: 'calculationType=fixed' },
-        { name: 'percentageRate', label: 'Percentage Rate (%)', type: 'number', 
-          condition: 'calculationType=percentage' },
-        { name: 'dailyRate', label: 'Daily Rate', type: 'currency', 
-          condition: 'calculationType=daily' },
-        { name: 'maximumAmount', label: 'Maximum Amount (Optional)', type: 'currency' }
+        {
+          name: 'fixedAmount',
+          label: 'Fixed Amount',
+          type: 'currency',
+          condition: 'calculationType=fixed'
+        },
+        {
+          name: 'percentageRate',
+          label: 'Percentage Rate (%)',
+          type: 'number',
+          condition: 'calculationType=percentage'
+        },
+        {
+          name: 'dailyRate',
+          label: 'Daily Rate',
+          type: 'currency',
+          condition: 'calculationType=daily'
+        },
+        {
+          name: 'maximumAmount',
+          label: 'Maximum Amount (Optional)',
+          type: 'currency'
+        }
       ],
-      
+
       scholarship: [
-        { name: 'type', label: 'Scholarship Type', type: 'select',
+        {
+          name: 'type',
+          label: 'Scholarship Type',
+          type: 'select',
           options: [
             { value: 'percentage', label: 'Percentage Discount' },
             { value: 'fixed', label: 'Fixed Amount Discount' },
@@ -1562,20 +1717,45 @@ Alpine.data('feeRuleBuilder', () => ({
             { value: 'need_based', label: 'Need-Based Assessment' }
           ]
         },
-        { name: 'percentage', label: 'Discount Percentage', type: 'number', 
-          condition: 'type=percentage', min: 0, max: 100 },
-        { name: 'fixedAmount', label: 'Fixed Discount Amount', type: 'currency', 
-          condition: 'type=fixed' },
-        { name: 'maximumAmount', label: 'Maximum Scholarship Amount', type: 'currency' },
-        { name: 'minimumGrade', label: 'Minimum Grade Requirement', type: 'select',
+        {
+          name: 'percentage',
+          label: 'Discount Percentage',
+          type: 'number',
+          condition: 'type=percentage',
+          min: 0,
+          max: 100
+        },
+        {
+          name: 'fixedAmount',
+          label: 'Fixed Discount Amount',
+          type: 'currency',
+          condition: 'type=fixed'
+        },
+        {
+          name: 'maximumAmount',
+          label: 'Maximum Scholarship Amount',
+          type: 'currency'
+        },
+        {
+          name: 'minimumGrade',
+          label: 'Minimum Grade Requirement',
+          type: 'select',
           condition: 'type=merit_based',
-          options: ['A+', 'A', 'B+', 'B', 'C+', 'C'] },
-        { name: 'parentIncomeLimit', label: 'Parent Income Limit', type: 'currency',
-          condition: 'type=need_based' }
+          options: ['A+', 'A', 'B+', 'B', 'C+', 'C']
+        },
+        {
+          name: 'parentIncomeLimit',
+          label: 'Parent Income Limit',
+          type: 'currency',
+          condition: 'type=need_based'
+        }
       ],
-      
+
       waiver: [
-        { name: 'waiverType', label: 'Waiver Type', type: 'select',
+        {
+          name: 'waiverType',
+          label: 'Waiver Type',
+          type: 'select',
           options: [
             { value: 'percentage', label: 'Percentage Waiver' },
             { value: 'fixed', label: 'Fixed Amount Waiver' },
@@ -1583,24 +1763,38 @@ Alpine.data('feeRuleBuilder', () => ({
             { value: 'conditional', label: 'Conditional Waiver' }
           ]
         },
-        { name: 'percentage', label: 'Waiver Percentage', type: 'number', 
-          condition: 'waiverType=percentage', min: 0, max: 100 },
-        { name: 'fixedAmount', label: 'Fixed Waiver Amount', type: 'currency', 
-          condition: 'waiverType=fixed' },
+        {
+          name: 'percentage',
+          label: 'Waiver Percentage',
+          type: 'number',
+          condition: 'waiverType=percentage',
+          min: 0,
+          max: 100
+        },
+        {
+          name: 'fixedAmount',
+          label: 'Fixed Waiver Amount',
+          type: 'currency',
+          condition: 'waiverType=fixed'
+        },
         { name: 'reason', label: 'Waiver Reason', type: 'text', required: true }
       ],
-      
+
       custom_formula: [
-        { name: 'formula', label: 'JavaScript Formula', type: 'code',
+        {
+          name: 'formula',
+          label: 'JavaScript Formula',
+          type: 'code',
           help: 'Available variables: baseFee, currentTotal, student (object), Math functions',
-          placeholder: 'return baseFee * 0.9; // 10% discount example' },
+          placeholder: 'return baseFee * 0.9; // 10% discount example'
+        },
         { name: 'description', label: 'Formula Description', type: 'textarea' }
       ]
     };
-    
+
     return templates[type] || [];
   },
-  
+
   // Condition builder for rule eligibility
   addCondition() {
     const conditionId = Date.now();
@@ -1611,11 +1805,11 @@ Alpine.data('feeRuleBuilder', () => ({
       logicalOperator: 'AND'
     };
   },
-  
+
   removeCondition(conditionId) {
     delete this.conditions[conditionId];
   },
-  
+
   // Save rule configuration
   async saveRule() {
     const ruleData = {
@@ -1630,14 +1824,14 @@ Alpine.data('feeRuleBuilder', () => ({
       effectiveFrom: this.effectiveFrom,
       effectiveTo: this.effectiveTo
     };
-    
+
     try {
       const response = await fetch('/api/fee-rules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ruleData)
       });
-      
+
       if (response.ok) {
         this.showSuccess('Fee rule saved successfully!');
         this.resetForm();
@@ -1648,7 +1842,7 @@ Alpine.data('feeRuleBuilder', () => ({
       this.showError('Error saving fee rule: ' + error.message);
     }
   },
-  
+
   // Test rule against sample data
   async testRule() {
     const testData = {
@@ -1656,14 +1850,14 @@ Alpine.data('feeRuleBuilder', () => ({
       conditions: this.conditions,
       sampleStudent: this.sampleStudentData
     };
-    
+
     try {
       const response = await fetch('/api/fee-rules/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(testData)
       });
-      
+
       const result = await response.json();
       this.showTestResult(result);
     } catch (error) {
@@ -1680,7 +1874,7 @@ Alpine.data('feeRuleBuilder', () => ({
 <div class="container mx-auto p-6" x-data="feeRuleBuilder()">
   <div class="bg-white rounded-lg shadow-lg p-6">
     <h2 class="text-2xl font-bold mb-6">Configure Fee Calculation Rules</h2>
-    
+
     <!-- Rule Type Selection -->
     <div class="mb-6">
       <label class="block text-sm font-medium mb-2">Rule Type</label>
@@ -1691,65 +1885,92 @@ Alpine.data('feeRuleBuilder', () => ({
         </template>
       </select>
     </div>
-    
+
     <!-- Basic Rule Information -->
     <div class="grid grid-cols-2 gap-6 mb-6">
       <div>
         <label class="block text-sm font-medium mb-2">Rule Name</label>
-        <input type="text" x-model="ruleName" class="w-full p-3 border rounded-lg" 
-               placeholder="e.g., Standard Late Fee">
+        <input
+          type="text"
+          x-model="ruleName"
+          class="w-full p-3 border rounded-lg"
+          placeholder="e.g., Standard Late Fee"
+        />
       </div>
       <div>
         <label class="block text-sm font-medium mb-2">Priority</label>
-        <input type="number" x-model="priority" class="w-full p-3 border rounded-lg" 
-               placeholder="100" min="1" max="1000">
+        <input
+          type="number"
+          x-model="priority"
+          class="w-full p-3 border rounded-lg"
+          placeholder="100"
+          min="1"
+          max="1000"
+        />
       </div>
     </div>
-    
+
     <!-- Dynamic Configuration Fields -->
     <div x-show="selectedType" class="mb-6">
       <h3 class="text-lg font-semibold mb-4">Rule Configuration</h3>
       <div class="grid grid-cols-2 gap-4">
         <template x-for="field in getFieldsForType(selectedType)">
-          <div :class="field.condition ? 'col-span-1' : 'col-span-2'"
-               x-show="!field.condition || eval(field.condition.replace('=', '=='))">
-            <label class="block text-sm font-medium mb-2" x-text="field.label"></label>
-            
+          <div
+            :class="field.condition ? 'col-span-1' : 'col-span-2'"
+            x-show="!field.condition || eval(field.condition.replace('=', '=='))"
+          >
+            <label
+              class="block text-sm font-medium mb-2"
+              x-text="field.label"
+            ></label>
+
             <!-- Text Input -->
-            <input x-show="field.type === 'text' || field.type === 'number' || field.type === 'currency'"
-                   :type="field.type === 'currency' ? 'number' : field.type"
-                   x-model="ruleConfig[field.name]"
-                   class="w-full p-3 border rounded-lg"
-                   :placeholder="field.placeholder || ''"
-                   :min="field.min"
-                   :max="field.max"
-                   :step="field.type === 'currency' ? '0.01' : '1'">
-            
+            <input
+              x-show="field.type === 'text' || field.type === 'number' || field.type === 'currency'"
+              :type="field.type === 'currency' ? 'number' : field.type"
+              x-model="ruleConfig[field.name]"
+              class="w-full p-3 border rounded-lg"
+              :placeholder="field.placeholder || ''"
+              :min="field.min"
+              :max="field.max"
+              :step="field.type === 'currency' ? '0.01' : '1'"
+            />
+
             <!-- Select Dropdown -->
-            <select x-show="field.type === 'select'"
-                    x-model="ruleConfig[field.name]"
-                    class="w-full p-3 border rounded-lg">
+            <select
+              x-show="field.type === 'select'"
+              x-model="ruleConfig[field.name]"
+              class="w-full p-3 border rounded-lg"
+            >
               <option value="">Select Option</option>
               <template x-for="option in field.options">
-                <option :value="option.value || option" 
-                        x-text="option.label || option"></option>
+                <option
+                  :value="option.value || option"
+                  x-text="option.label || option"
+                ></option>
               </template>
             </select>
-            
+
             <!-- Textarea -->
-            <textarea x-show="field.type === 'textarea' || field.type === 'code'"
-                      x-model="ruleConfig[field.name]"
-                      class="w-full p-3 border rounded-lg h-32"
-                      :class="field.type === 'code' ? 'font-mono' : ''"
-                      :placeholder="field.placeholder || ''"></textarea>
-            
+            <textarea
+              x-show="field.type === 'textarea' || field.type === 'code'"
+              x-model="ruleConfig[field.name]"
+              class="w-full p-3 border rounded-lg h-32"
+              :class="field.type === 'code' ? 'font-mono' : ''"
+              :placeholder="field.placeholder || ''"
+            ></textarea>
+
             <!-- Help Text -->
-            <p x-show="field.help" class="text-sm text-gray-600 mt-1" x-text="field.help"></p>
+            <p
+              x-show="field.help"
+              class="text-sm text-gray-600 mt-1"
+              x-text="field.help"
+            ></p>
           </div>
         </template>
       </div>
     </div>
-    
+
     <!-- Eligibility Conditions -->
     <div class="mb-6">
       <h3 class="text-lg font-semibold mb-4">Eligibility Conditions</h3>
@@ -1764,7 +1985,7 @@ Alpine.data('feeRuleBuilder', () => ({
               <option value="parentIncome">Parent Income</option>
               <option value="academicPerformance">Academic Performance</option>
             </select>
-            
+
             <select x-model="condition.operator" class="p-2 border rounded">
               <option value="equals">Equals</option>
               <option value="not_equals">Not Equals</option>
@@ -1772,32 +1993,44 @@ Alpine.data('feeRuleBuilder', () => ({
               <option value="less_than">Less Than</option>
               <option value="contains">Contains</option>
             </select>
-            
-            <input type="text" x-model="condition.value" 
-                   class="flex-1 p-2 border rounded" placeholder="Value">
-            
-            <button @click="removeCondition(id)" 
-                    class="text-red-600 hover:text-red-800">
+
+            <input
+              type="text"
+              x-model="condition.value"
+              class="flex-1 p-2 border rounded"
+              placeholder="Value"
+            />
+
+            <button
+              @click="removeCondition(id)"
+              class="text-red-600 hover:text-red-800"
+            >
               Remove
             </button>
           </div>
         </template>
-        
-        <button @click="addCondition()" 
-                class="text-blue-600 hover:text-blue-800">
+
+        <button
+          @click="addCondition()"
+          class="text-blue-600 hover:text-blue-800"
+        >
           + Add Condition
         </button>
       </div>
     </div>
-    
+
     <!-- Action Buttons -->
     <div class="flex space-x-4">
-      <button @click="testRule()" 
-              class="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600">
+      <button
+        @click="testRule()"
+        class="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600"
+      >
         Test Rule
       </button>
-      <button @click="saveRule()" 
-              class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+      <button
+        @click="saveRule()"
+        class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+      >
         Save Rule
       </button>
     </div>
@@ -1811,7 +2044,10 @@ Alpine.data('feeRuleBuilder', () => ({
 
 ### **Wizard System Overview**
 
-The system includes a comprehensive, frontend-configurable wizard system that allows easy addition, modification, and removal of setup wizards and their steps. All wizards support maximum per-tenant configuration with intelligent defaults for quick setup.
+The system includes a comprehensive, frontend-configurable wizard system that
+allows easy addition, modification, and removal of setup wizards and their
+steps. All wizards support maximum per-tenant configuration with intelligent
+defaults for quick setup.
 
 ### **Wizard Configuration Engine**
 
@@ -1823,8 +2059,8 @@ const WizardConfigs = {
     name: 'Trust Setup Wizard',
     description: 'Complete setup wizard for new educational trusts',
     version: '1.0.0',
-    canModify: true,      // Allow frontend modification
-    canDelete: false,     // Prevent deletion of core wizards
+    canModify: true, // Allow frontend modification
+    canDelete: false, // Prevent deletion of core wizards
     steps: [
       {
         id: 'trust_info',
@@ -1856,7 +2092,8 @@ const WizardConfigs = {
             pattern: '^[A-Z0-9]{3,20}$',
             unique: true,
             defaultValue: '',
-            helpText: 'Unique identifier for the trust (used in database naming)'
+            helpText:
+              'Unique identifier for the trust (used in database naming)'
           }
           // ... more fields with comprehensive configuration
         ]
@@ -1864,15 +2101,16 @@ const WizardConfigs = {
       // ... more steps
     ]
   },
-  
+
   schoolSetup: {
     id: 'school_setup',
     name: 'School Setup Wizard',
     description: 'Setup wizard for individual schools within a trust',
     version: '1.0.0',
     canModify: true,
-    canDelete: true,      // Allow deletion of non-core wizards
-    perTenantDefaults: {  // Per-tenant default values
+    canDelete: true, // Allow deletion of non-core wizards
+    perTenantDefaults: {
+      // Per-tenant default values
       academicYear: 'auto-generate',
       gradeSystem: '10-point',
       feeStructure: 'simple'
@@ -1892,7 +2130,7 @@ const WizardConfigs = {
             type: 'text',
             label: 'School Name',
             required: true,
-            defaultValue: '{{trust_name}} School',  // Dynamic defaults
+            defaultValue: '{{trust_name}} School', // Dynamic defaults
             maxLength: 200
           },
           {
@@ -1902,7 +2140,7 @@ const WizardConfigs = {
             required: true,
             pattern: '^[A-Z0-9]{3,10}$',
             unique: true,
-            defaultValue: '{{trust_code}}_001'   // Auto-generated pattern
+            defaultValue: '{{trust_code}}_001' // Auto-generated pattern
           },
           {
             name: 'academic_structure',
@@ -1926,7 +2164,7 @@ const WizardConfigs = {
       }
     ]
   },
-  
+
   feeStructureSetup: {
     id: 'fee_structure_setup',
     name: 'Fee Structure Setup Wizard',
@@ -1961,9 +2199,25 @@ const WizardConfigs = {
               { name: 'Lab Fee', amount: 0, required: false }
             ],
             itemFields: [
-              { name: 'name', type: 'text', label: 'Category Name', required: true },
-              { name: 'amount', type: 'number', label: 'Amount', required: true, min: 0 },
-              { name: 'required', type: 'checkbox', label: 'Mandatory Fee', defaultValue: true }
+              {
+                name: 'name',
+                type: 'text',
+                label: 'Category Name',
+                required: true
+              },
+              {
+                name: 'amount',
+                type: 'number',
+                label: 'Amount',
+                required: true,
+                min: 0
+              },
+              {
+                name: 'required',
+                type: 'checkbox',
+                label: 'Mandatory Fee',
+                defaultValue: true
+              }
             ]
           }
         ]
@@ -1971,7 +2225,8 @@ const WizardConfigs = {
       {
         id: 'advanced_fee_rules',
         name: 'Advanced Fee Rules',
-        description: 'Configure late fees, discounts, scholarships, and waivers',
+        description:
+          'Configure late fees, discounts, scholarships, and waivers',
         order: 2,
         required: false,
         component: 'AdvancedFeeRulesStep',
@@ -1989,17 +2244,46 @@ const WizardConfigs = {
               maxAmount: null
             },
             objectFields: [
-              { name: 'enabled', type: 'checkbox', label: 'Enable Late Fees', defaultValue: true },
-              { name: 'type', type: 'select', label: 'Late Fee Type', 
+              {
+                name: 'enabled',
+                type: 'checkbox',
+                label: 'Enable Late Fees',
+                defaultValue: true
+              },
+              {
+                name: 'type',
+                type: 'select',
+                label: 'Late Fee Type',
                 options: [
                   { value: 'percentage', label: 'Percentage of Due Amount' },
                   { value: 'fixed', label: 'Fixed Amount' },
-                  { value: 'progressive', label: 'Progressive (increases over time)' }
+                  {
+                    value: 'progressive',
+                    label: 'Progressive (increases over time)'
+                  }
                 ]
               },
-              { name: 'value', type: 'number', label: 'Late Fee Value', required: true, min: 0 },
-              { name: 'gracePeriodDays', type: 'number', label: 'Grace Period (Days)', defaultValue: 7, min: 0 },
-              { name: 'maxAmount', type: 'number', label: 'Maximum Late Fee Amount', required: false, min: 0 }
+              {
+                name: 'value',
+                type: 'number',
+                label: 'Late Fee Value',
+                required: true,
+                min: 0
+              },
+              {
+                name: 'gracePeriodDays',
+                type: 'number',
+                label: 'Grace Period (Days)',
+                defaultValue: 7,
+                min: 0
+              },
+              {
+                name: 'maxAmount',
+                type: 'number',
+                label: 'Maximum Late Fee Amount',
+                required: false,
+                min: 0
+              }
             ]
           },
           {
@@ -2009,17 +2293,41 @@ const WizardConfigs = {
             required: false,
             defaultValue: [],
             itemFields: [
-              { name: 'name', type: 'text', label: 'Scholarship Name', required: true },
-              { name: 'type', type: 'select', label: 'Discount Type',
+              {
+                name: 'name',
+                type: 'text',
+                label: 'Scholarship Name',
+                required: true
+              },
+              {
+                name: 'type',
+                type: 'select',
+                label: 'Discount Type',
                 options: [
                   { value: 'percentage', label: 'Percentage Discount' },
                   { value: 'fixed', label: 'Fixed Amount Discount' },
                   { value: 'waiver', label: 'Complete Waiver' }
                 ]
               },
-              { name: 'value', type: 'number', label: 'Discount Value', required: true, min: 0 },
-              { name: 'eligibilityCriteria', type: 'textarea', label: 'Eligibility Criteria', required: true },
-              { name: 'autoApply', type: 'checkbox', label: 'Auto-apply based on criteria', defaultValue: false }
+              {
+                name: 'value',
+                type: 'number',
+                label: 'Discount Value',
+                required: true,
+                min: 0
+              },
+              {
+                name: 'eligibilityCriteria',
+                type: 'textarea',
+                label: 'Eligibility Criteria',
+                required: true
+              },
+              {
+                name: 'autoApply',
+                type: 'checkbox',
+                label: 'Auto-apply based on criteria',
+                defaultValue: false
+              }
             ]
           }
         ]
@@ -2034,7 +2342,8 @@ module.exports = WizardConfigs;
 ### **Key Features of the Wizard System**
 
 1. **Frontend-Configurable**: Complete wizard management through web interface
-2. **Dynamic Step Creation**: Add/remove/modify wizard steps without code changes
+2. **Dynamic Step Creation**: Add/remove/modify wizard steps without code
+   changes
 3. **Per-Tenant Defaults**: Intelligent defaults based on tenant configuration
 4. **Conditional Logic**: Show/hide fields based on other field values
 5. **Validation Engine**: Comprehensive validation with custom business rules
@@ -2044,6 +2353,7 @@ module.exports = WizardConfigs;
 9. **Security**: Role-based access to wizard configuration
 10. **Extensible**: Easy addition of new wizard types and field types
 
-This wizard system ensures maximum flexibility while maintaining the simplicity needed for quick setup with sensible defaults.
+This wizard system ensures maximum flexibility while maintaining the simplicity
+needed for quick setup with sensible defaults.
 
 ---

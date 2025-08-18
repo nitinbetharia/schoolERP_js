@@ -1,11 +1,15 @@
 # School ERP - Technical Requirements Document
 
 ## Project Overview
-Complete School ERP system with multi-tenant architecture supporting educational trusts managing multiple schools. Built for long-term reliability with bulletproof validation and zero-maintenance design.
+
+Complete School ERP system with multi-tenant architecture supporting educational
+trusts managing multiple schools. Built for long-term reliability with
+bulletproof validation and zero-maintenance design.
 
 ## Module Dependencies & Implementation Sequence
 
 ### Phase 1: Foundation Layer (Critical Dependencies)
+
 ```
 1. DATA Module    → Database infrastructure, connections, schema management
 2. AUTH Module    → Authentication, authorization, session management
@@ -13,18 +17,21 @@ Complete School ERP system with multi-tenant architecture supporting educational
 ```
 
 ### Phase 2: Core Entity Management
+
 ```
 4. USER Module   → User lifecycle management (depends on AUTH, SETUP)
 5. STUD Module   → Student management (depends on USER, SETUP)
 ```
 
 ### Phase 3: Operational Modules
+
 ```
 6. FEES Module   → Fee management (depends on STUD, USER)
 7. ATTD Module   → Attendance tracking (depends on STUD, USER)
 ```
 
 ### Phase 4: Analytics & Communication
+
 ```
 8. REPT Module   → Reporting system (depends on all data modules)
 9. DASH Module   → Dashboards (depends on all operational modules)
@@ -34,6 +41,7 @@ Complete School ERP system with multi-tenant architecture supporting educational
 ## Technical Architecture
 
 ### Database Architecture
+
 - **Master Database**: `school_erp_master`
   - System configuration and trust registry
   - System-level users and audit logs
@@ -42,6 +50,7 @@ Complete School ERP system with multi-tenant architecture supporting educational
   - Complete isolation between trusts
 
 ### Technology Stack (Fixed Requirements)
+
 - **Runtime**: Node.js 18+ (CommonJS, no TypeScript)
 - **Framework**: Express.js 4.18+
 - **Database**: MySQL 8.0+
@@ -54,14 +63,18 @@ Complete School ERP system with multi-tenant architecture supporting educational
 ### Naming Conventions (Industry Standards)
 
 #### Database Naming
+
 - **Tables**: Snake_case (plural) - `system_users`, `fee_structures`
 - **Columns**: Snake_case - `first_name`, `created_at`, `trust_id`
-- **Indexes**: `idx_{table}_{column(s)}` - `idx_users_email`, `idx_students_admission_no`
+- **Indexes**: `idx_{table}_{column(s)}` - `idx_users_email`,
+  `idx_students_admission_no`
 - **Foreign Keys**: `fk_{table}_{referenced_table}` - `fk_students_schools`
-- **Primary Keys**: `id` (auto-increment integer)
+- **Primary Keys**: Mixed - UUIDs for sensitive data (users, students), integers
+  for lookup tables
 - **Timestamps**: `created_at`, `updated_at`, `deleted_at` (soft deletes)
 
 #### Code Naming
+
 - **Files**: Kebab-case - `user-management.js`, `fee-collection.js`
 - **Variables**: camelCase - `userId`, `feeAmount`, `studentProfile`
 - **Constants**: UPPER_SNAKE_CASE - `MAX_LOGIN_ATTEMPTS`, `SESSION_TIMEOUT`
@@ -70,6 +83,7 @@ Complete School ERP system with multi-tenant architecture supporting educational
 - **Routes**: Kebab-case - `/api/user-management`, `/fees/fee-structure`
 
 #### Directory Structure
+
 ```
 school-erp-bulletproof/
 ├── server.js                  # Main entry point
@@ -111,9 +125,11 @@ school-erp-bulletproof/
 ## Module Specifications
 
 ### 1. DATA Module - Database Infrastructure
+
 **Purpose**: Foundation layer for all database operations
 
 **Components**:
+
 - Database connection management with pooling
 - Schema creation and migration system
 - Multi-database support (master + trust databases)
@@ -121,12 +137,14 @@ school-erp-bulletproof/
 - Audit logging infrastructure
 
 **Key Files**:
+
 - `modules/data/database-service.js` - Connection management
 - `modules/data/migration-service.js` - Schema migrations
 - `modules/data/audit-service.js` - Audit logging
 - `scripts/setup-database.js` - Database initialization
 
 **Database Tables**:
+
 ```sql
 -- Master Database Tables
 system_config (id, config_key, config_value, data_type, created_at, updated_at)
@@ -137,22 +155,26 @@ system_audit_logs (id, user_id, action, table_name, record_id, old_values, new_v
 ```
 
 ### 2. AUTH Module - Authentication & Authorization
+
 **Purpose**: Complete security framework
 
 **Components**:
-- User authentication (session + JWT)
+
+- User authentication (bcryptjs + express-session)
 - Role-based access control (RBAC)
 - Multi-factor authentication (MFA)
 - Account security policies
 - Session management
 
 **Key Files**:
+
 - `modules/auth/auth-service.js` - Authentication logic
 - `modules/auth/rbac-service.js` - Role-based access control
 - `modules/auth/session-service.js` - Session management
 - `middleware/auth-middleware.js` - Auth middleware
 
 **Security Features**:
+
 - Password hashing with bcrypt (12 rounds)
 - Account lockout after failed attempts
 - Session timeout and rotation
@@ -160,9 +182,11 @@ system_audit_logs (id, user_id, action, table_name, record_id, old_values, new_v
 - XSS and CSRF protection
 
 ### 3. SETUP Module - Configuration Wizard
+
 **Purpose**: Initial system setup and configuration
 
 **Components**:
+
 - Trust creation wizard
 - School configuration
 - Academic structure setup
@@ -170,14 +194,17 @@ system_audit_logs (id, user_id, action, table_name, record_id, old_values, new_v
 - System configuration
 
 **Key Files**:
+
 - `modules/setup/setup-service.js` - Setup business logic
 - `modules/setup/wizard-controller.js` - Wizard flow control
 - `views/setup/` - Wizard templates
 
 ### 4. USER Module - User Management
+
 **Purpose**: Complete user lifecycle management
 
 **Components**:
+
 - User CRUD operations
 - Role and permission management
 - School assignments
@@ -185,6 +212,7 @@ system_audit_logs (id, user_id, action, table_name, record_id, old_values, new_v
 - Department and designation tracking
 
 **Database Tables**:
+
 ```sql
 -- Trust Database Tables
 users (id, employee_id, first_name, last_name, email, phone, password_hash, role, status, school_id, department, designation, date_of_joining, created_at, updated_at)
@@ -193,9 +221,11 @@ user_sessions (session_id, user_id, ip_address, user_agent, created_at, expires_
 ```
 
 ### 5. STUD Module - Student Management
+
 **Purpose**: Student lifecycle from admission to graduation
 
 **Components**:
+
 - Admission process with workflow
 - Student profile management
 - Parent-student relationships
@@ -203,6 +233,7 @@ user_sessions (session_id, user_id, ip_address, user_agent, created_at, expires_
 - Document management
 
 **Database Tables**:
+
 ```sql
 students (id, admission_no, roll_no, first_name, last_name, date_of_birth, gender, class_id, section_id, academic_year_id, admission_date, status, created_at, updated_at)
 admissions (id, application_no, student_id, class_id, application_date, admission_date, status, documents_verified, created_by, approved_by, created_at, updated_at)
@@ -211,9 +242,11 @@ student_transfers (id, student_id, from_school_id, to_school_id, transfer_date, 
 ```
 
 ### 6. FEES Module - Fee Management
+
 **Purpose**: Comprehensive financial management
 
 **Components**:
+
 - Fee structure management
 - Student fee assignments
 - Payment collection and tracking
@@ -221,6 +254,7 @@ student_transfers (id, student_id, from_school_id, to_school_id, transfer_date, 
 - Financial reporting
 
 **Database Tables**:
+
 ```sql
 fee_structures (id, class_id, academic_year_id, fee_head, amount, due_date, is_mandatory, created_at, updated_at)
 student_fee_assignments (id, student_id, fee_structure_id, assigned_amount, discount_amount, final_amount, due_date, created_at, updated_at)
@@ -229,9 +263,11 @@ fee_discounts (id, student_id, discount_type, discount_value, reason, approved_b
 ```
 
 ### 7. ATTD Module - Attendance Management
+
 **Purpose**: Daily attendance tracking and reporting
 
 **Database Tables**:
+
 ```sql
 attendance_daily (id, student_id, class_id, attendance_date, status, marked_by, remarks, created_at, updated_at)
 attendance_summary (id, student_id, month, year, total_days, present_days, absent_days, late_days, percentage, updated_at)
@@ -239,9 +275,11 @@ leave_applications (id, student_id, leave_type, from_date, to_date, reason, stat
 ```
 
 ### 8. REPT Module - Reporting System
+
 **Purpose**: Comprehensive reporting and analytics
 
 **Components**:
+
 - Pre-built report templates
 - Custom report builder
 - Export functionality (PDF, Excel, CSV)
@@ -249,9 +287,11 @@ leave_applications (id, student_id, leave_type, from_date, to_date, reason, stat
 - Report sharing and distribution
 
 ### 9. DASH Module - Dashboard & Analytics
+
 **Purpose**: Role-based dashboards with key metrics
 
 **Components**:
+
 - Real-time KPI widgets
 - Role-specific dashboards
 - Interactive charts and graphs
@@ -259,9 +299,11 @@ leave_applications (id, student_id, leave_type, from_date, to_date, reason, stat
 - Performance indicators
 
 ### 10. COMM Module - Communication System
+
 **Purpose**: Multi-channel communication platform
 
 **Components**:
+
 - SMS and email integration
 - In-app messaging
 - Announcement system
@@ -271,10 +313,13 @@ leave_applications (id, student_id, leave_type, from_date, to_date, reason, stat
 ## Validation Standards
 
 ### Input Validation (Joi Schemas)
+
 ```javascript
 // Example validation schema
 const studentSchema = Joi.object({
-  admissionNo: Joi.string().pattern(/^[A-Z0-9]{6,12}$/).required(),
+  admissionNo: Joi.string()
+    .pattern(/^[A-Z0-9]{6,12}$/)
+    .required(),
   firstName: Joi.string().min(2).max(50).required(),
   lastName: Joi.string().min(2).max(50).required(),
   dateOfBirth: Joi.date().max('now').required(),
@@ -285,6 +330,7 @@ const studentSchema = Joi.object({
 ```
 
 ### Business Rule Validation
+
 - Unique constraints on critical fields (email, admission numbers)
 - Date range validations (admission dates, fee due dates)
 - Relationship validations (parent-student links, teacher-class assignments)
@@ -293,12 +339,14 @@ const studentSchema = Joi.object({
 ## Security Standards
 
 ### Authentication Security
+
 - Password complexity requirements (8+ chars, mixed case, numbers, symbols)
 - Account lockout after 5 failed attempts
 - Session timeout after 30 minutes of inactivity
 - Multi-factor authentication for admin roles
 
 ### Data Security
+
 - All sensitive data encrypted at rest
 - Parameterized queries to prevent SQL injection
 - XSS prevention through template escaping
@@ -306,6 +354,7 @@ const studentSchema = Joi.object({
 - Rate limiting on all endpoints
 
 ### Access Control
+
 - Role-based access control with granular permissions
 - Context-aware authorization (users can only access their school's data)
 - Audit logging for all CRUD operations
@@ -314,12 +363,14 @@ const studentSchema = Joi.object({
 ## Performance Standards
 
 ### Response Time Targets
+
 - Page loads: < 2 seconds
 - API responses: < 500ms
 - Database queries: < 100ms
 - Report generation: < 10 seconds
 
 ### Scalability Targets
+
 - 1000+ concurrent users per trust
 - 50,000+ students per trust
 - 1M+ transactions per year
@@ -328,18 +379,21 @@ const studentSchema = Joi.object({
 ## Testing Standards
 
 ### Unit Testing
+
 - All business logic functions
 - Validation schemas
 - Database operations
 - Utility functions
 
 ### Integration Testing
+
 - API endpoints
 - Database transactions
 - Authentication flows
 - Module interactions
 
 ### End-to-End Testing
+
 - Complete user workflows
 - Cross-module operations
 - Error handling scenarios
@@ -348,11 +402,13 @@ const studentSchema = Joi.object({
 ## Deployment Standards
 
 ### Environment Configuration
+
 - Development: Local MySQL with sample data
 - Staging: Cloud VM with production-like data
 - Production: Load-balanced setup with backup
 
 ### Monitoring Requirements
+
 - Application performance monitoring
 - Database performance tracking
 - Error tracking and alerting
@@ -362,6 +418,7 @@ const studentSchema = Joi.object({
 ## Compliance Requirements
 
 ### Data Protection
+
 - GDPR compliance for data handling
 - Student data protection policies
 - Audit trail maintenance
@@ -369,6 +426,7 @@ const studentSchema = Joi.object({
 - Right to data deletion
 
 ### Educational Standards
+
 - Academic record security
 - Parental consent management
 - Grade privacy protection
@@ -376,8 +434,9 @@ const studentSchema = Joi.object({
 
 ---
 
-**Implementation Timeline**: 5-7 days for complete development
-**Testing Phase**: 2-3 days for comprehensive testing
-**Total Delivery**: Production-ready system in 7-10 days
+**Implementation Timeline**: 5-7 days for complete development **Testing
+Phase**: 2-3 days for comprehensive testing **Total Delivery**: Production-ready
+system in 7-10 days
 
-This document serves as the complete technical specification for implementing all modules with industry standards and bulletproof reliability.
+This document serves as the complete technical specification for implementing
+all modules with industry standards and bulletproof reliability.

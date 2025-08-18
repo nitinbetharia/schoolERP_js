@@ -176,8 +176,7 @@ dist/
 ehthumbs.db
 Thumbs.db
 
-# IDE files
-.vscode/
+# IDE files (VS Code settings are tracked for team consistency)
 .idea/
 *.swp
 *.swo
