@@ -10,25 +10,32 @@
 
 ---
 
-## 🚀 **DEVELOPMENT PRIORITY SEQUENCE (Following Our Tech Stack)**
+## 🚀 **DEVELOPMENT PRIORITY SEQUENCE (Indian School System Implementation)**
 
-### **SESSION 1: Fee Management Foundation (2-3 hours)**
+### **SESSION 1: Indian School Foundation + Fee Management (2-3 hours)**
 
-#### **Database Schema Creation (Sequelize ORM)**
+#### **Indian Education System Setup (Sequelize ORM)**
 
-- [ ] Create `models/FeeStructure.js` (following existing model pattern)
-- [ ] Create `models/FeePayment.js` (with Razorpay integration fields)
-- [ ] Create `models/FeeReceipt.js` (PDF generation with existing `pdfkit`)
-- [ ] Update `models/index.js` for new associations
-- [ ] Create Sequelize migration file `YYYYMMDD-create-fee-management-tables.js`
+- [ ] Update `models/Class.js` - Add NEP stage classification (foundational/preparatory/middle/secondary)
+- [ ] Enhance `models/Student.js` - Add Indian-specific fields (see INDIAN_EDUCATION_SYSTEM_GUIDE.md)
+- [ ] Create `models/GovernmentCompliance.js` - Aadhaar, SARAL ID, CBSE UID tracking
+- [ ] Update age validation rules for Indian classes (Nursery-XII)
 
-#### **Service Layer (Following Existing Pattern)**
+#### **Fee Management for Indian Schools (Following Existing Pattern)**
 
-- [ ] Create `modules/fee/services/FeeService.js`
-- [ ] Implement fee calculation engine with business rules
-- [ ] Integrate Razorpay SDK (already in dependencies)
-- [ ] Add payment webhook handling with `express` middleware
-- [ ] Use existing `joi` validation patterns
+- [ ] Create `models/IndianFeeStructure.js` (Trust + School level fees)
+- [ ] Create `models/FeePayment.js` (with RTE reimbursement support)
+- [ ] Create `models/FeeReceipt.js` (Government compliance format with `pdfkit`)
+- [ ] Add category-based fee calculation (General/SC/ST/OBC/EWS)
+- [ ] Implement RTE quota fee waiver system
+
+#### **Service Layer for Indian Schools**
+
+- [ ] Create `modules/fee/services/IndianFeeService.js`
+- [ ] Add government scheme integration logic
+- [ ] Implement multi-tier fee calculation engine
+- [ ] Add scholarship and RTE benefit calculations
+- [ ] Integrate Razorpay SDK with Indian compliance
 
 #### **Controller & Routes (Following Architecture)**
 
@@ -51,66 +58,76 @@ GET  /api/reports/collections    # Collection reports
 GET  /api/reports/outstanding    # Outstanding dues report
 ```
 
-### **SESSION 2: Enquiry Management System (1-2 hours)**
+### **SESSION 2: Enquiry Management for Indian Admissions (1-2 hours)**
 
-#### **Database Schema (Sequelize Models)**
+#### **Database Schema for Indian Admissions (Sequelize Models)**
 
-- [ ] Create `models/Enquiry.js` (UUID primary key, following pattern)
-- [ ] Create `models/EnquiryFollowup.js` (tracking activities)
-- [ ] Create `models/EnquirySource.js` (lead source management)
-- [ ] Add Sequelize migration for enquiry tables
+- [ ] Create `models/AdmissionEnquiry.js` - Lead capture for different classes
+- [ ] Add admission type classification (Fresh/Readmission/Transfer)
+- [ ] Add class-specific enquiry rules (Nursery/Class I/Class VI/Class IX/Class XI)
+- [ ] Create `models/EnquiryFollowup.js` - Indian school follow-up patterns
 
-#### **Lead Management Service**
+#### **Enquiry Management Service for Indian Schools**
 
-- [ ] Create `modules/enquiry/services/EnquiryService.js`
-- [ ] Implement lead scoring algorithm
-- [ ] Add conversion tracking to student
-- [ ] Integrate with existing email system (`@sendgrid/mail` or `nodemailer`)
+- [ ] Create `modules/enquiry/services/IndianEnquiryService.js`
+- [ ] Implement age-based class eligibility validation
+- [ ] Add NEP-compliant admission calendar (April-May for new academic year)
+- [ ] Create conversion-to-application workflow with Indian documentation
+- [ ] Integrate WhatsApp API for parent communication (common in Indian schools)
 
-#### **API Integration (Following Pattern)**
-
-- [ ] Create `modules/enquiry/controllers/EnquiryController.js`
-- [ ] Create `modules/enquiry/routes/enquiryRoutes.js`
-- [ ] Use existing validation middleware with `joi`
-
-#### **API Endpoints**
+#### **API Endpoints for Indian Admissions**
 
 ```http
-POST /api/enquiries                  # Create enquiry/lead
-GET  /api/enquiries                  # List enquiries with filters
-GET  /api/enquiries/:id              # Get enquiry details
-PUT  /api/enquiries/:id              # Update enquiry
-POST /api/enquiries/:id/followup     # Add follow-up activity
-POST /api/enquiries/:id/convert      # Convert to student application
-GET  /api/reports/enquiry-analytics  # Conversion funnel reports
+POST /api/enquiries/nursery         # Pre-primary admission enquiry (age 3-6)
+POST /api/enquiries/primary         # Class I-V enquiry with age validation
+POST /api/enquiries/secondary       # Class VI-VIII enquiry  
+POST /api/enquiries/higher          # Class IX-XII enquiry with stream selection
+GET  /api/enquiries/age-check       # Age eligibility validation
+POST /api/enquiries/rte             # RTE quota specific enquiry
+GET  /api/enquiries/admission-calendar # Indian academic calendar dates
 ```
 
-### **SESSION 3: Enhanced Admission Workflow (2 hours)**
+### **SESSION 3: Enhanced Admission Workflow for Indian Schools (2 hours)**
 
-#### **Database Updates (Existing Student Model)**
+#### **4-Stage Indian Admission Workflow Implementation**
 
-- [ ] Add government ID fields to `models/Student.js`:
-  - `aadhaar_number` (VARCHAR(12) with validation)
-  - `saral_id` (VARCHAR(20) for Maharashtra)
-  - `cbse_uid` (VARCHAR(20) for CBSE schools)
-- [ ] Add admission workflow stage tracking
-- [ ] Update validation schema with `joi`
+- [ ] **ENQUIRY STAGE** - Lead capture with class-specific age rules
+- [ ] **APPLICATION STAGE** - Document collection (Birth cert, Aadhaar, TC, etc.)
+- [ ] **ASSESSMENT STAGE** - Age-appropriate evaluation (interaction/written/entrance)
+- [ ] **CONFIRMATION STAGE** - Fee payment + government compliance verification
 
-#### **Document Management (Using Existing Stack)**
+#### **Government Document Integration (Indian Requirements)**
 
-- [ ] Create `models/StudentDocument.js` (enhance existing if present)
-- [ ] Use existing `express-fileupload` for document uploads
-- [ ] Integrate with existing file handling patterns
-- [ ] Add document verification status workflow
+- [ ] Add Aadhaar number validation (12-digit with checksum)
+- [ ] Implement SARAL ID integration (Maharashtra state requirement)
+- [ ] Add CBSE UID support for CBSE affiliated schools
+- [ ] Create document verification workflow for Indian documents
+- [ ] Birth certificate validation for age verification
 
-#### **Government API Integration**
+#### **Enhanced Student Model for Indian Schools**
 
-- [ ] Create service for Aadhaar verification (using `axios`)
-- [ ] Add SARAL ID integration for Maharashtra
-- [ ] CBSE UID integration for board schools
-- [ ] Use existing `validator` library for ID format validation
+```javascript
+// Additional fields for Indian students (add to models/Student.js)
+admission_type: ENUM('FRESH', 'READMISSION', 'TRANSFER', 'MID_TERM'),
+admission_category: ENUM('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'NT-A', 'NT-B', 'NT-C'),
+quota_type: ENUM('GENERAL', 'RTE', 'MANAGEMENT', 'NRI', 'SPORTS', 'STAFF_WARD'),
+medium_of_instruction: ENUM('ENGLISH', 'HINDI', 'MARATHI', 'REGIONAL'),
+board_affiliation: ENUM('CBSE', 'ICSE', 'STATE', 'IB'),
+nep_stage: ENUM('FOUNDATIONAL', 'PREPARATORY', 'MIDDLE', 'SECONDARY'),
+aadhaar_number: VARCHAR(12),
+saral_id: VARCHAR(20),
+cbse_uid: VARCHAR(20),
+rte_eligible: BOOLEAN,
+government_category_certificate: VARCHAR(255)
+```
 
-#### **Enhanced Admission Stages**
+#### **Indian Admission Service Enhancement**
+
+- [ ] Update `modules/student/services/StudentService.js`
+- [ ] Add NEP 2020 compliant admission rules
+- [ ] Implement RTE quota calculation (25% reservation)
+- [ ] Add age-based class allocation logic
+- [ ] Create government compliance verification
 
 ```javascript
 // Update Student model with admission stages
@@ -130,45 +147,77 @@ admission_stage: {
 
 ## 🧪 **TESTING PRIORITIES**
 
+### **SESSION 4: Testing & Indian Compliance Verification (1 hour)**
+
+#### **API Testing for Indian School Features**
+
+- [ ] Create `tests/indian-admissions-tests.http` - Test NEP-compliant admission flow
+- [ ] Create `tests/indian-fee-management-tests.http` - Test RTE fee calculations
+- [ ] Create `tests/government-compliance-tests.http` - Test Aadhaar/SARAL validation
+- [ ] Test age-based class allocation for Indian standards
+
+#### **Government Compliance Testing**
+
+- [ ] Verify Aadhaar number validation (12-digit with checksum)
+- [ ] Test RTE quota calculations (25% reservation)
+- [ ] Validate category-wise fee structures (General/SC/ST/OBC/EWS)
+- [ ] Test admission calendar compliance (Indian academic year)
+
+#### **Integration Testing with Existing System**
+
+- [ ] Verify existing student functionality remains intact
+- [ ] Test tenant-wise data isolation for multi-school setup
+- [ ] Validate session management for Indian school users
+- [ ] Test role-based access for Indian school staff
+
 ### **After Each Session**
 
 - [ ] Test new API endpoints with REST Client
-- [ ] Verify database schema updates
+- [ ] Verify database schema updates for Indian requirements
 - [ ] Test integration with existing student system
-- [ ] Update test files with new endpoints
+- [ ] Validate NEP 2020 compliance in admission flow
+- [ ] Update test files with Indian school scenarios
 
-### **Test File Updates**
+### **Test File Updates for Indian Schools**
 
-- [ ] Create `fee-management-tests.http`
-- [ ] Create `enquiry-management-tests.http`
-- [ ] Update `student-integration-tests.http`
+- [ ] Create `indian-fee-management-tests.http`
+- [ ] Create `indian-enquiry-management-tests.http`
+- [ ] Create `government-compliance-tests.http`
+- [ ] Update `student-integration-tests.http` with Indian fields
 
 ---
 
-## 📊 **SUCCESS CRITERIA**
+## 📊 **SUCCESS CRITERIA (Indian School System)**
 
-### **End of Evening Session**
+### **End of Evening Session - Indian School Compliance**
 
-- [ ] Fee structures can be created and managed
-- [ ] Basic payment processing works
-- [ ] Enquiry system captures and tracks leads
-- [ ] Enhanced admission workflow implemented
-- [ ] Government ID fields added to student profiles
-- [ ] All new endpoints tested and working
+- [ ] Indian fee structures (Trust + School level) can be created and managed
+- [ ] RTE quota and category-wise fee calculation working
+- [ ] Multi-tier admission enquiry system (Nursery/Primary/Secondary/Higher)
+- [ ] 4-stage Indian admission workflow implemented
+- [ ] Government ID fields (Aadhaar/SARAL/CBSE UID) added and validated
+- [ ] NEP 2020 stage classification working
+- [ ] Age-based class allocation for Indian standards functional
+- [ ] All Indian school specific endpoints tested and working
 
-### **Database Verification**
+### **Database Verification - Indian Extensions**
 
-- [ ] New tables created successfully
-- [ ] Model associations working
-- [ ] Data integrity maintained
-- [ ] Migration scripts (if needed) executed
+- [ ] New tables for Indian school requirements created successfully
+- [ ] Government compliance model associations working
+- [ ] Indian-specific student fields properly integrated
+- [ ] Migration scripts for Indian fields executed
+- [ ] Multi-tier fee structure data integrity maintained
 
-### **Integration Verification**
+### **Indian Education System Integration Verification**
 
 - [ ] Existing student functionality unaffected
-- [ ] New features integrate seamlessly
+- [ ] Indian school features integrate seamlessly with current system
+- [ ] NEP 2020 compliance maintained throughout admission process
+- [ ] Government category-wise processing works correctly
+- [ ] RTE quota calculations accurate
+- [ ] Multi-language support (English/Hindi/Regional) functional
 - [ ] API responses consistent with existing patterns
-- [ ] Error handling follows established patterns
+- [ ] Error handling follows established patterns with Indian compliance messages
 
 ---
 
