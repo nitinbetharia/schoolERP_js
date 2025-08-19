@@ -80,7 +80,7 @@ GET  /api/reports/outstanding    # Outstanding dues report
 ```http
 POST /api/enquiries/nursery         # Pre-primary admission enquiry (age 3-6)
 POST /api/enquiries/primary         # Class I-V enquiry with age validation
-POST /api/enquiries/secondary       # Class VI-VIII enquiry  
+POST /api/enquiries/secondary       # Class VI-VIII enquiry
 POST /api/enquiries/higher          # Class IX-XII enquiry with stream selection
 GET  /api/enquiries/age-check       # Age eligibility validation
 POST /api/enquiries/rte             # RTE quota specific enquiry
@@ -227,32 +227,32 @@ admission_stage: {
 
 ```javascript
 // Using existing axios for Razorpay API calls
-const axios = require("axios");
+const axios = require('axios');
 
 class PaymentService {
-  constructor() {
-    this.razorpay = {
-      baseURL: "https://api.razorpay.com/v1/",
-      auth: {
-        username: process.env.RAZORPAY_KEY_ID,
-        password: process.env.RAZORPAY_KEY_SECRET,
-      },
-    };
-  }
+   constructor() {
+      this.razorpay = {
+         baseURL: 'https://api.razorpay.com/v1/',
+         auth: {
+            username: process.env.RAZORPAY_KEY_ID,
+            password: process.env.RAZORPAY_KEY_SECRET,
+         },
+      };
+   }
 
-  async createOrder(amount, currency = "INR") {
-    try {
-      const response = await axios.post(
-        `${this.razorpay.baseURL}orders`,
-        { amount: amount * 100, currency, receipt: `rcpt_${Date.now()}` },
-        { auth: this.razorpay.auth },
-      );
-      return response.data;
-    } catch (error) {
-      logger.error("Razorpay order creation failed:", error);
-      throw new Error("Payment order creation failed");
-    }
-  }
+   async createOrder(amount, currency = 'INR') {
+      try {
+         const response = await axios.post(
+            `${this.razorpay.baseURL}orders`,
+            { amount: amount * 100, currency, receipt: `rcpt_${Date.now()}` },
+            { auth: this.razorpay.auth }
+         );
+         return response.data;
+      } catch (error) {
+         logger.error('Razorpay order creation failed:', error);
+         throw new Error('Payment order creation failed');
+      }
+   }
 }
 ```
 
@@ -260,28 +260,25 @@ class PaymentService {
 
 ```javascript
 // Using existing EJS for email templates
-const ejs = require("ejs");
-const path = require("path");
+const ejs = require('ejs');
+const path = require('path');
 
 // Create email template: views/emails/admission-confirmation.ejs
-const emailTemplate = await ejs.renderFile(
-  path.join(__dirname, "../../../views/emails/admission-confirmation.ejs"),
-  {
-    studentName: student.full_name,
-    admissionNumber: student.admission_number,
-    schoolName: school.name,
-  },
-);
+const emailTemplate = await ejs.renderFile(path.join(__dirname, '../../../views/emails/admission-confirmation.ejs'), {
+   studentName: student.full_name,
+   admissionNumber: student.admission_number,
+   schoolName: school.name,
+});
 
 // Send using existing @sendgrid/mail
-const sgMail = require("@sendgrid/mail");
+const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 await sgMail.send({
-  to: student.email,
-  from: school.email,
-  subject: "Admission Confirmation",
-  html: emailTemplate,
+   to: student.email,
+   from: school.email,
+   subject: 'Admission Confirmation',
+   html: emailTemplate,
 });
 ```
 
@@ -289,27 +286,24 @@ await sgMail.send({
 
 ```javascript
 // Using existing Twilio integration
-const twilio = require("twilio");
+const twilio = require('twilio');
 
 class SMSService {
-  constructor() {
-    this.client = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN,
-    );
-  }
+   constructor() {
+      this.client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+   }
 
-  async sendAdmissionSMS(phone, message) {
-    try {
-      await this.client.messages.create({
-        body: message,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: phone,
-      });
-    } catch (error) {
-      logger.error("SMS sending failed:", error);
-    }
-  }
+   async sendAdmissionSMS(phone, message) {
+      try {
+         await this.client.messages.create({
+            body: message,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: phone,
+         });
+      } catch (error) {
+         logger.error('SMS sending failed:', error);
+      }
+   }
 }
 ```
 
@@ -318,110 +312,98 @@ class SMSService {
 ```javascript
 // Multi-layered fee calculation following our patterns
 class FeeCalculationService {
-  async calculateTotalFees(studentId, academicYear) {
-    try {
-      const { getTenantModels } = require("../../../models");
-      const tenantModels = await getTenantModels(req.tenantCode);
-      const { Student, FeeStructure, FeeAssignment } = tenantModels;
+   async calculateTotalFees(studentId, academicYear) {
+      try {
+         const { getTenantModels } = require('../../../models');
+         const tenantModels = await getTenantModels(req.tenantCode);
+         const { Student, FeeStructure, FeeAssignment } = tenantModels;
 
-      const student = await Student.findByPk(studentId);
+         const student = await Student.findByPk(studentId);
 
-      // Trust-level fees (one-time/annual)
-      const trustFees = await FeeStructure.findAll({
-        where: {
-          trust_id: student.trust_id,
-          school_id: null, // Trust-wide fees
-          academic_year: academicYear,
-        },
-      });
+         // Trust-level fees (one-time/annual)
+         const trustFees = await FeeStructure.findAll({
+            where: {
+               trust_id: student.trust_id,
+               school_id: null, // Trust-wide fees
+               academic_year: academicYear,
+            },
+         });
 
-      // School-level fees (recurring)
-      const schoolFees = await FeeStructure.findAll({
-        where: {
-          school_id: student.school_id,
-          class_id: student.class_id,
-          academic_year: academicYear,
-        },
-      });
+         // School-level fees (recurring)
+         const schoolFees = await FeeStructure.findAll({
+            where: {
+               school_id: student.school_id,
+               class_id: student.class_id,
+               academic_year: academicYear,
+            },
+         });
 
-      // Calculate discounts based on category
-      const discounts = this.calculateDiscounts(student);
+         // Calculate discounts based on category
+         const discounts = this.calculateDiscounts(student);
 
-      const totalFees = [...trustFees, ...schoolFees].reduce(
-        (sum, fee) => sum + parseFloat(fee.amount),
-        0,
-      );
-      const totalDiscounts = discounts.reduce(
-        (sum, discount) => sum + parseFloat(discount.amount),
-        0,
-      );
+         const totalFees = [...trustFees, ...schoolFees].reduce((sum, fee) => sum + parseFloat(fee.amount), 0);
+         const totalDiscounts = discounts.reduce((sum, discount) => sum + parseFloat(discount.amount), 0);
 
-      return {
-        trustFees: trustFees.reduce(
-          (sum, fee) => sum + parseFloat(fee.amount),
-          0,
-        ),
-        schoolFees: schoolFees.reduce(
-          (sum, fee) => sum + parseFloat(fee.amount),
-          0,
-        ),
-        totalFees,
-        totalDiscounts,
-        finalAmount: totalFees - totalDiscounts,
-      };
-    } catch (error) {
-      logger.error("Fee calculation failed:", error);
-      throw error;
-    }
-  }
+         return {
+            trustFees: trustFees.reduce((sum, fee) => sum + parseFloat(fee.amount), 0),
+            schoolFees: schoolFees.reduce((sum, fee) => sum + parseFloat(fee.amount), 0),
+            totalFees,
+            totalDiscounts,
+            finalAmount: totalFees - totalDiscounts,
+         };
+      } catch (error) {
+         logger.error('Fee calculation failed:', error);
+         throw error;
+      }
+   }
 }
 ```
 
 ### **Government ID Validation (Using Existing Validator)**
 
 ```javascript
-const validator = require("validator");
+const validator = require('validator');
 
 // Aadhaar validation (12 digits)
 const validateAadhaar = (aadhaar) => {
-  return /^\d{12}$/.test(aadhaar);
+   return /^\d{12}$/.test(aadhaar);
 };
 
 // SARAL ID validation (Maharashtra format)
 const validateSaralId = (saralId) => {
-  return /^[A-Z]{2}\d{8}$/.test(saralId); // Format: MH12345678
+   return /^[A-Z]{2}\d{8}$/.test(saralId); // Format: MH12345678
 };
 
 // CBSE UID validation
 const validateCBSEUID = (cbseUid) => {
-  return /^\d{10}$/.test(cbseUid); // 10-digit number
+   return /^\d{10}$/.test(cbseUid); // 10-digit number
 };
 
 // Add to Student model validation
-const Student = sequelize.define("Student", {
-  // ... existing fields
-  aadhaar_number: {
-    type: DataTypes.STRING(12),
-    allowNull: true,
-    validate: {
-      isValidAadhaar: function (value) {
-        if (value && !validateAadhaar(value)) {
-          throw new Error("Invalid Aadhaar number format");
-        }
+const Student = sequelize.define('Student', {
+   // ... existing fields
+   aadhaar_number: {
+      type: DataTypes.STRING(12),
+      allowNull: true,
+      validate: {
+         isValidAadhaar: function (value) {
+            if (value && !validateAadhaar(value)) {
+               throw new Error('Invalid Aadhaar number format');
+            }
+         },
       },
-    },
-  },
-  saral_id: {
-    type: DataTypes.STRING(20),
-    allowNull: true,
-    validate: {
-      isValidSaral: function (value) {
-        if (value && !validateSaralId(value)) {
-          throw new Error("Invalid SARAL ID format");
-        }
+   },
+   saral_id: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      validate: {
+         isValidSaral: function (value) {
+            if (value && !validateSaralId(value)) {
+               throw new Error('Invalid SARAL ID format');
+            }
+         },
       },
-    },
-  },
+   },
 });
 ```
 
