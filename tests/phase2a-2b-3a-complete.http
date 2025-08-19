@@ -1,0 +1,286 @@
+### Complete Phase Testing: Phases 2A, 2B, 3A
+### Phase 2A: Setup Module | Phase 2B: User Module | Phase 3A: School Module
+
+# Test server status
+GET http://localhost:3000/api/v1/status
+Accept: application/json
+
+###
+
+###########################################
+# PHASE 1: SYSTEM ADMIN AUTHENTICATION
+###########################################
+
+# System admin login (required for all setup operations)
+POST http://localhost:3000/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+###########################################
+# PHASE 2A: SETUP MODULE TESTS
+###########################################
+
+# Initialize setup for trust ID 1
+POST http://localhost:3000/api/v1/setup/1/initialize
+Content-Type: application/json
+
+###
+
+# Get setup progress for trust ID 1
+GET http://localhost:3000/api/v1/setup/1/progress
+Accept: application/json
+
+###
+
+# Get details for trust_info step
+GET http://localhost:3000/api/v1/setup/1/step/trust_info
+Accept: application/json
+
+###
+
+# Complete trust_info step
+POST http://localhost:3000/api/v1/setup/1/step/trust_info/complete
+Content-Type: application/json
+
+{
+  "name": "Example Educational Trust",
+  "code": "EET001", 
+  "address": "123 Education Street, Learning City, LC 12345",
+  "contact_email": "admin@exampleeducation.org",
+  "contact_phone": "+1-555-0123"
+}
+
+###
+
+# Complete academic_year step
+POST http://localhost:3000/api/v1/setup/1/step/academic_year/complete
+Content-Type: application/json
+
+{
+  "year": "2024-2025",
+  "start_date": "2024-04-01",
+  "end_date": "2025-03-31",
+  "terms": [
+    {
+      "name": "Term 1",
+      "start_date": "2024-04-01", 
+      "end_date": "2024-09-30"
+    },
+    {
+      "name": "Term 2",
+      "start_date": "2024-10-01",
+      "end_date": "2025-03-31"
+    }
+  ]
+}
+
+###
+
+# Complete schools_basic step
+POST http://localhost:3000/api/v1/setup/1/step/schools_basic/complete
+Content-Type: application/json
+
+{
+  "schools": [
+    {
+      "name": "Main Campus School",
+      "code": "MCS001",
+      "address": "456 Campus Ave, Learning City, LC 12345",
+      "principal_name": "Dr. Jane Smith",
+      "contact_phone": "+1-555-0456"
+    },
+    {
+      "name": "Branch Campus School", 
+      "code": "BCS001",
+      "address": "789 Branch Road, Learning City, LC 12346",
+      "principal_name": "Mr. John Doe",
+      "contact_phone": "+1-555-0789"
+    }
+  ]
+}
+
+###
+
+# Get updated setup progress
+GET http://localhost:3000/api/v1/setup/1/progress
+Accept: application/json
+
+###
+
+###########################################
+# PHASE 2B: USER MODULE TESTS
+###########################################
+
+# Create a tenant user (Principal)
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+{
+  "username": "principal001",
+  "email": "principal@mainschool.edu",
+  "password": "principal123",
+  "role": "PRINCIPAL",
+  "profile": {
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "phone": "+1-555-0456",
+    "address": "123 Principal Lane, Learning City, LC 12345",
+    "employee_id": "EMP001",
+    "designation": "Principal",
+    "department": "Administration",
+    "joining_date": "2024-01-01",
+    "qualification": "M.Ed in Educational Leadership"
+  }
+}
+
+###
+
+# Create a tenant user (Teacher)
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+{
+  "username": "teacher001",
+  "email": "teacher1@mainschool.edu", 
+  "password": "teacher123",
+  "role": "TEACHER",
+  "profile": {
+    "first_name": "Mike",
+    "last_name": "Johnson",
+    "phone": "+1-555-0789",
+    "address": "456 Teacher Street, Learning City, LC 12345",
+    "employee_id": "EMP002",
+    "designation": "Senior Teacher",
+    "department": "Mathematics",
+    "joining_date": "2024-02-01",
+    "qualification": "M.Sc Mathematics, B.Ed",
+    "experience_years": 8
+  }
+}
+
+###
+
+# Create a tenant user (Student)
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+{
+  "username": "student001",
+  "email": "student1@example.com",
+  "password": "student123", 
+  "role": "STUDENT",
+  "profile": {
+    "first_name": "Alex",
+    "last_name": "Brown",
+    "date_of_birth": "2010-05-15",
+    "gender": "M",
+    "phone": "+1-555-0321",
+    "address": "789 Student Ave, Learning City, LC 12345",
+    "emergency_contact_name": "Sarah Brown",
+    "emergency_contact_phone": "+1-555-0654",
+    "emergency_contact_relationship": "Mother"
+  }
+}
+
+###
+
+# Get all users
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+X-Tenant-Code: trust001
+
+###
+
+# Get users by role (Teachers only)
+GET http://localhost:3000/api/v1/users?role=TEACHER
+Accept: application/json
+X-Tenant-Code: trust001
+
+###
+
+# Get user by ID
+GET http://localhost:3000/api/v1/users/1
+Accept: application/json
+X-Tenant-Code: trust001
+
+###
+
+# Update user profile
+PUT http://localhost:3000/api/v1/users/2
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+{
+  "profile": {
+    "experience_years": 9,
+    "additional_info": {
+      "certifications": ["Mathematics Excellence Award 2023"],
+      "specializations": ["Algebra", "Geometry", "Statistics"]
+    }
+  }
+}
+
+###
+
+# User authentication (Teacher login)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+{
+  "username": "teacher001",
+  "password": "teacher123"
+}
+
+###
+
+# User logout
+POST http://localhost:3000/api/v1/users/auth/logout
+Content-Type: application/json
+X-Tenant-Code: trust001
+
+###
+
+###########################################
+# PHASE 3A: SCHOOL MODULE TESTS (PLACEHOLDER)
+###########################################
+# Note: School module models created but services/controllers pending
+# Will be implemented when models are integrated
+
+# Future endpoint: Get all schools in trust
+# GET http://localhost:3000/api/v1/schools
+# Accept: application/json
+# X-Tenant-Code: trust001
+
+###
+
+# Future endpoint: Create a new school
+# POST http://localhost:3000/api/v1/schools
+# Content-Type: application/json
+# X-Tenant-Code: trust001
+
+###
+
+# Future endpoint: Get school details
+# GET http://localhost:3000/api/v1/schools/1
+# Accept: application/json  
+# X-Tenant-Code: trust001
+
+###
+
+###########################################
+# CLEANUP TESTS (DEVELOPMENT ONLY)
+###########################################
+
+# Reset setup (for testing purposes)
+DELETE http://localhost:3000/api/v1/setup/1/reset
+Accept: application/json

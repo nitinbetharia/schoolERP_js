@@ -1,0 +1,321 @@
+# System Login Tests (No Subdomain)
+# Tests system administrator login functionality without subdomain context
+# These routes bypass tenant detection and work directly with system database
+
+@baseUrl = http://localhost:3000/api/v1
+
+###########################################################################
+# SYSTEM LOGIN - NO SUBDOMAIN REQUIRED
+###########################################################################
+
+### 1. System Status Check (Public)
+# @name systemStatus
+GET {{baseUrl}}/status
+Content-Type: application/json
+
+###
+
+### 2. System Health Check (Public)
+# @name systemHealth  
+GET {{baseUrl}}/admin/system/health
+Content-Type: application/json
+
+###
+
+### 3. System Admin Login (No Subdomain Required)
+# @name systemAdminLogin
+# Username: admin, Password: admin123 (default system admin)
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+###
+
+### 4. System Admin Login - Alternative Email Login
+# @name systemAdminEmailLogin
+# Try login with email instead of username
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin@system.local",
+    "password": "admin123"
+}
+
+###
+
+### 5. System Admin Login - Invalid Credentials
+# @name systemAdminInvalidLogin
+# Should return 401 authentication error
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "wrongpassword"
+}
+
+###
+
+### 6. System Admin Login - Missing Fields
+# @name systemAdminMissingFields
+# Should return validation error
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin"
+}
+
+###
+
+### 7. Access System Admin Functionality After Login
+# @name systemTrustList
+# Requires authentication - use session from previous login
+GET {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+###
+
+### 8. System Admin Logout
+# @name systemAdminLogout
+POST {{baseUrl}}/admin/system/auth/logout
+Content-Type: application/json
+
+{}
+
+###
+
+### 9. Try Access After Logout (Should Fail)
+# @name systemAccessAfterLogout
+# Should return 401 since session is destroyed
+GET {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+###
+
+###########################################################################
+# SYSTEM LOGIN WITH SUBDOMAIN HEADERS (Should Still Work)
+###########################################################################
+
+### 10. System Admin Login with Trust001 Header (Should Still Work)
+# @name systemLoginWithSubdomain
+# System routes bypass tenant detection - subdomain headers ignored
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+###
+
+### 11. System Health with Demo Subdomain (Should Still Work)
+# @name systemHealthWithSubdomain
+GET {{baseUrl}}/admin/system/health
+Host: demo.example.com:3000
+
+###
+
+###########################################################################
+# SYSTEM USER MANAGEMENT (System Admin Only)
+###########################################################################
+
+### 12. Create New System User
+# @name createSystemUser
+# First login as admin to get session
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+###
+
+### 13. Create New System User (After Login)
+# @name createNewSystemUser
+POST {{baseUrl}}/admin/system/users
+Content-Type: application/json
+
+{
+    "username": "sysadmin2",
+    "email": "sysadmin2@system.local",
+    "password": "SecurePass123!",
+    "full_name": "System Administrator 2",
+    "role": "SYSTEM_ADMIN"
+}
+
+###
+
+### 14. Change System Admin Password
+# @name changeSystemPassword
+POST {{baseUrl}}/admin/system/auth/change-password
+Content-Type: application/json
+
+{
+    "currentPassword": "admin123",
+    "newPassword": "NewSecurePass123!"
+}
+
+###
+
+### 15. Login with New Password
+# @name loginWithNewPassword
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "NewSecurePass123!"
+}
+
+###
+
+### 16. Reset Password Back (For Testing)
+# @name resetPasswordBack
+POST {{baseUrl}}/admin/system/auth/change-password
+Content-Type: application/json
+
+{
+    "currentPassword": "NewSecurePass123!",
+    "newPassword": "admin123"
+}
+
+###
+
+###########################################################################
+# TRUST MANAGEMENT (System Level - No Tenant Context)
+###########################################################################
+
+### 17. Create New Trust (System Level)
+# @name createTrust
+# First ensure logged in as system admin
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+}
+
+###
+
+### 18. Create Trust After Login
+# @name createNewTrust
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+{
+    "name": "Test Trust",
+    "subdomain": "testrust",
+    "contact_email": "admin@testrust.edu",
+    "contact_phone": "+1-555-TEST",
+    "address": {
+        "street": "123 Test Street",
+        "city": "Test City", 
+        "state": "TS",
+        "postal_code": "12345",
+        "country": "Test Country"
+    },
+    "settings": {
+        "timezone": "Asia/Kolkata",
+        "academic_year_start": "April",
+        "max_students": 1000
+    }
+}
+
+###
+
+### 19. List All Trusts
+# @name listTrusts
+GET {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+###
+
+### 20. Get Specific Trust by ID
+# @name getTrust
+# Replace {trustId} with actual trust ID from create response
+GET {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+
+###
+
+### 21. Update Trust
+# @name updateTrust  
+PUT {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+
+{
+    "name": "Updated Test Trust",
+    "contact_email": "updated@testrust.edu",
+    "settings": {
+        "timezone": "Asia/Kolkata",
+        "academic_year_start": "June",
+        "max_students": 1500
+    }
+}
+
+###
+
+### 22. Complete Trust Setup
+# @name completeTrustSetup
+POST {{baseUrl}}/admin/system/trusts/1/complete-setup
+Content-Type: application/json
+
+{
+    "admin_user": {
+        "username": "testadmin",
+        "email": "admin@testrust.edu",
+        "password": "TestAdmin123!",
+        "full_name": "Test Trust Administrator"
+    }
+}
+
+###
+
+###########################################################################
+# ERROR HANDLING TESTS
+###########################################################################
+
+### 23. Try System Route with Invalid HTTP Method
+# @name invalidMethod
+DELETE {{baseUrl}}/admin/system/health
+Content-Type: application/json
+
+###
+
+### 24. Try Non-Existent System Route
+# @name nonExistentRoute
+GET {{baseUrl}}/admin/system/nonexistent
+Content-Type: application/json
+
+###
+
+### 25. Try System Route with Malformed JSON
+# @name malformedJson
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin123"
+    // Missing comma - malformed JSON
+}
+
+###
+
+### 26. Final Cleanup - Logout
+# @name finalLogout
+POST {{baseUrl}}/admin/system/auth/logout
+Content-Type: application/json
+
+{}

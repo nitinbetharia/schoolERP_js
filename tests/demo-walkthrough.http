@@ -1,0 +1,155 @@
+###
+### School ERP - Complete Demo Walkthrough
+### This file shows exact steps with real examples
+### Follow this sequence to test the system completely
+###
+
+@baseUrl = http://localhost:3000/api/v1
+
+###############################################################################
+### STEP 1: Verify Server is Running
+###############################################################################
+
+### Health Check (Should return status 200)
+GET {{baseUrl}}/admin/system/health
+Accept: application/json
+
+###
+
+### API Status (Should return status 200)
+GET {{baseUrl}}/status
+Accept: application/json
+
+###############################################################################
+### STEP 2: System Admin Login
+###############################################################################
+
+### System Admin Login
+# @name adminLogin
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+# After running this, look for Set-Cookie header in response:
+# Set-Cookie: connect.sid=s%3Aabcdef123456.hash789; Path=/; HttpOnly
+# Copy the entire value: s%3Aabcdef123456.hash789
+
+###############################################################################
+### STEP 3: Trust Management (Replace SESSION_COOKIE_VALUE below)
+###############################################################################
+
+### Create a New Trust
+# @name createTrust
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+
+{
+  "name": "Sunrise Academy Trust",
+  "contactEmail": "admin@sunriseacademy.edu",
+  "contactPhone": "+91-98765-43210",
+  "address": {
+    "street": "123 Education Lane",
+    "city": "Learning City",
+    "state": "Knowledge State",
+    "zipCode": "560001",
+    "country": "India"
+  },
+  "description": "A premier educational institution focused on holistic development"
+}
+
+###
+
+### Get All Trusts
+GET {{baseUrl}}/admin/system/trusts
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+Accept: application/json
+
+###
+
+### Get Trust by ID (Use ID from create response)
+GET {{baseUrl}}/admin/system/trusts/1
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+Accept: application/json
+
+###
+
+### Update Trust
+PUT {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+
+{
+  "name": "Sunrise Academy Trust - Updated",
+  "contactEmail": "updated@sunriseacademy.edu",
+  "description": "Updated description with new programs and facilities"
+}
+
+###
+
+### Complete Trust Setup (This creates the tenant database)
+POST {{baseUrl}}/admin/system/trusts/1/complete-setup
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+
+###############################################################################
+### STEP 4: Test Error Scenarios
+###############################################################################
+
+### Try to Create Trust Without Authentication (Should fail with 401)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Trust",
+  "contactEmail": "test@example.com"
+}
+
+###
+
+### Try to Create Trust with Invalid Data (Should fail with 400)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+
+{
+  "name": "",
+  "contactEmail": "invalid-email-format"
+}
+
+###############################################################################
+### STEP 5: Logout
+###############################################################################
+
+### System Admin Logout
+POST {{baseUrl}}/admin/system/auth/logout
+Cookie: connect.sid=SESSION_COOKIE_VALUE
+
+###############################################################################
+### INSTRUCTIONS FOR USE:
+###
+### 1. Start the server:
+###    npm run dev
+###
+### 2. Run "Health Check" to verify server is running
+###
+### 3. Run "System Admin Login"
+###
+### 4. In the response, find the Set-Cookie header:
+###    Set-Cookie: connect.sid=s%3A1Abc23Def456.Ghi789Jkl012; Path=/; HttpOnly
+###
+### 5. Copy ONLY the value part (everything after connect.sid=):
+###    s%3A1Abc23Def456.Ghi789Jkl012
+###
+### 6. Replace "SESSION_COOKIE_VALUE" in all subsequent requests with this value
+###
+### 7. Run the remaining tests in sequence
+###
+### Example of correctly formatted cookie:
+### Cookie: connect.sid=s%3A1Abc23Def456.Ghi789Jkl012
+###
+### DO NOT include the Path, HttpOnly, or other cookie attributes!
+###############################################################################

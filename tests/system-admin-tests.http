@@ -1,0 +1,137 @@
+###
+### School ERP - System Admin Only Tests
+### These tests avoid tenant detection issues
+### Focus on Phase 1A & 1B core functionality
+###
+
+@baseUrl = http://localhost:3000/api/v1/admin/system
+@username = admin
+@password = admin123
+
+###############################################################################
+### 1. SYSTEM AUTHENTICATION (Working)
+###############################################################################
+
+### 1.1 System Admin Login
+# @name systemLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### 1.2 Test Invalid Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "invalid",
+  "password": "invalid123"
+}
+
+### 1.3 System Admin Logout
+POST {{baseUrl}}/auth/logout
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+###############################################################################
+### 2. TRUST MANAGEMENT (Working)
+###############################################################################
+
+### 2.1 Create Trust
+# @name createTrust
+POST {{baseUrl}}/trusts
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "name": "Demo School Trust",
+  "contactEmail": "admin@demoschool.edu",
+  "contactPhone": "+91-98765-43210",
+  "address": {
+    "street": "123 School Street",
+    "city": "Education City",
+    "state": "Learning State", 
+    "zipCode": "12345",
+    "country": "India"
+  },
+  "description": "A demonstration school trust for testing"
+}
+
+### 2.2 Get All Trusts
+GET {{baseUrl}}/trusts
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+Accept: application/json
+
+### 2.3 Get Trust by ID
+GET {{baseUrl}}/trusts/1
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+Accept: application/json
+
+### 2.4 Update Trust
+PUT {{baseUrl}}/trusts/1
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "name": "Updated Demo School Trust",
+  "description": "Updated description for testing"
+}
+
+### 2.5 Complete Trust Setup
+POST {{baseUrl}}/trusts/1/complete-setup
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+###############################################################################
+### 3. VALIDATION TESTS
+###############################################################################
+
+### 3.1 Create Trust - Missing Required Field (Should Fail)
+POST {{baseUrl}}/trusts
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "contactEmail": "missing-name@test.edu"
+}
+
+### 3.2 Create Trust - Invalid Email (Should Fail)  
+POST {{baseUrl}}/trusts
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "name": "Valid Name",
+  "contactEmail": "invalid.email.format"
+}
+
+###############################################################################
+### 4. AUTHENTICATION TESTS
+###############################################################################
+
+### 4.1 Access Trusts Without Login (Should Fail)
+GET {{baseUrl}}/trusts
+Accept: application/json
+
+### 4.2 Create Trust Without Login (Should Fail)
+POST {{baseUrl}}/trusts
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Trust",
+  "contactEmail": "test@test.com"
+}
+
+###############################################################################
+### INSTRUCTIONS:
+###
+### 1. Start server: npm run dev
+### 2. Run "1.1 System Admin Login" 
+### 3. Copy the "connect.sid" value from Set-Cookie header
+### 4. Replace "PASTE_SESSION_COOKIE_HERE" with the full cookie
+### 5. Run the remaining tests
+###
+### These tests focus only on system-level endpoints that work correctly
+### and avoid the tenant detection issues in health/status endpoints.
+###############################################################################

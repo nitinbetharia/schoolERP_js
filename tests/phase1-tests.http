@@ -1,0 +1,385 @@
+###
+### School ERP API Tests - Phase 1A (DATA) & 1B (AUTH)
+### REST Client Extension for VS Code
+### Server: http://localhost:3000
+###
+
+@baseUrl = http://localhost:3000/api/v1
+@adminUsername = admin
+@adminPassword = admin123
+
+# Variables will be populated after login
+@sessionCookie = 
+@trustId = 
+
+###############################################################################
+### 1. HEALTH & STATUS CHECKS
+###############################################################################
+
+### 1.1 Health Check (No Auth Required)
+GET {{baseUrl}}/admin/system/health
+Accept: application/json
+
+###
+
+### 1.2 API Status (No Auth Required)  
+GET {{baseUrl}}/status
+Accept: application/json
+
+###############################################################################
+### 2. SYSTEM AUTHENTICATION TESTS
+###############################################################################
+
+### 2.1 System Admin Login
+# @name login
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{adminUsername}}",
+  "password": "{{adminPassword}}"
+}
+
+### 2.2 Login with Invalid Credentials (Should Fail)
+POST {{baseUrl}}/admin/system/auth/login  
+Content-Type: application/json
+
+{
+  "username": "invalid",
+  "password": "invalid123"
+}
+
+### 2.3 Login with Missing Fields (Should Fail)
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+### 2.4 Change Password (Requires Login)
+# First login, then use this endpoint
+POST {{baseUrl}}/admin/system/auth/change-password
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "currentPassword": "{{adminPassword}}",
+  "newPassword": "newAdmin123",
+  "confirmPassword": "newAdmin123"
+}
+
+### 2.5 System Admin Logout
+POST {{baseUrl}}/admin/system/auth/logout
+Cookie: {{sessionCookie}}
+
+###############################################################################
+### 3. TRUST MANAGEMENT TESTS (Requires Authentication)
+###############################################################################
+
+### 3.1 Create Trust
+# @name createTrust
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Green Valley School Trust",
+  "contactEmail": "admin@greenvalley.edu",
+  "contactPhone": "+1234567890",
+  "address": {
+    "street": "123 Education Street", 
+    "city": "Knowledge City",
+    "state": "Learning State",
+    "zipCode": "12345",
+    "country": "India"
+  },
+  "description": "A premier educational trust focused on holistic development"
+}
+
+### 3.2 Create Trust with Minimal Data
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Simple School Trust",
+  "contactEmail": "contact@simpleschool.edu"
+}
+
+### 3.3 Create Trust with Invalid Data (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json  
+Cookie: {{sessionCookie}}
+
+{
+  "name": "",
+  "contactEmail": "invalid-email"
+}
+
+### 3.4 Get All Trusts (Default Pagination)
+GET {{baseUrl}}/admin/system/trusts
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.5 Get Trusts with Pagination
+GET {{baseUrl}}/admin/system/trusts?page=1&limit=5&sortBy=name&sortOrder=asc
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.6 Search Trusts by Name
+GET {{baseUrl}}/admin/system/trusts?search=Green
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.7 Filter Trusts by Status
+GET {{baseUrl}}/admin/system/trusts?status=ACTIVE
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.8 Get Trust by ID
+# Replace {trustId} with actual ID from create trust response
+GET {{baseUrl}}/admin/system/trusts/1
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.9 Get Trust by Invalid ID (Should Fail)
+GET {{baseUrl}}/admin/system/trusts/99999
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 3.10 Update Trust
+PUT {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Green Valley School Trust - Updated",
+  "contactEmail": "newemail@greenvalley.edu",
+  "contactPhone": "+1987654321",
+  "address": {
+    "street": "456 Updated Education Street",
+    "city": "New Knowledge City", 
+    "state": "Advanced Learning State",
+    "zipCode": "54321",
+    "country": "India"
+  },
+  "description": "Updated description for the premier educational trust"
+}
+
+### 3.11 Update Trust with Invalid Data (Should Fail)
+PUT {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "contactEmail": "invalid-email-format"
+}
+
+### 3.12 Complete Trust Setup
+POST {{baseUrl}}/admin/system/trusts/1/complete-setup
+Cookie: {{sessionCookie}}
+
+###############################################################################
+### 4. AUTHORIZATION TESTS (Access Control)
+###############################################################################
+
+### 4.1 Access Protected Endpoint Without Session (Should Fail)
+GET {{baseUrl}}/admin/system/trusts
+Accept: application/json
+
+### 4.2 Create Trust Without Session (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+
+{
+  "name": "Unauthorized Trust",
+  "contactEmail": "test@test.com"
+}
+
+### 4.3 Access Admin Endpoint with Invalid Session (Should Fail)
+GET {{baseUrl}}/admin/system/trusts
+Cookie: connect.sid=invalid-session-id
+Accept: application/json
+
+###############################################################################
+### 5. VALIDATION TESTS
+###############################################################################
+
+### 5.1 Create Trust - Name Too Short (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "AB",
+  "contactEmail": "valid@email.com"
+}
+
+### 5.2 Create Trust - Name Too Long (Should Fail)  
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "This is a very long trust name that exceeds the maximum allowed length for trust names in the system which should cause a validation error",
+  "contactEmail": "valid@email.com"
+}
+
+### 5.3 Create Trust - Invalid Email Format (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Valid Trust Name",
+  "contactEmail": "invalid.email.format"
+}
+
+### 5.4 Create Trust - Invalid Phone Format (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Valid Trust Name",
+  "contactEmail": "valid@email.com",
+  "contactPhone": "invalid-phone"
+}
+
+###############################################################################
+### 6. RATE LIMITING TESTS
+###############################################################################
+
+### 6.1 Test Login Rate Limiting
+# Run this multiple times quickly to trigger rate limiting
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "wrongpassword"
+}
+
+### 6.2 Test API Rate Limiting  
+# Make multiple rapid requests to test general API rate limiting
+GET {{baseUrl}}/admin/system/health
+
+###############################################################################
+### 7. ERROR HANDLING TESTS
+###############################################################################
+
+### 7.1 Invalid JSON Format (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Test Trust",
+  "contactEmail": "test@test.com",
+  invalidJson: true
+}
+
+### 7.2 Missing Content-Type Header (Should Fail)
+POST {{baseUrl}}/admin/system/trusts
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Test Trust",
+  "contactEmail": "test@test.com"
+}
+
+### 7.3 Invalid HTTP Method (Should Fail)
+PATCH {{baseUrl}}/admin/system/trusts
+Cookie: {{sessionCookie}}
+
+### 7.4 Non-Existent Endpoint (Should Fail)
+GET {{baseUrl}}/admin/system/nonexistent
+Cookie: {{sessionCookie}}
+
+###############################################################################
+### 8. PAGINATION AND FILTERING TESTS
+###############################################################################
+
+### 8.1 Test Large Page Size
+GET {{baseUrl}}/admin/system/trusts?limit=100
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 8.2 Test Invalid Pagination Parameters
+GET {{baseUrl}}/admin/system/trusts?page=-1&limit=0
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 8.3 Test Sorting Options
+GET {{baseUrl}}/admin/system/trusts?sortBy=createdAt&sortOrder=desc
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 8.4 Test Invalid Sorting Parameters
+GET {{baseUrl}}/admin/system/trusts?sortBy=invalidField&sortOrder=invalidOrder
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+###############################################################################
+### 9. SECURITY TESTS
+###############################################################################
+
+### 9.1 Test XSS Protection
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "<script>alert('XSS')</script>",
+  "contactEmail": "test@test.com",
+  "description": "<img src=x onerror=alert('XSS')>"
+}
+
+### 9.2 Test SQL Injection Protection
+GET {{baseUrl}}/admin/system/trusts?search='; DROP TABLE trusts; --
+Cookie: {{sessionCookie}}
+Accept: application/json
+
+### 9.3 Test CORS Headers
+OPTIONS {{baseUrl}}/admin/system/trusts
+Origin: https://malicious-site.com
+Access-Control-Request-Method: POST
+Access-Control-Request-Headers: Content-Type
+
+###############################################################################
+### 10. PERFORMANCE TESTS
+###############################################################################
+
+### 10.1 Large Payload Test
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: {{sessionCookie}}
+
+{
+  "name": "Performance Test Trust",
+  "contactEmail": "performance@test.com",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo."
+}
+
+###############################################################################
+### NOTES:
+### 
+### 1. Run "2.1 System Admin Login" first to get the session cookie
+### 2. Copy the Set-Cookie header value from the login response 
+### 3. Update the @sessionCookie variable at the top with the cookie value
+### 4. For trust-specific operations, use the trust ID returned from create operations
+###
+### Expected Response Codes:
+### - 200: Success
+### - 201: Created  
+### - 400: Bad Request (validation errors)
+### - 401: Unauthorized (no session)
+### - 403: Forbidden (insufficient permissions)
+### - 404: Not Found
+### - 429: Too Many Requests (rate limiting)
+### - 500: Internal Server Error
+###
+### Session Cookie Format: 
+### connect.sid=s%3A[session-id].signature
+###############################################################################

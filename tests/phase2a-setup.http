@@ -1,0 +1,103 @@
+### Setup Module API Testing
+### Phase 2A: SETUP Module Implementation
+
+# Test server status
+GET http://localhost:3000/api/v1/status
+Accept: application/json
+
+###
+
+# System login first (required for setup operations)
+POST http://localhost:3000/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+# Initialize setup for trust ID 1
+POST http://localhost:3000/api/v1/setup/1/initialize
+Content-Type: application/json
+
+###
+
+# Get setup progress for trust ID 1
+GET http://localhost:3000/api/v1/setup/1/progress
+Accept: application/json
+
+###
+
+# Get details for trust_info step
+GET http://localhost:3000/api/v1/setup/1/step/trust_info
+Accept: application/json
+
+###
+
+# Complete trust_info step
+POST http://localhost:3000/api/v1/setup/1/step/trust_info/complete
+Content-Type: application/json
+
+{
+  "name": "Example Educational Trust",
+  "code": "EET001",
+  "address": "123 Education Street, Learning City, LC 12345",
+  "contact_email": "admin@exampleeducation.org",
+  "contact_phone": "+1-555-0123"
+}
+
+###
+
+# Complete academic_year step
+POST http://localhost:3000/api/v1/setup/1/step/academic_year/complete
+Content-Type: application/json
+
+{
+  "year": "2024-2025",
+  "start_date": "2024-04-01",
+  "end_date": "2025-03-31",
+  "terms": [
+    {
+      "name": "Term 1",
+      "start_date": "2024-04-01",
+      "end_date": "2024-09-30"
+    },
+    {
+      "name": "Term 2", 
+      "start_date": "2024-10-01",
+      "end_date": "2025-03-31"
+    }
+  ]
+}
+
+###
+
+# Complete schools_basic step
+POST http://localhost:3000/api/v1/setup/1/step/schools_basic/complete
+Content-Type: application/json
+
+{
+  "schools": [
+    {
+      "name": "Main Campus School",
+      "code": "MCS001",
+      "address": "456 Campus Ave, Learning City, LC 12345",
+      "principal_name": "Dr. Jane Smith",
+      "contact_phone": "+1-555-0456"
+    }
+  ]
+}
+
+###
+
+# Get updated setup progress
+GET http://localhost:3000/api/v1/setup/1/progress
+Accept: application/json
+
+###
+
+# Reset setup (for testing purposes)
+DELETE http://localhost:3000/api/v1/setup/1/reset
+Accept: application/json

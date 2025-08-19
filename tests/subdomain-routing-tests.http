@@ -1,0 +1,323 @@
+### Subdomain-based Trust Context and Authentication Tests
+### Testing tenant detection, routing, and authentication via subdomains
+
+###########################################
+# SYSTEM ADMIN TESTS (No Subdomain)
+###########################################
+
+# Test system status (no tenant context needed)
+GET http://localhost:3000/api/v1/status
+Accept: application/json
+
+###
+
+# System admin login (system-level, no tenant context)
+POST http://localhost:3000/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+
+# Get system health (system-level)
+GET http://localhost:3000/api/v1/admin/system/health
+Accept: application/json
+
+###
+
+# List all trusts in system (system-level)
+GET http://localhost:3000/api/v1/admin/system/trusts
+Accept: application/json
+
+###
+
+###########################################
+# TRUST001 SUBDOMAIN TESTS
+###########################################
+
+# Test tenant detection for trust001 subdomain
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: trust001.example.com:3000
+
+###
+
+# User login on trust001 subdomain (should fail - no users yet)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "principal001",
+  "password": "principal123"
+}
+
+###
+
+# Create user on trust001 subdomain (needs system admin session)
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "principal001",
+  "email": "principal@trust001.edu",
+  "password": "principal123",
+  "role": "PRINCIPAL",
+  "profile": {
+    "first_name": "John",
+    "last_name": "Smith",
+    "phone": "+1-555-0123",
+    "employee_id": "T001-P001",
+    "designation": "Principal"
+  }
+}
+
+###
+
+# User login on trust001 subdomain (should work after user creation)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "principal001",
+  "password": "principal123"
+}
+
+###
+
+# Get all users on trust001 (should show trust001 users only)
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: trust001.example.com:3000
+
+###
+
+# Create another user on trust001
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "teacher001",
+  "email": "teacher1@trust001.edu",
+  "password": "teacher123",
+  "role": "TEACHER",
+  "profile": {
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "phone": "+1-555-0456",
+    "employee_id": "T001-T001",
+    "designation": "Mathematics Teacher",
+    "department": "Mathematics"
+  }
+}
+
+###
+
+###########################################
+# DEMO SUBDOMAIN TESTS
+###########################################
+
+# User login on demo subdomain (different tenant)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: demo.example.com:3000
+
+{
+  "username": "demo_user",
+  "password": "demo123"
+}
+
+###
+
+# Create user on demo subdomain
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+Host: demo.example.com:3000
+
+{
+  "username": "demo_principal",
+  "email": "principal@demo.edu",
+  "password": "demo123",
+  "role": "PRINCIPAL",
+  "profile": {
+    "first_name": "Demo",
+    "last_name": "Principal",
+    "phone": "+1-555-DEMO",
+    "employee_id": "DEMO-P001"
+  }
+}
+
+###
+
+# Get users on demo subdomain (should be isolated from trust001)
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: demo.example.com:3000
+
+###
+
+# Login as demo user
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: demo.example.com:3000
+
+{
+  "username": "demo_principal",
+  "password": "demo123"
+}
+
+###
+
+###########################################
+# LOCALHOST TESTS (DEFAULT TENANT)
+###########################################
+
+# Test localhost routing (should use default tenant "demo")
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+
+###
+
+# Login on localhost (should use demo tenant database)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+
+{
+  "username": "demo_principal",
+  "password": "demo123"
+}
+
+###
+
+###########################################
+# CROSS-TENANT ISOLATION TESTS
+###########################################
+
+# Verify trust001 users are not visible from demo subdomain
+GET http://localhost:3000/api/v1/users?role=PRINCIPAL
+Accept: application/json
+Host: demo.example.com:3000
+
+###
+
+# Verify demo users are not visible from trust001 subdomain  
+GET http://localhost:3000/api/v1/users?role=PRINCIPAL
+Accept: application/json
+Host: trust001.example.com:3000
+
+###
+
+# Try to login with trust001 credentials on demo subdomain (should fail)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: demo.example.com:3000
+
+{
+  "username": "principal001",
+  "password": "principal123"
+}
+
+###
+
+# Try to login with demo credentials on trust001 subdomain (should fail)
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "demo_principal", 
+  "password": "demo123"
+}
+
+###
+
+###########################################
+# SETUP MODULE TESTS WITH SUBDOMAINS
+###########################################
+
+# Initialize setup for trust001 (system admin required)
+POST http://localhost:3000/api/v1/setup/1/initialize
+Content-Type: application/json
+
+###
+
+# Get setup progress for trust001
+GET http://localhost:3000/api/v1/setup/1/progress
+Accept: application/json
+
+###
+
+# Complete trust info setup step
+POST http://localhost:3000/api/v1/setup/1/step/trust_info/complete
+Content-Type: application/json
+
+{
+  "name": "Trust001 Educational Foundation",
+  "code": "T001",
+  "address": "123 Education Street, Learning City, LC 12345",
+  "contact_email": "admin@trust001.edu",
+  "contact_phone": "+1-555-0001"
+}
+
+###
+
+###########################################
+# ERROR HANDLING TESTS
+###########################################
+
+# Test invalid subdomain
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: nonexistent.example.com:3000
+
+###
+
+# Test malformed host header
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: invalid-format
+
+###
+
+# Test www subdomain (should fallback to default)
+GET http://localhost:3000/api/v1/users
+Accept: application/json
+Host: www.example.com:3000
+
+###
+
+###########################################
+# SESSION ISOLATION TESTS
+###########################################
+
+# Login on trust001
+POST http://localhost:3000/api/v1/users/auth/login
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+{
+  "username": "principal001",
+  "password": "principal123"
+}
+
+###
+
+# Try to access with trust001 session on demo subdomain (should fail)
+GET http://localhost:3000/api/v1/users/1
+Accept: application/json
+Host: demo.example.com:3000
+
+###
+
+# Logout from trust001
+POST http://localhost:3000/api/v1/users/auth/logout
+Content-Type: application/json
+Host: trust001.example.com:3000
+
+###

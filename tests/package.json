@@ -1,0 +1,33 @@
+{
+   "name": "schoolerp-testing-suite",
+   "version": "1.0.0",
+   "description": "Comprehensive tests for subdomain-based multi-tenant authentication",
+   "scripts": {
+      "test": "mocha tests/subdomain-auth.test.js --timeout 10000 --reporter spec",
+      "test:verbose": "mocha tests/subdomain-auth.test.js --timeout 10000 --reporter spec --recursive",
+      "test:watch": "mocha tests/subdomain-auth.test.js --timeout 10000 --watch",
+      "test:coverage": "nyc mocha tests/subdomain-auth.test.js --timeout 10000"
+   },
+   "devDependencies": {
+      "mocha": "^10.0.0",
+      "chai": "^4.3.7",
+      "axios": "^1.4.0",
+      "nyc": "^15.1.0"
+   },
+   "mocha": {
+      "timeout": 10000,
+      "recursive": true,
+      "reporter": "spec"
+   },
+   "nyc": {
+      "reporter": [
+         "html",
+         "text",
+         "text-summary"
+      ],
+      "exclude": [
+         "tests/**",
+         "node_modules/**"
+      ]
+   }
+}

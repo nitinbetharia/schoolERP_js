@@ -1,0 +1,82 @@
+###
+### School ERP - Quick Essential Tests
+### Use this for rapid testing of core functionality
+###
+
+@baseUrl = http://localhost:3000/api/v1
+
+###############################################################################
+### QUICK START - Run these in order
+###############################################################################
+
+### 1. Health Check
+GET {{baseUrl}}/admin/system/health
+
+### 2. System Admin Login
+# @name quickLogin
+POST {{baseUrl}}/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 3. Create First Trust  
+# Copy the Set-Cookie from login response and paste below
+POST {{baseUrl}}/admin/system/trusts
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "name": "Test School Trust",
+  "contactEmail": "admin@testschool.edu",
+  "contactPhone": "+1234567890",
+  "address": {
+    "street": "123 School Street",
+    "city": "Education City", 
+    "state": "Learning State",
+    "zipCode": "12345",
+    "country": "India"
+  }
+}
+
+### 4. Get All Trusts
+GET {{baseUrl}}/admin/system/trusts
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+### 5. Get Trust by ID (use ID from create response)
+GET {{baseUrl}}/admin/system/trusts/1
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+### 6. Update Trust
+PUT {{baseUrl}}/admin/system/trusts/1
+Content-Type: application/json
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+{
+  "name": "Updated Test School Trust",
+  "contactEmail": "updated@testschool.edu",
+  "description": "This is an updated description"
+}
+
+### 7. Complete Trust Setup
+POST {{baseUrl}}/admin/system/trusts/1/complete-setup
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+### 8. Logout
+POST {{baseUrl}}/admin/system/auth/logout
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+
+###############################################################################
+### HOW TO USE:
+### 1. Ensure server is running: npm run dev
+### 2. Run "Health Check" to verify server
+### 3. Run "System Admin Login" 
+### 4. Copy the "connect.sid" value from Set-Cookie header
+### 5. Replace "REPLACE_WITH_SESSION_COOKIE_VALUE" with the cookie value
+### 6. Run the remaining tests in order
+###
+### Example cookie format:
+### Cookie: connect.sid=s%3Aabcdefghijk.1234567890abcdefghijk
+###############################################################################
