@@ -1,6 +1,135 @@
 # Indian School System & NEP Implementation Guide
 
-## 🇮🇳 **INDIAN EDUCATION SYSTEM STRUCTURE**
+## � **BOARD AFFILIATION & COMPLIANCE MATRIX**
+
+### **Automated Compliance System Based on School Type**
+
+#### **Board Affiliation Types & Applicable Laws**
+
+```javascript
+// Comprehensive Board Affiliation System
+const BOARD_COMPLIANCE_MATRIX = {
+   CBSE: {
+      mandatory_requirements: [
+         'NEP_2020_COMPLIANCE',
+         'CBSE_BYLAWS',
+         'CBSE_AFFILIATION_REQUIREMENTS',
+         'CBSE_CURRICULUM_STANDARDS',
+         'CBSE_EXAMINATION_SYSTEM',
+         'UDISE_PLUS_REPORTING',
+         'RTE_ACT_2009',
+         'POCSO_COMPLIANCE',
+         'CHILD_PROTECTION_POLICY',
+      ],
+      student_ids_required: ['CBSE_UID', 'AADHAAR', 'UDISE_STUDENT_ID'],
+      examination_system: 'CBSE_BOARD_EXAMS',
+      curriculum: 'NCERT_BASED',
+      assessment: 'CCE_CONTINUOUS_COMPREHENSIVE',
+      reporting: ['CBSE_PORTAL', 'UDISE_PLUS', 'DIKSHA_INTEGRATION'],
+   },
+
+   ICSE: {
+      mandatory_requirements: [
+         'NEP_2020_COMPLIANCE',
+         'CISCE_COUNCIL_RULES',
+         'ICSE_CURRICULUM_STANDARDS',
+         'CISCE_EXAMINATION_SYSTEM',
+         'UDISE_PLUS_REPORTING',
+         'RTE_ACT_2009',
+         'POCSO_COMPLIANCE',
+         'CHILD_PROTECTION_POLICY',
+      ],
+      student_ids_required: ['CISCE_UID', 'AADHAAR', 'UDISE_STUDENT_ID'],
+      examination_system: 'ICSE_ISC_EXAMS',
+      curriculum: 'CISCE_SYLLABUS',
+      assessment: 'INTERNAL_EXTERNAL_ASSESSMENT',
+      reporting: ['CISCE_PORTAL', 'UDISE_PLUS'],
+   },
+
+   STATE_BOARD: {
+      mandatory_requirements: [
+         'NEP_2020_COMPLIANCE',
+         'STATE_EDUCATION_ACT',
+         'STATE_CURRICULUM_FRAMEWORK',
+         'STATE_EXAMINATION_RULES',
+         'UDISE_PLUS_REPORTING',
+         'RTE_ACT_2009',
+         'STATE_MEDIUM_POLICY',
+         'POCSO_COMPLIANCE',
+      ],
+      student_ids_required: ['STATE_UID', 'AADHAAR', 'UDISE_STUDENT_ID', 'SARAL_ID'],
+      examination_system: 'STATE_BOARD_EXAMS',
+      curriculum: 'STATE_CURRICULUM',
+      assessment: 'STATE_ASSESSMENT_PATTERN',
+      reporting: ['STATE_PORTAL', 'UDISE_PLUS', 'SARAL_SYSTEM'],
+   },
+
+   IB_INTERNATIONAL: {
+      mandatory_requirements: [
+         'IB_AUTHORIZATION_REQUIREMENTS',
+         'IB_PROGRAMME_STANDARDS',
+         'INTERNATIONAL_CHILD_PROTECTION',
+         'UDISE_PLUS_REPORTING',
+         'FOREIGN_EDUCATION_PROVIDER_REGULATIONS',
+         'RTE_COMPLIANCE_IF_INDIAN_STUDENTS',
+      ],
+      student_ids_required: ['IB_STUDENT_ID', 'PASSPORT_NUMBER', 'AADHAAR_IF_INDIAN'],
+      examination_system: 'IB_ASSESSMENT_SYSTEM',
+      curriculum: 'IB_CURRICULUM_FRAMEWORK',
+      assessment: 'IB_INTERNAL_EXTERNAL_ASSESSMENT',
+      reporting: ['IB_INFORMATION_SYSTEM', 'UDISE_PLUS_IF_REQUIRED'],
+   },
+
+   CAMBRIDGE_INTERNATIONAL: {
+      mandatory_requirements: [
+         'CAMBRIDGE_CENTRE_REQUIREMENTS',
+         'CAMBRIDGE_QUALITY_STANDARDS',
+         'INTERNATIONAL_CHILD_PROTECTION',
+         'UDISE_PLUS_REPORTING',
+         'FOREIGN_EDUCATION_PROVIDER_REGULATIONS',
+      ],
+      student_ids_required: ['CAMBRIDGE_ID', 'PASSPORT_NUMBER', 'AADHAAR_IF_INDIAN'],
+      examination_system: 'CAMBRIDGE_INTERNATIONAL_EXAMS',
+      curriculum: 'CAMBRIDGE_CURRICULUM',
+      assessment: 'CAMBRIDGE_ASSESSMENT_SYSTEM',
+      reporting: ['CAMBRIDGE_INTERNATIONAL_SYSTEM', 'UDISE_PLUS_IF_REQUIRED'],
+   },
+
+   WALDORF_STEINER: {
+      mandatory_requirements: [
+         'WALDORF_PEDAGOGY_STANDARDS',
+         'ALTERNATIVE_EDUCATION_COMPLIANCE',
+         'CHILD_DEVELOPMENT_FOCUS',
+         'UDISE_PLUS_REPORTING',
+         'RTE_ACT_2009',
+      ],
+      student_ids_required: ['AADHAAR', 'UDISE_STUDENT_ID'],
+      examination_system: 'ALTERNATIVE_ASSESSMENT',
+      curriculum: 'WALDORF_CURRICULUM',
+      assessment: 'HOLISTIC_DEVELOPMENT_ASSESSMENT',
+      reporting: ['UDISE_PLUS', 'ALTERNATIVE_EDUCATION_PORTAL'],
+   },
+
+   MONTESSORI: {
+      mandatory_requirements: [
+         'MONTESSORI_METHOD_STANDARDS',
+         'EARLY_CHILDHOOD_REGULATIONS',
+         'CHILD_CENTRIC_EDUCATION_COMPLIANCE',
+         'UDISE_PLUS_REPORTING',
+         'RTE_ACT_2009',
+      ],
+      student_ids_required: ['AADHAAR', 'UDISE_STUDENT_ID'],
+      examination_system: 'CONTINUOUS_OBSERVATION',
+      curriculum: 'MONTESSORI_CURRICULUM',
+      assessment: 'SELF_PACED_ASSESSMENT',
+      reporting: ['UDISE_PLUS', 'EARLY_CHILDHOOD_PORTAL'],
+   },
+};
+```
+
+---
+
+## �🇮🇳 **INDIAN EDUCATION SYSTEM STRUCTURE**
 
 ### **NEP 2020 Compliant School Structure**
 
@@ -31,6 +160,88 @@
 - **Focus**: Critical thinking, board exams (X, XII)
 - **Streams**: Science, Commerce, Arts, Vocational
 - **Admission Points**: Class IX (major entry), Class XI (stream selection)
+
+---
+
+## 🎓 **NEP 2020 IMPLEMENTATION REQUIREMENTS**
+
+### **Key NEP 2020 Principles for School ERP**
+
+#### **1. Holistic Development Tracking**
+
+- **Academic Performance**: Subject-wise competency mapping
+- **Co-curricular Activities**: Arts, sports, creativity tracking
+- **Life Skills Assessment**: Critical thinking, problem-solving
+- **Values Education**: Ethics, citizenship, environmental awareness
+- **Health & Wellness**: Physical fitness, mental health monitoring
+
+#### **2. Multilingual Education Support**
+
+- **Three-Language Formula**: Hindi, English, Regional/Modern Indian Language
+- **Mother Tongue Preference**: Early years education in home language
+- **Language Proficiency Levels**: Basic, Intermediate, Advanced tracking
+- **Foreign Language Options**: Classes VI onwards
+- **Classical Language**: Sanskrit, others as optional subjects
+
+#### **3. Assessment & Evaluation (NEP Compliant)**
+
+- **Competency-Based Assessment**: Knowledge, skills, values, attitudes
+- **360-Degree Assessment**: Self, peer, teacher, parent evaluation
+- **Portfolio Approach**: Student work collection and progress tracking
+- **Reduced Board Exam Stress**: Semester system, multiple attempts
+- **Coding & Computational Thinking**: Mandatory from Class VI
+
+#### **4. Vocational Education Integration**
+
+- **Skill-Based Learning**: From Class VI onwards
+- **Industry Partnerships**: Internships, mentorship programs
+- **Local Craft Integration**: Regional skills and knowledge
+- **Career Counseling**: Professional guidance system
+- **Entrepreneurship Education**: Innovation and startup mindset
+
+#### **5. Technology Integration (Digital India Initiative)**
+
+- **Digital Literacy**: ICT skills for all students
+- **Online Learning Platforms**: Blended learning support
+- **AI & Data Science**: Introduction from secondary level
+- **Digital Portfolio**: Student achievement documentation
+- **Virtual Labs**: Science and mathematics experiments
+
+#### **NEP 2020 Data Model Requirements**
+
+```javascript
+nep_compliance: {
+  // ACADEMIC STRUCTURE
+  nep_stage: DataTypes.ENUM('FOUNDATIONAL', 'PREPARATORY', 'MIDDLE', 'SECONDARY'),
+  academic_year_structure: DataTypes.ENUM('5+3+3+4', 'TRADITIONAL'),
+
+  // ASSESSMENT SYSTEM
+  competency_based_assessment: DataTypes.BOOLEAN,
+  portfolio_assessment: DataTypes.BOOLEAN,
+  peer_assessment: DataTypes.BOOLEAN,
+  self_assessment: DataTypes.BOOLEAN,
+
+  // MULTILINGUAL EDUCATION
+  home_language: DataTypes.STRING(50),
+  three_language_formula: DataTypes.JSON,        // Languages being studied
+  language_proficiency_levels: DataTypes.JSON,  // Proficiency in each language
+
+  // SKILL DEVELOPMENT
+  vocational_subjects: DataTypes.JSON,           // Vocational courses taken
+  coding_proficiency: DataTypes.ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED'),
+  entrepreneurship_activities: DataTypes.JSON,
+
+  // HOLISTIC DEVELOPMENT
+  co_curricular_participation: DataTypes.JSON,  // Arts, sports, clubs
+  life_skills_assessment: DataTypes.JSON,       // Critical thinking, etc.
+  values_education_completion: DataTypes.BOOLEAN,
+
+  // TECHNOLOGY INTEGRATION
+  digital_literacy_level: DataTypes.ENUM('BASIC', 'INTERMEDIATE', 'ADVANCED'),
+  online_learning_hours: DataTypes.INTEGER,
+  digital_portfolio_status: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'COMPLETED')
+}
+```
 
 ---
 
@@ -98,23 +309,813 @@ Educational Trust/Society
 
 ---
 
-## 📋 **ENHANCED STUDENT MODEL FOR INDIAN SCHOOLS**
+## 📚 **BOARD AFFILIATION REQUIREMENTS**
 
-### **Additional Fields Required**
+### **CBSE (Central Board of Secondary Education)**
 
-#### **Government Compliance Fields**
+#### **CBSE Specific Requirements**
+
+- **Registration**: School Code (5-digit), Principal Registration, Teacher Registration
+- **Student ID**: CBSE UID (15-character alphanumeric)
+- **Academic Structure**: Classes IX-XII (Secondary & Sr. Secondary)
+- **Examinations**: Board exams for Classes X and XII
+- **Curriculum**: NCERT-based with NEP 2020 integration
+- **Languages**: Three-language formula mandatory
+- **Assessment**: Continuous and Comprehensive Evaluation (CCE)
+- **Documentation**: Transfer Certificates, Character Certificates, Migration Certificates
+- **Online Systems**: Parinam Manjusha, Academic Repository, DigiLocker integration
+
+---
+
+## 🏫 **COMPREHENSIVE SCHOOL PROFILE MODEL**
+
+### **Dynamic Compliance System Based on Board Affiliation**
 
 ```javascript
-// Add to Student model
-government_ids: {
-  aadhaar_number: DataTypes.STRING(12),
-  saral_id: DataTypes.STRING(20),      // Maharashtra
-  cbse_uid: DataTypes.STRING(15),      // CBSE schools
-  state_uid: DataTypes.STRING(20),     // State board UID
-  rte_beneficiary: DataTypes.BOOLEAN,  // RTE quota student
-  scholarship_id: DataTypes.STRING(20) // Government scholarship ID
-}
+// models/SchoolProfile.js - Comprehensive School Profile with Auto-Compliance
+const SchoolProfile = sequelize.define('SchoolProfile', {
+   // BASIC SCHOOL INFORMATION
+   school_name: DataTypes.STRING(200),
+   udise_code: DataTypes.STRING(11),
+
+   // BOARD AFFILIATION (Determines all applicable requirements)
+   primary_board: {
+      type: DataTypes.ENUM(
+         'CBSE',
+         'ICSE',
+         'STATE_BOARD',
+         'IB_INTERNATIONAL',
+         'CAMBRIDGE_INTERNATIONAL',
+         'WALDORF_STEINER',
+         'MONTESSORI',
+         'KENDRIYA_VIDYALAYA',
+         'NAVODAYA_VIDYALAYA',
+         'ARMY_PUBLIC_SCHOOL'
+      ),
+      allowNull: false,
+   },
+
+   // SCHOOL CATEGORIZATION
+   school_type: DataTypes.ENUM('GOVERNMENT', 'GOVERNMENT_AIDED', 'PRIVATE_UNAIDED', 'INTERNATIONAL'),
+   management_type: DataTypes.ENUM('GOVERNMENT', 'PRIVATE', 'AIDED', 'TRUST', 'SOCIETY', 'COMPANY'),
+   recognition_status: DataTypes.ENUM('RECOGNIZED', 'UNRECOGNIZED', 'PROVISIONAL'),
+
+   // CLASS RANGE OFFERED
+   classes_offered: DataTypes.STRING(20), // e.g., "Nursery-XII", "VI-XII", "IX-XII"
+
+   // BOARD SPECIFIC CODES/IDs
+   cbse_school_code: DataTypes.STRING(5),
+   cisce_registration: DataTypes.STRING(10),
+   state_board_code: DataTypes.STRING(15),
+   ib_school_code: DataTypes.STRING(10),
+   cambridge_centre_number: DataTypes.STRING(8),
+
+   // AUTO-GENERATED COMPLIANCE REQUIREMENTS (Based on Board)
+   applicable_laws: {
+      type: DataTypes.JSON, // Auto-populated based on board affiliation
+      defaultValue: [],
+   },
+
+   required_student_ids: {
+      type: DataTypes.JSON, // Auto-populated based on board affiliation
+      defaultValue: [],
+   },
+
+   mandatory_reporting: {
+      type: DataTypes.JSON, // Auto-populated based on board affiliation
+      defaultValue: [],
+   },
+
+   examination_system: DataTypes.STRING(50), // Auto-populated
+   curriculum_framework: DataTypes.STRING(50), // Auto-populated
+   assessment_pattern: DataTypes.STRING(50), // Auto-populated
+});
+
+// METHOD: Auto-populate compliance requirements based on board
+SchoolProfile.prototype.setComplianceRequirements = function () {
+   const compliance = BOARD_COMPLIANCE_MATRIX[this.primary_board];
+
+   if (compliance) {
+      this.applicable_laws = compliance.mandatory_requirements;
+      this.required_student_ids = compliance.student_ids_required;
+      this.mandatory_reporting = compliance.reporting;
+      this.examination_system = compliance.examination_system;
+      this.curriculum_framework = compliance.curriculum;
+      this.assessment_pattern = compliance.assessment;
+   }
+
+   // Add common Indian requirements if Indian board
+   if (['CBSE', 'ICSE', 'STATE_BOARD'].includes(this.primary_board)) {
+      this.applicable_laws.push('RTE_ACT_2009', 'POCSO_ACT', 'CHILD_LABOUR_PROHIBITION');
+      this.required_student_ids.push('AADHAAR', 'UDISE_STUDENT_ID');
+      this.mandatory_reporting.push('UDISE_PLUS');
+   }
+};
+
+// HOOK: Auto-set compliance on save
+SchoolProfile.addHook('beforeSave', (school) => {
+   school.setComplianceRequirements();
+});
 ```
+
+### **Board-Specific Compliance Models**
+
+#### **CBSE Compliance Data**
+
+```javascript
+const CBSECompliance = sequelize.define('CBSECompliance', {
+   school_id: DataTypes.UUID,
+   cbse_affiliation_number: DataTypes.STRING(5),
+   affiliation_status: DataTypes.ENUM('PROVISIONAL', 'REGULAR', 'UPGRADATION'),
+   affiliation_validity: DataTypes.DATE,
+   recognition_classes: DataTypes.STRING(20),
+   three_language_compliance: DataTypes.BOOLEAN,
+   cce_implementation: DataTypes.BOOLEAN,
+   student_teacher_ratio: DataTypes.DECIMAL(5, 2),
+   infrastructure_compliance: DataTypes.BOOLEAN,
+   safety_certificate: DataTypes.BOOLEAN,
+   fire_safety_certificate: DataTypes.BOOLEAN,
+   building_safety_certificate: DataTypes.BOOLEAN,
+   last_inspection_date: DataTypes.DATE,
+   next_inspection_due: DataTypes.DATE,
+});
+```
+
+#### **ICSE/CISCE Compliance Data**
+
+```javascript
+const CISCECompliance = sequelize.define('CISCECompliance', {
+   school_id: DataTypes.UUID,
+   cisce_registration_number: DataTypes.STRING(10),
+   icse_recognition: DataTypes.BOOLEAN,
+   isc_recognition: DataTypes.BOOLEAN,
+   curriculum_compliance: DataTypes.BOOLEAN,
+   practical_facilities: DataTypes.BOOLEAN,
+   library_requirements: DataTypes.BOOLEAN,
+   teacher_qualification_compliance: DataTypes.BOOLEAN,
+   internal_assessment_system: DataTypes.BOOLEAN,
+   project_work_system: DataTypes.BOOLEAN,
+});
+```
+
+#### **State Board Compliance Data**
+
+```javascript
+const StateBoardCompliance = sequelize.define('StateBoardCompliance', {
+   school_id: DataTypes.UUID,
+   state_board_registration: DataTypes.STRING(15),
+   state_recognition_number: DataTypes.STRING(20),
+   rte_compliance: DataTypes.BOOLEAN,
+   reservation_policy_implementation: DataTypes.BOOLEAN,
+   mid_day_meal_scheme: DataTypes.BOOLEAN,
+   free_uniform_books: DataTypes.BOOLEAN,
+   local_language_instruction: DataTypes.BOOLEAN,
+   minority_status: DataTypes.BOOLEAN,
+   tribal_area_benefits: DataTypes.BOOLEAN,
+});
+```
+
+#### **International Board Compliance Data**
+
+```javascript
+const InternationalBoardCompliance = sequelize.define('InternationalBoardCompliance', {
+   school_id: DataTypes.UUID,
+   international_accreditation: DataTypes.STRING(50),
+   foreign_education_provider_status: DataTypes.BOOLEAN,
+   international_curriculum_license: DataTypes.STRING(20),
+   qualified_international_teachers: DataTypes.INTEGER,
+   english_proficiency_requirements: DataTypes.BOOLEAN,
+   cultural_exchange_programs: DataTypes.BOOLEAN,
+   international_assessment_system: DataTypes.BOOLEAN,
+   overseas_university_partnerships: DataTypes.INTEGER,
+});
+```
+
+---
+
+cisce_uid: DataTypes.STRING(15), // Student CISCE UID
+icse_affiliation: DataTypes.BOOLEAN, // ICSE Classes VI-X
+isc_affiliation: DataTypes.BOOLEAN, // ISC Classes XI-XII
+practical_facilities: DataTypes.JSON, // Lab, equipment details
+project_tracking: DataTypes.BOOLEAN,
+internal_assessment_system: DataTypes.BOOLEAN
+}
+
+````
+
+### **STATE BOARDS**
+
+#### **State Board Specific Requirements**
+- **Maharashtra State Board**: SSC (Class X), HSC (Classes XI-XII)
+- **Regional Language**: Mandatory local language
+- **Vocational Streams**: Technical, agricultural, commercial
+- **State UID**: State-specific student identifier
+- **Local Compliance**: District education office registration
+
+### **INTERNATIONAL BOARDS**
+
+#### **IB (International Baccalaureate)**
+- **Authorization**: IB World School authorization number
+- **Programs**: PYP (Primary), MYP (Middle), DP (Diploma)
+- **Assessment**: Internal assessment + external moderation
+- **Languages**: Multilingual program structure
+- **International Mindedness**: Global citizenship focus
+- **CAS Requirements**: Creativity, Activity, Service tracking
+
+#### **Cambridge International**
+- **Registration**: Cambridge School Number
+- **Programs**: Cambridge Primary, Lower Secondary, IGCSE, AS/A Levels
+- **Assessment**: Cambridge examinations, coursework
+- **Languages**: English medium with ESL support
+- **International Curriculum**: Global perspective integration
+
+#### **Other International Systems**
+- **American Curriculum**: AP courses, SAT preparation
+- **French Curriculum**: CNED, French Baccalaureate
+- **German Curriculum**: Deutsche Schule certification
+- **IB Continuum**: Full IB program implementation
+
+#### **International Compliance Data**
+```javascript
+international_compliance: {
+  board_type: DataTypes.ENUM('IB', 'CAMBRIDGE', 'AMERICAN', 'FRENCH', 'GERMAN', 'OTHER'),
+  authorization_number: DataTypes.STRING(20),
+  authorization_validity: DataTypes.DATE,
+  program_levels: DataTypes.JSON,              // PYP, MYP, DP etc.
+  assessment_system: DataTypes.STRING(50),
+  language_policy: DataTypes.TEXT,
+  accreditation_bodies: DataTypes.JSON,        // Additional accreditations
+  international_transfers: DataTypes.BOOLEAN,  // Supports international transfers
+  global_curriculum: DataTypes.BOOLEAN
+}
+````
+
+---
+
+## 🏛️ **GOVERNMENT IDENTIFICATION SYSTEMS**
+
+### **NATIONAL LEVEL SYSTEMS**
+
+#### **1. UDISE+ (Unified District Information System for Education Plus)**
+
+- **Purpose**: National database for all schools and students
+- **Student ID Format**: 11-digit UDISE School Code + Student Sequence Number
+- **School Code Structure**: State(2) + District(2) + Block(3) + Cluster(2) + School(2) = 11 digits
+- **Student ID Structure**: UDISE School Code (11) + Student Sequence (4-6 digits)
+- **Example**: 27010100101001 (Maharashtra school code + student sequence)
+- **Total Length**: 15-17 characters
+- **Mandatory For**: All government, aided, and unaided schools
+- **Data Collection**: Annual school census, student enrollment, learning outcomes
+- **API Integration**: Available through DoE UDISE+ portal and Samagra Shiksha
+- **Academic Year Integration**: Student IDs linked to academic year and class progression
+
+#### **2. PEN (Permanent Education Number)**
+
+- **Purpose**: Unique lifelong education identifier for each student
+- **Format**: 12-15 digit alphanumeric code
+- **Coverage**: Pre-primary to higher education
+- **Benefits**: Track educational journey across states and institutions
+- **Implementation Status**: Being rolled out nationally
+
+#### **3. Aadhaar Integration**
+
+- **Purpose**: Primary identity proof for all citizens
+- **Format**: 12-digit unique identification number
+- **School Usage**: Mandatory for government schemes, scholarships, midday meals
+- **Validation**: Real-time verification through UIDAI API
+- **Privacy**: Masked display, secure storage required
+
+### **STATE LEVEL SYSTEMS**
+
+#### **4. SARAL ID (Maharashtra)**
+
+- **Full Form**: Student Academic Records and Learning ID
+- **Purpose**: Maharashtra state student tracking system
+- **Coverage**: All schools (government, aided, private)
+- **Integration**: Links with UDISE+ data
+- **Features**: Academic progression tracking, scholarship management
+
+#### **5. EMIS (Education Management Information System)**
+
+- **Purpose**: State-wise education data management
+- **Coverage**: Varies by state (Gujarat EMIS, Karnataka SATS, etc.)
+- **Function**: School performance, student achievement tracking
+- **Data Points**: Attendance, learning outcomes, infrastructure
+
+### **BOARD SPECIFIC SYSTEMS**
+
+#### **6. CBSE Student UID**
+
+- **Purpose**: Central Board students identification
+- **Format**: Unique 15-digit code
+- **Usage**: Board examinations, result processing, migration
+- **Coverage**: Classes IX-XII
+
+#### **7. CISCE UID (ICSE/ISC)**
+
+- **Purpose**: Council for Indian School Certificate Examinations
+- **Coverage**: ICSE (Class X), ISC (Class XII)
+- **Features**: Student registration, examination management
+
+### **SCHEME SPECIFIC IDS**
+
+#### **8. PM SHRI School ID**
+
+- **Purpose**: Pradhan Mantri Schools for Rising India identification
+- **Coverage**: Selected exemplar schools
+- **Benefits**: Special funding, resource allocation
+
+#### **9. RTE Beneficiary ID**
+
+- **Purpose**: Right to Education Act beneficiary tracking
+- **Coverage**: 25% quota students in private schools
+- **Features**: Fee reimbursement, monitoring compliance
+
+#### **10. CWSN ID (Children with Special Needs)**
+
+- **Purpose**: Inclusive education support tracking
+- **Coverage**: Students with disabilities
+- **Benefits**: Special provisions, assistive devices, scholarships
+
+---
+
+## 📋 **UDISE+ COMPLIANCE DATA MODEL**
+
+### **UDISE School Model (Required for Government Reporting)**
+
+```javascript
+// models/UDISESchool.js - Comprehensive government mandated school data
+const UDISESchool = sequelize.define('UDISESchool', {
+   udise_code: {
+      type: DataTypes.STRING(11),
+      primaryKey: true,
+      validate: { len: [11, 11], isNumeric: true },
+   },
+
+   // BASIC SCHOOL IDENTIFICATION
+   school_name: DataTypes.STRING(200),
+   school_name_local: DataTypes.STRING(200), // Regional language name
+   school_category: DataTypes.ENUM(
+      'PRIMARY_ONLY',
+      'PRIMARY_WITH_UPPER_PRIMARY',
+      'PRIMARY_WITH_UPPER_PRIMARY_SEC',
+      'PRIMARY_WITH_UPPER_PRIMARY_HSEC',
+      'UPPER_PRIMARY_ONLY',
+      'UPPER_PRIMARY_WITH_SEC',
+      'UPPER_PRIMARY_WITH_HSEC',
+      'SECONDARY_ONLY',
+      'SECONDARY_WITH_HSEC',
+      'HIGHER_SECONDARY_ONLY'
+   ),
+
+   // SCHOOL MANAGEMENT & TYPE
+   school_management: DataTypes.ENUM('GOVERNMENT', 'LOCAL_BODY', 'GOVERNMENT_AIDED', 'PRIVATE_UNAIDED', 'OTHERS'),
+   school_management_details: DataTypes.ENUM(
+      'DEPARTMENT_OF_EDUCATION',
+      'TRIBAL_WELFARE',
+      'SOCIAL_WELFARE',
+      'MUNICIPALITY',
+      'PRIVATE_AIDED',
+      'PRIVATE_UNAIDED'
+   ),
+   school_type: DataTypes.ENUM('BOYS_ONLY', 'GIRLS_ONLY', 'CO_EDUCATIONAL'),
+
+   // DETAILED LOCATION DATA (UDISE+ Mandatory)
+   state_code: DataTypes.STRING(2),
+   district_code: DataTypes.STRING(2),
+   block_code: DataTypes.STRING(3),
+   cluster_code: DataTypes.STRING(2),
+   village_code: DataTypes.STRING(6),
+   pincode: DataTypes.STRING(6),
+   assembly_constituency: DataTypes.STRING(3),
+   parliament_constituency: DataTypes.STRING(2),
+
+   // ADDRESS DETAILS
+   address_line1: DataTypes.STRING(200),
+   address_line2: DataTypes.STRING(200),
+   landmark: DataTypes.STRING(100),
+   habitation_name: DataTypes.STRING(100),
+
+   // ESTABLISHMENT & RECOGNITION
+   year_of_establishment: DataTypes.INTEGER,
+   year_of_primary_recognition: DataTypes.INTEGER,
+   year_of_upper_primary_recognition: DataTypes.INTEGER,
+   year_of_secondary_recognition: DataTypes.INTEGER,
+   year_of_hsec_recognition: DataTypes.INTEGER,
+   recognition_status: DataTypes.ENUM('RECOGNIZED', 'PARTIALLY_RECOGNIZED', 'UNRECOGNIZED'),
+
+   // BOARD AFFILIATION & CURRICULUM
+   board_affiliation: DataTypes.ENUM('CBSE', 'ICSE', 'IB', 'NIOS', 'STATE_BOARD', 'OTHERS'),
+   affiliation_number: DataTypes.STRING(20),
+   curriculum_type: DataTypes.ENUM('STATE', 'CBSE', 'ICSE', 'IB', 'NIOS', 'OTHERS'),
+
+   // SCHOOL FACILITIES (UDISE+ Infrastructure Data)
+   building_status: DataTypes.ENUM('GOVERNMENT', 'RENTED', 'RENT_FREE', 'OTHERS'),
+   building_condition: DataTypes.ENUM('GOOD', 'MINOR_REPAIR', 'MAJOR_REPAIR'),
+   total_classrooms: DataTypes.INTEGER,
+   classrooms_in_good_condition: DataTypes.INTEGER,
+
+   // BASIC FACILITIES
+   electricity_available: DataTypes.BOOLEAN,
+   drinking_water_available: DataTypes.BOOLEAN,
+   playground_available: DataTypes.BOOLEAN,
+   library_available: DataTypes.BOOLEAN,
+   computer_lab_available: DataTypes.BOOLEAN,
+   internet_facility: DataTypes.BOOLEAN,
+
+   // TOILET FACILITIES
+   boys_toilet_available: DataTypes.BOOLEAN,
+   girls_toilet_available: DataTypes.BOOLEAN,
+   cwsn_toilet_available: DataTypes.BOOLEAN, // Children with Special Needs
+
+   // KITCHEN & NUTRITION
+   kitchen_garden: DataTypes.BOOLEAN,
+   mid_day_meal_facility: DataTypes.BOOLEAN,
+   cooking_facility: DataTypes.BOOLEAN,
+
+   // SAFETY & SECURITY
+   boundary_wall: DataTypes.BOOLEAN,
+   ramps_available: DataTypes.BOOLEAN, // For disabled access
+   hand_rails: DataTypes.BOOLEAN,
+
+   // DIGITAL INFRASTRUCTURE
+   ict_lab_available: DataTypes.BOOLEAN,
+   number_of_computers: DataTypes.INTEGER,
+   computers_for_teaching: DataTypes.INTEGER,
+   computers_for_non_teaching: DataTypes.INTEGER,
+
+   // DISTANCE & CONNECTIVITY
+   distance_from_brc: DataTypes.DECIMAL(5, 2), // Block Resource Centre
+   distance_from_crc: DataTypes.DECIMAL(5, 2), // Cluster Resource Centre
+   approach_road: DataTypes.ENUM('ALL_WEATHER', 'FAIR_WEATHER', 'FOOT_PATH', 'OTHERS'),
+
+   // SHIFTS & WORKING HOURS
+   school_shifts: DataTypes.ENUM('MORNING', 'AFTERNOON', 'BOTH'),
+   pre_primary_sections: DataTypes.INTEGER,
+   working_hours_per_day: DataTypes.DECIMAL(3, 1),
+   working_days_per_week: DataTypes.INTEGER,
+
+   // SPECIAL PROVISIONS
+   residential_school: DataTypes.BOOLEAN,
+   residential_type: DataTypes.ENUM('BOYS', 'GIRLS', 'BOTH', 'NA'),
+   hostel_facility: DataTypes.BOOLEAN,
+
+   // MINORITY STATUS
+   minority_status: DataTypes.ENUM('MUSLIM', 'CHRISTIAN', 'SIKH', 'BUDDHIST', 'PARSI', 'JAIN', 'OTHERS', 'NO'),
+
+   // MEDIUM OF INSTRUCTION
+   medium_of_instruction_1: DataTypes.STRING(50),
+   medium_of_instruction_2: DataTypes.STRING(50),
+   medium_of_instruction_3: DataTypes.STRING(50),
+
+   // UDISE+ COMPLIANCE & REPORTING
+   academic_year: DataTypes.STRING(9), // Format: 2024-2025
+   last_udise_submission: DataTypes.DATE,
+   udise_status: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING_VERIFICATION', 'CLOSED'),
+   data_capture_format: DataTypes.ENUM('ONLINE', 'OFFLINE'),
+   mobile_number: DataTypes.STRING(10),
+   email_id: DataTypes.STRING(100),
+   website: DataTypes.STRING(200),
+
+   // SCHOOL HEAD INFORMATION
+   head_master_name: DataTypes.STRING(100),
+   head_master_mobile: DataTypes.STRING(10),
+   head_master_email: DataTypes.STRING(100),
+   head_master_gender: DataTypes.ENUM('MALE', 'FEMALE', 'TRANSGENDER'),
+
+   // SPECIAL CATEGORIES
+   model_school: DataTypes.BOOLEAN,
+   integrated_scheme: DataTypes.BOOLEAN,
+   shift_school: DataTypes.BOOLEAN,
+   residential_school_type: DataTypes.ENUM('ASHRAM', 'NON_ASHRAM', 'NA'),
+
+   // CREATED/UPDATED TRACKING
+   created_at: DataTypes.DATE,
+   updated_at: DataTypes.DATE,
+   last_verified_by: DataTypes.UUID,
+});
+```
+
+### **UDISE Class-wise Infrastructure Model**
+
+```javascript
+// models/UDISEClassInfrastructure.js - Class-wise data required for UDISE+
+const UDISEClassInfrastructure = sequelize.define('UDISEClassInfrastructure', {
+   udise_school_code: {
+      type: DataTypes.STRING(11),
+      references: { model: 'UDISESchool', key: 'udise_code' },
+   },
+   academic_year: DataTypes.STRING(9),
+   class_name: DataTypes.ENUM('PRE_PRIMARY', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'),
+
+   // ENROLLMENT DATA
+   total_enrollment: DataTypes.INTEGER,
+   boys_enrollment: DataTypes.INTEGER,
+   girls_enrollment: DataTypes.INTEGER,
+
+   // CATEGORY-WISE ENROLLMENT
+   sc_boys: DataTypes.INTEGER,
+   sc_girls: DataTypes.INTEGER,
+   st_boys: DataTypes.INTEGER,
+   st_girls: DataTypes.INTEGER,
+   obc_boys: DataTypes.INTEGER,
+   obc_girls: DataTypes.INTEGER,
+
+   // SPECIAL CATEGORIES
+   muslim_boys: DataTypes.INTEGER,
+   muslim_girls: DataTypes.INTEGER,
+   cwsn_boys: DataTypes.INTEGER,
+   cwsn_girls: DataTypes.INTEGER,
+
+   // MEDIUM OF INSTRUCTION
+   hindi_medium: DataTypes.INTEGER,
+   english_medium: DataTypes.INTEGER,
+   regional_medium: DataTypes.INTEGER,
+   other_medium: DataTypes.INTEGER,
+});
+```
+
+### **UDISE Teacher Information Model**
+
+```javascript
+// models/UDISETeacher.js - Teacher data for UDISE+ compliance
+const UDISETeacher = sequelize.define('UDISETeacher', {
+   udise_school_code: {
+      type: DataTypes.STRING(11),
+      references: { model: 'UDISESchool', key: 'udise_code' },
+   },
+
+   // TEACHER IDENTIFICATION
+   teacher_code: DataTypes.STRING(20),
+   teacher_name: DataTypes.STRING(100),
+   gender: DataTypes.ENUM('MALE', 'FEMALE', 'TRANSGENDER'),
+   date_of_birth: DataTypes.DATEONLY,
+   social_category: DataTypes.ENUM('GENERAL', 'SC', 'ST', 'OBC'),
+
+   // PROFESSIONAL DETAILS
+   appointment_type: DataTypes.ENUM('REGULAR', 'CONTRACT', 'PART_TIME', 'GUEST'),
+   teaching_role: DataTypes.ENUM('HEAD_TEACHER', 'ASSISTANT_TEACHER', 'PRT', 'TGT', 'PGT'),
+   subjects_taught: DataTypes.STRING(200),
+   classes_taught: DataTypes.STRING(50),
+
+   // QUALIFICATION
+   professional_qualification: DataTypes.STRING(100),
+   academic_qualification: DataTypes.STRING(100),
+
+   // SERVICE DETAILS
+   date_of_joining_service: DataTypes.DATEONLY,
+   date_of_joining_school: DataTypes.DATEONLY,
+   in_position: DataTypes.BOOLEAN,
+
+   // TRAINING DATA
+   received_training: DataTypes.BOOLEAN,
+   training_type: DataTypes.STRING(200),
+   training_days_current_year: DataTypes.INTEGER,
+});
+```
+
+### **UDISE Student Data Requirements**
+
+```javascript
+// Additional fields required for UDISE+ compliance in Student model
+const UDISEStudentData = {
+   // ENROLLMENT DATA
+   admission_date: DataTypes.DATEONLY,
+   academic_year: DataTypes.STRING(9),
+   class_at_admission: DataTypes.STRING(5),
+   current_class: DataTypes.STRING(5),
+
+   // DEMOGRAPHIC DATA (UDISE+ Required)
+   social_category: DataTypes.ENUM('GENERAL', 'SC', 'ST', 'OBC'),
+   religion: DataTypes.ENUM('HINDU', 'MUSLIM', 'CHRISTIAN', 'SIKH', 'BUDDHIST', 'JAIN', 'OTHERS'),
+   mother_tongue: DataTypes.STRING(50),
+   is_cwsn: DataTypes.BOOLEAN, // Children with Special Needs
+   disability_type: DataTypes.ENUM('VISUAL', 'HEARING', 'SPEECH', 'LOCOMOTOR', 'INTELLECTUAL', 'MULTIPLE'),
+
+   // ATTENDANCE DATA (UDISE+ Reporting)
+   total_working_days: DataTypes.INTEGER,
+   days_present: DataTypes.INTEGER,
+   attendance_percentage: DataTypes.DECIMAL(5, 2),
+
+   // LEARNING OUTCOMES (NEP 2020 & UDISE+)
+   competency_level: DataTypes.ENUM('BELOW_BASIC', 'BASIC', 'PROFICIENT', 'ADVANCED'),
+   grade_status: DataTypes.ENUM('PROMOTED', 'DETAINED', 'PASS', 'FAIL', 'COMPARTMENT'),
+
+   // GOVERNMENT SCHEMES
+   midday_meal_recipient: DataTypes.BOOLEAN,
+   textbook_recipient: DataTypes.BOOLEAN,
+   uniform_recipient: DataTypes.BOOLEAN,
+   scholarship_recipient: DataTypes.BOOLEAN,
+   transport_facility: DataTypes.BOOLEAN,
+
+   // UDISE+ TRACKING
+   udise_verification_status: DataTypes.ENUM('VERIFIED', 'PENDING', 'REJECTED'),
+   last_udise_update: DataTypes.DATE,
+};
+```
+
+---
+
+## 📋 **ENHANCED STUDENT MODEL WITH BOARD-SPECIFIC VALIDATION**
+
+### **Dynamic Student Model Based on School's Board Affiliation**
+
+```javascript
+// models/Student.js - Board-aware student model
+const Student = sequelize.define('Student', {
+   // BASIC STUDENT INFORMATION
+   student_id: DataTypes.UUID,
+   first_name: DataTypes.STRING(50),
+   last_name: DataTypes.STRING(50),
+   date_of_birth: DataTypes.DATEONLY,
+
+   // BOARD-SPECIFIC VALIDATION (Auto-determined by school's board)
+   school_board: {
+      type: DataTypes.ENUM(
+         'CBSE',
+         'ICSE',
+         'STATE_BOARD',
+         'IB_INTERNATIONAL',
+         'CAMBRIDGE_INTERNATIONAL',
+         'WALDORF_STEINER',
+         'MONTESSORI'
+      ),
+      allowNull: false,
+   },
+
+   // DYNAMIC GOVERNMENT IDs (Required based on board)
+   government_ids: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+      // Structure varies by board:
+      // CBSE/ICSE/STATE: {aadhaar, udise_student_id, cbse_uid/cisce_uid, saral_id}
+      // INTERNATIONAL: {passport, visa_status, aadhaar_if_indian, international_id}
+   },
+
+   // BOARD-SPECIFIC ACADEMIC FIELDS
+   academic_data: {
+      type: DataTypes.JSON,
+      defaultValue: {},
+      // Structure varies by board:
+      // CBSE: {cce_grades, co_scholastic_areas, three_language_subjects}
+      // ICSE: {internal_assessment, practical_marks, project_work}
+      // IB: {cas_hours, extended_essay, theory_of_knowledge}
+      // STATE: {local_language_proficiency, state_specific_subjects}
+   },
+
+   // ASSESSMENT PATTERN (Based on board)
+   assessment_pattern: DataTypes.STRING(50), // Auto-populated from school board
+
+   // EXAMINATION SYSTEM (Based on board)
+   examination_system: DataTypes.STRING(50), // Auto-populated from school board
+
+   // COMPLIANCE FLAGS (Auto-validated based on board requirements)
+   compliance_status: {
+      type: DataTypes.JSON,
+      defaultValue: {
+         ids_verified: false,
+         board_requirements_met: false,
+         government_compliance: false,
+         age_verification: false,
+      },
+   },
+});
+
+// METHOD: Auto-populate board-specific requirements
+Student.prototype.setBoardRequirements = async function () {
+   const school = await SchoolProfile.findByPk(this.school_id);
+   const boardCompliance = BOARD_COMPLIANCE_MATRIX[school.primary_board];
+
+   this.school_board = school.primary_board;
+   this.assessment_pattern = boardCompliance.assessment;
+   this.examination_system = boardCompliance.examination_system;
+
+   // Initialize required government IDs based on board
+   const requiredIds = {};
+   boardCompliance.student_ids_required.forEach((idType) => {
+      requiredIds[idType.toLowerCase()] = null;
+   });
+   this.government_ids = requiredIds;
+};
+
+// VALIDATION: Board-specific validation
+Student.addHook('beforeValidate', async (student) => {
+   await student.setBoardRequirements();
+
+   // Validate required IDs based on board
+   const school = await SchoolProfile.findByPk(student.school_id);
+   const requiredIds = BOARD_COMPLIANCE_MATRIX[school.primary_board].student_ids_required;
+
+   requiredIds.forEach((idType) => {
+      if (!student.government_ids[idType.toLowerCase()]) {
+         throw new Error(`${idType} is required for ${school.primary_board} students`);
+      }
+   });
+});
+```
+
+### **Board-Specific Student Data Models**
+
+#### **CBSE Student Specific Data**
+
+```javascript
+const CBSEStudentData = sequelize.define('CBSEStudentData', {
+   student_id: DataTypes.UUID,
+   cbse_student_uid: DataTypes.STRING(15),
+   cce_grade_system: DataTypes.BOOLEAN,
+   three_language_subjects: DataTypes.JSON,
+   co_scholastic_areas: DataTypes.JSON, // Sports, Arts, Values
+   continuous_assessment: DataTypes.JSON,
+   board_exam_eligibility: DataTypes.BOOLEAN,
+   migration_certificate: DataTypes.STRING(20),
+   transfer_certificate: DataTypes.STRING(20),
+});
+```
+
+#### **ICSE Student Specific Data**
+
+```javascript
+const ICSEStudentData = sequelize.define('ICSEStudentData', {
+   student_id: DataTypes.UUID,
+   cisce_student_uid: DataTypes.STRING(15),
+   internal_assessment_marks: DataTypes.JSON,
+   practical_examination_marks: DataTypes.JSON,
+   project_work_marks: DataTypes.JSON,
+   board_examination_subjects: DataTypes.JSON,
+   language_combinations: DataTypes.JSON,
+   icse_registration_number: DataTypes.STRING(15),
+   isc_registration_number: DataTypes.STRING(15),
+});
+```
+
+#### **International Student Specific Data**
+
+```javascript
+const InternationalStudentData = sequelize.define('InternationalStudentData', {
+   student_id: DataTypes.UUID,
+   passport_number: DataTypes.STRING(20),
+   visa_status: DataTypes.ENUM('STUDENT_VISA', 'DEPENDENT_VISA', 'INDIAN_CITIZEN', 'OCI', 'PIO'),
+   nationality: DataTypes.STRING(50),
+   home_country_curriculum: DataTypes.STRING(50),
+   english_proficiency_level: DataTypes.ENUM('NATIVE', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'),
+   previous_international_schools: DataTypes.JSON,
+   university_counseling_status: DataTypes.BOOLEAN,
+   international_exam_registrations: DataTypes.JSON, // SAT, AP, IB exams
+});
+```
+
+#### **State Board Student Specific Data**
+
+```javascript
+const StateBoardStudentData = sequelize.define('StateBoardStudentData', {
+   student_id: DataTypes.UUID,
+   state_board_roll_number: DataTypes.STRING(15),
+   local_language_proficiency: DataTypes.ENUM('EXCELLENT', 'GOOD', 'FAIR', 'NEEDS_IMPROVEMENT'),
+   regional_cultural_activities: DataTypes.JSON,
+   state_scholarship_eligible: DataTypes.BOOLEAN,
+   rural_urban_classification: DataTypes.ENUM('RURAL', 'URBAN', 'SEMI_URBAN'),
+   mother_tongue: DataTypes.STRING(50),
+   caste_certificate_number: DataTypes.STRING(20),
+   income_certificate_number: DataTypes.STRING(20),
+});
+```
+
+### **Validation Rules by Board Type**
+
+```javascript
+// Board-specific validation rules
+const BOARD_VALIDATION_RULES = {
+   CBSE: {
+      required_ids: ['aadhaar_number', 'udise_student_id', 'cbse_uid'],
+      age_criteria: { nursery: { min: 3, max: 4 }, class_1: { min: 5, max: 7 } },
+      language_requirements: ['hindi', 'english', 'third_language'],
+      assessment_type: 'CCE',
+   },
+
+   ICSE: {
+      required_ids: ['aadhaar_number', 'udise_student_id', 'cisce_uid'],
+      age_criteria: { nursery: { min: 3, max: 4 }, class_1: { min: 5, max: 7 } },
+      language_requirements: ['english', 'second_language'],
+      assessment_type: 'INTERNAL_EXTERNAL',
+   },
+
+   IB_INTERNATIONAL: {
+      required_ids: ['passport_number', 'visa_status'],
+      age_criteria: { pyp1: { min: 3, max: 4 }, pyp2: { min: 4, max: 5 } },
+      language_requirements: ['english', 'mother_tongue', 'additional_language'],
+      assessment_type: 'HOLISTIC',
+   },
+
+   STATE_BOARD: {
+      required_ids: ['aadhaar_number', 'udise_student_id', 'state_uid', 'saral_id'],
+      age_criteria: { nursery: { min: 3, max: 4 }, class_1: { min: 5, max: 7 } },
+      language_requirements: ['regional_language', 'hindi', 'english'],
+      assessment_type: 'STATE_PATTERN',
+   },
+};
+```
+
+---
 
 #### **Indian Education Specific Fields**
 
