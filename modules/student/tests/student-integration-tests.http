@@ -1,0 +1,442 @@
+###
+# Complete Student Module Integration Test Suite
+# Phase 3B - End-to-End Student Lifecycle Testing
+# Test Order: Setup → Schools → Classes → Sections → Students → Lifecycle
+###
+
+### SETUP: Authentication and Basic Data
+# Ensure you have logged in and created basic school structure
+
+###
+### COMPREHENSIVE STUDENT LIFECYCLE TEST SCENARIO
+### Scenario: "Green Valley Public School - Academic Year 2024-25"
+###
+
+### STEP 1: Verify School Infrastructure
+GET http://localhost:3000/api/schools/1
+
+### STEP 2: Verify Class Structure
+GET http://localhost:3000/api/classes/school/1
+
+### STEP 3: Verify Section Structure
+GET http://localhost:3000/api/sections/class/1
+
+###
+### ADMISSION PROCESS - COMPLETE WORKFLOW
+###
+
+### ADM1. New Student Application (Arjun Kumar - Class 1A)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Arjun Kumar Sharma",
+   "date_of_birth": "2010-05-15",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-01",
+   "blood_group": "B+",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "nationality": "Indian",
+   "mother_tongue": "Hindi",
+   "address": "House No. 123, Green Park Colony, Sector 16",
+   "city": "New Delhi",
+   "state": "Delhi",
+   "postal_code": "110016",
+   "phone": "9876543210",
+   "email": "arjun.student@greenvalley.edu",
+   "previous_school": "Little Flowers Kindergarten",
+   "previous_class": "LKG",
+   "father_name": "Rajesh Kumar Sharma",
+   "father_phone": "9876543211",
+   "father_email": "rajesh.sharma@gmail.com",
+   "father_occupation": "Software Engineer",
+   "father_annual_income": 1200000,
+   "mother_name": "Sunita Sharma",
+   "mother_phone": "9876543212",
+   "mother_email": "sunita.sharma@gmail.com",
+   "mother_occupation": "Teacher",
+   "mother_annual_income": 600000,
+   "guardian_name": "Ravi Kumar (Uncle)",
+   "guardian_phone": "9876543213",
+   "guardian_relation": "Uncle",
+   "emergency_contact_name": "Ravi Kumar",
+   "emergency_contact_phone": "9876543213",
+   "emergency_contact_relation": "Uncle",
+   "medical_conditions": "None",
+   "allergies": "Dust allergy (mild)",
+   "doctor_name": "Dr. Rajesh Gupta",
+   "doctor_phone": "9876543214",
+   "transport_required": true,
+   "pickup_point": "Green Park Metro Station Gate 1",
+   "drop_point": "Green Park Metro Station Gate 1",
+   "hostel_required": false,
+   "subjects": ["English", "Hindi", "Mathematics", "Environmental Studies", "Art & Craft"],
+   "fee_structure": "Standard Fee Structure",
+   "special_needs": "None",
+   "talents": ["Drawing", "Singing"],
+   "hobbies": ["Reading story books", "Playing cricket", "Drawing"],
+   "admission_status": "APPLIED",
+   "student_status": "INACTIVE",
+   "password": "arjun2024"
+}
+
+### ADM2. Approve Admission and Assign Class
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "class_id": 1,
+   "section_id": 1,
+   "roll_number": "001"
+}
+
+### ADM3. Another Student Application (Priya Singh - Class 1B)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Priya Singh Chauhan",
+   "date_of_birth": "2010-08-22",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 2,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-03",
+   "blood_group": "A+",
+   "category": "OBC",
+   "religion": "Hindu",
+   "address": "Flat 456, Sunrise Apartments, Dwarka",
+   "city": "New Delhi",
+   "state": "Delhi",
+   "postal_code": "110075",
+   "phone": "9876543220",
+   "father_name": "Vinod Singh Chauhan",
+   "father_phone": "9876543221",
+   "father_occupation": "Business Owner",
+   "father_annual_income": 1800000,
+   "mother_name": "Kavita Singh",
+   "mother_phone": "9876543222",
+   "mother_occupation": "Housewife",
+   "transport_required": false,
+   "scholarship": 15,
+   "scholarship_reason": "Merit scholarship for academic excellence",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "roll_number": "001"
+}
+
+### ADM4. Create More Students for Complete Class
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Rohit Patel",
+   "date_of_birth": "2010-02-10",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-05",
+   "father_name": "Suresh Patel",
+   "father_phone": "9876543230",
+   "mother_name": "Meera Patel",
+   "mother_phone": "9876543231",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "roll_number": "002"
+}
+
+### STEP 4: Verify Class Enrollment
+GET http://localhost:3000/api/students/class/1/section/1
+
+###
+### ACADEMIC YEAR PROGRESSION
+###
+
+### YEAR1: End of Academic Year - Student Performance Update
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "current_grade": "A",
+   "academic_performance": {
+      "subjects": {
+         "English": "A",
+         "Hindi": "B+",
+         "Mathematics": "A+",
+         "Environmental Studies": "A",
+         "Art & Craft": "A+"
+      },
+      "overall_percentage": 92.5,
+      "rank": 2,
+      "total_students": 30
+   }
+}
+
+### YEAR2: Promote Excellent Student to Class 2
+POST http://localhost:3000/api/students/1/promote
+Content-Type: application/json
+
+{
+   "to_class_id": 2,
+   "to_section_id": 3,
+   "new_academic_year": "2025-26",
+   "promotion_date": "2025-03-31",
+   "promotion_status": "PROMOTED",
+   "final_grade": "A",
+   "attendance_percentage": 96.8,
+   "remarks": "Excellent academic performance and leadership qualities. Recommended for advanced learning programs."
+}
+
+### YEAR3: Student Needs Transfer (Family Relocation)
+POST http://localhost:3000/api/students/2/transfer
+Content-Type: application/json
+
+{
+   "to_school_id": 2,
+   "transfer_date": "2024-12-15",
+   "reason": "Family relocated to Bangalore due to father's job transfer",
+   "to_school_name": "Sunshine International School, Bangalore"
+}
+
+###
+### CHALLENGING SCENARIOS
+###
+
+### CHAL1. Student with Special Needs
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Aditi Sharma",
+   "date_of_birth": "2010-09-18",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-10",
+   "father_name": "Anil Sharma",
+   "father_phone": "9876543240",
+   "mother_name": "Pooja Sharma",
+   "mother_phone": "9876543241",
+   "medical_conditions": "Mild hearing impairment",
+   "special_needs": "Requires front seating, visual learning aids, and speech therapy support",
+   "allergies": "None",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "roll_number": "003"
+}
+
+### CHAL2. Scholarship Student from Disadvantaged Background
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Ravi Kumar",
+   "date_of_birth": "2010-01-25",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 2,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-01",
+   "category": "SC",
+   "father_name": "Ram Kumar",
+   "father_phone": "9876543250",
+   "father_occupation": "Daily wage laborer",
+   "father_annual_income": 120000,
+   "mother_name": "Sita Devi",
+   "mother_phone": "9876543251",
+   "mother_occupation": "Domestic help",
+   "mother_annual_income": 60000,
+   "scholarship": 100,
+   "scholarship_reason": "Full scholarship under government SC/ST welfare scheme",
+   "transport_required": true,
+   "fee_structure": "Scholarship Fee Structure (Waived)",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "roll_number": "001"
+}
+
+### CHAL3. International Student
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Emily Johnson",
+   "date_of_birth": "2010-11-12",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-06-15",
+   "nationality": "American",
+   "mother_tongue": "English",
+   "previous_school": "Lincoln Elementary School, California, USA",
+   "previous_class": "Grade 1",
+   "father_name": "Michael Johnson",
+   "father_phone": "9876543260",
+   "father_email": "michael.johnson@company.com",
+   "father_occupation": "Software Architect (Expat)",
+   "father_annual_income": 5000000,
+   "mother_name": "Sarah Johnson",
+   "mother_phone": "9876543261",
+   "mother_occupation": "Marketing Manager (Remote)",
+   "fee_structure": "International Student Fee Structure",
+   "subjects": ["English", "Hindi (Beginner)", "Mathematics", "Environmental Studies", "Art & Craft", "Indian Culture"],
+   "special_needs": "Hindi language support, cultural orientation",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "roll_number": "004"
+}
+
+###
+### DISCIPLINARY AND STATUS CHANGES
+###
+
+### DISC1. Student Suspension for Behavioral Issues
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "SUSPENDED",
+   "reason": "Involved in classroom disruption and disrespectful behavior towards teacher. 5-day suspension with mandatory counseling."
+}
+
+### DISC2. Reinstatement After Counseling
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "ACTIVE",
+   "reason": "Suspension completed. Student has undergone counseling and shown improvement in behavior. Parents meeting conducted."
+}
+
+###
+### BULK OPERATIONS FOR YEAR-END PROCESSING
+###
+
+### BULK1. Bulk Promotion for Entire Class
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "PROMOTE",
+   "student_ids": [1, 3, 4, 5, 6],
+   "data": {
+      "to_class_id": 2,
+      "new_academic_year": "2025-26",
+      "promotion_date": "2025-03-31",
+      "promotion_status": "PROMOTED",
+      "attendance_percentage": 90.0,
+      "remarks": "Bulk promotion - End of academic year 2024-25"
+   }
+}
+
+###
+### COMPREHENSIVE REPORTING AND ANALYTICS
+###
+
+### REP1. Get All Active Students in School
+GET http://localhost:3000/api/students?school_id=1&student_status=ACTIVE
+
+### REP2. Get Students by Academic Performance
+GET http://localhost:3000/api/students?school_id=1&search=A
+
+### REP3. Get Students Requiring Special Attention
+GET http://localhost:3000/api/students?school_id=1&search=special
+
+### REP4. Get Scholarship Students
+GET http://localhost:3000/api/students?school_id=1&search=scholarship
+
+### REP5. Get Transportation Required Students
+GET http://localhost:3000/api/students?school_id=1&search=transport
+
+###
+### ENROLLMENT HISTORY ANALYSIS
+###
+
+### HIST1. Student Academic Journey
+GET http://localhost:3000/api/students/1/enrollments
+
+### HIST2. Transfer Student History
+GET http://localhost:3000/api/students/2/enrollments
+
+### HIST3. Promoted Student History
+GET http://localhost:3000/api/students/1/enrollments
+
+###
+### DATA INTEGRITY AND VALIDATION TESTS
+###
+
+### VAL1. Attempt Duplicate Admission Number
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "admission_number": "GVP2400001",
+   "full_name": "Test Duplicate",
+   "date_of_birth": "2010-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Test Father",
+   "mother_name": "Test Mother"
+}
+
+### VAL2. Attempt Invalid Class Assignment
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "class_id": 9999,
+   "section_id": 9999
+}
+
+### VAL3. Attempt Future Date of Birth
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Future Student",
+   "date_of_birth": "2030-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Test Father",
+   "mother_name": "Test Mother"
+}
+
+###
+### FINAL STATUS CHECK
+###
+
+### FINAL1. Complete School Statistics
+GET http://localhost:3000/api/schools/1/stats
+
+### FINAL2. Class-wise Student Distribution
+GET http://localhost:3000/api/classes/school/1
+
+### FINAL3. Section-wise Student Count
+GET http://localhost:3000/api/sections/class/1
+
+### FINAL4. All Student Records Summary
+GET http://localhost:3000/api/students?school_id=1&include_inactive=true&limit=100
+
+### FINAL5. Student Status Distribution
+GET http://localhost:3000/api/students?school_id=1&student_status=ACTIVE
+GET http://localhost:3000/api/students?school_id=1&student_status=INACTIVE
+GET http://localhost:3000/api/students?school_id=1&student_status=SUSPENDED
+GET http://localhost:3000/api/students?school_id=1&student_status=TRANSFERRED
+GET http://localhost:3000/api/students?school_id=1&student_status=GRADUATED

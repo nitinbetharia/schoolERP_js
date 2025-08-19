@@ -1,0 +1,210 @@
+###
+# Section Management API Tests
+# Phase 3A Section Module Testing
+###
+
+### 1. Create new section (use class ID from class tests)
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "A",
+   "description": "Section A of Class 1A",
+   "section_teacher_id": null,
+   "capacity": 35,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### 2. Create another section for same class
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "B",
+   "description": "Section B of Class 1A",
+   "section_teacher_id": null,
+   "capacity": 30,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### 3. Create section for different class
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 3,
+   "name": "A",
+   "description": "Section A of Class KG1",
+   "section_teacher_id": null,
+   "capacity": 25,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### 4. Get all sections for class 1
+GET http://localhost:3000/api/sections/class/1
+
+### 5. Get sections with status filter
+GET http://localhost:3000/api/sections/class/1?status=ACTIVE
+
+### 6. Get section by ID
+GET http://localhost:3000/api/sections/1
+
+### 7. Update section
+PUT http://localhost:3000/api/sections/1
+Content-Type: application/json
+
+{
+   "description": "Updated Section A of Class 1A",
+   "capacity": 32,
+   "current_strength": 8
+}
+
+### 8. Bulk create sections for a class
+POST http://localhost:3000/api/sections/bulk/4
+Content-Type: application/json
+
+{
+   "sectionNames": ["A", "B", "C"]
+}
+
+### 9. Get all sections for class after bulk creation
+GET http://localhost:3000/api/sections/class/4
+
+### 10. Try to create duplicate section (should fail)
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "A",
+   "description": "Duplicate Section A",
+   "capacity": 30,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### 11. Create section with invalid class ID (should fail)
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 9999,
+   "name": "A",
+   "description": "Invalid Section",
+   "capacity": 30,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### 12. Create section with missing required fields (should fail)
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "description": "Incomplete Section"
+}
+
+### 13. Update section with invalid current_strength (should fail)
+PUT http://localhost:3000/api/sections/1
+Content-Type: application/json
+
+{
+   "current_strength": 50,
+   "capacity": 30
+}
+
+### 14. Create section with students for deletion test
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 4,
+   "name": "D",
+   "description": "Section D for deletion test",
+   "capacity": 30,
+   "current_strength": 5,
+   "status": "ACTIVE"
+}
+
+### 15. Try to delete section with students (should fail)
+DELETE http://localhost:3000/api/sections/8
+
+### 16. Update section to remove students first
+PUT http://localhost:3000/api/sections/8
+Content-Type: application/json
+
+{
+   "current_strength": 0
+}
+
+### 17. Delete section (soft delete)
+DELETE http://localhost:3000/api/sections/8
+
+### 18. Try to get deleted section
+GET http://localhost:3000/api/sections/8
+
+### 19. Get sections for class (should not include deleted)
+GET http://localhost:3000/api/sections/class/4
+
+### 20. Delete another section for testing
+DELETE http://localhost:3000/api/sections/2
+
+### 21. Test invalid section ID
+GET http://localhost:3000/api/sections/9999
+
+### 22. Test update non-existent section
+PUT http://localhost:3000/api/sections/9999
+Content-Type: application/json
+
+{
+   "name": "Non-existent Section"
+}
+
+### 23. Test delete non-existent section
+DELETE http://localhost:3000/api/sections/9999
+
+### 24. Test bulk creation with invalid class ID
+POST http://localhost:3000/api/sections/bulk/9999
+Content-Type: application/json
+
+{
+   "sectionNames": ["A", "B"]
+}
+
+### 25. Test bulk creation with empty section names
+POST http://localhost:3000/api/sections/bulk/4
+Content-Type: application/json
+
+{
+   "sectionNames": []
+}
+
+### 26. Test bulk creation with duplicate names for existing sections
+POST http://localhost:3000/api/sections/bulk/4
+Content-Type: application/json
+
+{
+   "sectionNames": ["A", "B"]
+}
+
+### 27. Create additional sections for comprehensive testing
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 5,
+   "name": "A",
+   "description": "Section A of Class 5A",
+   "capacity": 40,
+   "current_strength": 15,
+   "status": "ACTIVE"
+}
+
+### 28. Get section with full details including class and school info
+GET http://localhost:3000/api/sections/9

@@ -1,0 +1,528 @@
+###
+# Student Module Performance & Stress Testing Suite
+# Phase 3B - Load Testing and Performance Validation
+# Purpose: Validate system performance under realistic load conditions
+###
+
+### SETUP AUTHENTICATION
+# Ensure you are authenticated before running these tests
+
+###
+### PERFORMANCE BASELINE TESTS
+### Test system performance with realistic data volumes
+###
+
+### PERF1. Single Student Creation (Baseline)
+# @name createStudentBaseline
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Performance Test Student 001",
+   "date_of_birth": "2010-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "blood_group": "O+",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "address": "Test Address for Performance Student",
+   "city": "Test City",
+   "state": "Test State",
+   "postal_code": "110001",
+   "phone": "9999999001",
+   "father_name": "Performance Test Father 001",
+   "father_phone": "9999999002",
+   "father_occupation": "Engineer",
+   "father_annual_income": 1000000,
+   "mother_name": "Performance Test Mother 001",
+   "mother_phone": "9999999003",
+   "mother_occupation": "Teacher",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "password": "test001"
+}
+
+### PERF2. Bulk Student Creation (10 Students)
+# Simulate multiple students being added during admission period
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "CREATE",
+   "students": [
+      {
+         "full_name": "Bulk Test Student 001",
+         "date_of_birth": "2010-01-01",
+         "gender": "MALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 001",
+         "father_phone": "8888888001",
+         "mother_name": "Bulk Mother 001",
+         "mother_phone": "8888888002",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk001"
+      },
+      {
+         "full_name": "Bulk Test Student 002",
+         "date_of_birth": "2010-01-02",
+         "gender": "FEMALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 002",
+         "father_phone": "8888888003",
+         "mother_name": "Bulk Mother 002",
+         "mother_phone": "8888888004",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk002"
+      },
+      {
+         "full_name": "Bulk Test Student 003",
+         "date_of_birth": "2010-01-03",
+         "gender": "MALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 003",
+         "father_phone": "8888888005",
+         "mother_name": "Bulk Mother 003",
+         "mother_phone": "8888888006",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk003"
+      },
+      {
+         "full_name": "Bulk Test Student 004",
+         "date_of_birth": "2010-01-04",
+         "gender": "FEMALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 004",
+         "father_phone": "8888888007",
+         "mother_name": "Bulk Mother 004",
+         "mother_phone": "8888888008",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk004"
+      },
+      {
+         "full_name": "Bulk Test Student 005",
+         "date_of_birth": "2010-01-05",
+         "gender": "MALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 005",
+         "father_phone": "8888888009",
+         "mother_name": "Bulk Mother 005",
+         "mother_phone": "8888888010",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk005"
+      },
+      {
+         "full_name": "Bulk Test Student 006",
+         "date_of_birth": "2010-01-06",
+         "gender": "FEMALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 006",
+         "father_phone": "8888888011",
+         "mother_name": "Bulk Mother 006",
+         "mother_phone": "8888888012",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk006"
+      },
+      {
+         "full_name": "Bulk Test Student 007",
+         "date_of_birth": "2010-01-07",
+         "gender": "MALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 007",
+         "father_phone": "8888888013",
+         "mother_name": "Bulk Mother 007",
+         "mother_phone": "8888888014",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk007"
+      },
+      {
+         "full_name": "Bulk Test Student 008",
+         "date_of_birth": "2010-01-08",
+         "gender": "FEMALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 008",
+         "father_phone": "8888888015",
+         "mother_name": "Bulk Mother 008",
+         "mother_phone": "8888888016",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk008"
+      },
+      {
+         "full_name": "Bulk Test Student 009",
+         "date_of_birth": "2010-01-09",
+         "gender": "MALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 009",
+         "father_phone": "8888888017",
+         "mother_name": "Bulk Mother 009",
+         "mother_phone": "8888888018",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk009"
+      },
+      {
+         "full_name": "Bulk Test Student 010",
+         "date_of_birth": "2010-01-10",
+         "gender": "FEMALE",
+         "school_id": 1,
+         "academic_year": "2024-25",
+         "admission_date": "2024-08-19",
+         "father_name": "Bulk Father 010",
+         "father_phone": "8888888019",
+         "mother_name": "Bulk Mother 010",
+         "mother_phone": "8888888020",
+         "admission_status": "ENROLLED",
+         "student_status": "ACTIVE",
+         "password": "bulk010"
+      }
+   ]
+}
+
+###
+### DATABASE QUERY PERFORMANCE TESTS
+###
+
+### QUERY1. Large Dataset Retrieval - All Students
+# Test pagination performance with large dataset
+GET http://localhost:3000/api/students?limit=100&page=1
+
+### QUERY2. Complex Search Query Performance
+# Test search functionality with multiple criteria
+GET http://localhost:3000/api/students?search=Test&school_id=1&student_status=ACTIVE&limit=50
+
+### QUERY3. Class-based Query Performance
+# Test class-specific queries (common use case)
+GET http://localhost:3000/api/students/class/1?limit=100
+
+### QUERY4. Advanced Filter Performance
+# Test complex filtering scenarios
+GET http://localhost:3000/api/students?school_id=1&category=GENERAL&transport_required=true&student_status=ACTIVE
+
+### QUERY5. Name-based Search Performance
+# Test partial name matching (common admin task)
+GET http://localhost:3000/api/students?search=Bulk Test&limit=20
+
+###
+### CONCURRENT OPERATIONS SIMULATION
+### Simulate multiple users performing operations simultaneously
+###
+
+### CONCURRENT1. Multiple Student Reads (Simulate 5 simultaneous users)
+# Run these simultaneously to test concurrent read performance
+
+# User 1 - Teacher checking class list
+GET http://localhost:3000/api/students/class/1/section/1
+
+# User 2 - Admin searching for specific student
+GET http://localhost:3000/api/students?search=Performance Test Student
+
+# User 3 - Parent checking student details
+GET http://localhost:3000/api/students/1
+
+# User 4 - Admin checking school statistics
+GET http://localhost:3000/api/students?school_id=1&student_status=ACTIVE
+
+# User 5 - Office staff checking recent admissions
+GET http://localhost:3000/api/students?school_id=1&admission_date=2024-08-19
+
+###
+### STRESS TEST SCENARIOS
+### Push system limits with heavy operations
+###
+
+### STRESS1. Rapid Student Creation (Admission Rush Simulation)
+# Simulate admission season with rapid student additions
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Stress Test Student {{$randomInt 1000 9999}}",
+   "date_of_birth": "2010-{{$randomInt 1 12}}-{{$randomInt 1 28}}",
+   "gender": "{{$randomValue MALE FEMALE}}",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "phone": "{{$randomInt 7000000000 9999999999}}",
+   "father_name": "Stress Father {{$randomInt 1000 9999}}",
+   "father_phone": "{{$randomInt 7000000000 9999999999}}",
+   "mother_name": "Stress Mother {{$randomInt 1000 9999}}",
+   "mother_phone": "{{$randomInt 7000000000 9999999999}}",
+   "admission_status": "APPLIED",
+   "student_status": "INACTIVE",
+   "password": "stress{{$randomInt 1000 9999}}"
+}
+
+### STRESS2. Bulk Update Operations
+# Simulate end-of-year bulk status updates
+PUT http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "UPDATE_STATUS",
+   "filter": {
+      "school_id": 1,
+      "class_id": 1
+   },
+   "data": {
+      "student_status": "PROMOTED",
+      "remarks": "Bulk promotion for academic year end"
+   }
+}
+
+### STRESS3. Complex Reporting Query
+# Simulate heavy reporting operations
+GET http://localhost:3000/api/students?school_id=1&include_inactive=true&include_enrollments=true&include_documents=true&limit=200
+
+###
+### MEMORY AND RESOURCE USAGE TESTS
+###
+
+### MEMORY1. Large Record Creation with Full Data
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Memory Test Student with Very Long Name That Tests Field Limits",
+   "date_of_birth": "2010-06-15",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "blood_group": "AB+",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "nationality": "Indian",
+   "mother_tongue": "Hindi",
+   "address": "This is a very long address field that tests the system's ability to handle large text data. House Number 12345, Very Long Street Name That Goes On And On, Complex Name That Is Quite Long, Sector 99, Phase 100, Very Long City Name",
+   "city": "New Delhi With Very Long Suffix Name",
+   "state": "Delhi NCR Extended Region",
+   "postal_code": "110001",
+   "phone": "9876543999",
+   "email": "memory.test.student.with.very.long.email@greenvalleschool.educational.institution.com",
+   "previous_school": "Previous School With Very Long Name That Tests Field Length Limitations",
+   "previous_class": "Previous Class Details",
+   "father_name": "Father Name With Very Long Full Name Including Middle Names",
+   "father_phone": "9876543998",
+   "father_email": "father.with.very.long.email.address@company.corporation.business.com",
+   "father_occupation": "Software Engineer specializing in Enterprise Application Development",
+   "father_annual_income": 2500000,
+   "mother_name": "Mother Name With Very Long Full Name Including Middle Names",
+   "mother_phone": "9876543997",
+   "mother_email": "mother.with.very.long.email.address@company.corporation.business.com",
+   "mother_occupation": "Senior Marketing Manager for Digital Product Development",
+   "mother_annual_income": 1800000,
+   "guardian_name": "Guardian With Very Long Name and Multiple Middle Names",
+   "guardian_phone": "9876543996",
+   "guardian_relation": "Paternal Uncle (Brother of Father)",
+   "emergency_contact_name": "Emergency Contact With Very Long Name",
+   "emergency_contact_phone": "9876543995",
+   "emergency_contact_relation": "Maternal Grandmother (Mother's Mother)",
+   "medical_conditions": "This student has multiple medical conditions that require detailed documentation including seasonal allergies, mild asthma during winter months, requires inhaler, sensitive to dust particles, lactose intolerance requiring special dietary considerations",
+   "allergies": "Dust particles, pollen during spring season, certain food items including nuts and dairy products, some synthetic fabrics",
+   "doctor_name": "Dr. Medical Professional With Long Name",
+   "doctor_phone": "9876543994",
+   "transport_required": true,
+   "pickup_point": "Very Long Pickup Point Name That Tests Field Length - Main Gate Near Traffic Signal Junction",
+   "drop_point": "Very Long Drop Point Name That Tests Field Length - Main Gate Near Traffic Signal Junction",
+   "hostel_required": false,
+   "subjects": [
+      "English Language and Literature",
+      "Hindi Language and Grammar",
+      "Mathematics with Advanced Concepts",
+      "Environmental Studies and Science",
+      "Social Studies and Geography",
+      "Art and Craft with Creative Expression",
+      "Physical Education and Sports",
+      "Computer Science Basics",
+      "Music and Dance",
+      "Value Education and Ethics"
+   ],
+   "fee_structure": "Premium Fee Structure with Additional Activity Charges",
+   "special_needs": "Student requires special attention in multiple areas including academic support, social integration assistance, regular health monitoring, dietary considerations, and enhanced communication with parents",
+   "talents": [
+      "Exceptional drawing and painting abilities",
+      "Advanced mathematical problem solving",
+      "Creative writing and storytelling",
+      "Leadership qualities in group activities",
+      "Musical instruments - piano and guitar"
+   ],
+   "hobbies": [
+      "Reading advanced level books beyond age group",
+      "Creating digital art and animations",
+      "Building complex LEGO structures and models",
+      "Playing strategic board games like chess",
+      "Collecting stamps and coins from different countries",
+      "Learning about space science and astronomy",
+      "Participating in environmental conservation activities"
+   ],
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "password": "memtest2024"
+}
+
+### MEMORY2. Multiple Complex Queries Simultaneously
+# Run these together to test memory usage under concurrent load
+
+# Query 1 - Full student data with relationships
+GET http://localhost:3000/api/students/1?include_enrollments=true&include_documents=true
+
+# Query 2 - Large dataset with complex filters
+GET http://localhost:3000/api/students?school_id=1&include_all=true&limit=100
+
+# Query 3 - Aggregation queries
+GET http://localhost:3000/api/schools/1/stats
+
+###
+### ERROR HANDLING UNDER LOAD
+###
+
+### ERROR1. Rapid Invalid Requests
+# Test system stability with quick succession of invalid requests
+
+# Invalid student ID
+GET http://localhost:3000/api/students/99999
+
+# Invalid school ID
+GET http://localhost:3000/api/students?school_id=99999
+
+# Invalid class ID
+GET http://localhost:3000/api/students/class/99999
+
+# Invalid parameters
+GET http://localhost:3000/api/students?invalid_param=test&another_invalid=value
+
+### ERROR2. Malformed Data Submission
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "",
+   "date_of_birth": "invalid-date",
+   "gender": "INVALID_GENDER",
+   "school_id": "not_a_number",
+   "admission_date": "future-date-2030-12-31",
+   "phone": "invalid-phone-number",
+   "father_annual_income": "not_a_number",
+   "admission_status": "INVALID_STATUS"
+}
+
+###
+### CLEANUP AND VERIFICATION
+###
+
+### CLEANUP1. Remove Test Data
+# Remove test students created during performance testing
+DELETE http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "DELETE",
+   "filter": {
+      "full_name": {
+         "like": "%Test%"
+      },
+      "academic_year": "2024-25"
+   }
+}
+
+### VERIFY1. Verify System State After Load Testing
+GET http://localhost:3000/api/students?school_id=1&student_status=ACTIVE&limit=10
+
+### VERIFY2. Check Database Performance Metrics
+GET http://localhost:3000/api/system/health
+
+### VERIFY3. Validate Data Integrity After Stress Tests
+GET http://localhost:3000/api/students/validate-integrity
+
+###
+### PERFORMANCE BENCHMARKING
+### Use these to establish performance baselines
+###
+
+### BENCHMARK1. Single Student CRUD Operations
+# Measure time for basic operations
+
+# Create
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Benchmark Student",
+   "date_of_birth": "2010-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Benchmark Father",
+   "mother_name": "Benchmark Mother",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE"
+}
+
+# Read
+GET http://localhost:3000/api/students/{{student_id}}
+
+# Update
+PUT http://localhost:3000/api/students/{{student_id}}
+Content-Type: application/json
+
+{
+   "phone": "9999999999",
+   "email": "benchmark.updated@school.com"
+}
+
+# Delete
+DELETE http://localhost:3000/api/students/{{student_id}}
+
+### BENCHMARK2. Batch Operations Performance
+GET http://localhost:3000/api/students?school_id=1&limit=50
+GET http://localhost:3000/api/students?school_id=1&limit=100
+GET http://localhost:3000/api/students?school_id=1&limit=200
+GET http://localhost:3000/api/students?school_id=1&limit=500
+
+### BENCHMARK3. Search Performance with Different Data Sizes
+GET http://localhost:3000/api/students?search=Test&limit=10
+GET http://localhost:3000/api/students?search=Test&limit=50
+GET http://localhost:3000/api/students?search=Test&limit=100
+
+###
+### NOTES FOR PERFORMANCE TESTING:
+### 
+### 1. Run these tests in sequence, not all at once
+### 2. Monitor system resources (CPU, Memory, Database connections)
+### 3. Record response times for each operation type
+### 4. Test with different data volumes
+### 5. Verify data consistency after each test
+### 6. Use monitoring tools to track database performance
+### 7. Test network latency impact
+### 8. Measure concurrent user capacity
+### 9. Check for memory leaks during extended testing
+### 10. Validate error recovery mechanisms
+###

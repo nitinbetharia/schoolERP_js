@@ -1,0 +1,207 @@
+###
+# Class Management API Tests
+# Phase 3A Class Module Testing
+###
+
+### 1. Create new class (use school ID from school tests)
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 1A",
+   "standard": "1",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "current_strength": 0,
+   "class_teacher_id": null,
+   "room_number": "101",
+   "status": "ACTIVE"
+}
+
+### 2. Create another class
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 2B",
+   "standard": "2",
+   "division": "B",
+   "academic_year": "2024-25",
+   "capacity": 40,
+   "current_strength": 0,
+   "class_teacher_id": null,
+   "room_number": "201",
+   "status": "ACTIVE"
+}
+
+### 3. Create class for different school
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 3,
+   "name": "Class KG1",
+   "standard": "KG",
+   "division": "1",
+   "academic_year": "2024-25",
+   "capacity": 25,
+   "current_strength": 0,
+   "class_teacher_id": null,
+   "room_number": "KG1",
+   "status": "ACTIVE"
+}
+
+### 4. Get all classes for school 1
+GET http://localhost:3000/api/classes/school/1
+
+### 5. Get classes with standard filter
+GET http://localhost:3000/api/classes/school/1?standard=1
+
+### 6. Get classes with status filter
+GET http://localhost:3000/api/classes/school/1?status=ACTIVE
+
+### 7. Get class by ID
+GET http://localhost:3000/api/classes/1
+
+### 8. Update class
+PUT http://localhost:3000/api/classes/1
+Content-Type: application/json
+
+{
+   "name": "Class 1A - Updated",
+   "capacity": 30,
+   "current_strength": 5,
+   "room_number": "102"
+}
+
+### 9. Get class statistics
+GET http://localhost:3000/api/classes/1/stats
+
+### 10. Bulk create classes for school
+POST http://localhost:3000/api/classes/bulk/1
+Content-Type: application/json
+
+{
+   "standards": [
+      {
+         "standard": "3",
+         "divisions": ["A", "B"],
+         "capacity": 35,
+         "academic_year": "2024-25"
+      },
+      {
+         "standard": "4",
+         "divisions": ["A"],
+         "capacity": 40,
+         "academic_year": "2024-25"
+      }
+   ]
+}
+
+### 11. Get all classes for school after bulk creation
+GET http://localhost:3000/api/classes/school/1
+
+### 12. Try to create duplicate class (should fail)
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 1A",
+   "standard": "1",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "current_strength": 0,
+   "room_number": "103",
+   "status": "ACTIVE"
+}
+
+### 13. Create class with invalid school ID (should fail)
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 9999,
+   "name": "Invalid Class",
+   "standard": "5",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "status": "ACTIVE"
+}
+
+### 14. Create class with missing required fields (should fail)
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Incomplete Class"
+}
+
+### 15. Update class with invalid current_strength (should fail)
+PUT http://localhost:3000/api/classes/1
+Content-Type: application/json
+
+{
+   "current_strength": 50,
+   "capacity": 30
+}
+
+### 16. Delete class (soft delete)
+DELETE http://localhost:3000/api/classes/2
+
+### 17. Try to get deleted class
+GET http://localhost:3000/api/classes/2
+
+### 18. Get classes for school (should not include deleted)
+GET http://localhost:3000/api/classes/school/1
+
+### 19. Create class for section testing
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 5A",
+   "standard": "5",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 40,
+   "current_strength": 0,
+   "room_number": "501",
+   "status": "ACTIVE"
+}
+
+### 20. Test invalid class ID
+GET http://localhost:3000/api/classes/9999
+
+### 21. Test update non-existent class
+PUT http://localhost:3000/api/classes/9999
+Content-Type: application/json
+
+{
+   "name": "Non-existent Class"
+}
+
+### 22. Test delete non-existent class
+DELETE http://localhost:3000/api/classes/9999
+
+### 23. Test bulk creation with invalid school ID
+POST http://localhost:3000/api/classes/bulk/9999
+Content-Type: application/json
+
+{
+   "standards": [
+      {
+         "standard": "6",
+         "divisions": ["A"],
+         "capacity": 35,
+         "academic_year": "2024-25"
+      }
+   ]
+}

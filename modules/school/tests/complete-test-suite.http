@@ -1,0 +1,336 @@
+###
+# Complete School Module API Test Suite
+# Phase 3A School, Class, and Section Management Testing
+# Test Order: Schools → Classes → Sections
+###
+
+### SETUP: Login first (if authentication is required)
+# Replace with actual login endpoint and credentials
+
+###
+### SCHOOL MANAGEMENT TESTS
+###
+
+### S1. Create primary test school
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Test Primary School",
+   "code": "TPS001",
+   "address": "123 Test Street",
+   "city": "Test City",
+   "state": "Test State",
+   "pin_code": "123456",
+   "phone": "1234567890",
+   "email": "test@school.edu",
+   "principal_name": "Test Principal",
+   "principal_phone": "9876543210",
+   "principal_email": "principal@test.edu",
+   "affiliation_board": "CBSE",
+   "affiliation_number": "TEST123",
+   "established_date": "2020-01-01",
+   "school_type": "CBSE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### S2. Create secondary test school
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Test Secondary School",
+   "code": "TSS002",
+   "address": "456 Test Avenue",
+   "city": "Test City",
+   "state": "Test State",
+   "pin_code": "123457",
+   "phone": "1234567891",
+   "email": "secondary@school.edu",
+   "principal_name": "Test Principal 2",
+   "principal_phone": "9876543211",
+   "principal_email": "principal2@test.edu",
+   "affiliation_board": "ICSE",
+   "affiliation_number": "TEST456",
+   "established_date": "2018-06-15",
+   "school_type": "ICSE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### S3. Get all schools
+GET http://localhost:3000/api/schools
+
+### S4. Get school by ID (replace 1 with actual ID)
+GET http://localhost:3000/api/schools/1
+
+###
+### CLASS MANAGEMENT TESTS
+###
+
+### C1. Create classes for primary school
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 1A",
+   "standard": "1",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "current_strength": 0,
+   "room_number": "101",
+   "status": "ACTIVE"
+}
+
+### C2. Create more classes
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 1B",
+   "standard": "1",
+   "division": "B",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "current_strength": 0,
+   "room_number": "102",
+   "status": "ACTIVE"
+}
+
+### C3. Bulk create classes
+POST http://localhost:3000/api/classes/bulk/1
+Content-Type: application/json
+
+{
+   "standards": [
+      {
+         "standard": "2",
+         "divisions": ["A", "B"],
+         "capacity": 40,
+         "academic_year": "2024-25"
+      },
+      {
+         "standard": "3",
+         "divisions": ["A"],
+         "capacity": 38,
+         "academic_year": "2024-25"
+      }
+   ]
+}
+
+### C4. Get classes for school
+GET http://localhost:3000/api/classes/school/1
+
+### C5. Get class by ID
+GET http://localhost:3000/api/classes/1
+
+###
+### SECTION MANAGEMENT TESTS
+###
+
+### SE1. Create sections for Class 1A
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "A",
+   "description": "Section A of Class 1A",
+   "capacity": 18,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### SE2. Create more sections
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "B",
+   "description": "Section B of Class 1A",
+   "capacity": 17,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### SE3. Bulk create sections for Class 1B
+POST http://localhost:3000/api/sections/bulk/2
+Content-Type: application/json
+
+{
+   "sectionNames": ["A", "B"]
+}
+
+### SE4. Get sections for class
+GET http://localhost:3000/api/sections/class/1
+
+### SE5. Get section by ID
+GET http://localhost:3000/api/sections/1
+
+###
+### INTEGRATION TESTS
+###
+
+### I1. Update school and verify
+PUT http://localhost:3000/api/schools/1
+Content-Type: application/json
+
+{
+   "name": "Test Primary School - Updated",
+   "phone": "1234567899"
+}
+
+### I2. Get updated school
+GET http://localhost:3000/api/schools/1
+
+### I3. Update class and verify
+PUT http://localhost:3000/api/classes/1
+Content-Type: application/json
+
+{
+   "capacity": 40,
+   "current_strength": 5
+}
+
+### I4. Get updated class
+GET http://localhost:3000/api/classes/1
+
+### I5. Update section and verify
+PUT http://localhost:3000/api/sections/1
+Content-Type: application/json
+
+{
+   "current_strength": 3,
+   "description": "Updated Section A"
+}
+
+### I6. Get updated section
+GET http://localhost:3000/api/sections/1
+
+### I7. Get school statistics
+GET http://localhost:3000/api/schools/1/stats
+
+### I8. Get class statistics
+GET http://localhost:3000/api/classes/1/stats
+
+###
+### ERROR HANDLING TESTS
+###
+
+### E1. Try duplicate school code
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Duplicate Test School",
+   "code": "TPS001",
+   "address": "789 Duplicate Street",
+   "city": "Test City",
+   "state": "Test State",
+   "pin_code": "123458",
+   "phone": "1234567892",
+   "email": "duplicate@school.edu",
+   "principal_name": "Duplicate Principal",
+   "principal_phone": "9876543212",
+   "principal_email": "duplicate@test.edu",
+   "affiliation_board": "State Board",
+   "affiliation_number": "DUP789",
+   "established_date": "2021-01-01",
+   "school_type": "STATE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### E2. Try duplicate class
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 1,
+   "name": "Class 1A",
+   "standard": "1",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 30,
+   "status": "ACTIVE"
+}
+
+### E3. Try duplicate section
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 1,
+   "name": "A",
+   "description": "Duplicate Section A",
+   "capacity": 15,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### E4. Try invalid school ID for class
+POST http://localhost:3000/api/classes
+Content-Type: application/json
+
+{
+   "school_id": 9999,
+   "name": "Invalid School Class",
+   "standard": "4",
+   "division": "A",
+   "academic_year": "2024-25",
+   "capacity": 35,
+   "status": "ACTIVE"
+}
+
+### E5. Try invalid class ID for section
+POST http://localhost:3000/api/sections
+Content-Type: application/json
+
+{
+   "class_id": 9999,
+   "name": "A",
+   "description": "Invalid Class Section",
+   "capacity": 30,
+   "current_strength": 0,
+   "status": "ACTIVE"
+}
+
+### E6. Test invalid capacity (current_strength > capacity)
+PUT http://localhost:3000/api/sections/1
+Content-Type: application/json
+
+{
+   "current_strength": 25,
+   "capacity": 20
+}
+
+###
+### CLEANUP TESTS
+###
+
+### CL1. Delete sections (should work when current_strength is 0)
+DELETE http://localhost:3000/api/sections/4
+
+### CL2. Delete classes (should work when no sections or all sections deleted)
+DELETE http://localhost:3000/api/classes/5
+
+### CL3. Delete schools (should work when no classes or all classes deleted)
+DELETE http://localhost:3000/api/schools/2
+
+###
+### FINAL VERIFICATION
+###
+
+### V1. Get all schools (should show only active)
+GET http://localhost:3000/api/schools
+
+### V2. Get all classes for remaining school
+GET http://localhost:3000/api/classes/school/1
+
+### V3. Get all sections for remaining classes
+GET http://localhost:3000/api/sections/class/1

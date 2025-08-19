@@ -1,0 +1,403 @@
+###
+# Student Management API Tests
+# Phase 3B Student Module Testing - Complete Student Lifecycle
+###
+
+### 1. Create new student (basic information)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Arjun Kumar Sharma",
+   "date_of_birth": "2010-05-15",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-01",
+   "blood_group": "B+",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "nationality": "Indian",
+   "mother_tongue": "Hindi",
+   "address": "House No. 123, Green Park Colony",
+   "city": "New Delhi",
+   "state": "Delhi",
+   "postal_code": "110016",
+   "phone": "9876543210",
+   "email": "arjun.student@example.com",
+   "father_name": "Rajesh Kumar Sharma",
+   "father_phone": "9876543211",
+   "father_email": "rajesh.sharma@example.com",
+   "father_occupation": "Software Engineer",
+   "father_annual_income": 1200000,
+   "mother_name": "Sunita Sharma",
+   "mother_phone": "9876543212",
+   "mother_email": "sunita.sharma@example.com",
+   "mother_occupation": "Teacher",
+   "mother_annual_income": 600000,
+   "emergency_contact_name": "Ravi Kumar (Uncle)",
+   "emergency_contact_phone": "9876543213",
+   "emergency_contact_relation": "Uncle",
+   "medical_conditions": "None",
+   "allergies": "None",
+   "transport_required": true,
+   "pickup_point": "Green Park Metro Station",
+   "admission_status": "ENROLLED",
+   "password": "arjun2024"
+}
+
+### 2. Create another student with different details
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Priya Singh",
+   "date_of_birth": "2011-03-20",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 2,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-05",
+   "blood_group": "A+",
+   "category": "OBC",
+   "religion": "Hindu",
+   "address": "Flat 456, Sunset Apartments",
+   "city": "Mumbai",
+   "state": "Maharashtra",
+   "postal_code": "400001",
+   "phone": "9876543220",
+   "father_name": "Vinod Singh",
+   "father_phone": "9876543221",
+   "father_occupation": "Business",
+   "mother_name": "Kavita Singh",
+   "mother_phone": "9876543222",
+   "mother_occupation": "Housewife",
+   "hostel_required": true,
+   "admission_status": "ENROLLED"
+}
+
+### 3. Create student for different school
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Mohammad Ali Khan",
+   "date_of_birth": "2009-12-10",
+   "gender": "MALE",
+   "school_id": 2,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-02",
+   "blood_group": "O+",
+   "category": "GENERAL",
+   "religion": "Islam",
+   "father_name": "Abdul Rahman Khan",
+   "father_phone": "9876543230",
+   "mother_name": "Fatima Khan",
+   "mother_phone": "9876543231",
+   "admission_status": "ENROLLED"
+}
+
+### 4. Get all students
+GET http://localhost:3000/api/students
+
+### 5. Get students with school filter
+GET http://localhost:3000/api/students?school_id=1
+
+### 6. Get students with class and section filter
+GET http://localhost:3000/api/students?class_id=1&section_id=1
+
+### 7. Get students with academic year filter
+GET http://localhost:3000/api/students?academic_year=2024-25
+
+### 8. Get students with status filter
+GET http://localhost:3000/api/students?student_status=ACTIVE
+
+### 9. Search students by name or admission number
+GET http://localhost:3000/api/students?search=Arjun
+
+### 10. Get students with pagination
+GET http://localhost:3000/api/students?page=1&limit=2
+
+### 11. Get student by ID (replace 1 with actual ID)
+GET http://localhost:3000/api/students/1
+
+### 12. Get students by class and section
+GET http://localhost:3000/api/students/class/1/section/1
+
+### 13. Update student information
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "phone": "9876543215",
+   "address": "House No. 123, Green Park Colony, Updated Address",
+   "emergency_contact_phone": "9876543216",
+   "medical_conditions": "Mild asthma",
+   "transport_route": "Route A - Green Park"
+}
+
+### 14. Update student parent information
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "father_annual_income": 1350000,
+   "mother_occupation": "Principal",
+   "mother_annual_income": 800000,
+   "guardian_name": "Ravi Kumar",
+   "guardian_phone": "9876543213",
+   "guardian_relation": "Uncle"
+}
+
+### 15. Update student status
+PATCH http://localhost:3000/api/students/1/status
+Content-Type: application/json
+
+{
+   "status": "ACTIVE",
+   "reason": "Student is actively attending classes"
+}
+
+### 16. Transfer student to different section (internal transfer)
+POST http://localhost:3000/api/students/1/transfer
+Content-Type: application/json
+
+{
+   "to_class_id": 1,
+   "to_section_id": 2,
+   "transfer_date": "2024-08-19",
+   "reason": "Better section alignment"
+}
+
+### 17. Create student for promotion test
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Rohan Patel",
+   "date_of_birth": "2009-08-25",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2023-24",
+   "admission_date": "2023-04-01",
+   "father_name": "Suresh Patel",
+   "father_phone": "9876543240",
+   "mother_name": "Meera Patel",
+   "mother_phone": "9876543241",
+   "admission_status": "ENROLLED"
+}
+
+### 18. Promote student to next class
+POST http://localhost:3000/api/students/4/promote
+Content-Type: application/json
+
+{
+   "to_class_id": 2,
+   "to_section_id": 3,
+   "new_academic_year": "2024-25",
+   "promotion_date": "2024-03-31",
+   "promotion_status": "PROMOTED",
+   "final_grade": "A",
+   "attendance_percentage": 92.5,
+   "remarks": "Excellent performance throughout the year"
+}
+
+### 19. Get student enrollment history
+GET http://localhost:3000/api/students/4/enrollments
+
+### 20. Transfer student to different school (external transfer)
+POST http://localhost:3000/api/students/2/transfer
+Content-Type: application/json
+
+{
+   "to_school_id": 2,
+   "transfer_date": "2024-08-19",
+   "reason": "Family relocation",
+   "to_school_name": "Sunrise International School"
+}
+
+### 21. Suspend student
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "SUSPENDED",
+   "reason": "Disciplinary action - temporary suspension"
+}
+
+### 22. Reactivate suspended student
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "ACTIVE",
+   "reason": "Suspension period completed"
+}
+
+### 23. Bulk promote students
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "PROMOTE",
+   "student_ids": [1, 2],
+   "data": {
+      "to_class_id": 2,
+      "new_academic_year": "2024-25",
+      "promotion_date": "2024-03-31",
+      "promotion_status": "PROMOTED"
+   }
+}
+
+### 24. Bulk update status
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "UPDATE_STATUS",
+   "student_ids": [1, 2, 3],
+   "data": {
+      "status": "ACTIVE"
+   }
+}
+
+### 25. Try to create student with duplicate admission number (should fail)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "admission_number": "TPS2401",
+   "full_name": "Duplicate Student",
+   "date_of_birth": "2010-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Test Father",
+   "mother_name": "Test Mother"
+}
+
+### 26. Try to create student with invalid school ID (should fail)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Invalid School Student",
+   "date_of_birth": "2010-01-01",
+   "gender": "MALE",
+   "school_id": 9999,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Test Father",
+   "mother_name": "Test Mother"
+}
+
+### 27. Try to create student with missing required fields (should fail)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Incomplete Student",
+   "school_id": 1
+}
+
+### 28. Try to create student with future date of birth (should fail)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Future Student",
+   "date_of_birth": "2030-01-01",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Test Father",
+   "mother_name": "Test Mother"
+}
+
+### 29. Test invalid student ID
+GET http://localhost:3000/api/students/9999
+
+### 30. Test update non-existent student
+PUT http://localhost:3000/api/students/9999
+Content-Type: application/json
+
+{
+   "phone": "1234567890"
+}
+
+### 31. Get students including inactive
+GET http://localhost:3000/api/students?include_inactive=true
+
+### 32. Filter students by gender
+GET http://localhost:3000/api/students?gender=FEMALE
+
+### 33. Create student with comprehensive details
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Aarav Gupta",
+   "date_of_birth": "2010-11-30",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 1,
+   "section_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-04-10",
+   "blood_group": "AB+",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "nationality": "Indian",
+   "mother_tongue": "Gujarati",
+   "address": "12/34, Sardar Patel Nagar",
+   "city": "Ahmedabad",
+   "state": "Gujarat",
+   "postal_code": "380015",
+   "phone": "9876543250",
+   "email": "aarav.student@example.com",
+   "previous_school": "Little Angels School",
+   "previous_class": "Nursery",
+   "father_name": "Amit Gupta",
+   "father_phone": "9876543251",
+   "father_email": "amit.gupta@example.com",
+   "father_occupation": "Doctor",
+   "father_annual_income": 2000000,
+   "mother_name": "Priya Gupta",
+   "mother_phone": "9876543252",
+   "mother_email": "priya.gupta@example.com",
+   "mother_occupation": "Lawyer",
+   "mother_annual_income": 1500000,
+   "guardian_name": "Ramesh Gupta",
+   "guardian_phone": "9876543253",
+   "guardian_email": "ramesh.gupta@example.com",
+   "guardian_relation": "Grandfather",
+   "emergency_contact_name": "Deepak Gupta",
+   "emergency_contact_phone": "9876543254",
+   "emergency_contact_relation": "Uncle",
+   "medical_conditions": "Lactose intolerant",
+   "allergies": "Peanuts",
+   "medications": "None",
+   "doctor_name": "Dr. Rajesh Patel",
+   "doctor_phone": "9876543255",
+   "transport_required": true,
+   "transport_route": "Route B",
+   "pickup_point": "Sardar Patel Nagar Bus Stop",
+   "drop_point": "Home",
+   "hostel_required": false,
+   "stream": null,
+   "subjects": ["Mathematics", "English", "Hindi", "Science", "Social Studies"],
+   "fee_structure": "Standard",
+   "scholarship": 10,
+   "scholarship_reason": "Academic excellence",
+   "special_needs": "None",
+   "talents": ["Drawing", "Cricket"],
+   "hobbies": ["Reading", "Playing Cricket", "Drawing"],
+   "admission_status": "ENROLLED"
+}

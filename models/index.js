@@ -3,6 +3,13 @@ const { defineTrustModel } = require('./Trust');
 const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
 const { defineSetupConfiguration } = require('../modules/setup/models/SetupConfiguration');
 const { defineUserProfile } = require('../modules/user/models/UserProfile');
+const { defineSchool } = require('../modules/school/models/School');
+const { defineClass } = require('../modules/school/models/Class');
+const { defineSection } = require('../modules/school/models/Section');
+const { defineStudent } = require('./Student');
+const { defineAcademicYear } = require('./AcademicYear');
+const { defineStudentEnrollment } = require('./StudentEnrollment');
+const { defineStudentDocument } = require('./StudentDocument');
 const { logger, logSystem, logError } = require('../utils/logger');
 
 /**
@@ -94,13 +101,26 @@ class ModelRegistry {
          // Get tenant database connection
          const tenantDB = await dbManager.getTenantDB(tenantCode);
 
-         // Define tenant models (will be expanded in later phases)
+         // Define tenant models (complete academic system)
          const tenantModels = {
             // User model (tenant-specific users)
             User: this.defineTenantUserModel(tenantDB),
 
             // User profile model
             UserProfile: defineUserProfile(tenantDB),
+
+            // School management models
+            School: defineSchool(tenantDB),
+            Class: defineClass(tenantDB),
+            Section: defineSection(tenantDB),
+
+            // Academic year management
+            AcademicYear: defineAcademicYear(tenantDB),
+
+            // Student lifecycle models
+            Student: defineStudent(tenantDB),
+            StudentEnrollment: defineStudentEnrollment(tenantDB),
+            StudentDocument: defineStudentDocument(tenantDB),
 
             // Audit log for tenant operations
             AuditLog: this.defineTenantAuditLogModel(tenantDB),
@@ -245,27 +265,158 @@ class ModelRegistry {
     * Setup tenant model associations
     */
    setupTenantAssociations(tenantModels) {
-      const { User, UserProfile, AuditLog } = tenantModels;
+      const {
+         User,
+         UserProfile,
+         School,
+         Class,
+         Section,
+         AcademicYear,
+         Student,
+         StudentEnrollment,
+         StudentDocument,
+         AuditLog,
+      } = tenantModels;
 
-      // User has one UserProfile
+      // User associations
       User.hasOne(UserProfile, {
          foreignKey: 'user_id',
          as: 'profile',
       });
 
-      // UserProfile belongs to User
       UserProfile.belongsTo(User, {
          foreignKey: 'user_id',
          as: 'user',
       });
 
-      // AuditLog belongs to User
+      User.hasOne(Student, {
+         foreignKey: 'user_id',
+         as: 'studentProfile',
+      });
+
+      // School associations
+      School.hasMany(Class, {
+         foreignKey: 'school_id',
+         as: 'classes',
+      });
+
+      School.hasMany(Student, {
+         foreignKey: 'school_id',
+         as: 'students',
+      });
+
+      School.hasMany(AcademicYear, {
+         foreignKey: 'school_id',
+         as: 'academicYears',
+      });
+
+      // Class associations
+      Class.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      Class.hasMany(Section, {
+         foreignKey: 'class_id',
+         as: 'sections',
+      });
+
+      Class.hasMany(Student, {
+         foreignKey: 'class_id',
+         as: 'students',
+      });
+
+      Class.hasMany(StudentEnrollment, {
+         foreignKey: 'class_id',
+         as: 'enrollments',
+      });
+
+      // Section associations
+      Section.belongsTo(Class, {
+         foreignKey: 'class_id',
+         as: 'class',
+      });
+
+      Section.hasMany(Student, {
+         foreignKey: 'section_id',
+         as: 'students',
+      });
+
+      Section.hasMany(StudentEnrollment, {
+         foreignKey: 'section_id',
+         as: 'enrollments',
+      });
+
+      // Academic Year associations
+      AcademicYear.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      // Student associations
+      Student.belongsTo(User, {
+         foreignKey: 'user_id',
+         as: 'user',
+      });
+
+      Student.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      Student.belongsTo(Class, {
+         foreignKey: 'class_id',
+         as: 'class',
+      });
+
+      Student.belongsTo(Section, {
+         foreignKey: 'section_id',
+         as: 'section',
+      });
+
+      Student.hasMany(StudentEnrollment, {
+         foreignKey: 'student_id',
+         as: 'enrollments',
+      });
+
+      Student.hasMany(StudentDocument, {
+         foreignKey: 'student_id',
+         as: 'documents',
+      });
+
+      // Student Enrollment associations
+      StudentEnrollment.belongsTo(Student, {
+         foreignKey: 'student_id',
+         as: 'student',
+      });
+
+      StudentEnrollment.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      StudentEnrollment.belongsTo(Class, {
+         foreignKey: 'class_id',
+         as: 'class',
+      });
+
+      StudentEnrollment.belongsTo(Section, {
+         foreignKey: 'section_id',
+         as: 'section',
+      });
+
+      // Student Document associations
+      StudentDocument.belongsTo(Student, {
+         foreignKey: 'student_id',
+         as: 'student',
+      });
+
+      // Audit Log associations
       AuditLog.belongsTo(User, {
          foreignKey: 'user_id',
          as: 'user',
       });
 
-      // User has many AuditLogs
       User.hasMany(AuditLog, {
          foreignKey: 'user_id',
          as: 'auditLogs',

@@ -1,0 +1,419 @@
+###
+# Advanced Student Lifecycle Tests
+# Phase 3B Student Module - Complete Lifecycle Management
+###
+
+### SETUP: Login and create test data first
+# Run basic school and class creation tests before these
+
+###
+### ADMISSION WORKFLOW TESTS
+###
+
+### AL1. Create student with APPLIED status (admission application)
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Karan Singh Rathore",
+   "date_of_birth": "2010-07-18",
+   "gender": "MALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "blood_group": "O-",
+   "category": "GENERAL",
+   "religion": "Hindu",
+   "address": "Royal Palace Road, Jaipur",
+   "city": "Jaipur",
+   "state": "Rajasthan",
+   "postal_code": "302001",
+   "phone": "9876543260",
+   "father_name": "Vikram Singh Rathore",
+   "father_phone": "9876543261",
+   "father_occupation": "Business",
+   "father_annual_income": 2500000,
+   "mother_name": "Rani Singh Rathore",
+   "mother_phone": "9876543262",
+   "mother_occupation": "Housewife",
+   "admission_status": "APPLIED",
+   "student_status": "INACTIVE"
+}
+
+### AL2. Approve admission and assign class
+PUT http://localhost:3000/api/students/1
+Content-Type: application/json
+
+{
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE",
+   "class_id": 1,
+   "section_id": 1,
+   "roll_number": "001"
+}
+
+### AL3. Create waitlisted student
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Sneha Patel",
+   "date_of_birth": "2010-09-22",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "academic_year": "2024-25",
+   "admission_date": "2024-08-19",
+   "father_name": "Ramesh Patel",
+   "father_phone": "9876543270",
+   "mother_name": "Sunita Patel",
+   "mother_phone": "9876543271",
+   "admission_status": "WAITLISTED",
+   "student_status": "INACTIVE"
+}
+
+###
+### STUDENT PROGRESSION TESTS
+###
+
+### SP1. Create students in different classes for progression testing
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Rahul Sharma",
+   "date_of_birth": "2008-04-15",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 3,
+   "section_id": 5,
+   "academic_year": "2023-24",
+   "admission_date": "2021-04-01",
+   "father_name": "Mohan Sharma",
+   "father_phone": "9876543280",
+   "mother_name": "Radha Sharma",
+   "mother_phone": "9876543281",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE"
+}
+
+### SP2. Promote student with excellent performance
+POST http://localhost:3000/api/students/3/promote
+Content-Type: application/json
+
+{
+   "to_class_id": 4,
+   "to_section_id": 6,
+   "new_academic_year": "2024-25",
+   "promotion_date": "2024-03-31",
+   "promotion_status": "PROMOTED",
+   "final_grade": "A+",
+   "attendance_percentage": 96.5,
+   "remarks": "Outstanding academic performance and excellent attendance"
+}
+
+### SP3. Create student for detention scenario
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Vikash Kumar",
+   "date_of_birth": "2009-01-10",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 2,
+   "section_id": 3,
+   "academic_year": "2023-24",
+   "admission_date": "2022-04-01",
+   "father_name": "Rajesh Kumar",
+   "father_phone": "9876543290",
+   "mother_name": "Sita Kumar",
+   "mother_phone": "9876543291",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE"
+}
+
+### SP4. Detain student (repeat same class)
+POST http://localhost:3000/api/students/4/promote
+Content-Type: application/json
+
+{
+   "to_class_id": 2,
+   "to_section_id": 4,
+   "new_academic_year": "2024-25",
+   "promotion_date": "2024-03-31",
+   "promotion_status": "DETAINED",
+   "final_grade": "D",
+   "attendance_percentage": 68.0,
+   "remarks": "Needs improvement in academic performance. Detained for one year."
+}
+
+###
+### TRANSFER SCENARIOS
+###
+
+### TS1. Internal transfer within same school
+POST http://localhost:3000/api/students/1/transfer
+Content-Type: application/json
+
+{
+   "to_class_id": 2,
+   "to_section_id": 3,
+   "transfer_date": "2024-08-19",
+   "reason": "Better academic fit and peer group"
+}
+
+### TS2. External transfer to different school
+POST http://localhost:3000/api/students/2/transfer
+Content-Type: application/json
+
+{
+   "to_school_id": 2,
+   "transfer_date": "2024-08-19",
+   "reason": "Family relocation to different city",
+   "to_school_name": "City Public School, Bangalore"
+}
+
+### TS3. Create student for emergency transfer
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Ananya Reddy",
+   "date_of_birth": "2009-11-05",
+   "gender": "FEMALE",
+   "school_id": 1,
+   "class_id": 2,
+   "section_id": 3,
+   "academic_year": "2024-25",
+   "admission_date": "2023-04-01",
+   "father_name": "Suresh Reddy",
+   "father_phone": "9876543300",
+   "mother_name": "Lakshmi Reddy",
+   "mother_phone": "9876543301",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE"
+}
+
+### TS4. Emergency transfer
+POST http://localhost:3000/api/students/5/transfer
+Content-Type: application/json
+
+{
+   "to_school_id": 2,
+   "transfer_date": "2024-08-19",
+   "reason": "Emergency family situation requiring immediate relocation",
+   "to_school_name": "Emergency School Transfer"
+}
+
+###
+### STATUS MANAGEMENT
+###
+
+### SM1. Suspend student for disciplinary action
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "SUSPENDED",
+   "reason": "Disciplinary action - 15 days suspension for misconduct"
+}
+
+### SM2. Reactivate suspended student
+PATCH http://localhost:3000/api/students/3/status
+Content-Type: application/json
+
+{
+   "status": "ACTIVE",
+   "reason": "Suspension period completed. Student counseled and ready to resume classes."
+}
+
+### SM3. Mark student as dropped out
+PATCH http://localhost:3000/api/students/4/status
+Content-Type: application/json
+
+{
+   "status": "DROPPED",
+   "reason": "Student voluntarily discontinued studies due to financial constraints"
+}
+
+###
+### GRADUATION SCENARIOS
+###
+
+### GS1. Create final year student for graduation
+POST http://localhost:3000/api/students
+Content-Type: application/json
+
+{
+   "full_name": "Akshay Verma",
+   "date_of_birth": "2006-03-12",
+   "gender": "MALE",
+   "school_id": 1,
+   "class_id": 5,
+   "section_id": 7,
+   "academic_year": "2023-24",
+   "admission_date": "2019-04-01",
+   "father_name": "Ashok Verma",
+   "father_phone": "9876543310",
+   "mother_name": "Rekha Verma",
+   "mother_phone": "9876543311",
+   "admission_status": "ENROLLED",
+   "student_status": "ACTIVE"
+}
+
+### GS2. Graduate student
+PUT http://localhost:3000/api/students/6
+Content-Type: application/json
+
+{
+   "student_status": "GRADUATED",
+   "graduation_date": "2024-03-31",
+   "graduation_grade": "A+",
+   "graduation_remarks": "Graduated with distinction. Excellent academic performance throughout the tenure."
+}
+
+###
+### BULK OPERATIONS TESTING
+###
+
+### BO1. Bulk promotion of multiple students
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "PROMOTE",
+   "student_ids": [1, 3],
+   "data": {
+      "to_class_id": 3,
+      "new_academic_year": "2024-25",
+      "promotion_date": "2024-03-31",
+      "promotion_status": "PROMOTED",
+      "final_grade": "B+",
+      "attendance_percentage": 85.0
+   }
+}
+
+### BO2. Bulk internal transfer
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "TRANSFER",
+   "student_ids": [1, 3],
+   "data": {
+      "to_class_id": 3,
+      "to_section_id": 5,
+      "transfer_date": "2024-08-19",
+      "reason": "Bulk section reorganization"
+   }
+}
+
+### BO3. Bulk status update
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "UPDATE_STATUS",
+   "student_ids": [1, 3, 6],
+   "data": {
+      "status": "ACTIVE"
+   }
+}
+
+###
+### COMPLEX FILTERING AND SEARCH
+###
+
+### CF1. Get students by multiple criteria
+GET http://localhost:3000/api/students?school_id=1&class_id=2&student_status=ACTIVE&gender=MALE
+
+### CF2. Search students by parent name
+GET http://localhost:3000/api/students?search=Sharma
+
+### CF3. Get students by admission status
+GET http://localhost:3000/api/students?admission_status=ENROLLED
+
+### CF4. Get students with pagination and status filter
+GET http://localhost:3000/api/students?student_status=ACTIVE&page=1&limit=5
+
+### CF5. Get all students including inactive
+GET http://localhost:3000/api/students?include_inactive=true
+
+###
+### ENROLLMENT HISTORY TRACKING
+###
+
+### EH1. Get enrollment history for promoted student
+GET http://localhost:3000/api/students/3/enrollments
+
+### EH2. Get enrollment history for transferred student
+GET http://localhost:3000/api/students/2/enrollments
+
+### EH3. Get enrollment history for graduated student
+GET http://localhost:3000/api/students/6/enrollments
+
+###
+### CLASS/SECTION SPECIFIC OPERATIONS
+###
+
+### CS1. Get all students in a specific class-section
+GET http://localhost:3000/api/students/class/1/section/1
+
+### CS2. Get active students only in class-section
+GET http://localhost:3000/api/students/class/2/section/3?student_status=ACTIVE
+
+###
+### ERROR SCENARIOS AND EDGE CASES
+###
+
+### ES1. Try to promote student to non-existent class
+POST http://localhost:3000/api/students/1/promote
+Content-Type: application/json
+
+{
+   "to_class_id": 9999,
+   "new_academic_year": "2024-25",
+   "promotion_date": "2024-03-31",
+   "promotion_status": "PROMOTED"
+}
+
+### ES2. Try to transfer student to non-existent school
+POST http://localhost:3000/api/students/1/transfer
+Content-Type: application/json
+
+{
+   "to_school_id": 9999,
+   "transfer_date": "2024-08-19",
+   "reason": "Invalid transfer test"
+}
+
+### ES3. Try bulk operation with invalid student IDs
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "PROMOTE",
+   "student_ids": [9999, 9998],
+   "data": {
+      "to_class_id": 2,
+      "new_academic_year": "2024-25"
+   }
+}
+
+### ES4. Try to update non-existent student
+PUT http://localhost:3000/api/students/9999
+Content-Type: application/json
+
+{
+   "phone": "1234567890"
+}
+
+### ES5. Try invalid bulk operation
+POST http://localhost:3000/api/students/bulk
+Content-Type: application/json
+
+{
+   "operation": "INVALID_OPERATION",
+   "student_ids": [1, 2],
+   "data": {}
+}

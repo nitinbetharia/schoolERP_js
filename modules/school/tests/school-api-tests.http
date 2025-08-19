@@ -1,0 +1,160 @@
+###
+# School Management API Tests
+# Phase 3A School Module Testing
+###
+
+### 1. Create new school
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Green Valley Public School",
+   "code": "GVPS001",
+   "address": "123 Education Lane",
+   "city": "Mumbai",
+   "state": "Maharashtra",
+   "pin_code": "400001",
+   "phone": "022-12345678",
+   "email": "info@greenvalley.edu",
+   "principal_name": "Dr. Rajesh Sharma",
+   "principal_phone": "9876543210",
+   "principal_email": "principal@greenvalley.edu",
+   "website": "https://greenvalley.edu",
+   "affiliation_board": "CBSE",
+   "affiliation_number": "30123",
+   "established_date": "1985-04-15",
+   "school_type": "CBSE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### 2. Create another school
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Sunrise International School",
+   "code": "SIS002",
+   "address": "456 Knowledge Street",
+   "city": "Delhi",
+   "state": "Delhi",
+   "pin_code": "110001",
+   "phone": "011-98765432",
+   "email": "info@sunrise.edu",
+   "principal_name": "Ms. Priya Singh",
+   "principal_phone": "9123456789",
+   "principal_email": "principal@sunrise.edu",
+   "affiliation_board": "ICSE",
+   "affiliation_number": "DE456",
+   "established_date": "1992-06-20",
+   "school_type": "ICSE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### 3. Get all schools
+GET http://localhost:3000/api/schools
+
+### 4. Get schools with status filter
+GET http://localhost:3000/api/schools?status=ACTIVE
+
+### 5. Get schools with school type filter
+GET http://localhost:3000/api/schools?school_type=CBSE
+
+### 6. Get school by ID (replace {schoolId} with actual ID from create response)
+GET http://localhost:3000/api/schools/1
+
+### 7. Update school
+PUT http://localhost:3000/api/schools/1
+Content-Type: application/json
+
+{
+   "name": "Green Valley Public School - Updated",
+   "phone": "022-12345679",
+   "email": "updated@greenvalley.edu",
+   "website": "https://www.greenvalley.edu",
+   "principal_phone": "9876543211"
+}
+
+### 8. Get school statistics
+GET http://localhost:3000/api/schools/1/stats
+
+### 9. Try to create duplicate school (should fail)
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Another School",
+   "code": "GVPS001",
+   "address": "789 Test Road",
+   "city": "Pune",
+   "state": "Maharashtra",
+   "pin_code": "411001",
+   "phone": "020-12345678",
+   "email": "test@example.edu",
+   "principal_name": "Test Principal",
+   "principal_phone": "9000000000",
+   "principal_email": "test@example.edu",
+   "affiliation_board": "State Board",
+   "affiliation_number": "MH789",
+   "established_date": "2000-01-01",
+   "school_type": "STATE",
+   "medium_of_instruction": "Marathi",
+   "status": "ACTIVE"
+}
+
+### 10. Create school with missing required fields (should fail)
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Incomplete School",
+   "address": "Test Address"
+}
+
+### 11. Delete school (soft delete)
+DELETE http://localhost:3000/api/schools/2
+
+### 12. Try to get deleted school
+GET http://localhost:3000/api/schools/2
+
+### 13. Get all schools (should show only active ones)
+GET http://localhost:3000/api/schools
+
+### 14. Create school for further class testing
+POST http://localhost:3000/api/schools
+Content-Type: application/json
+
+{
+   "name": "Rainbow Primary School",
+   "code": "RPS003",
+   "address": "789 Learning Avenue",
+   "city": "Bangalore",
+   "state": "Karnataka",
+   "pin_code": "560001",
+   "phone": "080-12345678",
+   "email": "info@rainbow.edu",
+   "principal_name": "Mr. Suresh Kumar",
+   "principal_phone": "9988776655",
+   "principal_email": "principal@rainbow.edu",
+   "affiliation_board": "State Board",
+   "affiliation_number": "KA123",
+   "established_date": "1998-07-10",
+   "school_type": "STATE",
+   "medium_of_instruction": "English",
+   "status": "ACTIVE"
+}
+
+### 15. Test invalid school ID
+GET http://localhost:3000/api/schools/9999
+
+### 16. Test update non-existent school
+PUT http://localhost:3000/api/schools/9999
+Content-Type: application/json
+
+{
+   "name": "Non-existent School"
+}
+
+### 17. Test delete non-existent school
+DELETE http://localhost:3000/api/schools/9999
