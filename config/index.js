@@ -27,10 +27,14 @@ class ConfigManager {
       const rbacConfigPath = path.join(__dirname, 'rbac.json');
       const rbacConfig = JSON.parse(fs.readFileSync(rbacConfigPath, 'utf8'));
 
+      // Q59: Load business constants (no hardcoded values)
+      const businessConstants = require('./business-constants');
+
       // Use JSON config as main configuration
       this.config = {
         ...appConfigJson,
-        rbac: rbacConfig
+        rbac: rbacConfig,
+        constants: businessConstants
       };
 
       // Override with environment variables
@@ -81,8 +85,8 @@ class ConfigManager {
     this.config._technicalDecisions = {
       source: 'SINGLE_SOURCE_OF_TRUTH.md',
       version: 'FINAL',
-      decisionCount: 56,
-      lastUpdated: '2025-08-18',
+      decisionCount: 59, // Updated to include Q59
+      lastUpdated: '2025-08-19',
       immutable: true
     };
 

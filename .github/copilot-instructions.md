@@ -39,6 +39,138 @@ TODO: Implement User Authentication Module
 Current: Working on authentication middleware (3/7 completed)
 ```
 
+## 🚨 CRITICAL: ASYNC/AWAIT + TRY-CATCH ENFORCEMENT (Q57-Q58)
+
+**ALL JavaScript code MUST follow these patterns:**
+
+### **MANDATORY: Async/Await Pattern (Q57)**
+
+```javascript
+// ✅ CORRECT - Always use async/await
+async function processStudentData(studentId) {
+  try {
+    const student = await Student.findByPk(studentId);
+    const result = await performOperation(student);
+    return result;
+  } catch (error) {
+    logger.error('Student processing failed', {
+      studentId,
+      error: error.message
+    });
+    throw error;
+  }
+}
+
+// ❌ FORBIDDEN - No callbacks or raw promises
+function processStudentData(studentId, callback) {
+  // NEVER USE
+  Student.findByPk(studentId)
+    .then(student => {
+      // NEVER USE
+      callback(null, student);
+    })
+    .catch(callback); // NEVER USE
+}
+```
+
+### **MANDATORY: Try-Catch Pattern (Q58)**
+
+```javascript
+// ✅ CORRECT - Every async function has try-catch
+async function createStudent(studentData) {
+  try {
+    const validated = Student.sanitizeInput(studentData);
+    const student = await Student.create(validated);
+    logger.business('student_created', 'Student', student.id);
+    return student;
+  } catch (error) {
+    logger.error('Student creation failed', {
+      studentData,
+      error: error.message
+    });
+    throw new AppError('Failed to create student', 400);
+  }
+}
+
+// ❌ FORBIDDEN - No unhandled async operations
+async function createStudent(studentData) {
+  // NEVER USE
+  const student = await Student.create(studentData); // No try-catch = VIOLATION
+  return student;
+}
+```
+
+### **MANDATORY: Controller Pattern**
+
+```javascript
+// ✅ CORRECT - All controllers use async/await + try-catch
+const createStudentController = async (req, res, next) => {
+  try {
+    const studentData = req.body;
+    const student = await studentService.createStudent(studentData);
+    res.status(201).json({ success: true, data: student });
+  } catch (error) {
+    next(error); // Pass to centralized error handler
+  }
+};
+
+// ❌ FORBIDDEN - No sync controllers or missing error handling
+const createStudentController = (req, res) => {
+  // NEVER USE - not async
+  const student = studentService.createStudent(req.body); // No await = VIOLATION
+  res.json(student);
+};
+```
+
+## 🚨 CRITICAL: BUSINESS CONSTANTS ENFORCEMENT (Q59)
+
+**NO hardcoded business values allowed anywhere in code:**
+
+### **MANDATORY: Use Business Constants (Q59)**
+
+```javascript
+// ✅ CORRECT - Use business constants from config
+const config = require('../config/index');
+const constants = config.get('constants');
+
+// Model with constants
+status: {
+  type: DataTypes.ENUM(...constants.USER_STATUS.ALL_STATUS),
+  defaultValue: constants.USER_STATUS.ACTIVE
+}
+
+// Joi validation with constants
+role: Joi.string()
+  .valid(...constants.USER_ROLES.ALL_ROLES)
+  .required()
+
+// Business logic with constants
+if (user.role === constants.USER_ROLES.ADMIN) {
+  // Admin logic
+}
+
+// ❌ FORBIDDEN - No hardcoded business values
+status: {
+  type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'LOCKED'), // NEVER USE
+  defaultValue: 'ACTIVE' // NEVER USE
+}
+
+role: Joi.string().valid('ADMIN', 'TEACHER', 'STUDENT') // NEVER USE
+
+if (user.role === 'ADMIN') { // NEVER USE
+  // Logic
+}
+```
+
+### **MANDATORY: Business Constants Categories**
+
+- `USER_ROLES` - All user role types
+- `USER_STATUS` - User account status values
+- `ACADEMIC_STATUS` - Academic entity status
+- `PAYMENT_STATUS` - Payment transaction status
+- `COMMUNICATION_STATUS` - Message/notification status
+- `ATTENDANCE_STATUS` - Attendance tracking values
+
 ## 🚨 CRITICAL: CODE CONSISTENCY RULES (AVOID REITERATION)
 
 **ALWAYS check existing code before creating new code**:

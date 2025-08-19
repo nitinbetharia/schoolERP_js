@@ -1,3 +1,6 @@
+const config = require('../../config');
+const constants = config.get('constants');
+
 class RBACService {
   constructor() {
     // Define role equivalencies
@@ -5,8 +8,8 @@ class RBACService {
       SUPER_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
       SYSTEM_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
       SYS_ADMIN: ['SUPER_ADMIN', 'SYSTEM_ADMIN', 'SYS_ADMIN'],
-      GROUP_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN'],
-      TRUST_ADMIN: ['GROUP_ADMIN', 'TRUST_ADMIN']
+      GROUP_ADMIN: ['GROUP_ADMIN', constants.USER_ROLES.TRUST_ADMIN],
+      TRUST_ADMIN: ['GROUP_ADMIN', constants.USER_ROLES.TRUST_ADMIN]
     };
 
     this.roles = {
@@ -17,18 +20,27 @@ class RBACService {
         level: 90,
         permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*']
       },
-      TRUST_ADMIN: {
+      [constants.USER_ROLES.TRUST_ADMIN]: {
         level: 90,
         permissions: ['trusts:*', 'schools:*', 'users:*', 'students:*', 'fees:*', 'reports:*']
       },
-      SCHOOL_ADMIN: {
+      [constants.USER_ROLES.SCHOOL_ADMIN]: {
         level: 70,
         permissions: ['students:*', 'users:school', 'fees:*', 'attendance:*', 'reports:school']
       },
-      TEACHER: { level: 50, permissions: ['students:read', 'attendance:*', 'reports:class'] },
-      ACCOUNTANT: { level: 60, permissions: ['fees:*', 'students:read', 'reports:financial'] },
-      PARENT: { level: 20, permissions: ['students:own', 'fees:own', 'attendance:own'] },
-      STUDENT: { level: 10, permissions: ['profile:own', 'attendance:own'] }
+      [constants.USER_ROLES.TEACHER]: {
+        level: 50,
+        permissions: ['students:read', 'attendance:*', 'reports:class']
+      },
+      [constants.USER_ROLES.ACCOUNTANT]: {
+        level: 60,
+        permissions: ['fees:*', 'students:read', 'reports:financial']
+      },
+      [constants.USER_ROLES.PARENT]: {
+        level: 20,
+        permissions: ['students:own', 'fees:own', 'attendance:own']
+      },
+      [constants.USER_ROLES.STUDENT]: { level: 10, permissions: ['profile:own', 'attendance:own'] }
     };
 
     this.resources = [
@@ -76,22 +88,22 @@ class RBACService {
     const { userId, trustCode, schoolId, studentId, parentId } = context;
 
     switch (userRole) {
-      case 'TRUST_ADMIN':
+      case constants.USER_ROLES.TRUST_ADMIN:
         return this.checkTrustAdminPermissions(resource, action, context);
 
-      case 'SCHOOL_ADMIN':
+      case constants.USER_ROLES.SCHOOL_ADMIN:
         return this.checkSchoolAdminPermissions(resource, action, context);
 
-      case 'TEACHER':
+      case constants.USER_ROLES.TEACHER:
         return this.checkTeacherPermissions(resource, action, context);
 
-      case 'ACCOUNTANT':
+      case constants.USER_ROLES.ACCOUNTANT:
         return this.checkAccountantPermissions(resource, action, context);
 
-      case 'PARENT':
+      case constants.USER_ROLES.PARENT:
         return this.checkParentPermissions(resource, action, context);
 
-      case 'STUDENT':
+      case constants.USER_ROLES.STUDENT:
         return this.checkStudentPermissions(resource, action, context);
 
       default:
@@ -204,30 +216,57 @@ class RBACService {
       '/api/system-users': { roles: ['SYSTEM_ADMIN'], methods: ['GET', 'POST', 'PUT', 'DELETE'] },
 
       // Trust routes
-      '/api/schools': { roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN'], methods: ['GET', 'POST', 'PUT'] },
-      '/api/users': { roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN'], methods: ['GET', 'POST', 'PUT'] },
+      '/api/schools': {
+        roles: [constants.USER_ROLES.TRUST_ADMIN, constants.USER_ROLES.SCHOOL_ADMIN],
+        methods: ['GET', 'POST', 'PUT']
+      },
+      '/api/users': {
+        roles: [constants.USER_ROLES.TRUST_ADMIN, constants.USER_ROLES.SCHOOL_ADMIN],
+        methods: ['GET', 'POST', 'PUT']
+      },
 
       // Student routes
       '/api/students': {
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'],
+        roles: [
+          constants.USER_ROLES.TRUST_ADMIN,
+          constants.USER_ROLES.SCHOOL_ADMIN,
+          constants.USER_ROLES.TEACHER,
+          constants.USER_ROLES.PARENT
+        ],
         methods: ['GET', 'POST', 'PUT']
       },
 
       // Fee routes
       '/api/fees': {
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'ACCOUNTANT', 'PARENT'],
+        roles: [
+          constants.USER_ROLES.TRUST_ADMIN,
+          constants.USER_ROLES.SCHOOL_ADMIN,
+          constants.USER_ROLES.ACCOUNTANT,
+          constants.USER_ROLES.PARENT
+        ],
         methods: ['GET', 'POST', 'PUT']
       },
 
       // Attendance routes
       '/api/attendance': {
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'PARENT'],
+        roles: [
+          constants.USER_ROLES.TRUST_ADMIN,
+          constants.USER_ROLES.SCHOOL_ADMIN,
+          constants.USER_ROLES.TEACHER,
+          constants.USER_ROLES.PARENT
+        ],
         methods: ['GET', 'POST', 'PUT']
       },
 
       // Report routes
       '/api/reports': {
-        roles: ['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT'],
+        roles: [
+          constants.USER_ROLES.TRUST_ADMIN,
+          constants.USER_ROLES.SCHOOL_ADMIN,
+          constants.USER_ROLES.TEACHER,
+          constants.USER_ROLES.ACCOUNTANT,
+          constants.USER_ROLES.PARENT
+        ],
         methods: ['GET']
       }
     };
@@ -289,25 +328,36 @@ class RBACService {
     // Group admin can manage trust and below
     if (managerRole === 'GROUP_ADMIN') {
       const allowedRoles = [
-        'TRUST_ADMIN',
-        'SCHOOL_ADMIN',
-        'TEACHER',
-        'ACCOUNTANT',
-        'PARENT',
-        'STUDENT'
+        constants.USER_ROLES.TRUST_ADMIN,
+        constants.USER_ROLES.SCHOOL_ADMIN,
+        constants.USER_ROLES.TEACHER,
+        constants.USER_ROLES.ACCOUNTANT,
+        constants.USER_ROLES.PARENT,
+        constants.USER_ROLES.STUDENT
       ];
       return allowedRoles.includes(newRole);
     }
 
     // Trust admin can manage school level and below
-    if (managerRole === 'TRUST_ADMIN') {
-      const allowedRoles = ['SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'];
+    if (managerRole === constants.USER_ROLES.TRUST_ADMIN) {
+      const allowedRoles = [
+        constants.USER_ROLES.SCHOOL_ADMIN,
+        constants.USER_ROLES.TEACHER,
+        constants.USER_ROLES.ACCOUNTANT,
+        constants.USER_ROLES.PARENT,
+        constants.USER_ROLES.STUDENT
+      ];
       return allowedRoles.includes(newRole);
     }
 
     // School admin can manage operational roles
-    if (managerRole === 'SCHOOL_ADMIN') {
-      const allowedRoles = ['TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'];
+    if (managerRole === constants.USER_ROLES.SCHOOL_ADMIN) {
+      const allowedRoles = [
+        constants.USER_ROLES.TEACHER,
+        constants.USER_ROLES.ACCOUNTANT,
+        constants.USER_ROLES.PARENT,
+        constants.USER_ROLES.STUDENT
+      ];
       return allowedRoles.includes(newRole);
     }
 

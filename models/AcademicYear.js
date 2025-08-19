@@ -1,11 +1,14 @@
 /**
  * AcademicYear Model - Q&A Compliant Implementation
  * Following Q12 (sequelize.define), Q14 (INTEGER PK), Q16 (underscored), Q19 (Joi validation)
+ * Q59 Compliant: Uses business constants instead of hardcoded values
  * Matches exactly with academic_years table schema
  */
 
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
+const config = require('../config');
+const constants = config.get('constants');
 
 module.exports = sequelize => {
   // Q12 Compliant: Direct sequelize.define() (not class-based)
@@ -51,11 +54,11 @@ module.exports = sequelize => {
 
       // Status
       status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'COMPLETED'),
+        type: DataTypes.ENUM(...constants.ACADEMIC_STATUS.ALL_STATUS),
         allowNull: false,
-        defaultValue: 'ACTIVE',
+        defaultValue: constants.ACADEMIC_STATUS.ACTIVE,
         validate: {
-          isIn: [['ACTIVE', 'INACTIVE', 'COMPLETED']]
+          isIn: [constants.ACADEMIC_STATUS.ALL_STATUS]
         }
       },
 
@@ -109,7 +112,9 @@ module.exports = sequelize => {
       startDate: Joi.date().required(),
       endDate: Joi.date().greater(Joi.ref('startDate')).required(),
       isCurrent: Joi.boolean().default(false),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'COMPLETED').default('ACTIVE')
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .default(constants.ACADEMIC_STATUS.ACTIVE)
     }),
 
     update: Joi.object({
@@ -123,7 +128,9 @@ module.exports = sequelize => {
         })
         .optional(),
       isCurrent: Joi.boolean().optional(),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'COMPLETED').optional()
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .optional()
     })
   };
 
@@ -147,14 +154,14 @@ module.exports = sequelize => {
     return await AcademicYear.findOne({
       where: {
         isCurrent: true,
-        status: 'ACTIVE'
+        status: constants.ACADEMIC_STATUS.ACTIVE
       }
     });
   };
 
   AcademicYear.findActive = async () => {
     return await AcademicYear.findAll({
-      where: { status: 'ACTIVE' },
+      where: { status: constants.ACADEMIC_STATUS.ACTIVE },
       order: [['startDate', 'DESC']]
     });
   };
@@ -170,7 +177,7 @@ module.exports = sequelize => {
       where: {
         startDate: { [sequelize.Sequelize.Op.lte]: date },
         endDate: { [sequelize.Sequelize.Op.gte]: date },
-        status: 'ACTIVE'
+        status: constants.ACADEMIC_STATUS.ACTIVE
       }
     });
   };
@@ -210,7 +217,7 @@ module.exports = sequelize => {
     const startDate = new Date(this.startDate);
     const endDate = new Date(this.endDate);
 
-    return this.status === 'ACTIVE' && now >= startDate && now <= endDate;
+    return this.status === constants.ACADEMIC_STATUS.ACTIVE && now >= startDate && now <= endDate;
   };
 
   AcademicYear.prototype.getDurationInDays = function () {

@@ -191,6 +191,98 @@
       "features": ["generation", "scheduling", "export"]
     }
   },
+  "models": {
+    "Class": {
+      "className": {
+        "maxLength": 50,
+        "minLength": 1
+      },
+      "classOrder": {
+        "min": 0,
+        "max": 999
+      },
+      "status": {
+        "values": ["ACTIVE", "INACTIVE"],
+        "default": "ACTIVE"
+      }
+    },
+    "User": {
+      "firstName": {
+        "maxLength": 50,
+        "minLength": 1
+      },
+      "lastName": {
+        "maxLength": 50,
+        "minLength": 1
+      },
+      "email": {
+        "maxLength": 255,
+        "minLength": 5
+      },
+      "phone": {
+        "maxLength": 15,
+        "minLength": 10
+      },
+      "status": {
+        "values": ["ACTIVE", "INACTIVE", "SUSPENDED"],
+        "default": "ACTIVE"
+      }
+    },
+    "School": {
+      "schoolName": {
+        "maxLength": 100,
+        "minLength": 1
+      },
+      "schoolCode": {
+        "maxLength": 20,
+        "minLength": 2
+      },
+      "address": {
+        "maxLength": 500,
+        "minLength": 1
+      },
+      "phone": {
+        "maxLength": 15,
+        "minLength": 10
+      },
+      "email": {
+        "maxLength": 255,
+        "minLength": 5
+      },
+      "status": {
+        "values": ["ACTIVE", "INACTIVE"],
+        "default": "ACTIVE"
+      }
+    },
+    "AcademicYear": {
+      "yearName": {
+        "maxLength": 20,
+        "minLength": 4
+      },
+      "status": {
+        "values": ["ACTIVE", "INACTIVE", "COMPLETED"],
+        "default": "ACTIVE"
+      }
+    },
+    "Student": {
+      "studentId": {
+        "maxLength": 20,
+        "minLength": 1
+      },
+      "rollNumber": {
+        "maxLength": 20,
+        "minLength": 1
+      },
+      "admissionNumber": {
+        "maxLength": 20,
+        "minLength": 1
+      },
+      "status": {
+        "values": ["ACTIVE", "INACTIVE", "GRADUATED", "TRANSFERRED"],
+        "default": "ACTIVE"
+      }
+    }
+  },
   "errors": {
     "showStackTrace": true,
     "logErrors": true,

@@ -1,12 +1,17 @@
 /**
  * User Model - Q&A Compliant Implementation
  * Following Q12 (sequelize.define), Q14 (INTEGER PK), Q16 (underscored), Q19 (Joi validation)
+ * Following Q59 (Business constants - no hardcoded values)
  * Matches exactly with users table schema
  */
 
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
 const bcrypt = require('bcryptjs');
+
+// Q59 Compliant: Use business constants instead of hardcoded values
+const config = require('../config/index');
+const constants = config.get('constants');
 
 module.exports = sequelize => {
   // Q12 Compliant: Direct sequelize.define() (not class-based)
@@ -64,26 +69,19 @@ module.exports = sequelize => {
       },
 
       role: {
-        type: DataTypes.ENUM(
-          'TRUST_ADMIN',
-          'SCHOOL_ADMIN',
-          'TEACHER',
-          'ACCOUNTANT',
-          'PARENT',
-          'STUDENT'
-        ),
+        type: DataTypes.ENUM(...constants.USER_ROLES.ALL_ROLES), // Q59: Use business constants
         allowNull: false,
         validate: {
-          isIn: [['TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT']]
+          isIn: [constants.USER_ROLES.ALL_ROLES] // Q59: Use business constants
         }
       },
 
       status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'LOCKED'),
+        type: DataTypes.ENUM(...constants.USER_STATUS.ALL_STATUS), // Q59: Use business constants
         allowNull: false,
-        defaultValue: 'ACTIVE',
+        defaultValue: constants.USER_STATUS.ACTIVE, // Q59: Use business constants
         validate: {
-          isIn: [['ACTIVE', 'INACTIVE', 'LOCKED']]
+          isIn: [constants.USER_STATUS.ALL_STATUS] // Q59: Use business constants
         }
       },
 
@@ -123,10 +121,10 @@ module.exports = sequelize => {
       },
 
       gender: {
-        type: DataTypes.ENUM('MALE', 'FEMALE', 'OTHER'),
+        type: DataTypes.ENUM(...constants.GENDER.ALL_GENDERS),
         allowNull: true,
         validate: {
-          isIn: [['MALE', 'FEMALE', 'OTHER']]
+          isIn: [constants.GENDER.ALL_GENDERS]
         }
       },
 
@@ -271,15 +269,20 @@ module.exports = sequelize => {
       phone: Joi.string().max(20).optional().allow(null),
       password: Joi.string().min(8).max(100).required(),
       role: Joi.string()
-        .valid('TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT')
+        .valid(...constants.USER_ROLES.ALL_ROLES) // Q59: Use business constants
         .required(),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'LOCKED').default('ACTIVE'),
+      status: Joi.string()
+        .valid(...constants.USER_STATUS.ALL_STATUS) // Q59: Use business constants
+        .default(constants.USER_STATUS.ACTIVE), // Q59: Use business constants
       schoolId: Joi.number().integer().positive().optional().allow(null),
       department: Joi.string().max(100).optional().allow(null),
       designation: Joi.string().max(100).optional().allow(null),
       dateOfJoining: Joi.date().optional().allow(null),
       dateOfBirth: Joi.date().max('now').optional().allow(null),
-      gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').optional().allow(null),
+      gender: Joi.string()
+        .valid(...constants.GENDER.ALL_GENDERS)
+        .optional()
+        .allow(null),
       address: Joi.string().optional().allow(null),
       city: Joi.string().max(100).optional().allow(null),
       state: Joi.string().max(100).optional().allow(null),
@@ -296,15 +299,20 @@ module.exports = sequelize => {
       phone: Joi.string().max(20).optional().allow(null),
       password: Joi.string().min(8).max(100).optional(),
       role: Joi.string()
-        .valid('TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT')
+        .valid(...constants.USER_ROLES.ALL_ROLES) // Q59: Use business constants
         .optional(),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'LOCKED').optional(),
+      status: Joi.string()
+        .valid(...constants.USER_STATUS.ALL_STATUS) // Q59: Use business constants
+        .optional(),
       schoolId: Joi.number().integer().positive().optional().allow(null),
       department: Joi.string().max(100).optional().allow(null),
       designation: Joi.string().max(100).optional().allow(null),
       dateOfJoining: Joi.date().optional().allow(null),
       dateOfBirth: Joi.date().max('now').optional().allow(null),
-      gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').optional().allow(null),
+      gender: Joi.string()
+        .valid(...constants.GENDER.ALL_GENDERS)
+        .optional()
+        .allow(null),
       address: Joi.string().optional().allow(null),
       city: Joi.string().max(100).optional().allow(null),
       state: Joi.string().max(100).optional().allow(null),
@@ -319,88 +327,185 @@ module.exports = sequelize => {
     })
   };
 
-  // Q19 Compliant: Validation methods
-  User.sanitizeInput = (data, schema = 'create') => {
-    const { error, value } = User.validationSchemas[schema].validate(data, {
-      abortEarly: false,
-      stripUnknown: true
-    });
+  // Q19 Compliant: Validation methods + Q57-Q58 Compliant: async/await + try-catch
+  User.sanitizeInput = async function (data, schema = 'create') {
+    try {
+      const validationSchema = this.validationSchemas[schema];
+      if (!validationSchema) {
+        throw new Error(`Invalid validation schema: ${schema}`);
+      }
 
-    if (error) {
-      const details = error.details.map(detail => detail.message).join(', ');
-      throw new Error(`Validation failed: ${details}`);
+      const { error, value } = validationSchema.validate(data, {
+        abortEarly: false,
+        stripUnknown: true
+      });
+
+      if (error) {
+        const details = error.details.map(detail => detail.message).join(', ');
+        throw new Error(`Validation failed: ${details}`);
+      }
+
+      return value;
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('User input validation failed', {
+        data: { ...data, password: '[REDACTED]' },
+        schema,
+        error: error.message
+      });
+      throw error;
     }
-
-    return value;
   };
 
-  // Business logic methods
-  User.hashPassword = async password => {
-    // Q6 Compliant: bcryptjs with 12 salt rounds
-    return await bcrypt.hash(password, 12);
+  // Business logic methods with Q57-Q58 compliance
+  User.hashPassword = async function (password) {
+    try {
+      // Q6 Compliant: bcryptjs with 12 salt rounds
+      return await bcrypt.hash(password, 12);
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Password hashing failed', { error: error.message });
+      throw new Error('Password hashing failed');
+    }
   };
 
   User.prototype.validatePassword = async function (password) {
-    return await bcrypt.compare(password, this.passwordHash);
+    try {
+      return await bcrypt.compare(password, this.passwordHash);
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Password validation failed', { userId: this.id, error: error.message });
+      throw new Error('Password validation failed');
+    }
   };
 
   User.prototype.isLocked = function () {
-    return this.status === 'LOCKED' || (this.lockedUntil && this.lockedUntil > new Date());
+    return (
+      this.status === constants.USER_STATUS.LOCKED ||
+      (this.lockedUntil && this.lockedUntil > new Date())
+    );
   };
 
   User.prototype.incrementFailedAttempts = async function () {
-    this.failedLoginAttempts += 1;
+    try {
+      this.failedLoginAttempts += 1;
 
-    // Lock account after 5 failed attempts (Q&A decision)
-    if (this.failedLoginAttempts >= 5) {
-      this.status = 'LOCKED';
-      this.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      // Lock account after 5 failed attempts (Q&A decision)
+      if (this.failedLoginAttempts >= 5) {
+        this.status = constants.USER_STATUS.LOCKED;
+        this.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      }
+
+      await this.save();
+
+      const logger = require('../config/logger');
+      logger.security('failed_login_attempts', 'medium', {
+        userId: this.id,
+        email: this.email,
+        attempts: this.failedLoginAttempts,
+        locked: this.status === constants.USER_STATUS.LOCKED
+      });
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Failed to increment failed attempts', {
+        userId: this.id,
+        error: error.message
+      });
+      throw error;
     }
-
-    await this.save();
   };
 
   User.prototype.resetFailedAttempts = async function () {
-    if (this.failedLoginAttempts > 0 || this.status === 'LOCKED') {
-      this.failedLoginAttempts = 0;
-      this.status = 'ACTIVE';
-      this.lockedUntil = null;
-      await this.save();
+    try {
+      if (this.failedLoginAttempts > 0 || this.status === constants.USER_STATUS.LOCKED) {
+        this.failedLoginAttempts = 0;
+        this.status = constants.USER_STATUS.ACTIVE; // Q59: Use business constants
+        this.lockedUntil = null;
+        await this.save();
+
+        const logger = require('../config/logger');
+        logger.auth('account_unlocked', this.id, this.email);
+      }
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Failed to reset failed attempts', { userId: this.id, error: error.message });
+      throw error;
     }
   };
 
-  User.findByEmail = async email => {
-    return await User.findOne({
-      where: { email: email.toLowerCase() },
-      include: ['school'] // Q13: Include associations
-    });
-  };
-
-  User.findByEmployeeId = async employeeId => {
-    return await User.findOne({
-      where: { employeeId },
-      include: ['school']
-    });
-  };
-
-  User.findActiveByRole = async (role, schoolId = null) => {
-    const whereClause = {
-      role,
-      status: 'ACTIVE'
-    };
-
-    if (schoolId) {
-      whereClause.schoolId = schoolId;
+  User.findByEmail = async function (email) {
+    try {
+      return await User.findOne({
+        where: { email: email.toLowerCase() },
+        include: ['school'] // Q13: Include associations
+      });
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Failed to find user by email', { email, error: error.message });
+      throw error;
     }
+  };
 
-    return await User.findAll({
-      where: whereClause,
-      include: ['school'],
-      order: [
-        ['firstName', 'ASC'],
-        ['lastName', 'ASC']
-      ]
-    });
+  User.findByEmployeeId = async function (employeeId) {
+    try {
+      return await User.findOne({
+        where: { employeeId },
+        include: ['school']
+      });
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Failed to find user by employee ID', { employeeId, error: error.message });
+      throw error;
+    }
+  };
+
+  User.findActiveByRole = async function (role, schoolId = null) {
+    try {
+      const whereClause = {
+        role,
+        status: constants.USER_STATUS.ACTIVE // Q59: Use business constants
+      };
+
+      if (schoolId) {
+        whereClause.schoolId = schoolId;
+      }
+
+      return await User.findAll({
+        where: whereClause,
+        include: ['school'],
+        order: [
+          ['firstName', 'ASC'],
+          ['lastName', 'ASC']
+        ]
+      });
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('Failed to find active users by role', { role, schoolId, error: error.message });
+      throw error;
+    }
+  };
+
+  User.createUser = async function (userData) {
+    try {
+      const sanitized = await this.sanitizeInput(userData, 'create');
+
+      const user = await this.create(sanitized);
+
+      const logger = require('../config/logger');
+      logger.business('user_created', 'User', user.id, {
+        role: user.role,
+        schoolId: user.schoolId
+      });
+
+      return user;
+    } catch (error) {
+      const logger = require('../config/logger');
+      logger.error('User creation failed', {
+        userData: { ...userData, password: '[REDACTED]' },
+        error: error.message
+      });
+      throw error;
+    }
   };
 
   // Q13 Compliant: Associations defined inline

@@ -1,11 +1,14 @@
 /**
  * School Model - Q&A Compliant Implementation
  * Following Q12 (sequelize.define), Q14 (INTEGER PK), Q16 (underscored), Q19 (Joi validation)
+ * Q59 Compliant: Uses business constants instead of hardcoded values
  * Matches exactly with schools table schema
  */
 
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
+const config = require('../config');
+const constants = config.get('constants');
 
 module.exports = sequelize => {
   // Q12 Compliant: Direct sequelize.define() (not class-based)
@@ -124,11 +127,11 @@ module.exports = sequelize => {
 
       // Status
       status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
+        type: DataTypes.ENUM(...constants.ACADEMIC_STATUS.ALL_STATUS),
         allowNull: false,
-        defaultValue: 'ACTIVE',
+        defaultValue: constants.ACADEMIC_STATUS.ACTIVE,
         validate: {
-          isIn: [['ACTIVE', 'INACTIVE']]
+          isIn: [constants.ACADEMIC_STATUS.ALL_STATUS]
         }
       },
 
@@ -190,7 +193,9 @@ module.exports = sequelize => {
       affiliationNumber: Joi.string().max(100).optional().allow(null),
       board: Joi.string().max(100).optional().allow(null),
       logoUrl: Joi.string().uri().max(500).optional().allow(null),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE').default('ACTIVE')
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .default(constants.ACADEMIC_STATUS.ACTIVE)
     }),
 
     update: Joi.object({
@@ -209,7 +214,9 @@ module.exports = sequelize => {
       affiliationNumber: Joi.string().max(100).optional().allow(null),
       board: Joi.string().max(100).optional().allow(null),
       logoUrl: Joi.string().uri().max(500).optional().allow(null),
-      status: Joi.string().valid('ACTIVE', 'INACTIVE').optional()
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .optional()
     })
   };
 
@@ -237,7 +244,7 @@ module.exports = sequelize => {
 
   School.findActive = async () => {
     return await School.findAll({
-      where: { status: 'ACTIVE' },
+      where: { status: constants.ACADEMIC_STATUS.ACTIVE },
       order: [['schoolName', 'ASC']]
     });
   };
@@ -245,7 +252,7 @@ module.exports = sequelize => {
   School.findByLocation = async (city, state = null) => {
     const whereClause = {
       city,
-      status: 'ACTIVE'
+      status: constants.ACADEMIC_STATUS.ACTIVE
     };
 
     if (state) {

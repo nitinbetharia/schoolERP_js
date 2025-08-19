@@ -7,6 +7,7 @@
  * Q16: Snake_case database, camelCase JavaScript
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
+ * Q59: Uses business constants instead of hardcoded values
  *
  * Database Schema Match:
  * - Matches EXACTLY with actual `classes` table structure
@@ -16,6 +17,8 @@
 
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
+const config = require('../config');
+const constants = config.get('constants');
 
 /**
  * Class Model Definition
@@ -78,13 +81,13 @@ function createClassModel(sequelize) {
         }
       },
 
-      // Status enum - matches DB exactly
+      // Status enum - matches DB exactly (Q59: Use business constants)
       status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
+        type: DataTypes.ENUM(...constants.ACADEMIC_STATUS.ALL_STATUS),
         allowNull: false,
-        defaultValue: 'ACTIVE',
+        defaultValue: constants.ACADEMIC_STATUS.ACTIVE,
         validate: {
-          isIn: [['ACTIVE', 'INACTIVE']]
+          isIn: [constants.ACADEMIC_STATUS.ALL_STATUS]
         }
       }
 
@@ -187,9 +190,12 @@ function createClassModel(sequelize) {
         'number.positive': 'Academic Year ID must be positive'
       }),
 
-      status: Joi.string().valid('ACTIVE', 'INACTIVE').default('ACTIVE').messages({
-        'any.only': 'Status must be either ACTIVE or INACTIVE'
-      })
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .default(constants.ACADEMIC_STATUS.ACTIVE)
+        .messages({
+          'any.only': `Status must be one of: ${constants.ACADEMIC_STATUS.ALL_STATUS.join(', ')}`
+        })
     }),
 
     update: Joi.object({
@@ -203,9 +209,11 @@ function createClassModel(sequelize) {
         'number.min': 'Class order cannot be negative'
       }),
 
-      status: Joi.string().valid('ACTIVE', 'INACTIVE').messages({
-        'any.only': 'Status must be either ACTIVE or INACTIVE'
-      })
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .messages({
+          'any.only': `Status must be one of: ${constants.ACADEMIC_STATUS.ALL_STATUS.join(', ')}`
+        })
     }),
 
     // Validation for finding classes
@@ -220,9 +228,12 @@ function createClassModel(sequelize) {
         'number.positive': 'Academic Year ID must be positive'
       }),
 
-      status: Joi.string().valid('ACTIVE', 'INACTIVE').default('ACTIVE').messages({
-        'any.only': 'Status must be either ACTIVE or INACTIVE'
-      })
+      status: Joi.string()
+        .valid(...constants.ACADEMIC_STATUS.ALL_STATUS)
+        .default(constants.ACADEMIC_STATUS.ACTIVE)
+        .messages({
+          'any.only': `Status must be one of: ${constants.ACADEMIC_STATUS.ALL_STATUS.join(', ')}`
+        })
     })
   };
 
@@ -261,7 +272,7 @@ function createClassModel(sequelize) {
       where: {
         schoolId: sanitized.schoolId,
         academicYearId: sanitized.academicYearId,
-        status: options.status || 'ACTIVE'
+        status: options.status || constants.ACADEMIC_STATUS.ACTIVE
       },
       order: [['classOrder', 'ASC']],
       ...options
@@ -274,7 +285,7 @@ function createClassModel(sequelize) {
     return await Class.findAll({
       where: {
         schoolId: sanitized.schoolId,
-        status: 'ACTIVE'
+        status: constants.ACADEMIC_STATUS.ACTIVE
       },
       order: [['classOrder', 'ASC']],
       ...options

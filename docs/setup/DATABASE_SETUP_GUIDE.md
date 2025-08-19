@@ -1,16 +1,21 @@
 # Database Management Guide
 
-This guide covers the comprehensive database management system for the School ERP application.
+This guide covers the comprehensive database management system for the School
+ERP application.
 
 ## Overview
 
-The School ERP system uses a **multi-tenant architecture** with two main database types:
-- **Master Database**: Manages system-wide data (trusts, system users, configuration)
+The School ERP system uses a **multi-tenant architecture** with two main
+database types:
+
+- **Master Database**: Manages system-wide data (trusts, system users,
+  configuration)
 - **Trust Databases**: Individual databases for each school trust/organization
 
 ## Quick Start
 
 ### 1. Initial Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -20,13 +25,16 @@ npm run first-setup
 ```
 
 ### 2. Default Login Credentials
+
 After setup, you can login with:
+
 - **Email**: `nitin@gmail.com`
 - **Password**: `nitin@123`
 
 ## Available Scripts
 
 ### Setup Scripts
+
 ```bash
 # Complete initial setup (recommended for first time)
 npm run first-setup
@@ -45,6 +53,7 @@ npm run db:status
 ```
 
 ### Reset Scripts
+
 ```bash
 # Full database reset (drops everything and recreates)
 npm run reset-db:full
@@ -60,6 +69,7 @@ npm run reset-db:force
 ```
 
 ### Backup Scripts
+
 ```bash
 # Create full backup (all databases and data)
 npm run backup:full
@@ -76,12 +86,14 @@ npm run backup:clean
 ### Master Database Tables
 
 #### Core System Tables
+
 - `system_users` - System administrators and super users
 - `trusts` - School trusts/organizations
 - `system_config` - Global system configuration
 - `system_audit_logs` - System-level audit trail
 
 #### Enhanced Configuration Tables
+
 - `custom_field_definitions` - Custom field configurations
 - `custom_field_values` - Custom field data
 - `form_configurations` - Dynamic form builders
@@ -89,12 +101,14 @@ npm run backup:clean
 - `payment_method_configs` - Payment method settings
 
 #### Communication System
+
 - `notification_templates` - Email/SMS templates
 - `notifications_queue` - Notification delivery queue
 - `sms_configurations` - SMS provider settings
 - `email_configurations` - Email provider settings
 
 #### Reporting & Backup
+
 - `report_templates` - Report generation templates
 - `generated_reports` - Generated report history
 - `backup_configurations` - Backup schedule settings
@@ -103,6 +117,7 @@ npm run backup:clean
 ### Trust Database Tables
 
 #### Core Academic Tables
+
 - `users` - Trust-level users (admins, teachers, parents)
 - `students` - Student records
 - `classes` - Class and section management
@@ -110,18 +125,21 @@ npm run backup:clean
 - `schools` - School information within trust
 
 #### Fee Management
+
 - `fee_structures` - Fee structure definitions
 - `fee_receipts` - Fee payment receipts
 - `fee_categories` - Fee category management
 - `payment_transactions` - Payment transaction logs
 
 #### Attendance & Communication
+
 - `attendance_records` - Student attendance data
 - `communication_logs` - Trust-level communications
 - `communication_recipients` - Communication delivery tracking
 - `trust_config` - Trust-specific configuration
 
 #### Audit & Security
+
 - `trust_audit_logs` - Trust-level audit trail
 - `user_sessions` - User session management
 
@@ -146,6 +164,7 @@ DB_MASTER_NAME=school_erp_master
 ### Manual Database Operations
 
 #### Creating Additional Trust Databases
+
 ```javascript
 const DatabaseSetup = require('./scripts/setup-database');
 const setup = new DatabaseSetup();
@@ -155,6 +174,7 @@ await setup.createTrustDatabase('school_erp_trust_newschool', trustId);
 ```
 
 #### Custom Backup Operations
+
 ```bash
 # Backup specific database only
 node scripts/backup-database.js full
@@ -167,6 +187,7 @@ node scripts/backup-database.js clean 60
 ```
 
 #### Database Reset with Options
+
 ```bash
 # Reset specific components
 node scripts/reset-database.js full      # Complete reset
@@ -180,17 +201,20 @@ node scripts/reset-database.js full --force
 ## Backup Management
 
 ### Automatic Backups
+
 - Backups are stored in `./backups/` directory
 - Files are compressed using ZIP format
 - Checksums are calculated for integrity verification
 - Backup history is logged to the master database
 
 ### Backup Types
+
 1. **Full Backup**: Complete database dump with all data
 2. **Schema Backup**: Table structures only (for migration)
 3. **Incremental Backup**: Changes since last backup (planned feature)
 
 ### Backup Retention
+
 - Default retention: 30 days
 - Configurable via backup scripts
 - Automatic cleanup of old backups
@@ -198,18 +222,21 @@ node scripts/reset-database.js full --force
 ## Security Features
 
 ### Database Security
+
 - Foreign key constraints for data integrity
 - CHECK constraints for data validation
 - Indexed columns for performance
 - UTF8MB4 character set for full Unicode support
 
 ### Authentication Security
+
 - bcryptjs password hashing with salt
 - Session management with expiration
 - Login attempt tracking and account locking
 - Role-based access control (RBAC)
 
 ### Audit Trail
+
 - System-level and trust-level audit logs
 - User action tracking
 - IP address and user agent logging
@@ -218,12 +245,14 @@ node scripts/reset-database.js full --force
 ## Performance Optimization
 
 ### Database Indexing
+
 - Primary keys on all tables
 - Foreign key indexes
 - Custom indexes on frequently queried columns
 - Composite indexes for complex queries
 
 ### Connection Management
+
 - Connection pooling ready
 - Prepared statements for security
 - Multiple database connection support
@@ -234,6 +263,7 @@ node scripts/reset-database.js full --force
 ### Common Issues
 
 #### Connection Errors
+
 ```bash
 # Verify database connection using MySQL Shell
 mysqlsh --uri=mysql://username:password@host:port
@@ -244,6 +274,7 @@ mysqlsh --uri=mysql://username:password@host:port
 ```
 
 #### Permission Issues
+
 ```sql
 -- Grant required permissions
 GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost';
@@ -251,6 +282,7 @@ FLUSH PRIVILEGES;
 ```
 
 #### Schema Sync Issues
+
 ```bash
 # Reset and recreate everything
 npm run reset-db:force
@@ -262,6 +294,7 @@ npm run db:status
 ### Error Recovery
 
 #### Corrupted Database
+
 ```bash
 # Create backup if possible
 npm run backup:full
@@ -272,12 +305,14 @@ npm run db:seed
 ```
 
 #### Missing Tables
+
 ```bash
 # Recreate schema only
 npm run db:migrate
 ```
 
 #### Data Corruption
+
 ```bash
 # Restore from backup
 # Manual restore process:
@@ -289,6 +324,7 @@ npm run db:migrate
 ## Migration Guide
 
 ### Upgrading Database Schema
+
 1. Create backup before migration
 2. Update database-schema.sql file
 3. Run migration script
@@ -296,6 +332,7 @@ npm run db:migrate
 5. Test application functionality
 
 ### Adding New Features
+
 1. Update schema file with new tables
 2. Add seed data for new features
 3. Update service files to use new tables
@@ -304,18 +341,21 @@ npm run db:migrate
 ## Production Considerations
 
 ### Performance Monitoring
+
 - Monitor query performance
 - Track database size growth
 - Set up backup alerts
 - Monitor disk space usage
 
 ### Scaling Considerations
+
 - Database partitioning for large datasets
 - Read replicas for query performance
 - Connection pooling optimization
 - Index optimization
 
 ### Backup Strategy
+
 - Multiple backup locations
 - Regular backup testing
 - Disaster recovery procedures
@@ -324,12 +364,14 @@ npm run db:migrate
 ## Support and Maintenance
 
 ### Regular Maintenance Tasks
+
 - Weekly backup verification
 - Monthly performance review
 - Quarterly security audit
 - Annual disaster recovery testing
 
 ### Monitoring Checklist
+
 - [ ] Database connection health
 - [ ] Backup completion status
 - [ ] Disk space availability
@@ -344,4 +386,5 @@ npm run db:migrate
 
 ---
 
-**Note**: Always test database operations in a development environment before applying to production.
+**Note**: Always test database operations in a development environment before
+applying to production.

@@ -400,6 +400,31 @@ configuration
 API)  
 **Implementation**: CommunicationEngine with provider registration
 
+#### Q57: Asynchronous JavaScript Pattern
+
+**Decision**: async/await + try-catch for all asynchronous operations  
+**Implementation**: `async function name() { try { await operation(); } catch (error) { } }`  
+**FORBIDDEN**:
+Callbacks, raw Promises, unhandled async operations
+
+#### Q58: Error Handling Pattern
+
+**Decision**: Comprehensive try-catch with structured error responses  
+**Implementation**: Try-catch in all async functions + centralized error
+handler  
+**FORBIDDEN**: Unhandled promise rejections, silent failures
+
+#### Q59: Model Configuration Values
+
+**Decision**: All model validation rules and constraints in configuration
+files  
+**Implementation**: Use config.get('models.{modelName}') for field lengths,
+enums, validation rules  
+**FORBIDDEN**: Hardcoded field lengths, hardcoded enum values, hardcoded
+validation rules
+
+---
+
 ### **Academic Calendar**
 
 **Pattern**: Tenant-configurable academic calendar with flexible structures  
@@ -412,6 +437,13 @@ API)
 **Features**: Add/update/remove wizards, dynamic steps, per-tenant
 configuration  
 **Implementation**: WizardEngine with configurable steps
+
+#### Q59: Business Constants Configuration
+
+**Decision**: Centralized business constants in configuration (no hardcoded
+values)  
+**Implementation**: `config/business-constants.js` + config validation  
+**FORBIDDEN**: Hardcoded roles, status values, enums in models/code
 
 ---
 
@@ -428,5 +460,5 @@ configuration
 ---
 
 **VERSION**: FINAL  
-**TOTAL DECISIONS**: 56  
+**TOTAL DECISIONS**: 59  
 **STATUS**: IMMUTABLE - DO NOT MODIFY
