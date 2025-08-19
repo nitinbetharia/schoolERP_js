@@ -376,7 +376,7 @@ module.exports = {
   TRUST_STATUS: {
     // Trust/tenant status values
     ACTIVE: 'ACTIVE',
-    INACTIVE: 'INACTIVE', 
+    INACTIVE: 'INACTIVE',
     SUSPENDED: 'SUSPENDED',
     TERMINATED: 'TERMINATED',
 
@@ -404,7 +404,7 @@ module.exports = {
     // Display labels
     LABELS: {
       SUPER_ADMIN: 'Super Administrator',
-      SYSTEM_ADMIN: 'System Administrator', 
+      SYSTEM_ADMIN: 'System Administrator',
       SUPPORT_ADMIN: 'Support Administrator'
     }
   },
@@ -426,7 +426,17 @@ module.exports = {
     OTHER: 'OTHER',
 
     // Validation arrays
-    ALL_TYPES: ['TUITION', 'ADMISSION', 'EXAMINATION', 'LIBRARY', 'LABORATORY', 'TRANSPORT', 'HOSTEL', 'ACTIVITY', 'OTHER'],
+    ALL_TYPES: [
+      'TUITION',
+      'ADMISSION',
+      'EXAMINATION',
+      'LIBRARY',
+      'LABORATORY',
+      'TRANSPORT',
+      'HOSTEL',
+      'ACTIVITY',
+      'OTHER'
+    ],
 
     // Display labels
     LABELS: {
@@ -493,7 +503,7 @@ module.exports = {
     // Display labels
     LABELS: {
       PAYMENT: 'Payment',
-      REFUND: 'Refund', 
+      REFUND: 'Refund',
       ADJUSTMENT: 'Adjustment',
       WAIVER: 'Waiver'
     }
@@ -502,7 +512,7 @@ module.exports = {
   FEE_TRANSACTION_STATUS: {
     // Fee transaction status values
     PENDING: 'PENDING',
-    PROCESSING: 'PROCESSING', 
+    PROCESSING: 'PROCESSING',
     SUCCESS: 'SUCCESS',
     FAILED: 'FAILED',
     CANCELLED: 'CANCELLED',
@@ -533,7 +543,15 @@ module.exports = {
     NET_BANKING: 'NET_BANKING',
 
     // Validation arrays
-    ALL_METHODS: ['CASH', 'BANK_TRANSFER', 'CHEQUE', 'CARD', 'DIGITAL_WALLET', 'UPI', 'NET_BANKING'],
+    ALL_METHODS: [
+      'CASH',
+      'BANK_TRANSFER',
+      'CHEQUE',
+      'CARD',
+      'DIGITAL_WALLET',
+      'UPI',
+      'NET_BANKING'
+    ],
 
     // Display labels
     LABELS: {
@@ -588,7 +606,7 @@ module.exports = {
   },
 
   ATTENDANCE_STATUS: {
-    // Daily attendance status values  
+    // Daily attendance status values
     PRESENT: 'PRESENT',
     ABSENT: 'ABSENT',
     LATE: 'LATE',
@@ -641,13 +659,20 @@ module.exports = {
     GENERAL: 'GENERAL',
 
     // Validation arrays
-    ALL_CATEGORIES: ['ACADEMIC', 'ADMINISTRATIVE', 'FINANCIAL', 'ATTENDANCE', 'EMERGENCY', 'GENERAL'],
+    ALL_CATEGORIES: [
+      'ACADEMIC',
+      'ADMINISTRATIVE',
+      'FINANCIAL',
+      'ATTENDANCE',
+      'EMERGENCY',
+      'GENERAL'
+    ],
 
     // Display labels
     LABELS: {
       ACADEMIC: 'Academic',
       ADMINISTRATIVE: 'Administrative',
-      FINANCIAL: 'Financial', 
+      FINANCIAL: 'Financial',
       ATTENDANCE: 'Attendance',
       EMERGENCY: 'Emergency',
       GENERAL: 'General'
@@ -676,7 +701,7 @@ module.exports = {
   MESSAGE_STATUS: {
     // Message delivery status
     PENDING: 'PENDING',
-    SENT: 'SENT', 
+    SENT: 'SENT',
     DELIVERED: 'DELIVERED',
     READ: 'READ',
     FAILED: 'FAILED',
@@ -697,7 +722,7 @@ module.exports = {
   RECIPIENT_TYPES: {
     // Message recipient types
     USER: 'USER',
-    STUDENT: 'STUDENT', 
+    STUDENT: 'STUDENT',
     PARENT: 'PARENT',
     TEACHER: 'TEACHER',
     STAFF: 'STAFF',
@@ -772,7 +797,15 @@ module.exports = {
     SYSTEM: 'SYSTEM',
 
     // Validation arrays
-    ALL_CATEGORIES: ['AUTHENTICATION', 'DATA_MODIFICATION', 'DATA_ACCESS', 'FINANCE', 'ACADEMIC', 'COMMUNICATION', 'SYSTEM'],
+    ALL_CATEGORIES: [
+      'AUTHENTICATION',
+      'DATA_MODIFICATION',
+      'DATA_ACCESS',
+      'FINANCE',
+      'ACADEMIC',
+      'COMMUNICATION',
+      'SYSTEM'
+    ],
 
     // Display labels
     LABELS: {
@@ -844,7 +877,7 @@ module.exports = {
     WARNING: 'WARNING',
     ERROR: 'ERROR',
 
-    // Validation arrays  
+    // Validation arrays
     ALL_LEVELS: ['DEBUG', 'INFO', 'WARNING', 'ERROR'],
 
     // Display labels
@@ -868,7 +901,16 @@ module.exports = {
     WEBHOOK_RECEIVED: 'WEBHOOK_RECEIVED',
 
     // Validation arrays
-    ALL_EVENTS: ['CREATED', 'PROVIDER_REQUEST', 'SENT', 'DELIVERED', 'READ', 'ERROR', 'RETRY', 'WEBHOOK_RECEIVED'],
+    ALL_EVENTS: [
+      'CREATED',
+      'PROVIDER_REQUEST',
+      'SENT',
+      'DELIVERED',
+      'READ',
+      'ERROR',
+      'RETRY',
+      'WEBHOOK_RECEIVED'
+    ],
 
     // Display labels
     LABELS: {

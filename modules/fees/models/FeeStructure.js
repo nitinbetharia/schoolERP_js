@@ -1,6 +1,6 @@
 /**
  * FeeStructure Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * FeeStructure represents configurable fee rules per class/section
  * - Supports multiple fee types (tuition, transport, hostel, etc.)
  * - Configurable frequency (monthly, quarterly, yearly)
@@ -204,7 +204,7 @@ function createFeeStructureModel(sequelize) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -234,7 +234,7 @@ function createFeeStructureModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  FeeStructure.associate = (models) => {
+  FeeStructure.associate = models => {
     // FeeStructure belongs to School
     if (models.School) {
       FeeStructure.belongsTo(models.School, {
@@ -282,9 +282,9 @@ function createFeeStructureModel(sequelize) {
   };
 
   // Instance methods
-  FeeStructure.prototype.toJSON = function() {
+  FeeStructure.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Format decimal amounts
     if (values.amount) {
       values.amount = parseFloat(values.amount);
@@ -292,45 +292,45 @@ function createFeeStructureModel(sequelize) {
     if (values.lateFeeAmount) {
       values.lateFeeAmount = parseFloat(values.lateFeeAmount);
     }
-    
+
     return values;
   };
 
-  FeeStructure.prototype.calculateLateFee = function(daysLate) {
+  FeeStructure.prototype.calculateLateFee = function (daysLate) {
     if (daysLate <= this.lateFeeGraceDays) {
       return 0;
     }
     return parseFloat(this.lateFeeAmount);
   };
 
-  FeeStructure.prototype.getDueDateForMonth = function(year, month) {
+  FeeStructure.prototype.getDueDateForMonth = function (year, month) {
     if (!this.dueDay) {
       return null;
     }
-    
+
     // Handle end-of-month scenarios
     const dueDate = new Date(year, month - 1, this.dueDay);
     const lastDayOfMonth = new Date(year, month, 0).getDate();
-    
+
     if (this.dueDay > lastDayOfMonth) {
       dueDate.setDate(lastDayOfMonth);
     }
-    
+
     return dueDate;
   };
 
   // Class methods
-  FeeStructure.findForStudent = async function(studentId, academicYearId) {
+  FeeStructure.findForStudent = async function (studentId, academicYearId) {
     // This would need to be implemented based on student's class and section
     const studentModel = sequelize.models.Student;
     if (!studentModel) return [];
-    
+
     const student = await studentModel.findByPk(studentId, {
       include: ['class', 'section']
     });
-    
+
     if (!student) return [];
-    
+
     return await this.findAll({
       where: {
         academicYearId,
@@ -345,7 +345,7 @@ function createFeeStructureModel(sequelize) {
     });
   };
 
-  FeeStructure.findBySchoolAndYear = async function(schoolId, academicYearId) {
+  FeeStructure.findBySchoolAndYear = async function (schoolId, academicYearId) {
     return await this.findAll({
       where: {
         schoolId,
@@ -353,7 +353,10 @@ function createFeeStructureModel(sequelize) {
         status: constants.FEE_STRUCTURE_STATUS.ACTIVE
       },
       include: ['school', 'class', 'section', 'academicYear'],
-      order: [['feeType', 'ASC'], ['amount', 'ASC']]
+      order: [
+        ['feeType', 'ASC'],
+        ['amount', 'ASC']
+      ]
     });
   };
 
@@ -368,9 +371,13 @@ const feeStructureValidationSchemas = {
     classId: Joi.number().integer().min(1).optional(),
     sectionId: Joi.number().integer().min(1).optional(),
     academicYearId: Joi.number().integer().min(1).required(),
-    feeType: Joi.string().valid(...constants.FEE_TYPES.ALL_TYPES).required(),
+    feeType: Joi.string()
+      .valid(...constants.FEE_TYPES.ALL_TYPES)
+      .required(),
     amount: Joi.number().precision(2).min(0).required(),
-    frequency: Joi.string().valid(...constants.FEE_FREQUENCIES.ALL_FREQUENCIES).required(),
+    frequency: Joi.string()
+      .valid(...constants.FEE_FREQUENCIES.ALL_FREQUENCIES)
+      .required(),
     dueDay: Joi.number().integer().min(1).max(31).optional(),
     lateFeeAmount: Joi.number().precision(2).min(0).default(0),
     lateFeeGraceDays: Joi.number().integer().min(0).max(365).default(0),
@@ -384,12 +391,16 @@ const feeStructureValidationSchemas = {
     classId: Joi.number().integer().min(1).optional(),
     sectionId: Joi.number().integer().min(1).optional(),
     amount: Joi.number().precision(2).min(0).optional(),
-    frequency: Joi.string().valid(...constants.FEE_FREQUENCIES.ALL_FREQUENCIES).optional(),
+    frequency: Joi.string()
+      .valid(...constants.FEE_FREQUENCIES.ALL_FREQUENCIES)
+      .optional(),
     dueDay: Joi.number().integer().min(1).max(31).optional(),
     lateFeeAmount: Joi.number().precision(2).min(0).optional(),
     lateFeeGraceDays: Joi.number().integer().min(0).max(365).optional(),
     isMandatory: Joi.boolean().optional(),
-    status: Joi.string().valid(...constants.FEE_STRUCTURE_STATUS.ALL_STATUS).optional(),
+    status: Joi.string()
+      .valid(...constants.FEE_STRUCTURE_STATUS.ALL_STATUS)
+      .optional(),
     description: Joi.string().max(500).optional(),
     configurationRules: Joi.object().optional()
   })

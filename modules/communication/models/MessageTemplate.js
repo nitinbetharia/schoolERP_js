@@ -1,6 +1,6 @@
 /**
  * MessageTemplate Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * MessageTemplate represents reusable message templates for communication
  * - Supports multiple channels (Email, SMS, WhatsApp, Push)
  * - Template variables for dynamic content substitution
@@ -239,7 +239,7 @@ function createMessageTemplateModel(sequelize) {
       tableName: 'message_templates',
       timestamps: false, // Custom timestamp handling
       underscored: true,
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -270,7 +270,7 @@ function createMessageTemplateModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  MessageTemplate.associate = (models) => {
+  MessageTemplate.associate = models => {
     // MessageTemplate belongs to User (creator)
     if (models.User) {
       MessageTemplate.belongsTo(models.User, {
@@ -310,9 +310,9 @@ function createMessageTemplateModel(sequelize) {
   };
 
   // Instance methods
-  MessageTemplate.prototype.toJSON = function() {
+  MessageTemplate.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Parse JSON fields if they're strings
     ['channels', 'variables', 'metadata'].forEach(field => {
       if (values[field] && typeof values[field] === 'string') {
@@ -323,23 +323,23 @@ function createMessageTemplateModel(sequelize) {
         }
       }
     });
-    
+
     return values;
   };
 
-  MessageTemplate.prototype.isApproved = function() {
+  MessageTemplate.prototype.isApproved = function () {
     return this.approvalStatus === constants.APPROVAL_STATUS.APPROVED;
   };
 
-  MessageTemplate.prototype.canModify = function() {
+  MessageTemplate.prototype.canModify = function () {
     return !this.isSystem && this.approvalStatus !== constants.APPROVAL_STATUS.APPROVED;
   };
 
-  MessageTemplate.prototype.supportsChannel = function(channel) {
+  MessageTemplate.prototype.supportsChannel = function (channel) {
     return this.channels && this.channels.includes(channel);
   };
 
-  MessageTemplate.prototype.getContentForChannel = function(channel) {
+  MessageTemplate.prototype.getContentForChannel = function (channel) {
     switch (channel) {
       case constants.COMMUNICATION_CHANNELS.EMAIL:
         return {
@@ -364,9 +364,9 @@ function createMessageTemplateModel(sequelize) {
     }
   };
 
-  MessageTemplate.prototype.renderTemplate = function(variables = {}) {
+  MessageTemplate.prototype.renderTemplate = function (variables = {}) {
     const rendered = {};
-    
+
     if (this.emailSubject) {
       rendered.emailSubject = this.substituteVariables(this.emailSubject, variables);
     }
@@ -385,23 +385,23 @@ function createMessageTemplateModel(sequelize) {
     if (this.pushBody) {
       rendered.pushBody = this.substituteVariables(this.pushBody, variables);
     }
-    
+
     return rendered;
   };
 
-  MessageTemplate.prototype.substituteVariables = function(content, variables) {
+  MessageTemplate.prototype.substituteVariables = function (content, variables) {
     if (!content || typeof content !== 'string') return content;
-    
+
     let result = content;
     Object.keys(variables).forEach(key => {
       const placeholder = new RegExp(`{{${key}}}`, 'g');
       result = result.replace(placeholder, variables[key] || '');
     });
-    
+
     return result;
   };
 
-  MessageTemplate.prototype.createVersion = async function(updates = {}) {
+  MessageTemplate.prototype.createVersion = async function (updates = {}) {
     const newVersion = await MessageTemplate.create({
       ...this.toJSON(),
       id: undefined,
@@ -414,12 +414,12 @@ function createMessageTemplateModel(sequelize) {
       updatedAt: new Date(),
       ...updates
     });
-    
+
     return newVersion;
   };
 
   // Class methods
-  MessageTemplate.findByCode = async function(templateCode, options = {}) {
+  MessageTemplate.findByCode = async function (templateCode, options = {}) {
     return await this.findOne({
       where: {
         templateCode,
@@ -430,7 +430,7 @@ function createMessageTemplateModel(sequelize) {
     });
   };
 
-  MessageTemplate.findByCategory = async function(category, language = 'EN', options = {}) {
+  MessageTemplate.findByCategory = async function (category, language = 'EN', options = {}) {
     return await this.findAll({
       where: {
         category,
@@ -443,19 +443,22 @@ function createMessageTemplateModel(sequelize) {
     });
   };
 
-  MessageTemplate.getSystemTemplates = async function() {
+  MessageTemplate.getSystemTemplates = async function () {
     return await this.findAll({
       where: {
         isSystem: true,
         isActive: true
       },
-      order: [['category', 'ASC'], ['templateName', 'ASC']]
+      order: [
+        ['category', 'ASC'],
+        ['templateName', 'ASC']
+      ]
     });
   };
 
-  MessageTemplate.searchTemplates = async function(searchTerm, options = {}) {
+  MessageTemplate.searchTemplates = async function (searchTerm, options = {}) {
     const Op = sequelize.Op;
-    
+
     return await this.findAll({
       where: {
         [Op.or]: [
@@ -471,40 +474,40 @@ function createMessageTemplateModel(sequelize) {
     });
   };
 
-  MessageTemplate.validateTemplate = function(templateData) {
+  MessageTemplate.validateTemplate = function (templateData) {
     const errors = [];
-    
+
     // Check if at least one channel content is provided
     const hasEmailContent = templateData.emailSubject || templateData.emailBody;
     const hasSmsContent = templateData.smsContent;
     const hasWhatsappContent = templateData.whatsappContent;
     const hasPushContent = templateData.pushTitle || templateData.pushBody;
-    
+
     if (!hasEmailContent && !hasSmsContent && !hasWhatsappContent && !hasPushContent) {
       errors.push('At least one channel content must be provided');
     }
-    
+
     // Check channel-content alignment
     if (templateData.channels) {
       const channels = Array.isArray(templateData.channels) ? templateData.channels : [];
-      
+
       if (channels.includes(constants.COMMUNICATION_CHANNELS.EMAIL) && !hasEmailContent) {
         errors.push('Email content required when EMAIL channel is selected');
       }
-      
+
       if (channels.includes(constants.COMMUNICATION_CHANNELS.SMS) && !hasSmsContent) {
         errors.push('SMS content required when SMS channel is selected');
       }
-      
+
       if (channels.includes(constants.COMMUNICATION_CHANNELS.WHATSAPP) && !hasWhatsappContent) {
         errors.push('WhatsApp content required when WHATSAPP channel is selected');
       }
-      
+
       if (channels.includes(constants.COMMUNICATION_CHANNELS.PUSH) && !hasPushContent) {
         errors.push('Push content required when PUSH channel is selected');
       }
     }
-    
+
     return errors;
   };
 
@@ -517,7 +520,9 @@ const messageTemplateValidationSchemas = {
     templateCode: Joi.string().alphanum().uppercase().max(100).required(),
     templateName: Joi.string().max(200).required(),
     description: Joi.string().optional(),
-    category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).required(),
+    category: Joi.string()
+      .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+      .required(),
     channels: Joi.array()
       .items(Joi.string().valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS))
       .min(1)
@@ -538,7 +543,9 @@ const messageTemplateValidationSchemas = {
   update: Joi.object({
     templateName: Joi.string().max(200).optional(),
     description: Joi.string().optional(),
-    category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).optional(),
+    category: Joi.string()
+      .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+      .optional(),
     channels: Joi.array()
       .items(Joi.string().valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS))
       .min(1)
@@ -567,7 +574,9 @@ const messageTemplateValidationSchemas = {
 
   search: Joi.object({
     searchTerm: Joi.string().min(2).required(),
-    category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).optional(),
+    category: Joi.string()
+      .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+      .optional(),
     language: Joi.string().max(10).default('EN'),
     limit: Joi.number().integer().min(1).max(100).default(50)
   })

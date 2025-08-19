@@ -1,6 +1,6 @@
 /**
  * Message Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * Message represents individual communications sent to recipients
  * - Tracks message delivery across multiple channels
  * - Supports bulk messaging operations
@@ -272,7 +272,7 @@ function createMessageModel(sequelize) {
       tableName: 'messages',
       timestamps: false, // Custom timestamp handling
       underscored: true,
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -316,7 +316,7 @@ function createMessageModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  Message.associate = (models) => {
+  Message.associate = models => {
     // Message belongs to MessageTemplate (optional)
     if (models.MessageTemplate) {
       Message.belongsTo(models.MessageTemplate, {
@@ -346,9 +346,9 @@ function createMessageModel(sequelize) {
   };
 
   // Instance methods
-  Message.prototype.toJSON = function() {
+  Message.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Parse JSON fields if they're strings
     ['providerResponse', 'metadata'].forEach(field => {
       if (values[field] && typeof values[field] === 'string') {
@@ -359,15 +359,15 @@ function createMessageModel(sequelize) {
         }
       }
     });
-    
+
     return values;
   };
 
-  Message.prototype.isPending = function() {
+  Message.prototype.isPending = function () {
     return this.status === constants.MESSAGE_STATUS.PENDING;
   };
 
-  Message.prototype.isSent = function() {
+  Message.prototype.isSent = function () {
     return [
       constants.MESSAGE_STATUS.SENT,
       constants.MESSAGE_STATUS.DELIVERED,
@@ -375,26 +375,29 @@ function createMessageModel(sequelize) {
     ].includes(this.status);
   };
 
-  Message.prototype.isFailed = function() {
+  Message.prototype.isFailed = function () {
     return this.status === constants.MESSAGE_STATUS.FAILED;
   };
 
-  Message.prototype.canRetry = function() {
+  Message.prototype.canRetry = function () {
     return this.isFailed() && this.retryCount < this.maxRetries;
   };
 
-  Message.prototype.isScheduled = function() {
+  Message.prototype.isScheduled = function () {
     return this.scheduledAt && this.scheduledAt > new Date();
   };
 
-  Message.prototype.isReadyToSend = function() {
+  Message.prototype.isReadyToSend = function () {
     if (this.isScheduled()) {
       return this.scheduledAt <= new Date();
     }
     return this.isPending();
   };
 
-  Message.prototype.markAsSent = async function(providerMessageId = null, providerResponse = null) {
+  Message.prototype.markAsSent = async function (
+    providerMessageId = null,
+    providerResponse = null
+  ) {
     return await this.update({
       status: constants.MESSAGE_STATUS.SENT,
       sentAt: new Date(),
@@ -404,7 +407,7 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.prototype.markAsDelivered = async function(deliveredAt = null) {
+  Message.prototype.markAsDelivered = async function (deliveredAt = null) {
     return await this.update({
       status: constants.MESSAGE_STATUS.DELIVERED,
       deliveredAt: deliveredAt || new Date(),
@@ -412,7 +415,7 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.prototype.markAsRead = async function(readAt = null) {
+  Message.prototype.markAsRead = async function (readAt = null) {
     return await this.update({
       status: constants.MESSAGE_STATUS.READ,
       readAt: readAt || new Date(),
@@ -420,7 +423,11 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.prototype.markAsFailed = async function(errorMessage, errorCode = null, providerResponse = null) {
+  Message.prototype.markAsFailed = async function (
+    errorMessage,
+    errorCode = null,
+    providerResponse = null
+  ) {
     const updateData = {
       status: constants.MESSAGE_STATUS.FAILED,
       errorMessage,
@@ -441,7 +448,7 @@ function createMessageModel(sequelize) {
     return await this.update(updateData);
   };
 
-  Message.prototype.incrementRetry = async function() {
+  Message.prototype.incrementRetry = async function () {
     return await this.update({
       retryCount: this.retryCount + 1,
       status: constants.MESSAGE_STATUS.PENDING,
@@ -450,7 +457,7 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.prototype.calculateEstimatedCost = function() {
+  Message.prototype.calculateEstimatedCost = function () {
     // Simple cost estimation logic
     const costs = {
       [constants.COMMUNICATION_CHANNELS.EMAIL]: 0.001,
@@ -463,28 +470,31 @@ function createMessageModel(sequelize) {
   };
 
   // Class methods for bulk operations
-  Message.createBulkMessages = async function(messageData, sentByUserId, campaignId = null) {
+  Message.createBulkMessages = async function (messageData, sentByUserId, campaignId = null) {
     const transaction = await sequelize.transaction();
-    
+
     try {
       const messages = [];
-      
+
       for (const data of messageData) {
         const messageId = `MSG_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
-        const message = await this.create({
-          messageId,
-          sentByUserId,
-          campaignId,
-          estimatedCost: Message.prototype.calculateEstimatedCost.call({ channel: data.channel }),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          ...data
-        }, { transaction });
-        
+
+        const message = await this.create(
+          {
+            messageId,
+            sentByUserId,
+            campaignId,
+            estimatedCost: Message.prototype.calculateEstimatedCost.call({ channel: data.channel }),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data
+          },
+          { transaction }
+        );
+
         messages.push(message);
       }
-      
+
       await transaction.commit();
       return messages;
     } catch (error) {
@@ -493,9 +503,9 @@ function createMessageModel(sequelize) {
     }
   };
 
-  Message.findPendingMessages = async function(limit = 100) {
+  Message.findPendingMessages = async function (limit = 100) {
     const Op = sequelize.Op;
-    
+
     return await this.findAll({
       where: {
         [Op.or]: [
@@ -518,20 +528,20 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.findByRecipient = async function(recipientType, recipientId, options = {}) {
+  Message.findByRecipient = async function (recipientType, recipientId, options = {}) {
     const where = {
       recipientType,
       recipientId
     };
-    
+
     if (options.category) {
       where.category = options.category;
     }
-    
+
     if (options.channel) {
       where.channel = options.channel;
     }
-    
+
     if (options.status) {
       where.status = options.status;
     }
@@ -544,7 +554,7 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.findByCampaign = async function(campaignId, options = {}) {
+  Message.findByCampaign = async function (campaignId, options = {}) {
     return await this.findAll({
       where: { campaignId },
       order: [['created_at', 'DESC']],
@@ -552,21 +562,21 @@ function createMessageModel(sequelize) {
     });
   };
 
-  Message.getDeliveryStats = async function(filters = {}) {
+  Message.getDeliveryStats = async function (filters = {}) {
     const where = {};
-    
+
     if (filters.channel) {
       where.channel = filters.channel;
     }
-    
+
     if (filters.category) {
       where.category = filters.category;
     }
-    
+
     if (filters.campaignId) {
       where.campaignId = filters.campaignId;
     }
-    
+
     if (filters.startDate && filters.endDate) {
       where.createdAt = {
         [sequelize.Op.between]: [filters.startDate, filters.endDate]
@@ -600,9 +610,10 @@ function createMessageModel(sequelize) {
       result.totalCost += parseFloat(stat.totalCost || 0);
     });
 
-    result.successRate = result.total > 0 
-      ? ((result.sent + result.delivered + result.read) / result.total * 100).toFixed(2)
-      : 0;
+    result.successRate =
+      result.total > 0
+        ? (((result.sent + result.delivered + result.read) / result.total) * 100).toFixed(2)
+        : 0;
 
     return result;
   };
@@ -614,15 +625,23 @@ function createMessageModel(sequelize) {
 const messageValidationSchemas = {
   create: Joi.object({
     templateId: Joi.number().integer().min(1).optional(),
-    channel: Joi.string().valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS).required(),
+    channel: Joi.string()
+      .valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS)
+      .required(),
     subject: Joi.string().max(200).optional(),
     content: Joi.string().required(),
-    recipientType: Joi.string().valid(...constants.RECIPIENT_TYPES.ALL_TYPES).required(),
+    recipientType: Joi.string()
+      .valid(...constants.RECIPIENT_TYPES.ALL_TYPES)
+      .required(),
     recipientId: Joi.number().integer().min(1).required(),
     recipientContact: Joi.string().max(100).required(),
     recipientName: Joi.string().max(200).required(),
-    category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).required(),
-    priority: Joi.string().valid(...constants.MESSAGE_PRIORITY.ALL_PRIORITIES).default(constants.MESSAGE_PRIORITY.MEDIUM),
+    category: Joi.string()
+      .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+      .required(),
+    priority: Joi.string()
+      .valid(...constants.MESSAGE_PRIORITY.ALL_PRIORITIES)
+      .default(constants.MESSAGE_PRIORITY.MEDIUM),
     scheduledAt: Joi.date().optional(),
     maxRetries: Joi.number().integer().min(0).max(10).default(3),
     sentByUserId: Joi.number().integer().min(1).required(),
@@ -631,28 +650,41 @@ const messageValidationSchemas = {
   }),
 
   bulkCreate: Joi.object({
-    messages: Joi.array().items(
-      Joi.object({
-        templateId: Joi.number().integer().min(1).optional(),
-        channel: Joi.string().valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS).required(),
-        subject: Joi.string().max(200).optional(),
-        content: Joi.string().required(),
-        recipientType: Joi.string().valid(...constants.RECIPIENT_TYPES.ALL_TYPES).required(),
-        recipientId: Joi.number().integer().min(1).required(),
-        recipientContact: Joi.string().max(100).required(),
-        recipientName: Joi.string().max(200).required(),
-        category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).required(),
-        priority: Joi.string().valid(...constants.MESSAGE_PRIORITY.ALL_PRIORITIES).default(constants.MESSAGE_PRIORITY.MEDIUM),
-        scheduledAt: Joi.date().optional(),
-        metadata: Joi.object().optional()
-      })
-    ).required().min(1),
+    messages: Joi.array()
+      .items(
+        Joi.object({
+          templateId: Joi.number().integer().min(1).optional(),
+          channel: Joi.string()
+            .valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS)
+            .required(),
+          subject: Joi.string().max(200).optional(),
+          content: Joi.string().required(),
+          recipientType: Joi.string()
+            .valid(...constants.RECIPIENT_TYPES.ALL_TYPES)
+            .required(),
+          recipientId: Joi.number().integer().min(1).required(),
+          recipientContact: Joi.string().max(100).required(),
+          recipientName: Joi.string().max(200).required(),
+          category: Joi.string()
+            .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+            .required(),
+          priority: Joi.string()
+            .valid(...constants.MESSAGE_PRIORITY.ALL_PRIORITIES)
+            .default(constants.MESSAGE_PRIORITY.MEDIUM),
+          scheduledAt: Joi.date().optional(),
+          metadata: Joi.object().optional()
+        })
+      )
+      .required()
+      .min(1),
     sentByUserId: Joi.number().integer().min(1).required(),
     campaignId: Joi.string().max(100).optional()
   }),
 
   updateStatus: Joi.object({
-    status: Joi.string().valid(...constants.MESSAGE_STATUS.ALL_STATUS).required(),
+    status: Joi.string()
+      .valid(...constants.MESSAGE_STATUS.ALL_STATUS)
+      .required(),
     providerMessageId: Joi.string().max(200).optional(),
     providerResponse: Joi.object().optional(),
     errorMessage: Joi.string().optional(),
@@ -663,11 +695,19 @@ const messageValidationSchemas = {
   }),
 
   query: Joi.object({
-    recipientType: Joi.string().valid(...constants.RECIPIENT_TYPES.ALL_TYPES).optional(),
+    recipientType: Joi.string()
+      .valid(...constants.RECIPIENT_TYPES.ALL_TYPES)
+      .optional(),
     recipientId: Joi.number().integer().min(1).optional(),
-    channel: Joi.string().valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS).optional(),
-    category: Joi.string().valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES).optional(),
-    status: Joi.string().valid(...constants.MESSAGE_STATUS.ALL_STATUS).optional(),
+    channel: Joi.string()
+      .valid(...constants.COMMUNICATION_CHANNELS.ALL_CHANNELS)
+      .optional(),
+    category: Joi.string()
+      .valid(...constants.MESSAGE_CATEGORIES.ALL_CATEGORIES)
+      .optional(),
+    status: Joi.string()
+      .valid(...constants.MESSAGE_STATUS.ALL_STATUS)
+      .optional(),
     campaignId: Joi.string().max(100).optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),

@@ -1,6 +1,6 @@
 /**
  * FeeTransaction Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * FeeTransaction represents payment records for fee structures
  * - Tracks all payments, refunds, adjustments, and waivers
  * - Supports multiple payment methods and gateway integration
@@ -246,7 +246,7 @@ function createFeeTransactionModel(sequelize) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -286,7 +286,7 @@ function createFeeTransactionModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  FeeTransaction.associate = (models) => {
+  FeeTransaction.associate = models => {
     // FeeTransaction belongs to Student
     if (models.Student) {
       FeeTransaction.belongsTo(models.Student, {
@@ -323,30 +323,34 @@ function createFeeTransactionModel(sequelize) {
   };
 
   // Instance methods
-  FeeTransaction.prototype.toJSON = function() {
+  FeeTransaction.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Format decimal amounts
     ['amount', 'lateFeeAmount', 'discountAmount'].forEach(field => {
       if (values[field] !== null) {
         values[field] = parseFloat(values[field]);
       }
     });
-    
+
     return values;
   };
 
-  FeeTransaction.prototype.getTotalAmount = function() {
-    return parseFloat(this.amount) + parseFloat(this.lateFeeAmount) - parseFloat(this.discountAmount);
+  FeeTransaction.prototype.getTotalAmount = function () {
+    return (
+      parseFloat(this.amount) + parseFloat(this.lateFeeAmount) - parseFloat(this.discountAmount)
+    );
   };
 
-  FeeTransaction.prototype.generateReceiptNumber = function() {
+  FeeTransaction.prototype.generateReceiptNumber = function () {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    const random = Math.floor(Math.random() * 1000)
+      .toString()
+      .padStart(3, '0');
     return `FEE${date}${this.id.toString().padStart(6, '0')}${random}`;
   };
 
-  FeeTransaction.prototype.markAsReconciled = async function(userId) {
+  FeeTransaction.prototype.markAsReconciled = async function (userId) {
     this.reconciliationStatus = constants.RECONCILIATION_STATUS.RECONCILED;
     this.reconciledAt = new Date();
     this.reconciledByUserId = userId;
@@ -354,7 +358,7 @@ function createFeeTransactionModel(sequelize) {
   };
 
   // Class methods
-  FeeTransaction.findByStudent = async function(studentId, options = {}) {
+  FeeTransaction.findByStudent = async function (studentId, options = {}) {
     return await this.findAll({
       where: { studentId },
       order: [['paymentDate', 'DESC']],
@@ -363,7 +367,7 @@ function createFeeTransactionModel(sequelize) {
     });
   };
 
-  FeeTransaction.findByDateRange = async function(startDate, endDate, options = {}) {
+  FeeTransaction.findByDateRange = async function (startDate, endDate, options = {}) {
     const where = {
       paymentDate: {
         [sequelize.Op.between]: [startDate, endDate]
@@ -382,7 +386,7 @@ function createFeeTransactionModel(sequelize) {
     });
   };
 
-  FeeTransaction.getCollectionSummary = async function(startDate, endDate, options = {}) {
+  FeeTransaction.getCollectionSummary = async function (startDate, endDate, options = {}) {
     const where = {
       paymentDate: {
         [sequelize.Op.between]: [startDate, endDate]
@@ -409,7 +413,10 @@ function createFeeTransactionModel(sequelize) {
       totalAmount: parseFloat(item.totalAmount || 0),
       totalLateFee: parseFloat(item.totalLateFee || 0),
       totalDiscount: parseFloat(item.totalDiscount || 0),
-      netAmount: parseFloat(item.totalAmount || 0) + parseFloat(item.totalLateFee || 0) - parseFloat(item.totalDiscount || 0)
+      netAmount:
+        parseFloat(item.totalAmount || 0) +
+        parseFloat(item.totalLateFee || 0) -
+        parseFloat(item.totalDiscount || 0)
     }));
   };
 
@@ -421,9 +428,13 @@ const feeTransactionValidationSchemas = {
   create: Joi.object({
     studentId: Joi.number().integer().min(1).required(),
     feeStructureId: Joi.number().integer().min(1).required(),
-    transactionType: Joi.string().valid(...constants.FEE_TRANSACTION_TYPES.ALL_TYPES).default(constants.FEE_TRANSACTION_TYPES.PAYMENT),
+    transactionType: Joi.string()
+      .valid(...constants.FEE_TRANSACTION_TYPES.ALL_TYPES)
+      .default(constants.FEE_TRANSACTION_TYPES.PAYMENT),
     amount: Joi.number().precision(2).min(0).required(),
-    paymentMethod: Joi.string().valid(...constants.PAYMENT_METHODS.ALL_METHODS).required(),
+    paymentMethod: Joi.string()
+      .valid(...constants.PAYMENT_METHODS.ALL_METHODS)
+      .required(),
     paymentReference: Joi.string().max(100).optional(),
     paymentDate: Joi.date().required(),
     academicMonth: Joi.number().integer().min(1).max(12).optional(),
@@ -443,19 +454,29 @@ const feeTransactionValidationSchemas = {
     lateFeeAmount: Joi.number().precision(2).min(0).optional(),
     discountAmount: Joi.number().precision(2).min(0).optional(),
     discountReason: Joi.string().max(200).optional(),
-    status: Joi.string().valid(...constants.FEE_TRANSACTION_STATUS.ALL_STATUS).optional(),
+    status: Joi.string()
+      .valid(...constants.FEE_TRANSACTION_STATUS.ALL_STATUS)
+      .optional(),
     remarks: Joi.string().max(500).optional(),
-    reconciliationStatus: Joi.string().valid(...constants.RECONCILIATION_STATUS.ALL_STATUS).optional()
+    reconciliationStatus: Joi.string()
+      .valid(...constants.RECONCILIATION_STATUS.ALL_STATUS)
+      .optional()
   }),
 
   query: Joi.object({
     studentId: Joi.number().integer().min(1).optional(),
     feeStructureId: Joi.number().integer().min(1).optional(),
-    paymentMethod: Joi.string().valid(...constants.PAYMENT_METHODS.ALL_METHODS).optional(),
-    status: Joi.string().valid(...constants.FEE_TRANSACTION_STATUS.ALL_STATUS).optional(),
+    paymentMethod: Joi.string()
+      .valid(...constants.PAYMENT_METHODS.ALL_METHODS)
+      .optional(),
+    status: Joi.string()
+      .valid(...constants.FEE_TRANSACTION_STATUS.ALL_STATUS)
+      .optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
-    reconciliationStatus: Joi.string().valid(...constants.RECONCILIATION_STATUS.ALL_STATUS).optional(),
+    reconciliationStatus: Joi.string()
+      .valid(...constants.RECONCILIATION_STATUS.ALL_STATUS)
+      .optional(),
     limit: Joi.number().integer().min(1).max(1000).default(100)
   })
 };

@@ -1,6 +1,6 @@
 /**
  * SystemUser Model - System Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for system entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * SystemUser represents super admin users who manage the entire system
  * - Has access to all trusts and system-level operations
  * - Different from trust-level users (User model)
@@ -161,7 +161,7 @@ function createSystemUserModel(sequelize) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -183,13 +183,13 @@ function createSystemUserModel(sequelize) {
 
       // Hooks for password hashing
       hooks: {
-        beforeCreate: async (user) => {
+        beforeCreate: async user => {
           if (user.passwordHash) {
             // Q17: Use 12 salt rounds for bcrypt
             user.passwordHash = await bcrypt.hash(user.passwordHash, 12);
           }
         },
-        beforeUpdate: async (user) => {
+        beforeUpdate: async user => {
           if (user.changed('passwordHash')) {
             // Q17: Use 12 salt rounds for bcrypt
             user.passwordHash = await bcrypt.hash(user.passwordHash, 12);
@@ -200,7 +200,7 @@ function createSystemUserModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  SystemUser.associate = (models) => {
+  SystemUser.associate = models => {
     // SystemUser has many SystemAuditLogs
     if (models.SystemAuditLog) {
       SystemUser.hasMany(models.SystemAuditLog, {
@@ -213,7 +213,7 @@ function createSystemUserModel(sequelize) {
   };
 
   // Instance methods
-  SystemUser.prototype.toJSON = function() {
+  SystemUser.prototype.toJSON = function () {
     const values = { ...this.dataValues };
     // Remove sensitive fields from JSON output
     delete values.passwordHash;
@@ -222,28 +222,28 @@ function createSystemUserModel(sequelize) {
     return values;
   };
 
-  SystemUser.prototype.validatePassword = async function(password) {
+  SystemUser.prototype.validatePassword = async function (password) {
     return await bcrypt.compare(password, this.passwordHash);
   };
 
-  SystemUser.prototype.isLocked = function() {
+  SystemUser.prototype.isLocked = function () {
     return this.lockedUntil && this.lockedUntil > new Date();
   };
 
-  SystemUser.prototype.incrementFailedAttempts = async function() {
+  SystemUser.prototype.incrementFailedAttempts = async function () {
     const maxAttempts = 5;
     const lockTime = 30 * 60 * 1000; // 30 minutes
 
     this.failedLoginAttempts += 1;
-    
+
     if (this.failedLoginAttempts >= maxAttempts) {
       this.lockedUntil = new Date(Date.now() + lockTime);
     }
-    
+
     await this.save();
   };
 
-  SystemUser.prototype.resetFailedAttempts = async function() {
+  SystemUser.prototype.resetFailedAttempts = async function () {
     this.failedLoginAttempts = 0;
     this.lockedUntil = null;
     this.lastLogin = new Date();
@@ -251,18 +251,18 @@ function createSystemUserModel(sequelize) {
   };
 
   // Class methods
-  SystemUser.findByEmail = async function(email) {
+  SystemUser.findByEmail = async function (email) {
     return await this.findOne({
-      where: { 
+      where: {
         email: email.toLowerCase(),
         isActive: true
       }
     });
   };
 
-  SystemUser.findByUsername = async function(username) {
+  SystemUser.findByUsername = async function (username) {
     return await this.findOne({
-      where: { 
+      where: {
         username: username,
         isActive: true
       }
@@ -280,7 +280,9 @@ const systemUserValidationSchemas = {
     password: Joi.string().min(8).max(128).required(),
     firstName: Joi.string().min(1).max(100).required(),
     lastName: Joi.string().min(1).max(100).required(),
-    role: Joi.string().valid(...constants.SYSTEM_USER_ROLES.ALL_ROLES).default(constants.SYSTEM_USER_ROLES.SYSTEM_ADMIN),
+    role: Joi.string()
+      .valid(...constants.SYSTEM_USER_ROLES.ALL_ROLES)
+      .default(constants.SYSTEM_USER_ROLES.SYSTEM_ADMIN),
     permissions: Joi.object().optional(),
     isActive: Joi.boolean().default(true)
   }),
@@ -289,7 +291,9 @@ const systemUserValidationSchemas = {
     email: Joi.string().email().optional(),
     firstName: Joi.string().min(1).max(100).optional(),
     lastName: Joi.string().min(1).max(100).optional(),
-    role: Joi.string().valid(...constants.SYSTEM_USER_ROLES.ALL_ROLES).optional(),
+    role: Joi.string()
+      .valid(...constants.SYSTEM_USER_ROLES.ALL_ROLES)
+      .optional(),
     permissions: Joi.object().optional(),
     isActive: Joi.boolean().optional()
   }),

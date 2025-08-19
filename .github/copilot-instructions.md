@@ -13,6 +13,32 @@ Before generating ANY code, you MUST:
 3. ❌ NEVER use any pattern marked as "FORBIDDEN"
 4. ✅ Follow the exact technical specifications documented
 
+## 📋 **CURRENT PROJECT STATUS (UPDATED August 19, 2025)**
+
+### **✅ COMPLETED PHASES**
+
+```
+Phase 1: Legacy Cleanup           ████████████████████ 100%
+Phase 2: Database Architecture    ████████████████████ 100%
+Phase 3: Model Infrastructure     ████████████████████ 100%
+```
+
+### **🎯 READY FOR IMPLEMENTATION**
+
+```
+Phase 4: Business Services        ░░░░░░░░░░░░░░░░░░░░   0%
+Phase 5: Controller Layer         ░░░░░░░░░░░░░░░░░░░░   0%
+Phase 6: Integration Testing      ░░░░░░░░░░░░░░░░░░░░   0%
+```
+
+### **📊 CURRENT ARCHITECTURE STATUS**
+
+- **18 Models Complete**: 7 core + 11 domain-specific models
+- **100% Q&A Compliance**: All architectural decisions enforced
+- **HYBRID ARCHITECTURE**: Core models in root, modules in domains
+- **Multi-tenant Ready**: System + tenant database separation
+- **Performance Optimized**: Proper indexing and association patterns
+
 ## 📋 CRITICAL: TODO LIST MANAGEMENT (LIKE CLAUDE CODER)
 
 **BEFORE starting ANY development activity, you MUST:**
@@ -27,16 +53,16 @@ Before generating ANY code, you MUST:
 **Format Example:**
 
 ```
-TODO: Implement User Authentication Module
-- [x] Create user model with UUID primary key
-- [x] Set up bcryptjs password hashing (12 salt rounds)
-- [ ] Create authentication middleware
-- [ ] Add login/logout routes
-- [ ] Create login form with EJS template
-- [ ] Add session management
-- [ ] Test authentication flow
+TODO: Implement Fee Collection Service
+- [x] Create FeeStructure model (already complete)
+- [x] Create FeeTransaction model (already complete)
+- [ ] Create fee-structure-service.js
+- [ ] Create fee-collection-service.js
+- [ ] Add fee calculation business logic
+- [ ] Create fee collection API endpoints
+- [ ] Add fee reporting capabilities
 
-Current: Working on authentication middleware (3/7 completed)
+Current: Working on fee-structure-service.js (2/7 completed)
 ```
 
 ## 🚨 CRITICAL: ASYNC/AWAIT + TRY-CATCH ENFORCEMENT (Q57-Q58)
@@ -171,32 +197,79 @@ if (user.role === 'ADMIN') { // NEVER USE
 - `COMMUNICATION_STATUS` - Message/notification status
 - `ATTENDANCE_STATUS` - Attendance tracking values
 
-## 🚨 CRITICAL: CODE CONSISTENCY RULES (AVOID REITERATION)
+## 🚨 CRITICAL: CODE CONSISTENCY RULES (CURRENT ARCHITECTURE)
 
 **ALWAYS check existing code before creating new code**:
 
-1. ✅ **Check existing models** in `modules/*/models/` for:
-   - Model names, field names, data types
-   - Table naming conventions (snake_case)
-   - Primary key strategies (UUID vs integers)
-   - Association patterns and foreign keys
+1. ✅ **Check existing models** in `models/` and `modules/*/models/` for:
+   - **18 Complete Models**: Use as reference for new models
+   - **Association Patterns**: Follow `models/index.js` loading pattern
+   - **Validation Patterns**: Use Joi schemas within model files
+   - **Business Constants**: Use `config/business-constants.js`
 
-2. ✅ **Check existing database connections** in `modules/data/`:
-   - Connection patterns and pool settings
-   - Multi-tenant database naming (school*erp_trust*{code})
-   - Query patterns and transaction handling
+2. ✅ **Use existing model infrastructure**:
+   - **Model Loading**: Use `models/index.js` for all model operations
+   - **Database Connection**: Models handle connections automatically
+   - **Associations**: All models have proper foreign key relationships
+   - **Validation**: Every model includes Joi validation schemas
 
-3. ✅ **Use existing codebase APIs**:
-   - Database service: `modules/data/database-service.js`
-   - Configuration: `config/index.js`
-   - Authentication: `modules/auth/`
-   - Validation: Use existing Joi schemas
+3. ✅ **Follow HYBRID ARCHITECTURE pattern**:
+   - **Core Models**: Place in root `models/` (User, Student, School, etc.)
+   - **Domain Models**: Place in `modules/{domain}/models/`
+   - **Services**: Create in `modules/{domain}/services/` (NEXT PHASE)
+   - **Controllers**: Create in `modules/{domain}/controllers/` (NEXT PHASE)
 
-4. ✅ **Maintain consistency**:
-   - Route patterns: `/api/v1/{module}/{action}`
-   - Error handling: Use existing error response format
-   - Middleware chain: Follow established order
-   - File organization: Follow existing module structure
+4. ✅ **Use existing patterns**:
+   - **Route patterns**: `/api/v1/{module}/{action}`
+   - **Error handling**: Use centralized error response format
+   - **Middleware chain**: Follow established order
+   - **File organization**: Follow existing module structure
+
+5. ✅ **Database operations**:
+   - **Model Access**: Use `models.ModelName` after loading via index.js
+   - **Transactions**: Use Sequelize transaction patterns
+   - **Queries**: Use Sequelize ORM methods (no raw SQL)
+   - **Migrations**: Use Sequelize CLI for schema changes
+
+## 🏗️ **CURRENT MODEL REFERENCE GUIDE**
+
+### **Core Models (models/)**
+
+- **User.js** - Base authentication for all user types
+- **Student.js** - Student-specific academic data (extends User concept)
+- **School.js** - Multi-school support within trusts
+- **Class.js** - Academic class structure
+- **Section.js** - Class sections/divisions
+- **Subject.js** - Curriculum subjects
+- **AcademicYear.js** - Academic calendar configuration
+
+### **Domain Models (modules/\*/models/)**
+
+**System Management:**
+
+- **Trust.js** - Tenant registry and configuration
+- **SystemUser.js** - Super admin authentication
+- **SystemAuditLog.js** - Cross-tenant audit trails
+
+**Fee Management:**
+
+- **FeeStructure.js** - Configurable fee rules per class/section
+- **FeeTransaction.js** - Payment tracking and reconciliation
+
+**Attendance System:**
+
+- **AttendanceConfig.js** - Holiday calendar and working day rules
+- **AttendanceRecord.js** - Daily attendance tracking
+
+**Communication:**
+
+- **MessageTemplate.js** - Multi-channel message templates
+- **Message.js** - Message delivery management
+- **CommunicationLog.js** - Delivery tracking and analytics
+
+**Audit & Security:**
+
+- **AuditLog.js** - Comprehensive change tracking
 
 5. ✅ **All seedings and DB operations**:
    - MUST use existing connection objects from

@@ -1,6 +1,6 @@
 /**
  * SystemAuditLog Model - System Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses BIGINT primary key for high-volume audit data
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * SystemAuditLog represents cross-tenant audit trail
  * - Tracks all system-level operations across all trusts
  * - Contains 2-year retention policy as per Q&A decisions
@@ -161,7 +161,7 @@ function createSystemAuditLogModel(sequelize) {
       tableName: 'system_audit_logs',
       timestamps: false, // Only createdAt for audit logs
       underscored: true,
-      
+
       // Indexes for performance and queries
       indexes: [
         {
@@ -191,7 +191,7 @@ function createSystemAuditLogModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  SystemAuditLog.associate = (models) => {
+  SystemAuditLog.associate = models => {
     // SystemAuditLog belongs to Trust
     if (models.Trust) {
       SystemAuditLog.belongsTo(models.Trust, {
@@ -213,24 +213,24 @@ function createSystemAuditLogModel(sequelize) {
   };
 
   // Instance methods
-  SystemAuditLog.prototype.toJSON = function() {
+  SystemAuditLog.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Format timestamps
     if (values.createdAt) {
       values.createdAt = values.createdAt.toISOString();
     }
-    
+
     // Truncate large user agent strings
     if (values.userAgent && values.userAgent.length > 200) {
       values.userAgent = values.userAgent.substring(0, 200) + '...';
     }
-    
+
     return values;
   };
 
   // Class methods for audit log creation
-  SystemAuditLog.logAction = async function(logData) {
+  SystemAuditLog.logAction = async function (logData) {
     try {
       return await this.create({
         trustId: logData.trustId || null,
@@ -256,7 +256,7 @@ function createSystemAuditLogModel(sequelize) {
   };
 
   // Query helpers
-  SystemAuditLog.findByTrust = async function(trustId, options = {}) {
+  SystemAuditLog.findByTrust = async function (trustId, options = {}) {
     return await this.findAll({
       where: { trustId },
       order: [['createdAt', 'DESC']],
@@ -265,7 +265,7 @@ function createSystemAuditLogModel(sequelize) {
     });
   };
 
-  SystemAuditLog.findByUser = async function(userId, userType, options = {}) {
+  SystemAuditLog.findByUser = async function (userId, userType, options = {}) {
     return await this.findAll({
       where: { userId, userType },
       order: [['createdAt', 'DESC']],
@@ -274,7 +274,7 @@ function createSystemAuditLogModel(sequelize) {
     });
   };
 
-  SystemAuditLog.findByDateRange = async function(startDate, endDate, options = {}) {
+  SystemAuditLog.findByDateRange = async function (startDate, endDate, options = {}) {
     return await this.findAll({
       where: {
         createdAt: {
@@ -288,10 +288,10 @@ function createSystemAuditLogModel(sequelize) {
   };
 
   // Data retention management
-  SystemAuditLog.cleanupOldLogs = async function() {
+  SystemAuditLog.cleanupOldLogs = async function () {
     const twoYearsAgo = new Date();
     twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-    
+
     const deletedCount = await this.destroy({
       where: {
         createdAt: {
@@ -299,7 +299,7 @@ function createSystemAuditLogModel(sequelize) {
         }
       }
     });
-    
+
     console.log(`Cleaned up ${deletedCount} old audit logs (older than 2 years)`);
     return deletedCount;
   };
@@ -312,7 +312,9 @@ const systemAuditLogValidationSchemas = {
   create: Joi.object({
     trustId: Joi.number().integer().min(1).optional(),
     userId: Joi.number().integer().min(1).optional(),
-    userType: Joi.string().valid(...constants.AUDIT_USER_TYPES.ALL_TYPES).required(),
+    userType: Joi.string()
+      .valid(...constants.AUDIT_USER_TYPES.ALL_TYPES)
+      .required(),
     action: Joi.string().min(1).max(100).required(),
     module: Joi.string().min(1).max(50).required(),
     tableName: Joi.string().min(1).max(100).optional(),
@@ -329,7 +331,9 @@ const systemAuditLogValidationSchemas = {
   query: Joi.object({
     trustId: Joi.number().integer().min(1).optional(),
     userId: Joi.number().integer().min(1).optional(),
-    userType: Joi.string().valid(...constants.AUDIT_USER_TYPES.ALL_TYPES).optional(),
+    userType: Joi.string()
+      .valid(...constants.AUDIT_USER_TYPES.ALL_TYPES)
+      .optional(),
     action: Joi.string().optional(),
     module: Joi.string().optional(),
     tableName: Joi.string().optional(),

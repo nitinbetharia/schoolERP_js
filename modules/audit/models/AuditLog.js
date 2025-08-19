@@ -1,6 +1,6 @@
 /**
  * AuditLog Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * AuditLog provides comprehensive audit trails for all system operations
  * - Tracks all CRUD operations across all entities
  * - Captures before/after values for data changes
@@ -242,7 +242,7 @@ function createAuditLogModel(sequelize) {
       tableName: 'audit_logs',
       timestamps: false, // Only using createdAt
       underscored: true,
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -294,7 +294,7 @@ function createAuditLogModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  AuditLog.associate = (models) => {
+  AuditLog.associate = models => {
     // AuditLog belongs to User (optional - system actions have no user)
     if (models.User) {
       AuditLog.belongsTo(models.User, {
@@ -306,9 +306,9 @@ function createAuditLogModel(sequelize) {
   };
 
   // Instance methods
-  AuditLog.prototype.toJSON = function() {
+  AuditLog.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Parse JSON fields if they're strings
     ['oldValues', 'newValues', 'changedFields', 'metadata'].forEach(field => {
       if (values[field] && typeof values[field] === 'string') {
@@ -319,31 +319,31 @@ function createAuditLogModel(sequelize) {
         }
       }
     });
-    
+
     return values;
   };
 
-  AuditLog.prototype.isSuccess = function() {
+  AuditLog.prototype.isSuccess = function () {
     return this.operationResult === constants.OPERATION_RESULTS.SUCCESS;
   };
 
-  AuditLog.prototype.isFailed = function() {
+  AuditLog.prototype.isFailed = function () {
     return this.operationResult === constants.OPERATION_RESULTS.FAILED;
   };
 
-  AuditLog.prototype.isHighRisk = function() {
+  AuditLog.prototype.isHighRisk = function () {
     return this.riskLevel === constants.RISK_LEVELS.HIGH;
   };
 
-  AuditLog.prototype.isArchivable = function() {
+  AuditLog.prototype.isArchivable = function () {
     return this.retentionDate && this.retentionDate <= new Date();
   };
 
-  AuditLog.prototype.getChangeSummary = function() {
+  AuditLog.prototype.getChangeSummary = function () {
     if (!this.changedFields || this.changedFields.length === 0) {
       return 'No fields changed';
     }
-    
+
     const fields = Array.isArray(this.changedFields) ? this.changedFields : [];
     if (fields.length === 1) {
       return `Changed field: ${fields[0]}`;
@@ -354,7 +354,7 @@ function createAuditLogModel(sequelize) {
     }
   };
 
-  AuditLog.prototype.archive = async function() {
+  AuditLog.prototype.archive = async function () {
     return await this.update({
       isArchived: true,
       metadata: {
@@ -366,7 +366,7 @@ function createAuditLogModel(sequelize) {
   };
 
   // Class methods for creating audit entries
-  AuditLog.logCreate = async function(entityType, entityId, newValues, context = {}) {
+  AuditLog.logCreate = async function (entityType, entityId, newValues, context = {}) {
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.CREATE,
       entityType,
@@ -376,9 +376,9 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.logUpdate = async function(entityType, entityId, oldValues, newValues, context = {}) {
+  AuditLog.logUpdate = async function (entityType, entityId, oldValues, newValues, context = {}) {
     const changedFields = this.getChangedFields(oldValues, newValues);
-    
+
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.UPDATE,
       entityType,
@@ -390,7 +390,7 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.logDelete = async function(entityType, entityId, oldValues, context = {}) {
+  AuditLog.logDelete = async function (entityType, entityId, oldValues, context = {}) {
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.DELETE,
       entityType,
@@ -401,7 +401,7 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.logLogin = async function(userId, context = {}) {
+  AuditLog.logLogin = async function (userId, context = {}) {
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.LOGIN,
       entityType: 'User',
@@ -412,7 +412,7 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.logLogout = async function(userId, context = {}) {
+  AuditLog.logLogout = async function (userId, context = {}) {
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.LOGOUT,
       entityType: 'User',
@@ -423,7 +423,7 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.logAccess = async function(entityType, entityId, userId, context = {}) {
+  AuditLog.logAccess = async function (entityType, entityId, userId, context = {}) {
     return await this.createAuditEntry({
       action: constants.AUDIT_ACTIONS.ACCESS,
       entityType,
@@ -435,9 +435,9 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.createAuditEntry = async function(data) {
+  AuditLog.createAuditEntry = async function (data) {
     const auditId = `AUDIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Set defaults
     const auditData = {
       auditId,
@@ -455,51 +455,53 @@ function createAuditLogModel(sequelize) {
     return await this.create(auditData);
   };
 
-  AuditLog.getChangedFields = function(oldValues, newValues) {
+  AuditLog.getChangedFields = function (oldValues, newValues) {
     if (!oldValues || !newValues) return [];
-    
+
     const changed = [];
     const allKeys = new Set([...Object.keys(oldValues), ...Object.keys(newValues)]);
-    
+
     for (const key of allKeys) {
       if (oldValues[key] !== newValues[key]) {
         changed.push(key);
       }
     }
-    
+
     return changed;
   };
 
-  AuditLog.getTableNameFromEntityType = function(entityType) {
+  AuditLog.getTableNameFromEntityType = function (entityType) {
     const mapping = {
-      'User': 'users',
-      'Student': 'students',
-      'Parent': 'parents',
-      'Teacher': 'teachers',
-      'Class': 'classes',
-      'Section': 'sections',
-      'Subject': 'subjects',
-      'FeeStructure': 'fee_structures',
-      'FeeTransaction': 'fee_transactions',
-      'AttendanceRecord': 'attendance_records',
-      'Message': 'messages'
+      User: 'users',
+      Student: 'students',
+      Parent: 'parents',
+      Teacher: 'teachers',
+      Class: 'classes',
+      Section: 'sections',
+      Subject: 'subjects',
+      FeeStructure: 'fee_structures',
+      FeeTransaction: 'fee_transactions',
+      AttendanceRecord: 'attendance_records',
+      Message: 'messages'
     };
-    
+
     return mapping[entityType] || entityType.toLowerCase() + 's';
   };
 
-  AuditLog.assessRiskLevel = function(data) {
+  AuditLog.assessRiskLevel = function (data) {
     // High risk operations
     if (data.action === constants.AUDIT_ACTIONS.DELETE) return constants.RISK_LEVELS.HIGH;
-    if (data.entityType === 'User' && data.action === constants.AUDIT_ACTIONS.UPDATE) return constants.RISK_LEVELS.HIGH;
-    if (data.category === constants.AUDIT_CATEGORIES.AUTHENTICATION) return constants.RISK_LEVELS.MEDIUM;
+    if (data.entityType === 'User' && data.action === constants.AUDIT_ACTIONS.UPDATE)
+      return constants.RISK_LEVELS.HIGH;
+    if (data.category === constants.AUDIT_CATEGORIES.AUTHENTICATION)
+      return constants.RISK_LEVELS.MEDIUM;
     if (data.category === constants.AUDIT_CATEGORIES.FINANCE) return constants.RISK_LEVELS.HIGH;
-    
+
     // Medium risk by default
     return constants.RISK_LEVELS.MEDIUM;
   };
 
-  AuditLog.calculateRetentionDate = function(category) {
+  AuditLog.calculateRetentionDate = function (category) {
     const now = new Date();
     const retentionPeriods = {
       [constants.AUDIT_CATEGORIES.AUTHENTICATION]: 365, // 1 year
@@ -510,16 +512,16 @@ function createAuditLogModel(sequelize) {
       [constants.AUDIT_CATEGORIES.DATA_ACCESS]: 365, // 1 year
       [constants.AUDIT_CATEGORIES.SYSTEM]: 365 // 1 year
     };
-    
+
     const days = retentionPeriods[category] || 730; // Default 2 years
     const retentionDate = new Date(now);
     retentionDate.setDate(retentionDate.getDate() + days);
-    
+
     return retentionDate;
   };
 
   // Query methods
-  AuditLog.findByEntity = async function(entityType, entityId, options = {}) {
+  AuditLog.findByEntity = async function (entityType, entityId, options = {}) {
     return await this.findAll({
       where: {
         entityType,
@@ -531,19 +533,19 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.findByUser = async function(userId, options = {}) {
+  AuditLog.findByUser = async function (userId, options = {}) {
     const where = { userId };
-    
+
     if (options.startDate && options.endDate) {
       where.createdAt = {
         [sequelize.Op.between]: [options.startDate, options.endDate]
       };
     }
-    
+
     if (options.action) {
       where.action = options.action;
     }
-    
+
     if (options.category) {
       where.category = options.category;
     }
@@ -555,11 +557,11 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.findHighRiskOperations = async function(options = {}) {
+  AuditLog.findHighRiskOperations = async function (options = {}) {
     const where = {
       riskLevel: constants.RISK_LEVELS.HIGH
     };
-    
+
     if (options.startDate && options.endDate) {
       where.createdAt = {
         [sequelize.Op.between]: [options.startDate, options.endDate]
@@ -574,11 +576,11 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.findFailedOperations = async function(options = {}) {
+  AuditLog.findFailedOperations = async function (options = {}) {
     const where = {
       operationResult: constants.OPERATION_RESULTS.FAILED
     };
-    
+
     if (options.startDate && options.endDate) {
       where.createdAt = {
         [sequelize.Op.between]: [options.startDate, options.endDate]
@@ -593,17 +595,17 @@ function createAuditLogModel(sequelize) {
     });
   };
 
-  AuditLog.getActivitySummary = async function(filters = {}) {
+  AuditLog.getActivitySummary = async function (filters = {}) {
     const where = {};
-    
+
     if (filters.userId) {
       where.userId = filters.userId;
     }
-    
+
     if (filters.entityType) {
       where.entityType = filters.entityType;
     }
-    
+
     if (filters.startDate && filters.endDate) {
       where.createdAt = {
         [sequelize.Op.between]: [filters.startDate, filters.endDate]
@@ -630,7 +632,7 @@ function createAuditLogModel(sequelize) {
     }));
   };
 
-  AuditLog.archiveOldRecords = async function() {
+  AuditLog.archiveOldRecords = async function () {
     const result = await this.update(
       { isArchived: true },
       {
@@ -642,14 +644,14 @@ function createAuditLogModel(sequelize) {
         }
       }
     );
-    
+
     return result[0]; // Number of affected rows
   };
 
-  AuditLog.purgeArchivedRecords = async function(olderThanDays = 30) {
+  AuditLog.purgeArchivedRecords = async function (olderThanDays = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
-    
+
     const result = await this.destroy({
       where: {
         isArchived: true,
@@ -658,7 +660,7 @@ function createAuditLogModel(sequelize) {
         }
       }
     });
-    
+
     return result;
   };
 
@@ -668,7 +670,9 @@ function createAuditLogModel(sequelize) {
 // Q19 Compliance: Joi validation schemas
 const auditLogValidationSchemas = {
   create: Joi.object({
-    action: Joi.string().valid(...constants.AUDIT_ACTIONS.ALL_ACTIONS).required(),
+    action: Joi.string()
+      .valid(...constants.AUDIT_ACTIONS.ALL_ACTIONS)
+      .required(),
     entityType: Joi.string().max(100).required(),
     entityId: Joi.string().max(50).required(),
     tableName: Joi.string().max(100).optional(),
@@ -681,11 +685,17 @@ const auditLogValidationSchemas = {
     oldValues: Joi.object().optional(),
     newValues: Joi.object().optional(),
     changedFields: Joi.array().items(Joi.string()).optional(),
-    operationResult: Joi.string().valid(...constants.OPERATION_RESULTS.ALL_RESULTS).default(constants.OPERATION_RESULTS.SUCCESS),
+    operationResult: Joi.string()
+      .valid(...constants.OPERATION_RESULTS.ALL_RESULTS)
+      .default(constants.OPERATION_RESULTS.SUCCESS),
     errorMessage: Joi.string().optional(),
     businessReason: Joi.string().optional(),
-    category: Joi.string().valid(...constants.AUDIT_CATEGORIES.ALL_CATEGORIES).required(),
-    riskLevel: Joi.string().valid(...constants.RISK_LEVELS.ALL_LEVELS).default(constants.RISK_LEVELS.LOW),
+    category: Joi.string()
+      .valid(...constants.AUDIT_CATEGORIES.ALL_CATEGORIES)
+      .required(),
+    riskLevel: Joi.string()
+      .valid(...constants.RISK_LEVELS.ALL_LEVELS)
+      .default(constants.RISK_LEVELS.LOW),
     applicationModule: Joi.string().max(100).optional(),
     metadata: Joi.object().optional()
   }),
@@ -694,10 +704,18 @@ const auditLogValidationSchemas = {
     entityType: Joi.string().max(100).optional(),
     entityId: Joi.string().max(50).optional(),
     userId: Joi.number().integer().min(1).optional(),
-    action: Joi.string().valid(...constants.AUDIT_ACTIONS.ALL_ACTIONS).optional(),
-    category: Joi.string().valid(...constants.AUDIT_CATEGORIES.ALL_CATEGORIES).optional(),
-    riskLevel: Joi.string().valid(...constants.RISK_LEVELS.ALL_LEVELS).optional(),
-    operationResult: Joi.string().valid(...constants.OPERATION_RESULTS.ALL_RESULTS).optional(),
+    action: Joi.string()
+      .valid(...constants.AUDIT_ACTIONS.ALL_ACTIONS)
+      .optional(),
+    category: Joi.string()
+      .valid(...constants.AUDIT_CATEGORIES.ALL_CATEGORIES)
+      .optional(),
+    riskLevel: Joi.string()
+      .valid(...constants.RISK_LEVELS.ALL_LEVELS)
+      .optional(),
+    operationResult: Joi.string()
+      .valid(...constants.OPERATION_RESULTS.ALL_RESULTS)
+      .optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
     limit: Joi.number().integer().min(1).max(1000).default(100)

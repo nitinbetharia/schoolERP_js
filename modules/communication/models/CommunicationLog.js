@@ -1,6 +1,6 @@
 /**
  * CommunicationLog Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * CommunicationLog provides detailed tracking of message processing
  * - Detailed logs of each step in message delivery
  * - Provider-specific responses and webhooks
@@ -218,7 +218,7 @@ function createCommunicationLogModel(sequelize) {
       tableName: 'communication_logs',
       timestamps: false, // Only using loggedAt
       underscored: true,
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -256,7 +256,7 @@ function createCommunicationLogModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  CommunicationLog.associate = (models) => {
+  CommunicationLog.associate = models => {
     // CommunicationLog belongs to Message
     if (models.Message) {
       CommunicationLog.belongsTo(models.Message, {
@@ -277,9 +277,9 @@ function createCommunicationLogModel(sequelize) {
   };
 
   // Instance methods
-  CommunicationLog.prototype.toJSON = function() {
+  CommunicationLog.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Parse JSON fields if they're strings
     ['requestData', 'responseData', 'webhookData', 'metadata'].forEach(field => {
       if (values[field] && typeof values[field] === 'string') {
@@ -290,29 +290,31 @@ function createCommunicationLogModel(sequelize) {
         }
       }
     });
-    
+
     return values;
   };
 
-  CommunicationLog.prototype.isError = function() {
+  CommunicationLog.prototype.isError = function () {
     return this.logLevel === constants.LOG_LEVELS.ERROR;
   };
 
-  CommunicationLog.prototype.isWarning = function() {
+  CommunicationLog.prototype.isWarning = function () {
     return this.logLevel === constants.LOG_LEVELS.WARNING;
   };
 
-  CommunicationLog.prototype.isSuccess = function() {
-    return this.event === constants.COMMUNICATION_EVENTS.DELIVERED ||
-           this.event === constants.COMMUNICATION_EVENTS.READ;
+  CommunicationLog.prototype.isSuccess = function () {
+    return (
+      this.event === constants.COMMUNICATION_EVENTS.DELIVERED ||
+      this.event === constants.COMMUNICATION_EVENTS.READ
+    );
   };
 
-  CommunicationLog.prototype.hasPerformanceIssue = function() {
+  CommunicationLog.prototype.hasPerformanceIssue = function () {
     return this.processingTimeMs && this.processingTimeMs > 5000; // 5+ seconds
   };
 
   // Class methods for logging different events
-  CommunicationLog.logMessageCreated = async function(messageId, userId = null, metadata = {}) {
+  CommunicationLog.logMessageCreated = async function (messageId, userId = null, metadata = {}) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.INFO,
@@ -324,7 +326,12 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logProviderRequest = async function(messageId, provider, requestData, metadata = {}) {
+  CommunicationLog.logProviderRequest = async function (
+    messageId,
+    provider,
+    requestData,
+    metadata = {}
+  ) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.DEBUG,
@@ -337,9 +344,16 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logProviderResponse = async function(messageId, provider, responseData, httpStatusCode, processingTime, metadata = {}) {
+  CommunicationLog.logProviderResponse = async function (
+    messageId,
+    provider,
+    responseData,
+    httpStatusCode,
+    processingTime,
+    metadata = {}
+  ) {
     const isSuccess = httpStatusCode >= 200 && httpStatusCode < 300;
-    
+
     return await this.create({
       messageId,
       logLevel: isSuccess ? constants.LOG_LEVELS.INFO : constants.LOG_LEVELS.ERROR,
@@ -354,7 +368,12 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logDelivery = async function(messageId, provider, webhookData = null, metadata = {}) {
+  CommunicationLog.logDelivery = async function (
+    messageId,
+    provider,
+    webhookData = null,
+    metadata = {}
+  ) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.INFO,
@@ -367,7 +386,7 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logRead = async function(messageId, readData = null, metadata = {}) {
+  CommunicationLog.logRead = async function (messageId, readData = null, metadata = {}) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.INFO,
@@ -379,7 +398,14 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logError = async function(messageId, errorCode, errorMessage, stackTrace = null, retryAttempt = 0, metadata = {}) {
+  CommunicationLog.logError = async function (
+    messageId,
+    errorCode,
+    errorMessage,
+    stackTrace = null,
+    retryAttempt = 0,
+    metadata = {}
+  ) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.ERROR,
@@ -394,7 +420,7 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logRetry = async function(messageId, retryAttempt, reason, metadata = {}) {
+  CommunicationLog.logRetry = async function (messageId, retryAttempt, reason, metadata = {}) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.WARNING,
@@ -406,7 +432,13 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.logWebhook = async function(messageId, provider, webhookData, webhookSignature = null, metadata = {}) {
+  CommunicationLog.logWebhook = async function (
+    messageId,
+    provider,
+    webhookData,
+    webhookSignature = null,
+    metadata = {}
+  ) {
     return await this.create({
       messageId,
       logLevel: constants.LOG_LEVELS.DEBUG,
@@ -421,7 +453,7 @@ function createCommunicationLogModel(sequelize) {
   };
 
   // Query methods
-  CommunicationLog.findByMessage = async function(messageId, options = {}) {
+  CommunicationLog.findByMessage = async function (messageId, options = {}) {
     return await this.findAll({
       where: { messageId },
       order: [['logged_at', 'ASC']],
@@ -430,19 +462,19 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.findErrors = async function(filters = {}) {
+  CommunicationLog.findErrors = async function (filters = {}) {
     const where = {
       logLevel: constants.LOG_LEVELS.ERROR
     };
-    
+
     if (filters.provider) {
       where.provider = filters.provider;
     }
-    
+
     if (filters.errorCode) {
       where.errorCode = filters.errorCode;
     }
-    
+
     if (filters.startDate && filters.endDate) {
       where.loggedAt = {
         [sequelize.Op.between]: [filters.startDate, filters.endDate]
@@ -457,17 +489,17 @@ function createCommunicationLogModel(sequelize) {
     });
   };
 
-  CommunicationLog.getPerformanceMetrics = async function(filters = {}) {
+  CommunicationLog.getPerformanceMetrics = async function (filters = {}) {
     const where = {};
-    
+
     if (filters.provider) {
       where.provider = filters.provider;
     }
-    
+
     if (filters.event) {
       where.event = filters.event;
     }
-    
+
     if (filters.startDate && filters.endDate) {
       where.loggedAt = {
         [sequelize.Op.between]: [filters.startDate, filters.endDate]
@@ -498,15 +530,15 @@ function createCommunicationLogModel(sequelize) {
     }));
   };
 
-  CommunicationLog.getErrorAnalysis = async function(filters = {}) {
+  CommunicationLog.getErrorAnalysis = async function (filters = {}) {
     const where = {
       logLevel: constants.LOG_LEVELS.ERROR
     };
-    
+
     if (filters.provider) {
       where.provider = filters.provider;
     }
-    
+
     if (filters.startDate && filters.endDate) {
       where.loggedAt = {
         [sequelize.Op.between]: [filters.startDate, filters.endDate]
@@ -534,10 +566,10 @@ function createCommunicationLogModel(sequelize) {
     }));
   };
 
-  CommunicationLog.cleanupOldLogs = async function(retentionDays = 90) {
+  CommunicationLog.cleanupOldLogs = async function (retentionDays = 90) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-    
+
     const result = await this.destroy({
       where: {
         loggedAt: {
@@ -545,7 +577,7 @@ function createCommunicationLogModel(sequelize) {
         }
       }
     });
-    
+
     return result;
   };
 
@@ -556,8 +588,12 @@ function createCommunicationLogModel(sequelize) {
 const communicationLogValidationSchemas = {
   create: Joi.object({
     messageId: Joi.number().integer().min(1).required(),
-    logLevel: Joi.string().valid(...constants.LOG_LEVELS.ALL_LEVELS).required(),
-    event: Joi.string().valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS).required(),
+    logLevel: Joi.string()
+      .valid(...constants.LOG_LEVELS.ALL_LEVELS)
+      .required(),
+    event: Joi.string()
+      .valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS)
+      .required(),
     description: Joi.string().required(),
     provider: Joi.string().max(50).optional(),
     providerMessageId: Joi.string().max(200).optional(),
@@ -581,8 +617,12 @@ const communicationLogValidationSchemas = {
 
   query: Joi.object({
     messageId: Joi.number().integer().min(1).optional(),
-    logLevel: Joi.string().valid(...constants.LOG_LEVELS.ALL_LEVELS).optional(),
-    event: Joi.string().valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS).optional(),
+    logLevel: Joi.string()
+      .valid(...constants.LOG_LEVELS.ALL_LEVELS)
+      .optional(),
+    event: Joi.string()
+      .valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS)
+      .optional(),
     provider: Joi.string().max(50).optional(),
     errorCode: Joi.string().max(50).optional(),
     startDate: Joi.date().optional(),
@@ -592,7 +632,9 @@ const communicationLogValidationSchemas = {
 
   performanceQuery: Joi.object({
     provider: Joi.string().max(50).optional(),
-    event: Joi.string().valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS).optional(),
+    event: Joi.string()
+      .valid(...constants.COMMUNICATION_EVENTS.ALL_EVENTS)
+      .optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional()
   }),

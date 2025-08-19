@@ -1,6 +1,6 @@
 /**
  * AttendanceRecord Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * AttendanceRecord represents daily attendance records for students
  * - Tracks daily attendance with all status types (Present/Absent/Late/Half-day/Excused)
  * - Supports bulk operations for class-wise attendance marking
@@ -156,7 +156,7 @@ function createAttendanceRecordModel(sequelize) {
       tableName: 'attendance_records',
       timestamps: false, // Custom timestamp handling
       underscored: true,
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -185,7 +185,7 @@ function createAttendanceRecordModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  AttendanceRecord.associate = (models) => {
+  AttendanceRecord.associate = models => {
     // AttendanceRecord belongs to Student
     if (models.Student) {
       AttendanceRecord.belongsTo(models.Student, {
@@ -213,9 +213,9 @@ function createAttendanceRecordModel(sequelize) {
   };
 
   // Instance methods
-  AttendanceRecord.prototype.toJSON = function() {
+  AttendanceRecord.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Format time fields
     if (values.checkInTime) {
       values.checkInTime = values.checkInTime;
@@ -223,20 +223,20 @@ function createAttendanceRecordModel(sequelize) {
     if (values.checkOutTime) {
       values.checkOutTime = values.checkOutTime;
     }
-    
+
     // Parse metadata if it's a string
     if (values.metadata && typeof values.metadata === 'string') {
       values.metadata = JSON.parse(values.metadata);
     }
-    
+
     return values;
   };
 
-  AttendanceRecord.prototype.isLate = function() {
+  AttendanceRecord.prototype.isLate = function () {
     return this.status === constants.ATTENDANCE_STATUS.LATE;
   };
 
-  AttendanceRecord.prototype.isPresent = function() {
+  AttendanceRecord.prototype.isPresent = function () {
     return [
       constants.ATTENDANCE_STATUS.PRESENT,
       constants.ATTENDANCE_STATUS.LATE,
@@ -244,25 +244,25 @@ function createAttendanceRecordModel(sequelize) {
     ].includes(this.status);
   };
 
-  AttendanceRecord.prototype.calculateLateMinutes = function(schoolStartTime = '09:00') {
+  AttendanceRecord.prototype.calculateLateMinutes = function (schoolStartTime = '09:00') {
     if (!this.checkInTime) return 0;
-    
+
     const [schoolHour, schoolMinute] = schoolStartTime.split(':').map(Number);
     const [checkHour, checkMinute] = this.checkInTime.split(':').map(Number);
-    
+
     const schoolMinutes = schoolHour * 60 + schoolMinute;
     const checkMinutes = checkHour * 60 + checkMinute;
-    
+
     return Math.max(0, checkMinutes - schoolMinutes);
   };
 
   // Class methods for bulk operations
-  AttendanceRecord.markBulkAttendance = async function(attendanceData, markedByUserId) {
+  AttendanceRecord.markBulkAttendance = async function (attendanceData, markedByUserId) {
     const transaction = await sequelize.transaction();
-    
+
     try {
       const records = [];
-      
+
       for (const record of attendanceData) {
         const existing = await this.findOne({
           where: {
@@ -287,7 +287,7 @@ function createAttendanceRecordModel(sequelize) {
           records.push(newRecord);
         }
       }
-      
+
       await transaction.commit();
       return records;
     } catch (error) {
@@ -296,15 +296,15 @@ function createAttendanceRecordModel(sequelize) {
     }
   };
 
-  AttendanceRecord.findByStudent = async function(studentId, options = {}) {
+  AttendanceRecord.findByStudent = async function (studentId, options = {}) {
     const where = { studentId };
-    
+
     if (options.startDate && options.endDate) {
       where.attendanceDate = {
         [sequelize.Op.between]: [options.startDate, options.endDate]
       };
     }
-    
+
     if (options.status) {
       where.status = options.status;
     }
@@ -317,11 +317,11 @@ function createAttendanceRecordModel(sequelize) {
     });
   };
 
-  AttendanceRecord.findByClass = async function(classId, sectionId, date, options = {}) {
+  AttendanceRecord.findByClass = async function (classId, sectionId, date, options = {}) {
     // Get all students in the class/section
     const Student = sequelize.models.Student;
     if (!Student) return [];
-    
+
     const students = await Student.findAll({
       where: {
         classId,
@@ -329,9 +329,9 @@ function createAttendanceRecordModel(sequelize) {
         status: constants.STUDENT_STATUS.ACTIVE
       }
     });
-    
+
     const studentIds = students.map(s => s.id);
-    
+
     return await this.findAll({
       where: {
         studentId: { [sequelize.Op.in]: studentIds },
@@ -342,7 +342,7 @@ function createAttendanceRecordModel(sequelize) {
     });
   };
 
-  AttendanceRecord.getAttendanceSummary = async function(studentId, startDate, endDate) {
+  AttendanceRecord.getAttendanceSummary = async function (studentId, startDate, endDate) {
     const records = await this.findAll({
       where: {
         studentId,
@@ -383,18 +383,23 @@ function createAttendanceRecordModel(sequelize) {
       }
     });
 
-    summary.attendancePercentage = summary.totalDays > 0 
-      ? ((summary.present + summary.late + summary.halfDay * 0.5) / summary.totalDays * 100).toFixed(2)
-      : 0;
+    summary.attendancePercentage =
+      summary.totalDays > 0
+        ? (
+            ((summary.present + summary.late + summary.halfDay * 0.5) / summary.totalDays) *
+            100
+          ).toFixed(2)
+        : 0;
 
     return summary;
   };
 
-  AttendanceRecord.getClassAttendanceSummary = async function(classId, sectionId, date) {
+  AttendanceRecord.getClassAttendanceSummary = async function (classId, sectionId, date) {
     // Get all students in the class/section
     const Student = sequelize.models.Student;
-    if (!Student) return { totalStudents: 0, present: 0, absent: 0, late: 0, halfDay: 0, excused: 0 };
-    
+    if (!Student)
+      return { totalStudents: 0, present: 0, absent: 0, late: 0, halfDay: 0, excused: 0 };
+
     const students = await Student.findAll({
       where: {
         classId,
@@ -402,10 +407,10 @@ function createAttendanceRecordModel(sequelize) {
         status: constants.STUDENT_STATUS.ACTIVE
       }
     });
-    
+
     const totalStudents = students.length;
     const studentIds = students.map(s => s.id);
-    
+
     const records = await this.findAll({
       where: {
         studentId: { [sequelize.Op.in]: studentIds },
@@ -445,9 +450,13 @@ function createAttendanceRecordModel(sequelize) {
       }
     });
 
-    summary.attendancePercentage = totalStudents > 0 
-      ? ((summary.present + summary.late + summary.halfDay * 0.5) / totalStudents * 100).toFixed(2)
-      : 0;
+    summary.attendancePercentage =
+      totalStudents > 0
+        ? (
+            ((summary.present + summary.late + summary.halfDay * 0.5) / totalStudents) *
+            100
+          ).toFixed(2)
+        : 0;
 
     return summary;
   };
@@ -460,9 +469,15 @@ const attendanceRecordValidationSchemas = {
   create: Joi.object({
     studentId: Joi.number().integer().min(1).required(),
     attendanceDate: Joi.date().required(),
-    status: Joi.string().valid(...constants.ATTENDANCE_STATUS.ALL_STATUS).required(),
-    checkInTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-    checkOutTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+    status: Joi.string()
+      .valid(...constants.ATTENDANCE_STATUS.ALL_STATUS)
+      .required(),
+    checkInTime: Joi.string()
+      .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      .optional(),
+    checkOutTime: Joi.string()
+      .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      .optional(),
     remarks: Joi.string().max(500).optional(),
     lateMinutes: Joi.number().integer().min(0).max(1440).optional(),
     excuseReason: Joi.string().max(200).optional(),
@@ -470,9 +485,15 @@ const attendanceRecordValidationSchemas = {
   }),
 
   update: Joi.object({
-    status: Joi.string().valid(...constants.ATTENDANCE_STATUS.ALL_STATUS).optional(),
-    checkInTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-    checkOutTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+    status: Joi.string()
+      .valid(...constants.ATTENDANCE_STATUS.ALL_STATUS)
+      .optional(),
+    checkInTime: Joi.string()
+      .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      .optional(),
+    checkOutTime: Joi.string()
+      .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+      .optional(),
     remarks: Joi.string().max(500).optional(),
     lateMinutes: Joi.number().integer().min(0).max(1440).optional(),
     excuseReason: Joi.string().max(200).optional(),
@@ -481,18 +502,27 @@ const attendanceRecordValidationSchemas = {
   }),
 
   bulkCreate: Joi.object({
-    attendanceData: Joi.array().items(
-      Joi.object({
-        studentId: Joi.number().integer().min(1).required(),
-        attendanceDate: Joi.date().required(),
-        status: Joi.string().valid(...constants.ATTENDANCE_STATUS.ALL_STATUS).required(),
-        checkInTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-        checkOutTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
-        remarks: Joi.string().max(500).optional(),
-        lateMinutes: Joi.number().integer().min(0).max(1440).optional(),
-        excuseReason: Joi.string().max(200).optional()
-      })
-    ).required().min(1),
+    attendanceData: Joi.array()
+      .items(
+        Joi.object({
+          studentId: Joi.number().integer().min(1).required(),
+          attendanceDate: Joi.date().required(),
+          status: Joi.string()
+            .valid(...constants.ATTENDANCE_STATUS.ALL_STATUS)
+            .required(),
+          checkInTime: Joi.string()
+            .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+            .optional(),
+          checkOutTime: Joi.string()
+            .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+            .optional(),
+          remarks: Joi.string().max(500).optional(),
+          lateMinutes: Joi.number().integer().min(0).max(1440).optional(),
+          excuseReason: Joi.string().max(200).optional()
+        })
+      )
+      .required()
+      .min(1),
     markedByUserId: Joi.number().integer().min(1).required()
   }),
 
@@ -503,7 +533,9 @@ const attendanceRecordValidationSchemas = {
     attendanceDate: Joi.date().optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
-    status: Joi.string().valid(...constants.ATTENDANCE_STATUS.ALL_STATUS).optional(),
+    status: Joi.string()
+      .valid(...constants.ATTENDANCE_STATUS.ALL_STATUS)
+      .optional(),
     limit: Joi.number().integer().min(1).max(1000).default(100)
   })
 };

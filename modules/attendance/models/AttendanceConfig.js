@@ -1,6 +1,6 @@
 /**
  * AttendanceConfig Model - Tenant Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for tenant entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * AttendanceConfig represents holiday calendar and attendance rules
  * - Manages holidays, working days, half-days, and special events
  * - Exception-based calendar system as per Q&A decisions
@@ -135,7 +135,7 @@ function createAttendanceConfigModel(sequelize) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -157,7 +157,7 @@ function createAttendanceConfigModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  AttendanceConfig.associate = (models) => {
+  AttendanceConfig.associate = models => {
     // AttendanceConfig belongs to School
     if (models.School) {
       AttendanceConfig.belongsTo(models.School, {
@@ -178,9 +178,9 @@ function createAttendanceConfigModel(sequelize) {
   };
 
   // Instance methods
-  AttendanceConfig.prototype.toJSON = function() {
+  AttendanceConfig.prototype.toJSON = function () {
     const values = { ...this.dataValues };
-    
+
     // Parse JSON fields
     if (values.appliesToClasses && typeof values.appliesToClasses === 'string') {
       values.appliesToClasses = JSON.parse(values.appliesToClasses);
@@ -188,21 +188,21 @@ function createAttendanceConfigModel(sequelize) {
     if (values.configData && typeof values.configData === 'string') {
       values.configData = JSON.parse(values.configData);
     }
-    
+
     return values;
   };
 
-  AttendanceConfig.prototype.appliesToClass = function(classId) {
+  AttendanceConfig.prototype.appliesToClass = function (classId) {
     // If appliesToClasses is null or empty, applies to all classes
     if (!this.appliesToClasses || this.appliesToClasses.length === 0) {
       return true;
     }
-    
+
     return this.appliesToClasses.includes(classId);
   };
 
   // Class methods
-  AttendanceConfig.findForDate = async function(schoolId, academicYearId, date, classId = null) {
+  AttendanceConfig.findForDate = async function (schoolId, academicYearId, date, classId = null) {
     const where = {
       schoolId,
       academicYearId,
@@ -222,7 +222,13 @@ function createAttendanceConfigModel(sequelize) {
     return configs;
   };
 
-  AttendanceConfig.findHolidaysInRange = async function(schoolId, academicYearId, startDate, endDate, classId = null) {
+  AttendanceConfig.findHolidaysInRange = async function (
+    schoolId,
+    academicYearId,
+    startDate,
+    endDate,
+    classId = null
+  ) {
     const where = {
       schoolId,
       academicYearId,
@@ -246,7 +252,13 @@ function createAttendanceConfigModel(sequelize) {
     return holidays;
   };
 
-  AttendanceConfig.getWorkingDaysCount = async function(schoolId, academicYearId, startDate, endDate, classId = null) {
+  AttendanceConfig.getWorkingDaysCount = async function (
+    schoolId,
+    academicYearId,
+    startDate,
+    endDate,
+    classId = null
+  ) {
     // Get all configs in the date range
     const configs = await this.findAll({
       where: {
@@ -259,7 +271,7 @@ function createAttendanceConfigModel(sequelize) {
     });
 
     // Filter by class if specified
-    const relevantConfigs = classId 
+    const relevantConfigs = classId
       ? configs.filter(config => config.appliesToClass(classId))
       : configs;
 
@@ -274,18 +286,22 @@ function createAttendanceConfigModel(sequelize) {
     while (current <= end) {
       const dateStr = current.toISOString().split('T')[0];
       const dayConfigs = relevantConfigs.filter(c => c.configDate === dateStr);
-      
+
       // Check if it's a weekend (Saturday = 6, Sunday = 0)
       const dayOfWeek = current.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
 
       if (!isWeekend) {
         totalDays++;
-        
+
         // Check for holidays or half days
-        const hasHoliday = dayConfigs.some(c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HOLIDAY);
-        const hasHalfDay = dayConfigs.some(c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HALF_DAY);
-        
+        const hasHoliday = dayConfigs.some(
+          c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HOLIDAY
+        );
+        const hasHalfDay = dayConfigs.some(
+          c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HALF_DAY
+        );
+
         if (hasHoliday) {
           holidays++;
         } else if (hasHalfDay) {
@@ -301,14 +317,14 @@ function createAttendanceConfigModel(sequelize) {
       holidays,
       halfDays,
       workingDays: totalDays - holidays,
-      effectiveWorkingDays: totalDays - holidays - (halfDays * 0.5)
+      effectiveWorkingDays: totalDays - holidays - halfDays * 0.5
     };
   };
 
-  AttendanceConfig.isWorkingDay = async function(schoolId, academicYearId, date, classId = null) {
+  AttendanceConfig.isWorkingDay = async function (schoolId, academicYearId, date, classId = null) {
     const dateObj = new Date(date);
     const dayOfWeek = dateObj.getDay();
-    
+
     // Check if it's a weekend
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       return false;
@@ -316,8 +332,10 @@ function createAttendanceConfigModel(sequelize) {
 
     // Check for holiday configuration
     const configs = await this.findForDate(schoolId, academicYearId, date, classId);
-    const hasHoliday = configs.some(c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HOLIDAY);
-    
+    const hasHoliday = configs.some(
+      c => c.configType === constants.ATTENDANCE_CONFIG_TYPES.HOLIDAY
+    );
+
     return !hasHoliday;
   };
 
@@ -329,7 +347,9 @@ const attendanceConfigValidationSchemas = {
   create: Joi.object({
     schoolId: Joi.number().integer().min(1).required(),
     academicYearId: Joi.number().integer().min(1).required(),
-    configType: Joi.string().valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES).required(),
+    configType: Joi.string()
+      .valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES)
+      .required(),
     configDate: Joi.date().required(),
     title: Joi.string().min(1).max(100).required(),
     description: Joi.string().max(500).optional(),
@@ -339,7 +359,9 @@ const attendanceConfigValidationSchemas = {
   }),
 
   update: Joi.object({
-    configType: Joi.string().valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES).optional(),
+    configType: Joi.string()
+      .valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES)
+      .optional(),
     configDate: Joi.date().optional(),
     title: Joi.string().min(1).max(100).optional(),
     description: Joi.string().max(500).optional(),
@@ -351,7 +373,9 @@ const attendanceConfigValidationSchemas = {
   query: Joi.object({
     schoolId: Joi.number().integer().min(1).required(),
     academicYearId: Joi.number().integer().min(1).required(),
-    configType: Joi.string().valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES).optional(),
+    configType: Joi.string()
+      .valid(...constants.ATTENDANCE_CONFIG_TYPES.ALL_TYPES)
+      .optional(),
     startDate: Joi.date().optional(),
     endDate: Joi.date().optional(),
     classId: Joi.number().integer().min(1).optional()

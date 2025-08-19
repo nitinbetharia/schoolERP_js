@@ -1,6 +1,6 @@
 /**
  * Trust Model - System Database Entity
- * 
+ *
  * Q1: Uses Sequelize ORM (not raw MySQL)
  * Q12: Uses sequelize.define() (not class-based)
  * Q14: Uses INTEGER primary key for system entities
@@ -8,7 +8,7 @@
  * Q19: Joi validation schemas within model file
  * Q33: RESTRICT foreign keys with user-friendly errors
  * Q59: Uses business constants instead of hardcoded values
- * 
+ *
  * Trust represents a tenant/organization in the system
  * - Each trust has its own database (school_erp_trust_{trustCode})
  * - Contains configuration and contact information
@@ -179,7 +179,7 @@ function createTrustModel(sequelize) {
       underscored: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      
+
       // Indexes for performance
       indexes: [
         {
@@ -199,7 +199,7 @@ function createTrustModel(sequelize) {
   );
 
   // Q13 Compliance: Define associations
-  Trust.associate = (models) => {
+  Trust.associate = models => {
     // Trust has many SystemAuditLogs
     if (models.SystemAuditLog) {
       Trust.hasMany(models.SystemAuditLog, {
@@ -211,7 +211,7 @@ function createTrustModel(sequelize) {
   };
 
   // Instance methods
-  Trust.prototype.toJSON = function() {
+  Trust.prototype.toJSON = function () {
     const values = { ...this.dataValues };
     // Remove sensitive configuration from JSON output
     if (values.tenantConfig && values.tenantConfig.sensitive) {
@@ -221,13 +221,13 @@ function createTrustModel(sequelize) {
   };
 
   // Class methods
-  Trust.findByCode = async function(trustCode) {
+  Trust.findByCode = async function (trustCode) {
     return await this.findOne({
       where: { trustCode: trustCode.toUpperCase() }
     });
   };
 
-  Trust.findBySubdomain = async function(subdomain) {
+  Trust.findBySubdomain = async function (subdomain) {
     return await this.findOne({
       where: { subdomain: subdomain.toLowerCase() }
     });
@@ -241,7 +241,12 @@ const trustValidationSchemas = {
   create: Joi.object({
     trustName: Joi.string().min(3).max(200).required(),
     trustCode: Joi.string().min(2).max(20).uppercase().alphanum().required(),
-    subdomain: Joi.string().min(3).max(50).lowercase().pattern(/^[a-z0-9-]+$/).required(),
+    subdomain: Joi.string()
+      .min(3)
+      .max(50)
+      .lowercase()
+      .pattern(/^[a-z0-9-]+$/)
+      .required(),
     contactEmail: Joi.string().email().required(),
     contactPhone: Joi.string().min(10).max(20).optional(),
     address: Joi.string().max(500).optional(),
@@ -268,7 +273,9 @@ const trustValidationSchemas = {
     logoUrl: Joi.string().uri().optional(),
     themeConfig: Joi.object().optional(),
     tenantConfig: Joi.object().optional(),
-    status: Joi.string().valid(...constants.TRUST_STATUS.ALL_STATUS).optional()
+    status: Joi.string()
+      .valid(...constants.TRUST_STATUS.ALL_STATUS)
+      .optional()
   })
 };
 
