@@ -1,41 +1,42 @@
 const SetupService = require('../services/SetupService');
-const { ValidationError, NotFoundError, DuplicateError } = require('../../../utils/errors');
+const {
+   ErrorFactory,
+   ValidationError,
+   NotFoundError,
+   DuplicateError
+} = require('../../../utils/errors');
 const logger = require('../../../utils/logger');
 
 /**
  * Setup Controller
  * Handles HTTP requests for trust setup management
  */
-class SetupController {
-   constructor() {
-      this.setupService = new SetupService();
-   }
+function createSetupController() {
+   const setupService = new SetupService();
 
    /**
     * Initialize setup for a trust
     */
-   async initializeSetup(req, res) {
+   async function initializeSetup(req, res) {
       try {
-         const { trust_id } = req.params;
-         const systemUserId = req.user.id;
+         const { trust_id } = req.body;
 
-         if (!trust_id || isNaN(trust_id)) {
-            throw new ValidationError('Valid trust ID is required');
+         if (!trust_id) {
+            return res.status(400).json({
+               success: false,
+               error: {
+                  code: 'MISSING_TRUST_ID',
+                  message: 'Trust ID is required'
+               }
+            });
          }
 
-         const result = await this.setupService.initializeSetup(parseInt(trust_id), systemUserId);
-
-         logger.info('Setup Controller Event', {
-            service: 'setup-controller',
-            category: 'SETUP',
-            event: 'Setup initialization request processed',
-            trust_id: trust_id,
-            system_user_id: systemUserId,
-         });
-
-         res.status(201).json({
+         const result = await setupService.initializeSetup(trust_id);
+         
+         res.json({
             success: true,
-            data: result,
+            message: 'Setup initialized successfully',
+            data: result
          });
       } catch (error) {
          logger.error('Setup Controller Error', {
@@ -45,11 +46,13 @@ class SetupController {
             error: error.message,
          });
 
-         const statusCode = error instanceof ValidationError ? 400 : error instanceof DuplicateError ? 409 : 500;
-
-         res.status(statusCode).json({
+         res.status(500).json({
             success: false,
-            error: error.message,
+            error: {
+               code: 'SETUP_INIT_FAILED',
+               message: 'Setup initialization failed',
+               details: error.message
+            }
          });
       }
    }
@@ -57,19 +60,25 @@ class SetupController {
    /**
     * Get setup progress for a trust
     */
-   async getSetupProgress(req, res) {
+   async function getSetupProgress(req, res) {
       try {
          const { trust_id } = req.params;
 
-         if (!trust_id || isNaN(trust_id)) {
-            throw new ValidationError('Valid trust ID is required');
+         if (!trust_id) {
+            return res.status(400).json({
+               success: false,
+               error: {
+                  code: 'MISSING_TRUST_ID',
+                  message: 'Trust ID is required'
+               }
+            });
          }
 
-         const progress = await this.setupService.getSetupProgress(parseInt(trust_id));
-
-         res.status(200).json({
+         const progress = await setupService.getSetupProgress(trust_id);
+         
+         res.json({
             success: true,
-            data: progress,
+            data: progress
          });
       } catch (error) {
          logger.error('Setup Controller Error', {
@@ -81,7 +90,11 @@ class SetupController {
 
          res.status(500).json({
             success: false,
-            error: error.message,
+            error: {
+               code: 'GET_PROGRESS_FAILED',
+               message: 'Failed to get setup progress',
+               details: error.message
+            }
          });
       }
    }
@@ -89,39 +102,26 @@ class SetupController {
    /**
     * Complete a setup step
     */
-   async completeStep(req, res) {
+   async function completeStep(req, res) {
       try {
-         const { trust_id, step_name } = req.params;
-         const configurationData = req.body;
-         const systemUserId = req.user.id;
+         const { trust_id, step_name } = req.body;
 
-         if (!trust_id || isNaN(trust_id)) {
-            throw new ValidationError('Valid trust ID is required');
+         if (!trust_id || !step_name) {
+            return res.status(400).json({
+               success: false,
+               error: {
+                  code: 'MISSING_PARAMETERS',
+                  message: 'Trust ID and step name are required'
+               }
+            });
          }
 
-         if (!step_name) {
-            throw new ValidationError('Step name is required');
-         }
-
-         const result = await this.setupService.completeStep(
-            parseInt(trust_id),
-            step_name,
-            configurationData,
-            systemUserId
-         );
-
-         logger.info('Setup Controller Event', {
-            service: 'setup-controller',
-            category: 'SETUP',
-            event: 'Setup step completion processed',
-            trust_id: trust_id,
-            step_name: step_name,
-            system_user_id: systemUserId,
-         });
-
-         res.status(200).json({
+         const result = await setupService.completeStep(trust_id, step_name, req.body.data);
+         
+         res.json({
             success: true,
-            data: result,
+            message: 'Setup step completed successfully',
+            data: result
          });
       } catch (error) {
          logger.error('Setup Controller Error', {
@@ -131,56 +131,39 @@ class SetupController {
             error: error.message,
          });
 
-         const statusCode =
-            error instanceof ValidationError
-               ? 400
-               : error instanceof NotFoundError
-                 ? 404
-                 : error instanceof DuplicateError
-                   ? 409
-                   : 500;
-
-         res.status(statusCode).json({
+         res.status(500).json({
             success: false,
-            error: error.message,
+            error: {
+               code: 'STEP_COMPLETION_FAILED',
+               message: 'Setup step completion failed',
+               details: error.message
+            }
          });
       }
    }
 
    /**
-    * Get setup step details
+    * Get step details
     */
-   async getStepDetails(req, res) {
+   async function getStepDetails(req, res) {
       try {
          const { trust_id, step_name } = req.params;
 
-         if (!trust_id || isNaN(trust_id)) {
-            throw new ValidationError('Valid trust ID is required');
+         if (!trust_id || !step_name) {
+            return res.status(400).json({
+               success: false,
+               error: {
+                  code: 'MISSING_PARAMETERS',
+                  message: 'Trust ID and step name are required'
+               }
+            });
          }
 
-         if (!step_name) {
-            throw new ValidationError('Step name is required');
-         }
-
-         const { SetupConfiguration } = require('../../../models');
-
-         const step = await SetupConfiguration.findOne({
-            where: {
-               trust_id: parseInt(trust_id),
-               step_name: step_name,
-            },
-         });
-
-         if (!step) {
-            throw new NotFoundError(`Setup step '${step_name}' not found for trust`);
-         }
-
-         res.status(200).json({
+         const stepDetails = await setupService.getStepDetails(trust_id, step_name);
+         
+         res.json({
             success: true,
-            data: {
-               step: step,
-               required_fields: this.setupService.getRequiredFields(step_name),
-            },
+            data: stepDetails
          });
       } catch (error) {
          logger.error('Setup Controller Error', {
@@ -190,54 +173,40 @@ class SetupController {
             error: error.message,
          });
 
-         const statusCode = error instanceof ValidationError ? 400 : error instanceof NotFoundError ? 404 : 500;
-
-         res.status(statusCode).json({
+         res.status(500).json({
             success: false,
-            error: error.message,
+            error: {
+               code: 'GET_STEP_DETAILS_FAILED',
+               message: 'Failed to get step details',
+               details: error.message
+            }
          });
       }
    }
 
    /**
-    * Reset setup for a trust (development/testing only)
+    * Reset setup for a trust
     */
-   async resetSetup(req, res) {
+   async function resetSetup(req, res) {
       try {
-         const { trust_id } = req.params;
-         const systemUserId = req.user.id;
+         const { trust_id } = req.body;
 
-         if (!trust_id || isNaN(trust_id)) {
-            throw new ValidationError('Valid trust ID is required');
+         if (!trust_id) {
+            return res.status(400).json({
+               success: false,
+               error: {
+                  code: 'MISSING_TRUST_ID',
+                  message: 'Trust ID is required'
+               }
+            });
          }
 
-         const { SetupConfiguration, Trust } = require('../../../models');
-
-         // Delete all setup configurations
-         await SetupConfiguration.destroy({
-            where: { trust_id: parseInt(trust_id) },
-         });
-
-         // Reset trust setup status
-         await Trust.update(
-            {
-               setup_completed_at: null,
-               is_active: false,
-            },
-            { where: { id: parseInt(trust_id) } }
-         );
-
-         logger.info('Setup Controller Event', {
-            service: 'setup-controller',
-            category: 'SETUP',
-            event: 'Setup reset completed',
-            trust_id: trust_id,
-            system_user_id: systemUserId,
-         });
-
-         res.status(200).json({
+         const result = await setupService.resetSetup(trust_id);
+         
+         res.json({
             success: true,
             message: 'Setup reset successfully',
+            data: result
          });
       } catch (error) {
          logger.error('Setup Controller Error', {
@@ -249,10 +218,22 @@ class SetupController {
 
          res.status(500).json({
             success: false,
-            error: error.message,
+            error: {
+               code: 'SETUP_RESET_FAILED',
+               message: 'Setup reset failed',
+               details: error.message
+            }
          });
       }
    }
+
+   return {
+      initializeSetup,
+      getSetupProgress,
+      completeStep,
+      getStepDetails,
+      resetSetup,
+   };
 }
 
-module.exports = SetupController;
+module.exports = createSetupController;

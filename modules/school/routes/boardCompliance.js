@@ -6,8 +6,8 @@ const router = express.Router();
 const boardComplianceController = new BoardComplianceController();
 
 /**
- * Board Compliance Routes
- * All routes require authentication
+ * Enhanced Board Compliance Routes
+ * All routes require authentication and proper authorization
  */
 
 // Trust-level NEP policy management (Trust Admin only)
@@ -30,7 +30,7 @@ router.put(
    (req, res) => boardComplianceController.setSchoolNEPPolicy(req, res)
 );
 
-// Board affiliation management
+// General board affiliation management
 router.get(
    '/schools/:schoolId/board-compliance',
    authenticate,
@@ -45,7 +45,90 @@ router.put(
    (req, res) => boardComplianceController.setBoardAffiliation(req, res)
 );
 
-// Reports and analytics
+// ============================================================================
+// CBSE BOARD COMPLIANCE ROUTES
+// ============================================================================
+
+// CBSE affiliation registration and management
+router.post(
+   '/schools/:schoolId/cbse/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerCBSEAffiliation(req, res)
+);
+
+router.put(
+   '/schools/:schoolId/cbse/compliance',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.updateCBSECompliance(req, res)
+);
+
+// CBSE transfer certificate generation
+router.post(
+   '/schools/:schoolId/cbse/students/:studentId/transfer-certificate',
+   authenticate,
+   authorize('school_admin', 'principal', 'academic_coordinator'),
+   (req, res) => boardComplianceController.generateCBSETransferCertificate(req, res)
+);
+
+// ============================================================================
+// CISCE BOARD COMPLIANCE ROUTES
+// ============================================================================
+
+// CISCE affiliation registration and management
+router.post(
+   '/schools/:schoolId/cisce/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerCISCEAffiliation(req, res)
+);
+
+// CISCE transfer certificate generation
+router.post(
+   '/schools/:schoolId/cisce/students/:studentId/transfer-certificate',
+   authenticate,
+   authorize('school_admin', 'principal', 'academic_coordinator'),
+   (req, res) => boardComplianceController.generateCISCETransferCertificate(req, res)
+);
+
+// ============================================================================
+// STATE BOARD COMPLIANCE ROUTES
+// ============================================================================
+
+// State Board affiliation registration and management
+router.post(
+   '/schools/:schoolId/state-board/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerStateBoardAffiliation(req, res)
+);
+
+// ============================================================================
+// INTERNATIONAL BOARD COMPLIANCE ROUTES
+// ============================================================================
+
+// International Board authorization registration and management
+router.post(
+   '/schools/:schoolId/international-board/authorization',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerInternationalBoardAuthorization(req, res)
+);
+
+// ============================================================================
+// COMPREHENSIVE COMPLIANCE REPORTING
+// ============================================================================
+
+// Comprehensive board compliance report
+router.get(
+   '/schools/:schoolId/comprehensive-report',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.getComprehensiveBoardComplianceReport(req, res)
+);
+
+// NEP compliance report (existing)
 router.get('/reports/nep-compliance', authenticate, authorize('trust_admin', 'system_admin'), (req, res) =>
    boardComplianceController.getNEPComplianceReport(req, res)
 );

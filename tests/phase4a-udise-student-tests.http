@@ -1,0 +1,420 @@
+# UDISE+ Student System Tests
+
+## Test Environment Setup
+```
+Base URL: http://localhost:3000
+Tenant: demo
+Content-Type: application/json
+Authorization: Required for all endpoints
+```
+
+## Authentication Setup (Run these first)
+```http
+### 1. System Login (Get session for testing)
+POST http://localhost:3000/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin@system.local",
+  "password": "admin123"
+}
+
+### 2. Trust Login (Switch to demo tenant)
+POST http://localhost:3000/api/v1/demo/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin@demo.school",
+  "password": "password123"
+}
+```
+
+## Test Data Prerequisites
+
+### Create Test Student (if needed)
+```http
+### Create Student for UDISE+ Registration
+POST http://localhost:3000/api/v1/demo/students
+Content-Type: application/json
+
+{
+  "user": {
+    "username": "test.student.udise",
+    "email": "test.student.udise@demo.school",
+    "password": "password123",
+    "full_name": "Test Student for UDISE",
+    "phone": "9876543210"
+  },
+  "admission_number": "DEMO/2025/UDISE/001",
+  "school_id": 1,
+  "class_id": 1,
+  "section_id": 1,
+  "academic_year": "2024-25",
+  "admission_date": "2024-04-01",
+  "date_of_birth": "2010-05-15",
+  "gender": "MALE",
+  "category": "GENERAL",
+  "father_name": "Test Father",
+  "mother_name": "Test Mother",
+  "guardian_phone": "9876543210",
+  "address": "123 Test Street, Demo City"
+}
+```
+
+## UDISE+ Student Registration Tests
+
+### 1. Register Student with UDISE+ (Basic)
+```http
+### Register student with minimal data
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "student_id": 1,
+  "enrollment_date": "2024-04-01",
+  "academic_session": "2024-25",
+  "census_year": "2024",
+  "enrollment_type": "FRESH"
+}
+```
+
+### 2. Register Student with UDISE+ (Complete)
+```http
+### Register student with complete data
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "student_id": 2,
+  "enrollment_date": "2024-04-01",
+  "academic_session": "2024-25",
+  "census_year": "2024",
+  "enrollment_type": "FRESH",
+  "aadhaar_number": "123456789012",
+  "pen_number": "PEN2024001",
+  "saral_id": "MH2024001",
+  "mother_tongue": "Hindi",
+  "previous_school_type": "GOVERNMENT",
+  "rte_beneficiary": false,
+  "cwsn_status": false,
+  "foundational_literacy_level": "PROFICIENT",
+  "foundational_numeracy_level": "DEVELOPING",
+  "digital_literacy_level": "BEGINNER"
+}
+```
+
+### 3. Register Student - Validation Tests
+```http
+### Test missing student_id
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "enrollment_date": "2024-04-01"
+}
+
+### Test invalid Aadhaar number
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "student_id": 1,
+  "aadhaar_number": "123456789"
+}
+
+### Test duplicate registration
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "student_id": 1,
+  "enrollment_date": "2024-04-01"
+}
+```
+
+## UDISE+ Student Retrieval Tests
+
+### 4. Get Student by UDISE+ ID
+```http
+### Get student details (replace with actual UDISE+ student ID)
+GET http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+### Test non-existent student
+GET http://localhost:3000/api/v1/school/demo/udise/students/999999999999
+Content-Type: application/json
+```
+
+### 5. Get Students by School
+```http
+### Get all UDISE+ students for a school
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/students
+Content-Type: application/json
+
+### Get students with pagination
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/students?page=1&limit=10
+Content-Type: application/json
+
+### Get students with filters
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/students?academic_session=2024-25&census_year=2024&validation_status=VALID
+Content-Type: application/json
+
+### Get inactive students
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/students?is_active=false
+Content-Type: application/json
+```
+
+## UDISE+ Student Update Tests
+
+### 6. Update Student Information
+```http
+### Update basic information
+PUT http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+{
+  "mother_tongue": "Marathi",
+  "foundational_literacy_level": "ADVANCED",
+  "digital_literacy_level": "PROFICIENT",
+  "remarks": "Updated literacy levels after assessment"
+}
+
+### Update government IDs
+PUT http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+{
+  "pen_number": "PEN2024002",
+  "saral_id": "MH2024002",
+  "cbse_uid": "CBSE2024001"
+}
+
+### Update special category status
+PUT http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+{
+  "rte_beneficiary": true,
+  "rte_beneficiary_id": "RTE2024001",
+  "cwsn_status": true,
+  "cwsn_disability_type": "LEARNING_DISABILITY"
+}
+```
+
+### 7. Update Validation Tests
+```http
+### Test invalid Aadhaar update
+PUT http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+{
+  "aadhaar_number": "invalid_aadhaar"
+}
+
+### Test non-existent student update
+PUT http://localhost:3000/api/v1/school/demo/udise/students/999999999999
+Content-Type: application/json
+
+{
+  "remarks": "Test update"
+}
+```
+
+## UDISE+ Student Validation Tests
+
+### 8. Validate Student Data
+```http
+### Validate student for government submission
+POST http://localhost:3000/api/v1/school/demo/udise/students/123456789011/validate
+Content-Type: application/json
+
+### Validate non-existent student
+POST http://localhost:3000/api/v1/school/demo/udise/students/999999999999/validate
+Content-Type: application/json
+```
+
+## UDISE+ Census Generation Tests
+
+### 9. Generate Census Data
+```http
+### Generate census data for 2024
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/census/2024
+Content-Type: application/json
+
+### Generate census for different year
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/census/2025
+Content-Type: application/json
+
+### Test invalid school ID
+GET http://localhost:3000/api/v1/school/demo/udise/schools/999/census/2024
+Content-Type: application/json
+```
+
+## Bulk Registration Tests
+
+### 10. Bulk Register Students
+```http
+### Bulk register multiple students
+POST http://localhost:3000/api/v1/school/demo/udise/students/bulk-register
+Content-Type: application/json
+
+{
+  "registrations": [
+    {
+      "student_id": 3,
+      "udise_data": {
+        "enrollment_date": "2024-04-01",
+        "academic_session": "2024-25",
+        "census_year": "2024",
+        "enrollment_type": "FRESH",
+        "mother_tongue": "Hindi"
+      }
+    },
+    {
+      "student_id": 4,
+      "udise_data": {
+        "enrollment_date": "2024-04-02",
+        "academic_session": "2024-25",
+        "census_year": "2024",
+        "enrollment_type": "TRANSFER",
+        "mother_tongue": "English",
+        "previous_school_type": "PRIVATE"
+      }
+    }
+  ]
+}
+
+### Test bulk registration with some invalid data
+POST http://localhost:3000/api/v1/school/demo/udise/students/bulk-register
+Content-Type: application/json
+
+{
+  "registrations": [
+    {
+      "student_id": 5,
+      "udise_data": {
+        "enrollment_date": "2024-04-01",
+        "academic_session": "2024-25",
+        "census_year": "2024"
+      }
+    },
+    {
+      "student_id": 999,
+      "udise_data": {
+        "enrollment_date": "2024-04-01"
+      }
+    }
+  ]
+}
+```
+
+### 11. Bulk Registration Validation Tests
+```http
+### Test empty registrations array
+POST http://localhost:3000/api/v1/school/demo/udise/students/bulk-register
+Content-Type: application/json
+
+{
+  "registrations": []
+}
+
+### Test too many registrations (>500)
+POST http://localhost:3000/api/v1/school/demo/udise/students/bulk-register
+Content-Type: application/json
+
+{
+  "registrations": [
+    # ... (would need 501+ items to test limit)
+  ]
+}
+```
+
+## Integration Tests with Student Model
+
+### 12. Test UDISE+ Student with Student Relations
+```http
+### Get UDISE+ student with full student details
+GET http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+
+### Verify student has UDISE+ registration
+GET http://localhost:3000/api/v1/demo/students/1
+Content-Type: application/json
+```
+
+## Error Handling Tests
+
+### 13. Authentication Tests
+```http
+### Test without authentication
+POST http://localhost:3000/api/v1/school/demo/udise/students/register
+Content-Type: application/json
+
+{
+  "student_id": 1
+}
+
+### Test with insufficient authorization (if possible)
+GET http://localhost:3000/api/v1/school/demo/udise/students/123456789011
+Content-Type: application/json
+```
+
+### 14. Validation Edge Cases
+```http
+### Test very long UDISE+ student ID
+GET http://localhost:3000/api/v1/school/demo/udise/students/1234567890123456789
+Content-Type: application/json
+
+### Test special characters in ID
+GET http://localhost:3000/api/v1/school/demo/udise/students/123456789abc
+Content-Type: application/json
+
+### Test SQL injection attempt
+GET http://localhost:3000/api/v1/school/demo/udise/students/123456789011'; DROP TABLE udise_students; --
+Content-Type: application/json
+```
+
+## Performance Tests
+
+### 15. Large Dataset Tests
+```http
+### Get large number of students
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/students?limit=1000
+Content-Type: application/json
+
+### Generate census with large dataset
+GET http://localhost:3000/api/v1/school/demo/udise/schools/1/census/2024
+Content-Type: application/json
+```
+
+## Test Cleanup
+```http
+### Note: In production, provide endpoints or manual cleanup for test data
+### This would require administrative tools to remove test UDISE+ registrations
+```
+
+---
+
+## Expected Test Results
+
+### Success Scenarios:
+1. Student registration should return 201 with UDISE+ student ID
+2. Student retrieval should return complete student data with associations
+3. Updates should return 200 with updated timestamp
+4. Validation should return validation status and errors
+5. Census generation should return statistical data and student list
+6. Bulk operations should return success/failure counts
+
+### Error Scenarios:
+1. Missing required fields should return 400 validation error
+2. Non-existent resources should return 404 not found
+3. Duplicate registrations should return 409 conflict
+4. Invalid data formats should return 400 validation error
+5. Authentication failures should return 401 unauthorized
+6. Authorization failures should return 403 forbidden
+
+### Performance Expectations:
+1. Single student operations < 500ms
+2. Bulk operations < 5 seconds for 100 students
+3. Census generation < 10 seconds for 1000 students
+4. Proper pagination for large datasets

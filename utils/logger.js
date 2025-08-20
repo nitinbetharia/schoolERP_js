@@ -145,7 +145,7 @@ const logHelpers = {
       });
    },
 
-   // Log errors with context
+   // Log errors with context - legacy function, use ErrorFactory.logError for new code
    logError: (error, context = {}) => {
       logger.error('Application Error', {
          category: 'ERROR',
@@ -158,10 +158,21 @@ const logHelpers = {
 
    // Log database operations
    logDB: (operation, query, executionTime, meta = {}) => {
+      // Handle case where Sequelize passes query directly as first parameter
+      if (typeof operation === 'string' && !query && !executionTime) {
+         dbLogger.debug('Database Query', {
+            category: 'DATABASE',
+            query: operation.substring(0, 500), // Truncate long queries
+            timestamp: new Date().toISOString(),
+            ...meta,
+         });
+         return;
+      }
+
       dbLogger.debug('Database Operation', {
          category: 'DATABASE',
          operation,
-         query: query.substring(0, 500), // Truncate long queries
+         query: query ? query.substring(0, 500) : '', // Truncate long queries
          executionTime,
          timestamp: new Date().toISOString(),
          ...meta,

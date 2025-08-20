@@ -4,6 +4,7 @@ const classRoutes = require('./classRoutes');
 const sectionRoutes = require('./sectionRoutes');
 const boardComplianceRoutes = require('./boardCompliance');
 const udiseRoutes = require('./udise');
+const udiseStudentRoutes = require('./udiseStudent');
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use('/classes', classRoutes);
 router.use('/sections', sectionRoutes);
 router.use('/compliance', boardComplianceRoutes);
 router.use('/udise', udiseRoutes);
+router.use('/udise', udiseStudentRoutes); // UDISE+ student specific routes
 
 module.exports = router;

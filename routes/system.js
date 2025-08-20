@@ -5,7 +5,12 @@ const { asyncHandler, healthCheck } = require('../middleware');
 const { trustService, systemAuthService } = require('../services/systemServices');
 const { requireSystemAdmin, loginRateLimit, authenticate } = require('../middleware/auth');
 const { sensitiveRateLimit } = require('../middleware/security');
-const { validators, formatSuccessResponse, commonSchemas } = require('../utils/errors');
+const {
+   ErrorFactory,
+   validators,
+   formatSuccessResponse,
+   commonSchemas
+} = require('../utils/errors');
 const { trustValidationSchemas } = require('../models/Trust');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
 

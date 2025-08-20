@@ -1,7 +1,11 @@
 const { getTenantModels, initializeTenantModels } = require('../models');
 const { dbManager } = require('../models/database');
 const { logSystem, logError } = require('../utils/logger');
-const { AuthenticationError } = require('../utils/errors');
+const {
+   ErrorFactory,
+   // Legacy classes for backward compatibility
+   AuthenticationError
+} = require('../utils/errors');
 const appConfig = require('../config/app-config.json');
 
 /**

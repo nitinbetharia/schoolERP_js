@@ -1,0 +1,446 @@
+### Attendance Management API Tests
+### School ERP System - Comprehensive attendance tracking
+### Base URL: http://localhost:3001/api
+
+@baseUrl = http://localhost:3001/api
+@authToken = {{login.response.body.data.token}}
+
+### ==================== AUTHENTICATION ====================
+
+### Login to get authentication token
+POST {{baseUrl}}/admin/system/login
+Content-Type: application/json
+
+{
+    "username": "system_admin",
+    "password": "admin123",
+    "login_type": "system"
+}
+
+### ==================== STUDENT ATTENDANCE TESTS ====================
+
+### Mark single student attendance - Present
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "PRESENT",
+    "period": "FULL_DAY",
+    "additional_info": {
+        "marked_via": "manual",
+        "location": "classroom"
+    }
+}
+
+### Mark student attendance - Absent with reason
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 2,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "ABSENT",
+    "period": "FULL_DAY",
+    "reason": "Sick leave",
+    "additional_info": {
+        "parent_informed": true,
+        "medical_certificate": false
+    }
+}
+
+### Mark student attendance - Late arrival
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 3,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "LATE",
+    "period": "FULL_DAY",
+    "reason": "Traffic delay",
+    "arrival_time": "09:15:00"
+}
+
+### Mark bulk student attendance
+POST {{baseUrl}}/attendance/student/bulk
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "attendance_list": [
+        {
+            "student_id": 1,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-16",
+            "status": "PRESENT",
+            "period": "FULL_DAY"
+        },
+        {
+            "student_id": 2,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-16",
+            "status": "PRESENT",
+            "period": "FULL_DAY"
+        },
+        {
+            "student_id": 3,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-16",
+            "status": "ABSENT",
+            "period": "FULL_DAY",
+            "reason": "Family function"
+        }
+    ]
+}
+
+### Update student attendance record
+PUT {{baseUrl}}/attendance/student/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "status": "LATE",
+    "arrival_time": "09:30:00",
+    "reason": "Doctor appointment",
+    "additional_info": {
+        "medical_certificate": true,
+        "updated_reason": "medical appointment"
+    }
+}
+
+### Get student attendance records with filters
+GET {{baseUrl}}/attendance/student?school_id=1&class_id=1&start_date=2024-01-15&end_date=2024-01-16
+Authorization: Bearer {{authToken}}
+
+### Get specific student attendance records
+GET {{baseUrl}}/attendance/student?student_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get student attendance by status
+GET {{baseUrl}}/attendance/student?school_id=1&status=ABSENT,SICK&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get student attendance statistics
+GET {{baseUrl}}/attendance/student/stats?school_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get specific student attendance statistics
+GET {{baseUrl}}/attendance/student/stats?student_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### ==================== TEACHER ATTENDANCE TESTS ====================
+
+### Mark teacher attendance - Present with check-in
+POST {{baseUrl}}/attendance/teacher
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "teacher_id": 1,
+    "school_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "PRESENT",
+    "check_in_time": "08:00:00",
+    "scheduled_start": "08:00:00",
+    "scheduled_end": "16:00:00",
+    "location": "Main Campus",
+    "additional_info": {
+        "department": "Mathematics",
+        "marked_via": "biometric"
+    }
+}
+
+### Mark teacher attendance - Late arrival
+POST {{baseUrl}}/attendance/teacher
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "teacher_id": 2,
+    "school_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "LATE",
+    "check_in_time": "08:30:00",
+    "scheduled_start": "08:00:00",
+    "scheduled_end": "16:00:00",
+    "reason": "Vehicle breakdown",
+    "location": "Main Campus"
+}
+
+### Mark teacher attendance - On leave
+POST {{baseUrl}}/attendance/teacher
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "teacher_id": 3,
+    "school_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "LEAVE",
+    "leave_type": "SICK",
+    "reason": "Medical appointment",
+    "additional_info": {
+        "medical_certificate": true,
+        "substitute_arranged": true
+    }
+}
+
+### Mark teacher attendance - Substitute teacher
+POST {{baseUrl}}/attendance/teacher
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "teacher_id": 4,
+    "school_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "PRESENT",
+    "check_in_time": "08:00:00",
+    "is_substitute": true,
+    "substituting_for": 3,
+    "location": "Main Campus",
+    "additional_info": {
+        "substitute_subject": "Mathematics",
+        "substitute_periods": ["1", "2", "3"]
+    }
+}
+
+### Update teacher check-out time
+PUT {{baseUrl}}/attendance/teacher/1/checkout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "check_out_time": "16:30:00"
+}
+
+### Update teacher check-out time with overtime
+PUT {{baseUrl}}/attendance/teacher/2/checkout
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "check_out_time": "18:00:00"
+}
+
+### Get teacher attendance records
+GET {{baseUrl}}/attendance/teacher?school_id=1&start_date=2024-01-15&end_date=2024-01-16
+Authorization: Bearer {{authToken}}
+
+### Get specific teacher attendance
+GET {{baseUrl}}/attendance/teacher?teacher_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get teacher attendance by status
+GET {{baseUrl}}/attendance/teacher?school_id=1&status=LEAVE&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get teacher leave records
+GET {{baseUrl}}/attendance/teacher?school_id=1&leave_type=SICK&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get substitute teacher records
+GET {{baseUrl}}/attendance/teacher?school_id=1&is_substitute=true&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get teacher attendance statistics
+GET {{baseUrl}}/attendance/teacher/stats?school_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### Get specific teacher attendance statistics with hours
+GET {{baseUrl}}/attendance/teacher/stats?teacher_id=1&start_date=2024-01-01&end_date=2024-01-31
+Authorization: Bearer {{authToken}}
+
+### ==================== REPORTING TESTS ====================
+
+### Generate comprehensive attendance report
+GET {{baseUrl}}/attendance/report?school_id=1&start_date=2024-01-01&end_date=2024-01-31&type=both
+Authorization: Bearer {{authToken}}
+
+### Generate student-only attendance report
+GET {{baseUrl}}/attendance/report?school_id=1&start_date=2024-01-15&end_date=2024-01-16&type=student
+Authorization: Bearer {{authToken}}
+
+### Generate teacher-only attendance report
+GET {{baseUrl}}/attendance/report?school_id=1&start_date=2024-01-15&end_date=2024-01-16&type=teacher
+Authorization: Bearer {{authToken}}
+
+### Get attendance dashboard for today
+GET {{baseUrl}}/attendance/dashboard?school_id=1
+Authorization: Bearer {{authToken}}
+
+### Get attendance dashboard for specific date
+GET {{baseUrl}}/attendance/dashboard?school_id=1&date=2024-01-15
+Authorization: Bearer {{authToken}}
+
+### ==================== ERROR HANDLING TESTS ====================
+
+### Test duplicate attendance error
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-15",
+    "status": "PRESENT"
+}
+
+### Test invalid status error
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-17",
+    "status": "INVALID_STATUS"
+}
+
+### Test missing required fields
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1
+}
+
+### Test invalid date format
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024/01/17",
+    "status": "PRESENT"
+}
+
+### Test non-existent student
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 99999,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-17",
+    "status": "PRESENT"
+}
+
+### Test unauthorized access (no token)
+GET {{baseUrl}}/attendance/student
+
+### ==================== BULK OPERATIONS TESTS ====================
+
+### Test bulk attendance with mixed success/failure
+POST {{baseUrl}}/attendance/student/bulk
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "attendance_list": [
+        {
+            "student_id": 1,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-18",
+            "status": "PRESENT"
+        },
+        {
+            "student_id": 99999,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-18",
+            "status": "PRESENT"
+        },
+        {
+            "student_id": 2,
+            "school_id": 1,
+            "class_id": 1,
+            "attendance_date": "2024-01-18",
+            "status": "ABSENT",
+            "reason": "Sick"
+        }
+    ]
+}
+
+### ==================== PERFORMANCE TESTS ====================
+
+### Test large date range query
+GET {{baseUrl}}/attendance/student?school_id=1&start_date=2023-01-01&end_date=2024-12-31
+Authorization: Bearer {{authToken}}
+
+### Test statistics calculation for large dataset
+GET {{baseUrl}}/attendance/student/stats?school_id=1&start_date=2023-01-01&end_date=2024-12-31
+Authorization: Bearer {{authToken}}
+
+### ==================== ACADEMIC YEAR TESTS ====================
+
+### Test academic year filtering
+GET {{baseUrl}}/attendance/student?school_id=1&academic_year=2024
+Authorization: Bearer {{authToken}}
+
+### Test cross-academic year statistics
+GET {{baseUrl}}/attendance/student/stats?school_id=1&academic_year=2024
+Authorization: Bearer {{authToken}}
+
+### ==================== EDGE CASE TESTS ====================
+
+### Test weekend attendance marking
+POST {{baseUrl}}/attendance/student
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "student_id": 1,
+    "school_id": 1,
+    "class_id": 1,
+    "attendance_date": "2024-01-20",
+    "status": "PRESENT",
+    "is_holiday": true,
+    "additional_info": {
+        "special_event": "Saturday extra classes"
+    }
+}
+
+### Test holiday attendance for teachers
+POST {{baseUrl}}/attendance/teacher
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "teacher_id": 1,
+    "school_id": 1,
+    "attendance_date": "2024-01-20",
+    "status": "PRESENT",
+    "check_in_time": "09:00:00",
+    "check_out_time": "13:00:00",
+    "is_holiday": true,
+    "additional_info": {
+        "special_duty": "Saturday supervision"
+    }
+}

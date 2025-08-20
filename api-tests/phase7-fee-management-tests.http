@@ -1,0 +1,240 @@
+# Phase 7 - Fee Management API Tests
+# Test suite for comprehensive Fee Management System
+# Server: http://localhost:3000
+
+### Variables
+@baseUrl = http://localhost:3000/api/v1
+@systemToken = {{$dotenv SYSTEM_TOKEN}}
+@schoolId = school_demo_001
+@studentId = STU_2024_001
+
+### 1. System Health Check
+GET {{baseUrl}}/system/health
+Content-Type: application/json
+
+### 2. Create Fee Structure - Tuition Fee
+POST {{baseUrl}}/fees/structures
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "school_id": "{{schoolId}}",
+  "fee_type": "tuition",
+  "fee_name": "Monthly Tuition Fee",
+  "amount": 5000.00,
+  "frequency": "monthly",
+  "academic_year": "2024-25",
+  "grade_class": "10",
+  "is_mandatory": true,
+  "due_date": 15,
+  "description": "Monthly tuition fee for Class 10"
+}
+
+### 3. Create Fee Structure - Library Fee  
+POST {{baseUrl}}/fees/structures
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "school_id": "{{schoolId}}",
+  "fee_type": "library",
+  "fee_name": "Annual Library Fee",
+  "amount": 2000.00,
+  "frequency": "annual",
+  "academic_year": "2024-25",
+  "grade_class": "10",
+  "is_mandatory": true,
+  "due_date": 30,
+  "description": "Annual library access and maintenance fee"
+}
+
+### 4. Get School Fee Structures
+GET {{baseUrl}}/fees/structures/school/{{schoolId}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 5. Create Student Fee Assignment
+POST {{baseUrl}}/fees/student-fees
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "student_id": "{{studentId}}",
+  "school_id": "{{schoolId}}",
+  "fee_structure_id": 1,
+  "amount": 5000.00,
+  "due_date": "2024-09-15",
+  "status": "pending",
+  "academic_year": "2024-25",
+  "term": "term1"
+}
+
+### 6. Get Student Fees
+GET {{baseUrl}}/fees/student-fees/student/{{studentId}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 7. Create Fee Discount
+POST {{baseUrl}}/fees/discounts
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "school_id": "{{schoolId}}",
+  "discount_name": "Merit Scholarship",
+  "discount_type": "percentage",
+  "discount_value": 20.00,
+  "applicable_fee_types": ["tuition", "library"],
+  "eligibility_criteria": "Students with >85% marks",
+  "is_active": true,
+  "academic_year": "2024-25"
+}
+
+### 8. Apply Discount to Student
+POST {{baseUrl}}/fees/discounts/apply
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "student_id": "{{studentId}}",
+  "school_id": "{{schoolId}}",
+  "discount_id": 1,
+  "applied_amount": 1000.00,
+  "applied_by": "admin",
+  "remarks": "Merit scholarship for excellent academic performance"
+}
+
+### 9. Process Fee Payment - Full Payment
+POST {{baseUrl}}/fees/payments
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "student_id": "{{studentId}}",
+  "school_id": "{{schoolId}}",
+  "student_fee_id": 1,
+  "amount_paid": 4000.00,
+  "payment_method": "cash",
+  "payment_reference": "CASH_001_2024",
+  "collected_by": "admin",
+  "remarks": "Monthly fee payment after discount"
+}
+
+### 10. Get Fee Collections for School
+GET {{baseUrl}}/fees/collections?school_id={{schoolId}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 11. Generate Fee Reports - Collection Summary
+GET {{baseUrl}}/fees/reports?school_id={{schoolId}}&report_type=collection_summary&date_from=2024-08-01&date_to=2024-08-31
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 12. Generate Fee Reports - Outstanding Fees
+GET {{baseUrl}}/fees/reports?school_id={{schoolId}}&report_type=outstanding_fees
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 13. Create Installment Payment Structure
+POST {{baseUrl}}/fees/structures
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "school_id": "{{schoolId}}",
+  "fee_type": "annual_fee",
+  "fee_name": "Annual School Fee",
+  "amount": 30000.00,
+  "frequency": "annual",
+  "academic_year": "2024-25",
+  "grade_class": "10",
+  "is_mandatory": true,
+  "allow_installments": true,
+  "installment_count": 3,
+  "description": "Annual school fee payable in 3 installments"
+}
+
+### 14. Bulk Fee Assignment
+POST {{baseUrl}}/fees/bulk
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "operation": "assign_fees",
+  "school_id": "{{schoolId}}",
+  "fee_structure_id": 1,
+  "student_ids": ["{{studentId}}"],
+  "academic_year": "2024-25",
+  "term": "term2"
+}
+
+### 15. Get Fee Payment History for Student
+GET {{baseUrl}}/fees/collections?student_id={{studentId}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 16. Generate Defaulter Report
+GET {{baseUrl}}/fees/reports?school_id={{schoolId}}&report_type=defaulters&overdue_days=30
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 17. Process Partial Payment
+POST {{baseUrl}}/fees/payments
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "student_id": "{{studentId}}",
+  "school_id": "{{schoolId}}",
+  "student_fee_id": 1,
+  "amount_paid": 1000.00,
+  "payment_method": "online",
+  "payment_reference": "UPI_12345_2024",
+  "collected_by": "system",
+  "remarks": "Partial payment via UPI"
+}
+
+### 18. Update Fee Structure
+PUT {{baseUrl}}/fees/structures/1
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "amount": 5500.00,
+  "description": "Updated monthly tuition fee for Class 10 - increased due to inflation"
+}
+
+### 19. Create Cheque Payment
+POST {{baseUrl}}/fees/payments
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "student_id": "{{studentId}}",
+  "school_id": "{{schoolId}}",
+  "student_fee_id": 2,
+  "amount_paid": 2000.00,
+  "payment_method": "cheque",
+  "payment_reference": "CHQ_789456_2024",
+  "cheque_number": "123456",
+  "bank_name": "State Bank of India",
+  "cheque_date": "2024-08-20",
+  "collected_by": "admin",
+  "remarks": "Library fee payment via cheque"
+}
+
+### 20. Get Daily Collection Report
+GET {{baseUrl}}/fees/reports?school_id={{schoolId}}&report_type=daily_collection&date=2024-08-20
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+###
+# Test Results Expected:
+# 1. All fee structures should be created successfully
+# 2. Student fees should be assigned properly
+# 3. Discounts should be applied correctly
+# 4. Payments should be processed and recorded
+# 5. Reports should generate accurate data
+# 6. Multi-tenant isolation should be maintained
+# 7. All CRUD operations should work seamlessly
+###

@@ -1,88 +1,96 @@
 const logger = require('../../../utils/logger');
-const { ValidationError, NotFoundError, DuplicateError } = require('../../../utils/errors');
+const {
+   ErrorFactory,
+   ValidationError,
+   NotFoundError,
+   DuplicateError
+} = require('../../../utils/errors');
 
 /**
  * Setup Service
  * Handles trust setup workflow management
  */
-class SetupService {
-   constructor() {
-      this.setupSteps = [
-         {
-            name: 'trust_info',
-            order: 1,
-            title: 'Trust Information',
-            description: 'Basic trust details and configuration',
-         },
-         {
-            name: 'academic_year',
-            order: 2,
-            title: 'Academic Year Setup',
-            description: 'Configure academic calendar and sessions',
-         },
-         { name: 'schools_basic', order: 3, title: 'Schools Basic Info', description: 'Add schools under this trust' },
-         { name: 'user_roles', order: 4, title: 'User Roles & Permissions', description: 'Configure RBAC system' },
-         { name: 'system_users', order: 5, title: 'System Users', description: 'Create initial administrative users' },
-         {
-            name: 'school_structure',
-            order: 6,
-            title: 'School Structure',
-            description: 'Configure classes, sections, and academic structure',
-         },
-         {
-            name: 'finalization',
-            order: 7,
-            title: 'Setup Finalization',
-            description: 'Complete setup and activate system',
-         },
-      ];
-   }
+function createSetupService() {
+   const setupSteps = [
+      {
+         name: 'trust_info',
+         order: 1,
+         title: 'Trust Information',
+         description: 'Basic trust details and configuration',
+      },
+      {
+         name: 'academic_year',
+         order: 2,
+         title: 'Academic Year',
+         description: 'Set up academic year configuration',
+      },
+      {
+         name: 'schools_basic',
+         order: 3,
+         title: 'Schools Basic Info',
+         description: 'Add basic school information',
+      },
+      {
+         name: 'user_roles',
+         order: 4,
+         title: 'User Roles',
+         description: 'Configure user roles and permissions',
+      },
+      {
+         name: 'system_users',
+         order: 5,
+         title: 'System Users',
+         description: 'Create initial system users',
+      },
+      {
+         name: 'school_structure',
+         order: 6,
+         title: 'School Structure',
+         description: 'Set up classes and sections',
+      },
+      {
+         name: 'finalization',
+         order: 7,
+         title: 'Finalization',
+         description: 'Complete setup and activate trust',
+      },
+   ];
 
    /**
-    * Initialize setup configuration for a trust
+    * Initialize setup for a trust
     */
-   async initializeSetup(trustId, systemUserId) {
+   async function initializeSetup(trustId) {
       try {
-         const { SetupConfiguration } = require('../../../models');
+         const { getTenantModels } = require('../../../models');
+         const models = await getTenantModels('system'); // Use system models for setup configuration
+         const { SetupConfiguration } = models;
 
-         // Check if setup already initialized
+         // Check if setup already exists
          const existingSetup = await SetupConfiguration.findOne({
-            where: { trust_id: trustId },
+            where: { trust_id: trustId }
          });
 
          if (existingSetup) {
-            throw new DuplicateError('Setup already initialized for this trust');
+            throw ErrorFactory.createError('ConflictError', 'Setup already initialized for this trust');
          }
 
-         // Create setup steps
-         const setupRecords = this.setupSteps.map((step) => ({
+         // Create initial setup configuration
+         const setupConfig = await SetupConfiguration.create({
             trust_id: trustId,
-            step_name: step.name,
-            step_order: step.order,
+            current_step: 'trust_info',
+            steps_completed: [],
             is_completed: false,
-            configuration_data: {
-               title: step.title,
-               description: step.description,
-               required_fields: this.getRequiredFields(step.name),
-            },
-         }));
-
-         const createdSteps = await SetupConfiguration.bulkCreate(setupRecords);
-
-         logger.info('Setup Service Event', {
-            service: 'setup-service',
-            category: 'SETUP',
-            event: 'Setup initialized successfully',
-            trust_id: trustId,
-            system_user_id: systemUserId,
-            steps_created: createdSteps.length,
+            configuration_data: {},
          });
 
-         return {
-            message: 'Setup initialized successfully',
-            steps: createdSteps,
-            total_steps: this.setupSteps.length,
-         };
+         logger.info('Setup Service Info', {
+            service: 'setup-service',
+            category: 'INITIALIZATION',
+            event: 'Setup initialized successfully',
+            trust_id: trustId,
+         });
+
+         return setupConfig;
       } catch (error) {
          logger.error('Setup Service Error', {
             service: 'setup-service',
@@ -98,19 +106,20 @@ class SetupService {
    /**
     * Get setup progress for a trust
     */
-   async getSetupProgress(trustId) {
+   async function getSetupProgress(trustId) {
       try {
-         const { SetupConfiguration } = require('../../../models');
+         const { getTenantModels } = require('../../../models');
+         const models = await getTenantModels('system');
+         const { SetupConfiguration } = models;
 
-         const setupSteps = await SetupConfiguration.findAll({
-            where: { trust_id: trustId },
-            order: [['step_order', 'ASC']],
+         const setupConfig = await SetupConfiguration.findOne({
+            where: { trust_id: trustId }
          });
 
-         if (setupSteps.length === 0) {
+         if (!setupConfig) {
             return {
                is_initialized: false,
-               total_steps: this.setupSteps.length,
+               total_steps: setupSteps.length,
                completed_steps: 0,
                progress_percentage: 0,
                current_step: null,
@@ -118,16 +127,20 @@ class SetupService {
             };
          }
 
-         const completedSteps = setupSteps.filter((step) => step.is_completed);
-         const currentStep = setupSteps.find((step) => !step.is_completed);
+         const completedSteps = setupConfig.steps_completed || [];
+         const progressPercentage = Math.round((completedSteps.length / setupSteps.length) * 100);
 
          return {
             is_initialized: true,
             total_steps: setupSteps.length,
             completed_steps: completedSteps.length,
-            progress_percentage: Math.round((completedSteps.length / setupSteps.length) * 100),
-            current_step: currentStep || null,
-            steps: setupSteps,
+            progress_percentage: progressPercentage,
+            current_step: setupConfig.current_step,
+            steps: setupSteps.map(step => ({
+               ...step,
+               completed: completedSteps.includes(step.name),
+               is_current: step.name === setupConfig.current_step,
+            })),
          };
       } catch (error) {
          logger.error('Setup Service Error', {
@@ -144,69 +157,67 @@ class SetupService {
    /**
     * Complete a setup step
     */
-   async completeStep(trustId, stepName, configurationData, systemUserId) {
+   async function completeStep(trustId, stepName, stepData, systemUserId) {
       try {
-         const { SetupConfiguration } = require('../../../models');
+         const { getTenantModels } = require('../../../models');
+         const models = await getTenantModels('system');
+         const { SetupConfiguration } = models;
 
-         const setupStep = await SetupConfiguration.findOne({
-            where: {
-               trust_id: trustId,
-               step_name: stepName,
-            },
+         const setupConfig = await SetupConfiguration.findOne({
+            where: { trust_id: trustId }
          });
 
-         if (!setupStep) {
-            throw new NotFoundError(`Setup step '${stepName}' not found for trust`);
+         if (!setupConfig) {
+            throw ErrorFactory.createError('NotFoundError', `Setup configuration not found for trust: ${trustId}`);
          }
 
-         if (setupStep.is_completed) {
-            throw new DuplicateError(`Setup step '${stepName}' is already completed`);
+         // Validate step exists
+         const step = setupSteps.find(s => s.name === stepName);
+         if (!step) {
+            throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
          }
 
-         // Validate configuration data
-         const validationErrors = this.validateStepData(stepName, configurationData);
+         // Check if step already completed
+         const completedSteps = setupConfig.steps_completed || [];
+         if (completedSteps.includes(stepName)) {
+            throw ErrorFactory.createError('ConflictError', `Setup step '${stepName}' already completed`);
+         }
+
+         // Validate step data
+         const validationErrors = this.validateStepData(stepName, stepData);
          if (validationErrors.length > 0) {
-            throw new ValidationError('Setup step validation failed', { validationErrors });
+            throw ErrorFactory.createError('ValidationError', 'Step validation failed', { validationErrors });
          }
 
-         // Update step as completed
-         await setupStep.update({
-            is_completed: true,
-            completed_by: systemUserId,
-            completed_at: new Date(),
-            configuration_data: {
-               ...setupStep.configuration_data,
-               ...configurationData,
-            },
-            validation_errors: null,
-         });
+         // Update setup configuration
+         completedSteps.push(stepName);
+         setupConfig.steps_completed = completedSteps;
+         setupConfig.configuration_data = {
+            ...setupConfig.configuration_data,
+            [stepName]: stepData,
+         };
 
-         // Check if all steps are completed
-         const allSteps = await SetupConfiguration.findAll({
-            where: { trust_id: trustId },
-         });
+         // Determine next step
+         const nextStep = setupSteps.find(s => s.order === step.order + 1);
+         setupConfig.current_step = nextStep ? nextStep.name : null;
 
-         const allCompleted = allSteps.every((step) => step.is_completed);
-
-         if (allCompleted) {
+         // Check if all steps completed
+         if (completedSteps.length === setupSteps.length) {
+            setupConfig.is_completed = true;
             await this.finalizeSetup(trustId, systemUserId);
          }
 
-         logger.info('Setup Service Event', {
+         await setupConfig.save();
+
+         logger.info('Setup Service Info', {
             service: 'setup-service',
-            category: 'SETUP',
-            event: 'Setup step completed',
+            category: 'STEP_COMPLETION',
+            event: 'Setup step completed successfully',
             trust_id: trustId,
             step_name: stepName,
-            system_user_id: systemUserId,
-            all_completed: allCompleted,
          });
 
-         return {
-            message: `Setup step '${stepName}' completed successfully`,
-            step: setupStep,
-            all_completed: allCompleted,
-         };
+         return setupConfig;
       } catch (error) {
          logger.error('Setup Service Error', {
             service: 'setup-service',
@@ -221,27 +232,28 @@ class SetupService {
    }
 
    /**
-    * Finalize setup process
+    * Finalize setup (activate trust)
     */
-   async finalizeSetup(trustId, systemUserId) {
+   async function finalizeSetup(trustId, systemUserId) {
       try {
-         const { Trust } = require('../../../models');
+         const { getTrustModel } = require('../../../models');
+         const Trust = getTrustModel();
 
-         await Trust.update(
-            {
-               setup_completed_at: new Date(),
-               is_active: true,
-            },
-            { where: { id: trustId } }
-         );
+         const trust = await Trust.findByPk(trustId);
+         if (!trust) {
+            throw ErrorFactory.createError('NotFoundError', `Trust not found: ${trustId}`);
+         }
 
-         logger.info('Setup Service Event', {
+         await trust.markSetupComplete();
+
+         logger.info('Setup Service Info', {
             service: 'setup-service',
-            category: 'SETUP',
+            category: 'FINALIZATION',
             event: 'Setup finalized successfully',
             trust_id: trustId,
-            system_user_id: systemUserId,
          });
+
+         return trust;
       } catch (error) {
          logger.error('Setup Service Error', {
             service: 'setup-service',
@@ -255,9 +267,9 @@ class SetupService {
    }
 
    /**
-    * Get required fields for each setup step
+    * Get required fields for a step
     */
-   getRequiredFields(stepName) {
+   function getRequiredFields(stepName) {
       const fieldMappings = {
          trust_info: ['name', 'code', 'address', 'contact_email', 'contact_phone'],
          academic_year: ['year', 'start_date', 'end_date', 'terms'],
@@ -272,9 +284,9 @@ class SetupService {
    }
 
    /**
-    * Validate step configuration data
+    * Validate step data
     */
-   validateStepData(stepName, data) {
+   function validateStepData(stepName, data) {
       const errors = [];
       const requiredFields = this.getRequiredFields(stepName);
 
@@ -284,7 +296,7 @@ class SetupService {
          }
       });
 
-      // Add specific validations per step
+      // Additional step-specific validation
       switch (stepName) {
          case 'trust_info':
             if (data.contact_email && !this.isValidEmail(data.contact_email)) {
@@ -293,7 +305,7 @@ class SetupService {
             break;
          case 'academic_year':
             if (data.start_date && data.end_date && new Date(data.start_date) >= new Date(data.end_date)) {
-               errors.push('Start date must be before end date');
+               errors.push('End date must be after start date');
             }
             break;
       }
@@ -302,12 +314,94 @@ class SetupService {
    }
 
    /**
-    * Email validation helper
+    * Validate email format
     */
-   isValidEmail(email) {
+   function isValidEmail(email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
    }
+
+   /**
+    * Get step details
+    */
+   async function getStepDetails(trustId, stepName) {
+      try {
+         const { getTenantModels } = require('../../../models');
+         const models = await getTenantModels('system');
+         const { SetupConfiguration } = models;
+
+         const setupConfig = await SetupConfiguration.findOne({
+            where: { trust_id: trustId }
+         });
+
+         const step = setupSteps.find(s => s.name === stepName);
+         if (!step) {
+            throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
+         }
+
+         return {
+            ...step,
+            required_fields: this.getRequiredFields(stepName),
+            current_data: setupConfig?.configuration_data?.[stepName] || {},
+            completed: setupConfig?.steps_completed?.includes(stepName) || false,
+         };
+      } catch (error) {
+         logger.error('Setup Service Error', {
+            service: 'setup-service',
+            category: 'ERROR',
+            event: 'Failed to get step details',
+            trust_id: trustId,
+            step_name: stepName,
+            error: error.message,
+         });
+         throw error;
+      }
+   }
+
+   /**
+    * Reset setup for a trust
+    */
+   async function resetSetup(trustId) {
+      try {
+         const { getTenantModels } = require('../../../models');
+         const models = await getTenantModels('system');
+         const { SetupConfiguration } = models;
+
+         await SetupConfiguration.destroy({
+            where: { trust_id: trustId }
+         });
+
+         logger.info('Setup Service Info', {
+            service: 'setup-service',
+            category: 'RESET',
+            event: 'Setup reset successfully',
+            trust_id: trustId,
+         });
+
+         return { success: true };
+      } catch (error) {
+         logger.error('Setup Service Error', {
+            service: 'setup-service',
+            category: 'ERROR',
+            event: 'Failed to reset setup',
+            trust_id: trustId,
+            error: error.message,
+         });
+         throw error;
+      }
+   }
+
+   return {
+      initializeSetup,
+      getSetupProgress,
+      completeStep,
+      finalizeSetup,
+      getRequiredFields,
+      validateStepData,
+      isValidEmail,
+      getStepDetails,
+      resetSetup,
+   };
 }
 
-module.exports = SetupService;
+module.exports = createSetupService;

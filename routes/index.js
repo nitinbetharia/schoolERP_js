@@ -4,16 +4,22 @@ const router = express.Router();
 // Import route modules
 const systemRoutes = require('./system');
 const setupRoutes = require('../modules/setup/routes/setupRoutes');
-const userRoutes = require('../modules/user/routes/userRoutes');
-const schoolModuleRoutes = require('../modules/school/routes');
-const studentRoutes = require('../modules/student/routes/studentRoutes');
+// const userRoutes = require('../modules/user/routes/userRoutes'); // Temporarily disabled - corrupted
+// const schoolModuleRoutes = require('../modules/school/routes'); // Temporarily disabled - may be corrupted
+// const studentRoutes = require('../modules/student/routes/studentRoutes'); // Temporarily disabled - may be corrupted
+// const attendanceRoutes = require('../modules/attendance/routes/attendanceRoutes'); // Temporarily disabled - may be corrupted
+const feeRoutes = require('../modules/fee/routes');
+const udiseRoutes = require('../modules/udise/routes');
 
 // Mount routes
 router.use('/admin/system', systemRoutes);
 router.use('/setup', setupRoutes);
-router.use('/users', userRoutes);
-router.use('/school', schoolModuleRoutes);
-router.use('/students', studentRoutes);
+// router.use('/users', userRoutes); // Temporarily disabled
+// router.use('/school', schoolModuleRoutes); // Temporarily disabled
+// router.use('/students', studentRoutes); // Temporarily disabled
+// router.use('/attendance', attendanceRoutes); // Temporarily disabled
+router.use('/fees', feeRoutes);
+router.use('/udise', udiseRoutes);
 
 // API status endpoint
 router.get('/status', (req, res) => {

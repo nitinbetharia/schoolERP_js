@@ -1,275 +1,183 @@
 const SectionService = require('../services/SectionService');
 const logger = require('../../../utils/logger');
-const { formatErrorResponse, getErrorStatusCode } = require('../../../utils/errors');
+const {
+   ErrorFactory,
+   formatErrorResponse,
+   getErrorStatusCode
+} = require('../../../utils/errors');
 
 /**
  * Section Controller
  * Handles HTTP requests for section management
  */
-class SectionController {
-   constructor() {
-      this.sectionService = new SectionService();
+function createSectionController() {
+
+   this.sectionService = new SectionService();
+   
+
+   /**
+    * createSection method
+    */
+   async function createSection() {
+
+      try {
+      const { tenantCode
    }
 
    /**
-    * Create new section
-    * POST /sections
+    * catch method
     */
-   async createSection(req, res) {
-      try {
-         const { tenantCode } = req.session;
-         const sectionData = req.body;
-         const createdBy = req.session.userId;
+   async function catch() {
 
-         const result = await this.sectionService.createSection(tenantCode, sectionData, createdBy);
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section created successfully',
-            tenant_code: tenantCode,
-            section_id: result.section.id,
-            user_id: req.session.userId,
-         });
-
-         res.status(201).json({
-            success: true,
-            message: 'Section created successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section creation failed',
-            tenant_code: req.session?.tenantCode,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Section creation failed',
+      tenant_code: req.session?.tenantCode,
+      user_id: req.session?.userId,
+      error: error.message,
+         
    }
 
    /**
-    * Get sections by class
-    * GET /sections/class/:classId
+    * getSectionsByClass method
     */
-   async getSectionsByClass(req, res) {
+   async function getSectionsByClass() {
+
       try {
-         const { tenantCode } = req.session;
-         const { classId } = req.params;
-         const { status } = req.query;
-
-         const result = await this.sectionService.getSectionsByClass(tenantCode, classId, { status });
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Sections retrieved successfully',
-            tenant_code: tenantCode,
-            class_id: classId,
-            count: result.sections.length,
-            user_id: req.session.userId,
-         });
-
-         res.status(200).json({
-            success: true,
-            message: 'Sections retrieved successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Sections retrieval failed',
-            tenant_code: req.session?.tenantCode,
-            class_id: req.params?.classId,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      const { tenantCode
    }
 
    /**
-    * Get section by ID
-    * GET /sections/:id
+    * catch method
     */
-   async getSectionById(req, res) {
-      try {
-         const { tenantCode } = req.session;
-         const { id } = req.params;
+   async function catch() {
 
-         const result = await this.sectionService.getSectionById(tenantCode, id);
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section retrieved successfully',
-            tenant_code: tenantCode,
-            section_id: id,
-            user_id: req.session.userId,
-         });
-
-         res.status(200).json({
-            success: true,
-            message: 'Section retrieved successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section retrieval failed',
-            tenant_code: req.session?.tenantCode,
-            section_id: req.params?.id,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Sections retrieval failed',
+      tenant_code: req.session?.tenantCode,
+      class_id: req.params?.classId,
+      user_id: req.session?.userId,
+      error: error.message,
+         
    }
 
    /**
-    * Update section
-    * PUT /sections/:id
+    * getSectionById method
     */
-   async updateSection(req, res) {
+   async function getSectionById() {
+
       try {
-         const { tenantCode } = req.session;
-         const { id } = req.params;
-         const sectionData = req.body;
-         const updatedBy = req.session.userId;
-
-         const result = await this.sectionService.updateSection(tenantCode, id, sectionData, updatedBy);
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section updated successfully',
-            tenant_code: tenantCode,
-            section_id: id,
-            user_id: req.session.userId,
-         });
-
-         res.status(200).json({
-            success: true,
-            message: 'Section updated successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section update failed',
-            tenant_code: req.session?.tenantCode,
-            section_id: req.params?.id,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      const { tenantCode
    }
 
    /**
-    * Delete section
-    * DELETE /sections/:id
+    * catch method
     */
-   async deleteSection(req, res) {
-      try {
-         const { tenantCode } = req.session;
-         const { id } = req.params;
-         const deletedBy = req.session.userId;
+   async function catch() {
 
-         const result = await this.sectionService.deleteSection(tenantCode, id, deletedBy);
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section deleted successfully',
-            tenant_code: tenantCode,
-            section_id: id,
-            user_id: req.session.userId,
-         });
-
-         res.status(200).json({
-            success: true,
-            message: 'Section deleted successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Section deletion failed',
-            tenant_code: req.session?.tenantCode,
-            section_id: req.params?.id,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Section retrieval failed',
+      tenant_code: req.session?.tenantCode,
+      section_id: req.params?.id,
+      user_id: req.session?.userId,
+      error: error.message,
+         
    }
 
    /**
-    * Bulk create sections for a class
-    * POST /sections/bulk/:classId
+    * updateSection method
     */
-   async bulkCreateSections(req, res) {
+   async function updateSection() {
+
       try {
-         const { tenantCode } = req.session;
-         const { classId } = req.params;
-         const { sectionNames } = req.body;
-         const createdBy = req.session.userId;
-
-         const result = await this.sectionService.bulkCreateSections(tenantCode, classId, sectionNames, createdBy);
-
-         logger.info('Section Controller Event', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Sections bulk created successfully',
-            tenant_code: tenantCode,
-            class_id: classId,
-            count: result.sections.length,
-            user_id: req.session.userId,
-         });
-
-         res.status(201).json({
-            success: true,
-            message: 'Sections created successfully',
-            data: result,
-         });
-      } catch (error) {
-         logger.error('Section Controller Error', {
-            controller: 'section-controller',
-            category: 'SECTION',
-            event: 'Sections bulk creation failed',
-            tenant_code: req.session?.tenantCode,
-            class_id: req.params?.classId,
-            user_id: req.session?.userId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      const { tenantCode
    }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Section update failed',
+      tenant_code: req.session?.tenantCode,
+      section_id: req.params?.id,
+      user_id: req.session?.userId,
+      error: error.message,
+         
+   }
+
+   /**
+    * deleteSection method
+    */
+   async function deleteSection() {
+
+      try {
+      const { tenantCode
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Section deletion failed',
+      tenant_code: req.session?.tenantCode,
+      section_id: req.params?.id,
+      user_id: req.session?.userId,
+      error: error.message,
+         
+   }
+
+   /**
+    * bulkCreateSections method
+    */
+   async function bulkCreateSections() {
+
+      try {
+      const { tenantCode
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('Section Controller Error', {
+      controller: 'section-controller',
+      category: 'SECTION',
+      event: 'Sections bulk creation failed',
+      tenant_code: req.session?.tenantCode,
+      class_id: req.params?.classId,
+      user_id: req.session?.userId,
+      error: error.message,
+         
+   }
+
+   return {
+      createSection,
+      catch,
+      getSectionsByClass,
+      catch,
+      getSectionById,
+      catch,
+      updateSection,
+      catch,
+      deleteSection,
+      catch,
+      bulkCreateSections,
+      catch
+   };
 }
 
 module.exports = SectionController;

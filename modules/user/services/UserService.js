@@ -1,380 +1,346 @@
 const bcrypt = require('bcryptjs');
 const logger = require('../../../utils/logger');
-const { ValidationError, NotFoundError, DuplicateError, AuthenticationError } = require('../../../utils/errors');
+const {
+   ErrorFactory,
+   // Legacy classes for backward compatibility
+   ValidationError,
+   NotFoundError,
+   DuplicateError,
+   AuthenticationError
+} = require('../../../utils/errors');
 
 /**
  * User Service
  * Handles tenant user management operations
  */
-class UserService {
-   constructor() {
-      this.defaultRoles = ['STUDENT', 'TEACHER', 'STAFF', 'PRINCIPAL', 'ADMIN'];
+function createUserService() {
+
+   this.defaultRoles = ['STUDENT', 'TEACHER', 'STAFF', 'PRINCIPAL', 'ADMIN'];
+   
+
+   /**
+    * createUser method
+    */
+   async function createUser() {
+
+      try {
+      const { getTenantModels
    }
 
    /**
-    * Create a new tenant user
+    * if method
     */
-   async createUser(tenantCode, userData, createdBy) {
-      try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User, UserProfile } = tenantModels;
+   async function if() {
 
-         // Check if user already exists
-         const existingUser = await User.findOne({
-            where: { username: userData.username },
-         });
-
-         if (existingUser) {
-            throw new DuplicateError('Username already exists in this tenant');
-         }
-
-         if (userData.email) {
-            const existingEmail = await User.findOne({
-               where: { email: userData.email },
-            });
-
-            if (existingEmail) {
-               throw new DuplicateError('Email already exists in this tenant');
-            }
-         }
-
-         // Hash password
-         const saltRounds = 12;
-         const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
-
-         // Create user
-         const user = await User.create({
-            username: userData.username,
-            email: userData.email,
-            password: hashedPassword,
-            role: userData.role || 'STUDENT',
-            is_active: userData.is_active !== undefined ? userData.is_active : true,
-            created_by: createdBy,
-         });
-
-         // Create user profile if profile data provided
-         let profile = null;
-         if (userData.profile) {
-            profile = await UserProfile.create({
-               user_id: user.id,
-               ...userData.profile,
-            });
-         }
-
-         logger.info('User Service Event', {
-            service: 'user-service',
-            category: 'USER',
-            event: 'User created successfully',
-            tenant_code: tenantCode,
-            user_id: user.id,
-            username: userData.username,
-            role: user.role,
-            created_by: createdBy,
-         });
-
-         return {
-            user: {
-               id: user.id,
-               username: user.username,
-               email: user.email,
-               role: user.role,
-               is_active: user.is_active,
-               created_at: user.created_at,
-            },
-            profile: profile,
-         };
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'Failed to create user',
-            tenant_code: tenantCode,
-            username: userData.username,
-            error: error.message,
-         });
-         throw error;
-      }
+      throw ErrorFactory.conflict('Username already exists in this tenant already exists');
+         
    }
 
    /**
-    * Get user by ID with profile
+    * if method
     */
-   async getUserById(tenantCode, userId) {
-      try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User, UserProfile } = tenantModels;
+   async function if() {
 
-         const user = await User.findByPk(userId, {
-            include: [
-               {
-                  model: UserProfile,
-                  as: 'profile',
-                  required: false,
-               },
-            ],
-            attributes: { exclude: ['password'] },
-         });
-
-         if (!user) {
-            throw new NotFoundError('User not found');
-         }
-
-         return user;
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'Failed to get user',
-            tenant_code: tenantCode,
-            user_id: userId,
-            error: error.message,
-         });
-         throw error;
-      }
+      const existingEmail = await User.findOne({
+      where: { email: userData.email
    }
 
    /**
-    * Update user
+    * if method
     */
-   async updateUser(tenantCode, userId, updateData, updatedBy) {
-      try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User, UserProfile } = tenantModels;
+   async function if() {
 
-         const user = await User.findByPk(userId);
-         if (!user) {
-            throw new NotFoundError('User not found');
-         }
-
-         // Check for duplicate username or email if being updated
-         if (updateData.username && updateData.username !== user.username) {
-            const existingUsername = await User.findOne({
-               where: {
-                  username: updateData.username,
-                  id: { [require('sequelize').Op.ne]: userId },
-               },
-            });
-
-            if (existingUsername) {
-               throw new DuplicateError('Username already exists');
-            }
-         }
-
-         if (updateData.email && updateData.email !== user.email) {
-            const existingEmail = await User.findOne({
-               where: {
-                  email: updateData.email,
-                  id: { [require('sequelize').Op.ne]: userId },
-               },
-            });
-
-            if (existingEmail) {
-               throw new DuplicateError('Email already exists');
-            }
-         }
-
-         // Hash new password if provided
-         if (updateData.password) {
-            const saltRounds = 12;
-            updateData.password = await bcrypt.hash(updateData.password, saltRounds);
-         }
-
-         // Update user
-         await user.update({
-            ...updateData,
-            updated_by: updatedBy,
-         });
-
-         // Update profile if profile data provided
-         if (updateData.profile) {
-            let profile = await UserProfile.findOne({ where: { user_id: userId } });
-
-            if (profile) {
-               await profile.update(updateData.profile);
-            } else {
-               await UserProfile.create({
-                  user_id: userId,
-                  ...updateData.profile,
-               });
-            }
-         }
-
-         logger.info('User Service Event', {
-            service: 'user-service',
-            category: 'USER',
-            event: 'User updated successfully',
-            tenant_code: tenantCode,
-            user_id: userId,
-            updated_by: updatedBy,
-         });
-
-         return await this.getUserById(tenantCode, userId);
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'Failed to update user',
-            tenant_code: tenantCode,
-            user_id: userId,
-            error: error.message,
-         });
-         throw error;
-      }
+      throw ErrorFactory.conflict('Email already exists in this tenant already exists');
+            
    }
 
    /**
-    * Get all users with filters
+    * if method
     */
-   async getUsers(tenantCode, filters = {}) {
-      try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User, UserProfile } = tenantModels;
+   async function if() {
 
-         const where = {};
-         if (filters.role) where.role = filters.role;
-         if (filters.is_active !== undefined) where.is_active = filters.is_active;
-
-         const users = await User.findAll({
-            where,
-            include: [
-               {
-                  model: UserProfile,
-                  as: 'profile',
-                  required: false,
-               },
-            ],
-            attributes: { exclude: ['password'] },
-            order: [['created_at', 'DESC']],
-            limit: filters.limit || 50,
-            offset: filters.offset || 0,
-         });
-
-         return users;
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'Failed to get users',
-            tenant_code: tenantCode,
-            error: error.message,
-         });
-         throw error;
-      }
+      profile = await UserProfile.create({
+      user_id: user.id,
+      ...userData.profile,
+            
    }
 
    /**
-    * Authenticate user
+    * catch method
     */
-   async authenticateUser(tenantCode, username, password) {
-      try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User, UserProfile } = tenantModels;
+   async function catch() {
 
-         const user = await User.findOne({
-            where: {
-               username: username,
-               is_active: true,
-            },
-            include: [
-               {
-                  model: UserProfile,
-                  as: 'profile',
-                  required: false,
-               },
-            ],
-         });
-
-         if (!user) {
-            throw new AuthenticationError('Invalid username or password');
-         }
-
-         const isValidPassword = await bcrypt.compare(password, user.password);
-         if (!isValidPassword) {
-            throw new AuthenticationError('Invalid username or password');
-         }
-
-         // Update last login
-         await user.update({
-            last_login_at: new Date(),
-         });
-
-         logger.info('User Service Event', {
-            service: 'user-service',
-            category: 'AUTH',
-            event: 'User authenticated successfully',
-            tenant_code: tenantCode,
-            user_id: user.id,
-            username: username,
-         });
-
-         return {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            is_active: user.is_active,
-            profile: user.profile,
-            last_login_at: user.last_login_at,
-         };
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'User authentication failed',
-            tenant_code: tenantCode,
-            username: username,
-            error: error.message,
-         });
-         throw error;
-      }
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'Failed to create user',
+      tenant_code: tenantCode,
+      username: userData.username,
+      error: error.message,
+         
    }
 
    /**
-    * Delete user (soft delete)
+    * getUserById method
     */
-   async deleteUser(tenantCode, userId, deletedBy) {
+   async function getUserById() {
+
       try {
-         const { getTenantModels } = require('../../../models');
-         const tenantModels = await getTenantModels(tenantCode);
-         const { User } = tenantModels;
-
-         const user = await User.findByPk(userId);
-         if (!user) {
-            throw new NotFoundError('User not found');
-         }
-
-         await user.update({
-            is_active: false,
-            updated_by: deletedBy,
-         });
-
-         logger.info('User Service Event', {
-            service: 'user-service',
-            category: 'USER',
-            event: 'User deleted successfully',
-            tenant_code: tenantCode,
-            user_id: userId,
-            deleted_by: deletedBy,
-         });
-
-         return { message: 'User deleted successfully' };
-      } catch (error) {
-         logger.error('User Service Error', {
-            service: 'user-service',
-            category: 'ERROR',
-            event: 'Failed to delete user',
-            tenant_code: tenantCode,
-            user_id: userId,
-            error: error.message,
-         });
-         throw error;
-      }
+      const { getTenantModels
    }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.notFound('User not found');
+         
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'Failed to get user',
+      tenant_code: tenantCode,
+      user_id: userId,
+      error: error.message,
+         
+   }
+
+   /**
+    * updateUser method
+    */
+   async function updateUser() {
+
+      try {
+      const { getTenantModels
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.notFound('User not found');
+         
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      const existingUsername = await User.findOne({
+      where: {
+      username: updateData.username,
+      id: { [require('sequelize').Op.ne]: userId
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.conflict('Username already exists already exists');
+            
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      const existingEmail = await User.findOne({
+      where: {
+      email: updateData.email,
+      id: { [require('sequelize').Op.ne]: userId
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.conflict('Email already exists already exists');
+            
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      const saltRounds = 12;
+      updateData.password = await bcrypt.hash(updateData.password, saltRounds);
+         
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      let profile = await UserProfile.findOne({ where: { user_id: userId
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      await profile.update(updateData.profile);
+            
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'Failed to update user',
+      tenant_code: tenantCode,
+      user_id: userId,
+      error: error.message,
+         
+   }
+
+   /**
+    * getUsers method
+    */
+   async function getUsers() {
+
+      try {
+      const { getTenantModels
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'Failed to get users',
+      tenant_code: tenantCode,
+      error: error.message,
+         
+   }
+
+   /**
+    * authenticateUser method
+    */
+   async function authenticateUser() {
+
+      try {
+      const { getTenantModels
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.authentication('Invalid username or password');
+         
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.authentication('Invalid username or password');
+         
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'User authentication failed',
+      tenant_code: tenantCode,
+      username: username,
+      error: error.message,
+         
+   }
+
+   /**
+    * deleteUser method
+    */
+   async function deleteUser() {
+
+      try {
+      const { getTenantModels
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      throw ErrorFactory.notFound('User not found');
+         
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('User Service Error', {
+      service: 'user-service',
+      category: 'ERROR',
+      event: 'Failed to delete user',
+      tenant_code: tenantCode,
+      user_id: userId,
+      error: error.message,
+         
+   }
+
+   return {
+      createUser,
+      if,
+      if,
+      if,
+      if,
+      catch,
+      getUserById,
+      if,
+      catch,
+      updateUser,
+      if,
+      if,
+      if,
+      if,
+      if,
+      if,
+      if,
+      if,
+      catch,
+      getUsers,
+      catch,
+      authenticateUser,
+      if,
+      if,
+      catch,
+      deleteUser,
+      if,
+      catch
+   };
 }
 
 module.exports = UserService;

@@ -1,7 +1,12 @@
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { logAuth, logError } = require('../utils/logger');
-const { AuthenticationError, AuthorizationError } = require('../utils/errors');
+const {
+   ErrorFactory,
+   // Legacy classes for backward compatibility
+   AuthenticationError,
+   AuthorizationError,
+} = require('../utils/errors');
 const { USER_ROLES, SYSTEM } = require('../config/business-constants');
 const appConfig = require('../config/app-config.json');
 
@@ -158,7 +163,7 @@ const passwordUtils = {
          return await bcrypt.hash(password, saltRounds);
       } catch (error) {
          logError(error, { context: 'hashPassword' });
-         throw new Error('Failed to hash password');
+         throw ErrorFactory.internal('Failed to hash password');
       }
    },
 
@@ -170,7 +175,7 @@ const passwordUtils = {
          return await bcrypt.compare(password, hash);
       } catch (error) {
          logError(error, { context: 'verifyPassword' });
-         throw new Error('Failed to verify password');
+         throw ErrorFactory.internal('Failed to verify password');
       }
    },
 
@@ -223,7 +228,7 @@ const checkAccountLock = async (user) => {
          loginAttempts: user.login_attempts,
       });
 
-      throw new AuthenticationError(
+      throw ErrorFactory.authentication(
          'Account is temporarily locked due to multiple failed login attempts',
          'AUTH_ACCOUNT_LOCKED'
       );

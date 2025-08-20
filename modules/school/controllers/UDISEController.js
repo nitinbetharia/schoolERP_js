@@ -1,466 +1,337 @@
 const UDISEService = require('../services/UDISEService');
 const logger = require('../../../utils/logger');
-const { formatErrorResponse, getErrorStatusCode } = require('../../../utils/errors');
+const {
+   ErrorFactory,
+   formatErrorResponse,
+   getErrorStatusCode
+} = require('../../../utils/errors');
 
 /**
  * UDISE+ Controller
  * Handles HTTP requests for UDISE+ school registration and census reporting
  */
-class UDISEController {
-   constructor() {
-      this.udiseService = new UDISEService();
+function createUDISEController() {
+
+   this.udiseService = new UDISEService();
+   
+
+   /**
+    * registerSchool method
+    */
+   async function registerSchool() {
+
+      try {
+      const schoolId = parseInt(req.params.schoolId);
+      const userId = req.user?.id;
+      const udiseData = req.body;
+
+      if (!schoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_SCHOOL_ID',
+      message: 'Valid school ID is required',
+               
    }
 
    /**
-    * Register school with UDISE+ system
+    * catch method
     */
-   async registerSchool(req, res) {
-      try {
-         const schoolId = parseInt(req.params.schoolId);
-         const userId = req.user?.id;
-         const udiseData = req.body;
+   async function catch() {
 
-         if (!schoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_SCHOOL_ID',
-                  message: 'Valid school ID is required',
-               },
-            });
-         }
-
-         const udiseSchool = await this.udiseService.registerSchoolWithUDISE(schoolId, udiseData, userId);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'REGISTRATION',
-            event: 'School registered with UDISE+',
-            school_id: schoolId,
-            udise_code: udiseSchool.udise_code,
-            user_id: userId,
-         });
-
-         res.status(201).json({
-            success: true,
-            data: udiseSchool,
-            message: 'School registered with UDISE+ successfully',
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'REGISTRATION',
-            event: 'School registration failed',
-            school_id: req.params.schoolId,
-            user_id: req.user?.id,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'REGISTRATION',
+      event: 'School registration failed',
+      school_id: req.params.schoolId,
+      user_id: req.user?.id,
+      error: error.message,
+         
    }
 
    /**
-    * Get UDISE+ school information
+    * getSchoolUDISEInfo method
     */
-   async getSchoolUDISEInfo(req, res) {
+   async function getSchoolUDISEInfo() {
+
       try {
-         const schoolId = parseInt(req.params.schoolId);
+      const schoolId = parseInt(req.params.schoolId);
 
-         if (!schoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_SCHOOL_ID',
-                  message: 'Valid school ID is required',
-               },
-            });
-         }
-
-         const { UDISESchool } = require('../../../models');
-         const udiseSchool = await UDISESchool.findOne({
-            where: { school_id: schoolId },
-            include: ['school', 'facilities', 'classInfrastructure'],
-         });
-
-         if (!udiseSchool) {
-            return res.status(404).json({
-               success: false,
-               error: {
-                  code: 'UDISE_NOT_REGISTERED',
-                  message: 'School not registered with UDISE+',
-               },
-            });
-         }
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'INFO_RETRIEVAL',
-            event: 'Get UDISE school info',
-            school_id: schoolId,
-            udise_code: udiseSchool.udise_code,
-         });
-
-         res.json({
-            success: true,
-            data: udiseSchool,
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'INFO_RETRIEVAL',
-            event: 'Get UDISE school info failed',
-            school_id: req.params.schoolId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      if (!schoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_SCHOOL_ID',
+      message: 'Valid school ID is required',
+               
    }
 
    /**
-    * Update class-wise enrollment data
+    * if method
     */
-   async updateClassEnrollment(req, res) {
-      try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const userId = req.user?.id;
-         const classData = req.body;
+   async function if() {
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const classInfra = await this.udiseService.updateClassEnrollment(udiseSchoolId, classData, userId);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'ENROLLMENT',
-            event: 'Class enrollment updated',
-            udise_school_id: udiseSchoolId,
-            class_name: classData.class_name,
-            total_enrollment: classInfra.getTotalEnrollment(),
-            user_id: userId,
-         });
-
-         res.json({
-            success: true,
-            data: classInfra,
-            message: 'Class enrollment data updated successfully',
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'ENROLLMENT',
-            event: 'Class enrollment update failed',
-            udise_school_id: req.params.udiseSchoolId,
-            user_id: req.user?.id,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      return res.status(404).json({
+      success: false,
+      error: {
+      code: 'UDISE_NOT_REGISTERED',
+      message: 'School not registered with UDISE+',
+               
    }
 
    /**
-    * Get class-wise enrollment report
+    * catch method
     */
-   async getClassEnrollmentReport(req, res) {
-      try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+   async function catch() {
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const enrollmentSummary = await this.udiseService.calculateEnrollmentSummary(udiseSchoolId, academicYear);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'REPORTING',
-            event: 'Class enrollment report generated',
-            udise_school_id: udiseSchoolId,
-            academic_year: academicYear,
-            total_students: enrollmentSummary.total_students,
-         });
-
-         res.json({
-            success: true,
-            data: {
-               udise_school_id: udiseSchoolId,
-               academic_year: academicYear,
-               enrollment_summary: enrollmentSummary,
-               generated_at: new Date(),
-            },
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'REPORTING',
-            event: 'Class enrollment report failed',
-            udise_school_id: req.params.udiseSchoolId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'INFO_RETRIEVAL',
+      event: 'Get UDISE school info failed',
+      school_id: req.params.schoolId,
+      error: error.message,
+         
    }
 
    /**
-    * Update school facilities data
+    * updateClassEnrollment method
     */
-   async updateFacilities(req, res) {
+   async function updateClassEnrollment() {
+
       try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const userId = req.user?.id;
-         const facilitiesData = req.body;
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const userId = req.user?.id;
+      const classData = req.body;
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const { UDISEFacilities } = require('../../../models');
-         const currentYear = this.udiseService.getCurrentAcademicYear();
-
-         const [facilities, created] = await UDISEFacilities.findOrCreate({
-            where: {
-               udise_school_id: udiseSchoolId,
-               assessment_year: facilitiesData.assessment_year || currentYear,
-            },
-            defaults: {
-               ...facilitiesData,
-               assessment_date: new Date(),
-               created_by: userId,
-            },
-         });
-
-         if (!created) {
-            await facilities.update({
-               ...facilitiesData,
-               assessment_date: new Date(),
-               updated_by: userId,
-            });
-         }
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'FACILITIES',
-            event: 'School facilities updated',
-            udise_school_id: udiseSchoolId,
-            compliance_score: facilities.compliance_score,
-            user_id: userId,
-         });
-
-         res.json({
-            success: true,
-            data: facilities,
-            message: 'School facilities data updated successfully',
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'FACILITIES',
-            event: 'Facilities update failed',
-            udise_school_id: req.params.udiseSchoolId,
-            user_id: req.user?.id,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
    }
 
    /**
-    * Generate annual census report
+    * catch method
     */
-   async generateCensusReport(req, res) {
-      try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+   async function catch() {
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const censusReport = await this.udiseService.generateAnnualCensusReport(udiseSchoolId, academicYear);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'CENSUS',
-            event: 'Annual census report generated',
-            udise_school_id: udiseSchoolId,
-            academic_year: academicYear,
-            total_enrollment: censusReport.enrollment_summary.total_students,
-         });
-
-         res.json({
-            success: true,
-            data: censusReport,
-            message: 'Annual census report generated successfully',
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'CENSUS',
-            event: 'Census report generation failed',
-            udise_school_id: req.params.udiseSchoolId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'ENROLLMENT',
+      event: 'Class enrollment update failed',
+      udise_school_id: req.params.udiseSchoolId,
+      user_id: req.user?.id,
+      error: error.message,
+         
    }
 
    /**
-    * Export UDISE+ data for submission
+    * getClassEnrollmentReport method
     */
-   async exportUDISEData(req, res) {
+   async function getClassEnrollmentReport() {
+
       try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
-         const format = req.query.format?.toUpperCase() || 'JSON';
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const exportData = await this.udiseService.exportUDISEData(udiseSchoolId, academicYear, format);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'DATA_EXPORT',
-            event: 'UDISE data exported',
-            udise_school_id: udiseSchoolId,
-            academic_year: academicYear,
-            format: format,
-         });
-
-         // Set appropriate content type for download
-         if (format === 'XML') {
-            res.setHeader('Content-Type', 'application/xml');
-            res.setHeader('Content-Disposition', `attachment; filename="udise_${udiseSchoolId}_${academicYear}.xml"`);
-         } else {
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Content-Disposition', `attachment; filename="udise_${udiseSchoolId}_${academicYear}.json"`);
-         }
-
-         res.json({
-            success: true,
-            data: exportData,
-            message: `UDISE+ data exported in ${format} format`,
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'DATA_EXPORT',
-            event: 'UDISE data export failed',
-            udise_school_id: req.params.udiseSchoolId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
    }
 
    /**
-    * Get compliance status
+    * catch method
     */
-   async getComplianceStatus(req, res) {
-      try {
-         const udiseSchoolId = parseInt(req.params.udiseSchoolId);
-         const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+   async function catch() {
 
-         if (!udiseSchoolId) {
-            return res.status(400).json({
-               success: false,
-               error: {
-                  code: 'INVALID_UDISE_SCHOOL_ID',
-                  message: 'Valid UDISE school ID is required',
-               },
-            });
-         }
-
-         const complianceStatus = await this.udiseService.calculateComplianceScore(udiseSchoolId, academicYear);
-         const dataCompleteness = await this.udiseService.assessDataCompleteness(udiseSchoolId, academicYear);
-
-         logger.info('UDISE Controller Success', {
-            controller: 'udise-controller',
-            category: 'COMPLIANCE',
-            event: 'Compliance status retrieved',
-            udise_school_id: udiseSchoolId,
-            compliance_level: complianceStatus.compliance_level,
-            data_completeness: dataCompleteness.overall_percentage,
-         });
-
-         res.json({
-            success: true,
-            data: {
-               udise_school_id: udiseSchoolId,
-               academic_year: academicYear,
-               compliance_status: complianceStatus,
-               data_completeness: dataCompleteness,
-               assessment_date: new Date(),
-            },
-         });
-      } catch (error) {
-         logger.error('UDISE Controller Error', {
-            controller: 'udise-controller',
-            category: 'COMPLIANCE',
-            event: 'Compliance status retrieval failed',
-            udise_school_id: req.params.udiseSchoolId,
-            error: error.message,
-         });
-
-         const statusCode = getErrorStatusCode(error);
-         const errorResponse = formatErrorResponse(error);
-         res.status(statusCode).json(errorResponse);
-      }
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'REPORTING',
+      event: 'Class enrollment report failed',
+      udise_school_id: req.params.udiseSchoolId,
+      error: error.message,
+         
    }
+
+   /**
+    * updateFacilities method
+    */
+   async function updateFacilities() {
+
+      try {
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const userId = req.user?.id;
+      const facilitiesData = req.body;
+
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      await facilities.update({
+      ...facilitiesData,
+      assessment_date: new Date(),
+      updated_by: userId,
+            
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'FACILITIES',
+      event: 'Facilities update failed',
+      udise_school_id: req.params.udiseSchoolId,
+      user_id: req.user?.id,
+      error: error.message,
+         
+   }
+
+   /**
+    * generateCensusReport method
+    */
+   async function generateCensusReport() {
+
+      try {
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'CENSUS',
+      event: 'Census report generation failed',
+      udise_school_id: req.params.udiseSchoolId,
+      error: error.message,
+         
+   }
+
+   /**
+    * exportUDISEData method
+    */
+   async function exportUDISEData() {
+
+      try {
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+      const format = req.query.format?.toUpperCase() || 'JSON';
+
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
+   }
+
+   /**
+    * if method
+    */
+   async function if() {
+
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Content-Disposition', `attachment; filename="udise_${udiseSchoolId
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'DATA_EXPORT',
+      event: 'UDISE data export failed',
+      udise_school_id: req.params.udiseSchoolId,
+      error: error.message,
+         
+   }
+
+   /**
+    * getComplianceStatus method
+    */
+   async function getComplianceStatus() {
+
+      try {
+      const udiseSchoolId = parseInt(req.params.udiseSchoolId);
+      const academicYear = req.query.academic_year || this.udiseService.getCurrentAcademicYear();
+
+      if (!udiseSchoolId) {
+      return res.status(400).json({
+      success: false,
+      error: {
+      code: 'INVALID_UDISE_SCHOOL_ID',
+      message: 'Valid UDISE school ID is required',
+               
+   }
+
+   /**
+    * catch method
+    */
+   async function catch() {
+
+      logger.error('UDISE Controller Error', {
+      controller: 'udise-controller',
+      category: 'COMPLIANCE',
+      event: 'Compliance status retrieval failed',
+      udise_school_id: req.params.udiseSchoolId,
+      error: error.message,
+         
+   }
+
+   return {
+      registerSchool,
+      catch,
+      getSchoolUDISEInfo,
+      if,
+      catch,
+      updateClassEnrollment,
+      catch,
+      getClassEnrollmentReport,
+      catch,
+      updateFacilities,
+      if,
+      catch,
+      generateCensusReport,
+      catch,
+      exportUDISEData,
+      if,
+      catch,
+      getComplianceStatus,
+      catch
+   };
 }
 
 module.exports = UDISEController;

@@ -1,126 +1,71 @@
-const { logger, logError } = require('../utils/logger');
-const { formatErrorResponse } = require('../utils/errors');
+const {
+   ErrorFactory,
+   formatErrorResponse,
+   getErrorStatusCode,
+   isOperationalError,
+   logError,
+} = require('../utils/errors');
+const { logger } = require('../utils/logger');
 
 /**
- * Global error handling middleware
- * Catches all errors and formats them consistently
+ * Centralized Error Handler Middleware
+ * Single point of error processing using http-errors
+ * Handles all error types: operational, system, Sequelize, JWT, etc.
  */
-const errorHandler = (err, req, res, next) => {
-   // Log the error
-   logError(err, {
-      url: req.originalUrl,
+function errorHandler(err, req, res, next) {
+   let error = err;
+
+   // Convert known errors to http-errors format
+   if (!isOperationalError(err)) {
+      // Handle Sequelize errors
+      if (err.name?.startsWith('Sequelize')) {
+         error = ErrorFactory.fromSequelize(err);
+      }
+      // Handle JWT errors
+      else if (err.name?.includes('JsonWebToken') || err.name === 'TokenExpiredError') {
+         error = ErrorFactory.fromJWT(err);
+      }
+      // Handle generic system errors
+      else {
+         error = ErrorFactory.internal('An unexpected error occurred', err);
+      }
+   }
+
+   // Log the error with context
+   logError(error, {
+      requestId: req.id,
       method: req.method,
+      url: req.url,
       ip: req.ip,
       userAgent: req.get('User-Agent'),
-      userId: req.user?.id,
+      user: req.user ? { id: req.user.id, email: req.user.email } : null,
+      tenant: req.tenant ? { id: req.tenant.id, name: req.tenant.name } : null,
       tenantCode: req.tenantCode,
    });
 
-   // Handle different error types
-   let statusCode = err.statusCode || 500;
-   let errorResponse;
+   // Get status code
+   const statusCode = getErrorStatusCode(error);
 
-   if (err.isOperational) {
-      // Operational errors (expected errors)
-      errorResponse = formatErrorResponse(err);
-   } else if (err.name === 'SequelizeValidationError') {
-      // Sequelize validation errors
-      statusCode = 400;
-      errorResponse = {
-         success: false,
-         error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Validation failed',
-            details: err.errors.map((error) => ({
-               field: error.path,
-               message: error.message,
-               value: error.value,
-            })),
-            timestamp: new Date().toISOString(),
-         },
-      };
-   } else if (err.name === 'SequelizeUniqueConstraintError') {
-      // Sequelize unique constraint errors
-      statusCode = 409;
-      errorResponse = {
-         success: false,
-         error: {
-            code: 'DUPLICATE_ENTRY',
-            message: 'Duplicate entry found',
-            details: err.errors.map((error) => ({
-               field: error.path,
-               message: `${error.path} already exists`,
-               value: error.value,
-            })),
-            timestamp: new Date().toISOString(),
-         },
-      };
-   } else if (err.name === 'SequelizeForeignKeyConstraintError') {
-      // Foreign key constraint errors
-      statusCode = 422;
-      errorResponse = {
-         success: false,
-         error: {
-            code: 'FOREIGN_KEY_CONSTRAINT',
-            message: 'Referenced record not found',
-            details: { field: err.field, value: err.value },
-            timestamp: new Date().toISOString(),
-         },
-      };
-   } else if (err.name === 'JsonWebTokenError') {
-      // JWT errors
-      statusCode = 401;
-      errorResponse = {
-         success: false,
-         error: {
-            code: 'INVALID_TOKEN',
-            message: 'Invalid authentication token',
-            timestamp: new Date().toISOString(),
-         },
-      };
-   } else {
-      // Unexpected errors
-      errorResponse = {
-         success: false,
-         error: {
-            code: 'INTERNAL_SERVER_ERROR',
-            message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message,
-            timestamp: new Date().toISOString(),
-         },
-      };
+   // Format error response
+   const errorResponse = formatErrorResponse(error);
 
-      // Log stack trace for unexpected errors
-      logger.error('Unexpected Error', {
-         message: err.message,
-         stack: err.stack,
-         url: req.originalUrl,
-         method: req.method,
-      });
-   }
-
+   // Send error response
    res.status(statusCode).json(errorResponse);
-};
+}
 
 /**
- * 404 Not Found middleware
+ * Handle 404 - Not Found
+ * Creates standardized 404 responses
  */
-const notFoundHandler = (req, res) => {
-   const errorResponse = {
-      success: false,
-      error: {
-         code: 'NOT_FOUND',
-         message: `Route ${req.originalUrl} not found`,
-         timestamp: new Date().toISOString(),
-      },
-   };
-
-   res.status(404).json(errorResponse);
-};
+function notFoundHandler(req, res, next) {
+   const error = ErrorFactory.notFound(`Route ${req.method} ${req.originalUrl}`);
+   next(error);
+}
 
 /**
  * Request logging middleware
  */
-const requestLogger = (req, res, next) => {
+function requestLogger(req, res, next) {
    const startTime = Date.now();
 
    // Log request
@@ -148,22 +93,41 @@ const requestLogger = (req, res, next) => {
    });
 
    next();
-};
+}
 
 /**
- * Async error wrapper
- * Wraps async route handlers to catch rejected promises
+ * Async error handler wrapper
+ * Catches async errors and passes to error handler
  */
-const asyncHandler = (fn) => {
+function asyncHandler(fn) {
    return (req, res, next) => {
       Promise.resolve(fn(req, res, next)).catch(next);
    };
-};
+}
+
+/**
+ * Express async error wrapper for route handlers
+ * Usage: router.get('/route', catchAsync(async (req, res) => { ... }))
+ */
+function catchAsync(fn) {
+   return (req, res, next) => {
+      Promise.resolve(fn(req, res, next)).catch((err) => {
+         // Log async handler error
+         logError(err, {
+            handler: 'asyncHandler',
+            method: req.method,
+            url: req.url,
+            user: req.user?.id,
+         });
+         next(err);
+      });
+   };
+}
 
 /**
  * Health check middleware
  */
-const healthCheck = async (req, res) => {
+async function healthCheck(req, res) {
    try {
       const { dbManager } = require('../models/database');
       const { modelRegistry } = require('../models');
@@ -200,12 +164,44 @@ const healthCheck = async (req, res) => {
          },
       });
    }
-};
+}
+
+/**
+ * Process exit handler for uncaught exceptions
+ * Should only be used as last resort - proper error handling is preferred
+ */
+function setupProcessErrorHandlers() {
+   // Handle uncaught exceptions
+   process.on('uncaughtException', (err) => {
+      logError(err, {
+         type: 'uncaughtException',
+         fatal: true,
+      });
+
+      // Give time for logging then exit
+      setTimeout(() => {
+         process.exit(1);
+      }, 1000);
+   });
+
+   // Handle unhandled promise rejections
+   process.on('unhandledRejection', (reason, promise) => {
+      const err = reason instanceof Error ? reason : new Error(reason);
+      logError(err, {
+         type: 'unhandledRejection',
+         promise: promise.toString(),
+      });
+
+      // Don't exit on unhandled rejections - just log them
+   });
+}
 
 module.exports = {
    errorHandler,
    notFoundHandler,
    requestLogger,
    asyncHandler,
+   catchAsync,
    healthCheck,
+   setupProcessErrorHandlers,
 };

@@ -7,60 +7,72 @@ const { defineSchool } = require('../modules/school/models/School');
 const { defineClass } = require('../modules/school/models/Class');
 const { defineSection } = require('../modules/school/models/Section');
 const { defineBoardCompliance } = require('../modules/school/models/BoardCompliance');
+const { defineCBSECompliance } = require('../modules/school/models/CBSECompliance');
+const { defineCISCECompliance } = require('../modules/school/models/CISCECompliance');
+const { defineStateBoardCompliance } = require('../modules/school/models/StateBoardCompliance');
+const { defineInternationalBoardCompliance } = require('../modules/school/models/InternationalBoardCompliance');
 const { defineNEPCompliance } = require('../modules/school/models/NEPCompliance');
 const { defineUDISESchool } = require('../modules/school/models/UDISESchool');
 const { defineUDISEClassInfrastructure } = require('../modules/school/models/UDISEClassInfrastructure');
 const { defineUDISEFacilities } = require('../modules/school/models/UDISEFacilities');
+const { defineUDISEStudent } = require('../modules/school/models/UDISEStudent');
 const { defineStudent } = require('./Student');
 const { defineAcademicYear } = require('./AcademicYear');
 const { defineStudentEnrollment } = require('./StudentEnrollment');
 const { defineStudentDocument } = require('./StudentDocument');
 const { logger, logSystem, logError } = require('../utils/logger');
 
+// Fee Management Models
+const { defineFeeStructure } = require('../modules/fee/models/FeeStructure');
+const { defineStudentFee } = require('../modules/fee/models/StudentFee');
+const { defineFeeCollection } = require('../modules/fee/models/FeeCollection');
+const { defineFeeInstallment } = require('../modules/fee/models/FeeInstallment');
+const { defineFeeDiscount } = require('../modules/fee/models/FeeDiscount');
+const { defineStudentFeeDiscount } = require('../modules/fee/models/StudentFeeDiscount');
+
+// UDISE+ Registration System Models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
+// const UdiseSchoolRegistrationModel = require('./UdiseSchoolRegistration');
+// const UdiseCensusDataModel = require('./UdiseCensusData');
+// const UdiseComplianceRecordModel = require('./UdiseComplianceRecord');
+// const UdiseIntegrationLogModel = require('./UdiseIntegrationLog');
+
 /**
  * Model registry for system and tenant databases
  * Manages model definitions and associations
  */
-class ModelRegistry {
-   constructor() {
-      this.systemModels = {};
-      this.tenantModels = new Map();
-      this.initialized = false;
-   }
+function createModelRegistry() {
+   let systemModels = {};
+   const tenantModels = new Map();
+   let initialized = false;
 
    /**
-    * Initialize system models
+    * Initialize system-wide models (Trust, SystemUser, etc.)
     */
-   async initializeSystemModels() {
+   async function initializeSystemModels() {
       try {
-         if (this.initialized) {
-            return this.systemModels;
+         if (initialized) {
+            return systemModels;
          }
 
-         logSystem('Initializing system models');
+         logSystem('Initializing system models...');
 
-         // Get system database connection
-         const systemDB = await dbManager.initializeSystemDB();
+         const systemDB = await dbManager.getSystemDB();
 
          // Define system models
-         this.systemModels.Trust = defineTrustModel(systemDB);
-         this.systemModels.SystemUser = defineSystemUserModel(systemDB);
-         this.systemModels.SystemAuditLog = defineSystemAuditLogModel(systemDB);
-         this.systemModels.SetupConfiguration = defineSetupConfiguration(systemDB);
+         systemModels.Trust = defineTrustModel(systemDB);
+         systemModels.SystemUser = defineSystemUserModel(systemDB);
+         systemModels.SystemAuditLog = defineSystemAuditLogModel(systemDB);
 
-         // Set up associations
-         this.setupSystemAssociations();
+         // Setup system associations
+         await setupSystemAssociations();
 
-         // Sync database schema in development
-         if (process.env.NODE_ENV === 'development') {
-            await systemDB.sync({ alter: true });
-            logSystem('System database schema synchronized');
-         }
+         // Sync system database
+         await systemDB.sync({ alter: true });
 
-         this.initialized = true;
+         initialized = true;
          logSystem('System models initialized successfully');
 
-         return this.systemModels;
+         return systemModels;
       } catch (error) {
          logError(error, { context: 'initializeSystemModels' });
          throw error;
@@ -68,92 +80,106 @@ class ModelRegistry {
    }
 
    /**
-    * Setup system model associations
+    * Setup associations for system models
     */
-   setupSystemAssociations() {
-      const { Trust, SystemUser, SystemAuditLog } = this.systemModels;
+   async function setupSystemAssociations() {
+      const { Trust, SystemUser, SystemAuditLog } = systemModels;
 
-      // SystemUser associations
-      if (SystemUser.associate) {
-         SystemUser.associate(this.systemModels);
+      // Trust-SystemUser associations
+      if (Trust && SystemUser && SystemUser.associate) {
+         SystemUser.associate(systemModels);
       }
 
-      // SystemAuditLog associations
-      if (SystemAuditLog.associate) {
-         SystemAuditLog.associate(this.systemModels);
+      if (SystemAuditLog && SystemAuditLog.associate) {
+         SystemAuditLog.associate(systemModels);
       }
-
-      logSystem('System model associations configured');
    }
 
    /**
     * Get system models
     */
-   getSystemModels() {
-      if (!this.initialized) {
+   async function getSystemModels() {
+      if (!initialized) {
          throw new Error('System models not initialized');
       }
-      return this.systemModels;
+      return systemModels;
    }
 
    /**
-    * Initialize tenant models for a specific tenant
+    * Initialize tenant-specific models
     */
-   async initializeTenantModels(tenantCode) {
+   async function initializeTenantModels(tenantCode) {
       try {
          logSystem(`Initializing tenant models for: ${tenantCode}`);
 
-         // Get tenant database connection
-         const tenantDB = await dbManager.getTenantDB(tenantCode);
-
-         // Define tenant models (complete academic system)
-         const tenantModels = {
-            // User model (tenant-specific users)
-            User: this.defineTenantUserModel(tenantDB),
-
-            // User profile model
-            UserProfile: defineUserProfile(tenantDB),
-
-            // School management models
-            School: defineSchool(tenantDB),
-            Class: defineClass(tenantDB),
-            Section: defineSection(tenantDB),
-
-            // Board compliance and NEP models
-            BoardCompliance: defineBoardCompliance(tenantDB),
-            NEPCompliance: defineNEPCompliance(tenantDB),
-
-            // UDISE+ government compliance models
-            UDISESchool: defineUDISESchool(tenantDB),
-            UDISEClassInfrastructure: defineUDISEClassInfrastructure(tenantDB),
-            UDISEFacilities: defineUDISEFacilities(tenantDB),
-
-            // Academic year management
-            AcademicYear: defineAcademicYear(tenantDB),
-
-            // Student lifecycle models
-            Student: defineStudent(tenantDB),
-            StudentEnrollment: defineStudentEnrollment(tenantDB),
-            StudentDocument: defineStudentDocument(tenantDB),
-
-            // Audit log for tenant operations
-            AuditLog: this.defineTenantAuditLogModel(tenantDB),
-         };
-
-         // Set up tenant associations
-         this.setupTenantAssociations(tenantModels);
-
-         // Sync database schema in development
-         if (process.env.NODE_ENV === 'development') {
-            await tenantDB.sync({ alter: true });
-            logSystem(`Tenant database schema synchronized for: ${tenantCode}`);
+         if (tenantModels.has(tenantCode)) {
+            return tenantModels.get(tenantCode);
          }
 
-         // Store tenant models
-         this.tenantModels.set(tenantCode, tenantModels);
+         const tenantDB = await dbManager.getTenantDB(tenantCode);
 
+         // Define tenant models
+         const models = {};
+
+         // User management models
+         models.User = defineTenantUserModel(tenantDB);
+         models.UserProfile = defineUserProfile(tenantDB);
+
+         // School management models
+         models.School = defineSchool(tenantDB);
+         models.Class = defineClass(tenantDB);
+         models.Section = defineSection(tenantDB);
+
+         // Academic models
+         models.AcademicYear = defineAcademicYear(tenantDB);
+
+         // Student models
+         models.Student = defineStudent(tenantDB);
+         models.StudentEnrollment = defineStudentEnrollment(tenantDB);
+         models.StudentDocument = defineStudentDocument(tenantDB);
+
+         // Compliance models
+         models.BoardCompliance = defineBoardCompliance(tenantDB);
+         models.CBSECompliance = defineCBSECompliance(tenantDB);
+         models.CISCECompliance = defineCISCECompliance(tenantDB);
+         models.StateBoardCompliance = defineStateBoardCompliance(tenantDB);
+         models.InternationalBoardCompliance = defineInternationalBoardCompliance(tenantDB);
+         models.NEPCompliance = defineNEPCompliance(tenantDB);
+
+         // UDISE models
+         models.UDISESchool = defineUDISESchool(tenantDB);
+         models.UDISEClassInfrastructure = defineUDISEClassInfrastructure(tenantDB);
+         models.UDISEFacilities = defineUDISEFacilities(tenantDB);
+         models.UDISEStudent = defineUDISEStudent(tenantDB);
+
+         // Fee management models
+         models.FeeStructure = defineFeeStructure(tenantDB);
+         models.StudentFee = defineStudentFee(tenantDB);
+         models.FeeCollection = defineFeeCollection(tenantDB);
+         models.FeeInstallment = defineFeeInstallment(tenantDB);
+         models.FeeDiscount = defineFeeDiscount(tenantDB);
+         models.StudentFeeDiscount = defineStudentFeeDiscount(tenantDB);
+
+         // UDISE+ Registration System models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
+         // models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
+         // models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
+         // models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
+         // models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
+
+         // Setup and audit models
+         models.SetupConfiguration = defineSetupConfiguration(tenantDB);
+         models.AuditLog = defineTenantAuditLogModel(tenantDB);
+
+         // Setup associations
+         await setupTenantAssociations(models);
+
+         // Sync tenant database
+         await tenantDB.sync({ alter: true });
+
+         tenantModels.set(tenantCode, models);
          logSystem(`Tenant models initialized successfully for: ${tenantCode}`);
-         return tenantModels;
+
+         return models;
       } catch (error) {
          logError(error, { context: 'initializeTenantModels', tenantCode });
          throw error;
@@ -161,19 +187,26 @@ class ModelRegistry {
    }
 
    /**
-    * Define tenant user model (Phase 2B expansion)
+    * Define tenant User model
     */
-   defineTenantUserModel(sequelize) {
+   function defineTenantUserModel(sequelize) {
       const { DataTypes } = require('sequelize');
-      const { USER_ROLES, USER_STATUS } = require('../config/business-constants');
 
-      return sequelize.define(
+      const User = sequelize.define(
          'User',
          {
             id: {
                type: DataTypes.INTEGER,
                primaryKey: true,
                autoIncrement: true,
+            },
+            school_id: {
+               type: DataTypes.INTEGER,
+               allowNull: false,
+               references: {
+                  model: 'schools',
+                  key: 'id',
+               },
             },
             username: {
                type: DataTypes.STRING(100),
@@ -182,21 +215,17 @@ class ModelRegistry {
             },
             email: {
                type: DataTypes.STRING(255),
-               allowNull: true,
+               allowNull: false,
                unique: true,
                validate: { isEmail: true },
             },
-            password: {
+            password_hash: {
                type: DataTypes.STRING(255),
                allowNull: false,
             },
             role: {
-               type: DataTypes.STRING(50),
+               type: DataTypes.ENUM('admin', 'teacher', 'student', 'parent'),
                allowNull: false,
-               defaultValue: 'STUDENT',
-               validate: {
-                  isIn: [['STUDENT', 'TEACHER', 'STAFF', 'PRINCIPAL', 'ADMIN', 'TRUST_ADMIN']],
-               },
             },
             is_active: {
                type: DataTypes.BOOLEAN,
@@ -220,23 +249,43 @@ class ModelRegistry {
             timestamps: true,
             createdAt: 'created_at',
             updatedAt: 'updated_at',
+            indexes: [
+               {
+                  name: 'user_school_id_idx',
+                  fields: ['school_id'],
+               },
+               {
+                  name: 'user_role_idx',
+                  fields: ['role'],
+               },
+            ],
          }
       );
+
+      return User;
    }
 
    /**
-    * Define tenant audit log model
+    * Define tenant AuditLog model
     */
-   defineTenantAuditLogModel(sequelize) {
+   function defineTenantAuditLogModel(sequelize) {
       const { DataTypes } = require('sequelize');
 
-      return sequelize.define(
+      const AuditLog = sequelize.define(
          'AuditLog',
          {
             id: {
                type: DataTypes.INTEGER,
                primaryKey: true,
                autoIncrement: true,
+            },
+            school_id: {
+               type: DataTypes.INTEGER,
+               allowNull: false,
+               references: {
+                  model: 'schools',
+                  key: 'id',
+               },
             },
             user_id: {
                type: DataTypes.INTEGER,
@@ -251,10 +300,14 @@ class ModelRegistry {
                allowNull: false,
             },
             entity_id: {
-               type: DataTypes.STRING(50),
+               type: DataTypes.INTEGER,
                allowNull: true,
             },
-            changes: {
+            old_values: {
+               type: DataTypes.JSON,
+               allowNull: true,
+            },
+            new_values: {
                type: DataTypes.JSON,
                allowNull: true,
             },
@@ -262,23 +315,26 @@ class ModelRegistry {
                type: DataTypes.STRING(45),
                allowNull: true,
             },
-            metadata: {
-               type: DataTypes.JSON,
+            user_agent: {
+               type: DataTypes.TEXT,
                allowNull: true,
             },
          },
          {
             tableName: 'audit_logs',
-            timestamps: false,
+            timestamps: true,
             createdAt: 'created_at',
+            updatedAt: 'updated_at',
          }
       );
+
+      return AuditLog;
    }
 
    /**
-    * Setup tenant model associations
+    * Setup associations for tenant models
     */
-   setupTenantAssociations(tenantModels) {
+   async function setupTenantAssociations(models) {
       const {
          User,
          UserProfile,
@@ -290,254 +346,151 @@ class ModelRegistry {
          StudentEnrollment,
          StudentDocument,
          BoardCompliance,
+         CBSECompliance,
+         CISCECompliance,
+         StateBoardCompliance,
+         InternationalBoardCompliance,
          NEPCompliance,
          UDISESchool,
          UDISEClassInfrastructure,
          UDISEFacilities,
+         UDISEStudent,
+         FeeStructure,
+         StudentFee,
+         FeeCollection,
+         FeeInstallment,
+         FeeDiscount,
+         StudentFeeDiscount,
          AuditLog,
-      } = tenantModels;
+      } = models;
 
-      // User associations
-      User.hasOne(UserProfile, {
-         foreignKey: 'user_id',
-         as: 'profile',
-      });
-
-      UserProfile.belongsTo(User, {
-         foreignKey: 'user_id',
-         as: 'user',
-      });
-
-      User.hasOne(Student, {
-         foreignKey: 'user_id',
-         as: 'studentProfile',
-      });
-
-      // School associations
-      School.hasMany(Class, {
-         foreignKey: 'school_id',
-         as: 'classes',
-      });
-
-      School.hasMany(Student, {
-         foreignKey: 'school_id',
-         as: 'students',
-      });
-
-      School.hasMany(AcademicYear, {
-         foreignKey: 'school_id',
-         as: 'academicYears',
-      });
-
-      // Board compliance associations
-      School.hasOne(BoardCompliance, {
-         foreignKey: 'school_id',
-         as: 'boardCompliance',
-      });
-
-      BoardCompliance.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      // NEP compliance associations
-      School.hasOne(NEPCompliance, {
-         foreignKey: 'school_id',
-         as: 'nepCompliance',
-      });
-
-      NEPCompliance.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      // UDISE+ compliance associations
-      School.hasOne(UDISESchool, {
-         foreignKey: 'school_id',
-         as: 'udiseRegistration',
-      });
-
-      UDISESchool.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      UDISESchool.hasMany(UDISEClassInfrastructure, {
-         foreignKey: 'udise_school_id',
-         as: 'classInfrastructure',
-      });
-
-      UDISEClassInfrastructure.belongsTo(UDISESchool, {
-         foreignKey: 'udise_school_id',
-         as: 'udiseSchool',
-      });
-
-      UDISESchool.hasMany(UDISEFacilities, {
-         foreignKey: 'udise_school_id',
-         as: 'facilities',
-      });
-
-      UDISEFacilities.belongsTo(UDISESchool, {
-         foreignKey: 'udise_school_id',
-         as: 'udiseSchool',
-      });
-
-      // Class associations
-      Class.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      Class.hasMany(Section, {
-         foreignKey: 'class_id',
-         as: 'sections',
-      });
-
-      Class.hasMany(Student, {
-         foreignKey: 'class_id',
-         as: 'students',
-      });
-
-      Class.hasMany(StudentEnrollment, {
-         foreignKey: 'class_id',
-         as: 'enrollments',
-      });
-
-      // Section associations
-      Section.belongsTo(Class, {
-         foreignKey: 'class_id',
-         as: 'class',
-      });
-
-      Section.hasMany(Student, {
-         foreignKey: 'section_id',
-         as: 'students',
-      });
-
-      Section.hasMany(StudentEnrollment, {
-         foreignKey: 'section_id',
-         as: 'enrollments',
-      });
-
-      // Academic Year associations
-      AcademicYear.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      // Student associations
-      Student.belongsTo(User, {
-         foreignKey: 'user_id',
-         as: 'user',
-      });
-
-      Student.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      Student.belongsTo(Class, {
-         foreignKey: 'class_id',
-         as: 'class',
-      });
-
-      Student.belongsTo(Section, {
-         foreignKey: 'section_id',
-         as: 'section',
-      });
-
-      Student.hasMany(StudentEnrollment, {
-         foreignKey: 'student_id',
-         as: 'enrollments',
-      });
-
-      Student.hasMany(StudentDocument, {
-         foreignKey: 'student_id',
-         as: 'documents',
-      });
-
-      // Student Enrollment associations
-      StudentEnrollment.belongsTo(Student, {
-         foreignKey: 'student_id',
-         as: 'student',
-      });
-
-      StudentEnrollment.belongsTo(School, {
-         foreignKey: 'school_id',
-         as: 'school',
-      });
-
-      StudentEnrollment.belongsTo(Class, {
-         foreignKey: 'class_id',
-         as: 'class',
-      });
-
-      StudentEnrollment.belongsTo(Section, {
-         foreignKey: 'section_id',
-         as: 'section',
-      });
-
-      // Student Document associations
-      StudentDocument.belongsTo(Student, {
-         foreignKey: 'student_id',
-         as: 'student',
-      });
-
-      // Audit Log associations
-      AuditLog.belongsTo(User, {
-         foreignKey: 'user_id',
-         as: 'user',
-      });
-
-      User.hasMany(AuditLog, {
-         foreignKey: 'user_id',
-         as: 'auditLogs',
+      // Setup all model associations here
+      // Each model's associate method should be called if it exists
+      Object.values(models).forEach((model) => {
+         if (model.associate && typeof model.associate === 'function') {
+            model.associate(models);
+         }
       });
    }
 
    /**
-    * Get tenant models for a specific tenant
+    * Get tenant models
     */
-   getTenantModels(tenantCode) {
-      if (!this.tenantModels.has(tenantCode)) {
+   async function getTenantModels(tenantCode) {
+      if (!tenantModels.has(tenantCode)) {
          throw new Error(`Tenant models not initialized for: ${tenantCode}`);
       }
-      return this.tenantModels.get(tenantCode);
+      return tenantModels.get(tenantCode);
    }
 
    /**
     * Health check for model registry
     */
-   async healthCheck() {
+   async function healthCheck() {
       const health = {
-         systemModels: Object.keys(this.systemModels).length,
-         tenantModels: this.tenantModels.size,
-         initialized: this.initialized,
-         activeTenants: Array.from(this.tenantModels.keys()),
+         systemModels: Object.keys(systemModels).length,
+         tenantModels: tenantModels.size,
+         initialized: initialized,
+         activeTenants: Array.from(tenantModels.keys()),
       };
 
       return health;
    }
+
+   return {
+      initializeSystemModels,
+      setupSystemAssociations,
+      getSystemModels,
+      initializeTenantModels,
+      defineTenantUserModel,
+      defineTenantAuditLogModel,
+      setupTenantAssociations,
+      getTenantModels,
+      healthCheck,
+   };
 }
 
 // Create singleton instance
-const modelRegistry = new ModelRegistry();
+const modelRegistry = new createModelRegistry();
+
+// For UDISE and other services that need to initialize models directly
+function createTenantModels(tenantDB) {
+   const models = {};
+   
+   // User management models
+   models.User = modelRegistry.defineTenantUserModel(tenantDB);
+   models.UserProfile = defineUserProfile(tenantDB);
+
+   // School management models
+   models.School = defineSchool(tenantDB);
+   models.Class = defineClass(tenantDB);
+   models.Section = defineSection(tenantDB);
+
+   // Academic models
+   models.AcademicYear = defineAcademicYear(tenantDB);
+
+   // Student models
+   models.Student = defineStudent(tenantDB);
+   models.StudentEnrollment = defineStudentEnrollment(tenantDB);
+   models.StudentDocument = defineStudentDocument(tenantDB);
+
+   // Compliance models
+   models.BoardCompliance = defineBoardCompliance(tenantDB);
+   models.CBSECompliance = defineCBSECompliance(tenantDB);
+   models.CISCECompliance = defineCISCECompliance(tenantDB);
+   models.StateBoardCompliance = defineStateBoardCompliance(tenantDB);
+   models.InternationalBoardCompliance = defineInternationalBoardCompliance(tenantDB);
+   models.NEPCompliance = defineNEPCompliance(tenantDB);
+
+   // UDISE models (old)
+   models.UDISESchool = defineUDISESchool(tenantDB);
+   models.UDISEClassInfrastructure = defineUDISEClassInfrastructure(tenantDB);
+   models.UDISEFacilities = defineUDISEFacilities(tenantDB);
+   models.UDISEStudent = defineUDISEStudent(tenantDB);
+
+   // Fee management models
+   models.FeeStructure = defineFeeStructure(tenantDB);
+   models.StudentFee = defineStudentFee(tenantDB);
+   models.FeeCollection = defineFeeCollection(tenantDB);
+   models.FeeInstallment = defineFeeInstallment(tenantDB);
+   models.FeeDiscount = defineFeeDiscount(tenantDB);
+   models.StudentFeeDiscount = defineStudentFeeDiscount(tenantDB);
+
+   // UDISE+ Registration System models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
+   // models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
+   // models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
+   // models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
+   // models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
+
+   // Setup and audit models
+   models.SetupConfiguration = defineSetupConfiguration(tenantDB);
+   models.AuditLog = modelRegistry.defineTenantAuditLogModel(tenantDB);
+
+   // Setup associations
+   Object.values(models).forEach(model => {
+      if (model.associate && typeof model.associate === 'function') {
+         model.associate(models);
+      }
+   });
+
+   return models;
+}
 
 // Export convenience functions
-module.exports = {
-   ModelRegistry,
-   modelRegistry,
+module.exports = createTenantModels;
 
-   // System model getters
-   getSystemModels: () => modelRegistry.getSystemModels(),
-   getTrustModel: () => modelRegistry.getSystemModels().Trust,
-   getSystemUserModel: () => modelRegistry.getSystemModels().SystemUser,
-   getSystemAuditLogModel: () => modelRegistry.getSystemModels().SystemAuditLog,
+module.exports.ModelRegistry = createModelRegistry;
+module.exports.modelRegistry = modelRegistry;
 
-   // Tenant model getters
-   getTenantModels: (tenantCode) => modelRegistry.getTenantModels(tenantCode),
+// System model getters
+module.exports.getSystemModels = () => modelRegistry.getSystemModels();
+module.exports.getTrustModel = () => modelRegistry.getSystemModels().Trust;
+module.exports.getSystemUserModel = () => modelRegistry.getSystemModels().SystemUser;
+module.exports.getSystemAuditLogModel = () => modelRegistry.getSystemModels().SystemAuditLog;
 
-   // Initialize functions
-   initializeSystemModels: () => modelRegistry.initializeSystemModels(),
-   initializeTenantModels: (tenantCode) => modelRegistry.initializeTenantModels(tenantCode),
-};
+// Tenant model getters
+module.exports.getTenantModels = (tenantCode) => modelRegistry.getTenantModels(tenantCode);
+
+// Initialize functions
+module.exports.initializeSystemModels = () => modelRegistry.initializeSystemModels();
+module.exports.initializeTenantModels = (tenantCode) => modelRegistry.initializeTenantModels(tenantCode);

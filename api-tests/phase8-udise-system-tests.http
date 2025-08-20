@@ -1,0 +1,316 @@
+# Phase 8 - UDISE+ School Registration System API Tests
+# Test suite for comprehensive UDISE+ Registration, Census, and Compliance System
+# Server: http://localhost:3000
+
+### Variables
+@baseUrl = http://localhost:3000/api/v1
+@systemToken = {{$dotenv SYSTEM_TOKEN}}
+@schoolId = school_demo_001
+@academicYear = 2024-25
+
+### 1. System Health Check
+GET {{baseUrl}}/system/health
+Content-Type: application/json
+
+### 2. UDISE Module Health Check
+GET {{baseUrl}}/udise/health
+Content-Type: application/json
+
+### 3. UDISE Module Status
+GET {{baseUrl}}/udise/status
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 4. Create UDISE School Registration
+POST {{baseUrl}}/udise/registration
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "school_id": "{{schoolId}}",
+  "school_name_english": "Demo Government Primary School",
+  "school_name_hindi": "डेमो सरकारी प्राथमिक विद्यालय",
+  "state_code": "06",
+  "district_code": "001",
+  "block_code": "0001",
+  "village_code": "000001",
+  "school_category": "primary",
+  "school_management": "government",
+  "school_type": "co_educational",
+  "recognition_status": "recognized",
+  "affiliation_board": "State Board",
+  "affiliation_number": "STATE001",
+  "academic_year": "{{academicYear}}",
+  "total_classrooms": 8,
+  "boundary_wall": true,
+  "drinking_water_available": true,
+  "electricity_available": true,
+  "toilet_boys": 2,
+  "toilet_girls": 2,
+  "library_available": true,
+  "playground_available": true,
+  "computer_lab": false,
+  "internet_connectivity": false
+}
+
+### 5. Get UDISE Registrations
+GET {{baseUrl}}/udise/registration?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 6. Get Single UDISE Registration
+GET {{baseUrl}}/udise/registration/1
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 7. Validate UDISE Registration
+POST {{baseUrl}}/udise/registration/1/validate
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 8. Update UDISE Registration
+PUT {{baseUrl}}/udise/registration/1
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "total_classrooms": 10,
+  "computer_lab": true,
+  "internet_connectivity": true,
+  "inspection_grade": "A",
+  "compliance_score": 85.5
+}
+
+### 9. Submit UDISE Registration for Approval
+POST {{baseUrl}}/udise/registration/1/submit
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "submission_remarks": "All required documentation completed and verified"
+}
+
+### 10. Create Census Data - September 30 Collection
+POST {{baseUrl}}/udise/census
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "udise_registration_id": 1,
+  "school_id": "{{schoolId}}",
+  "academic_year": "{{academicYear}}",
+  "census_date": "2024-09-30",
+  "data_collection_phase": "september_30",
+  "enrollment_class_1_boys": 15,
+  "enrollment_class_1_girls": 12,
+  "enrollment_class_2_boys": 18,
+  "enrollment_class_2_girls": 16,
+  "enrollment_class_3_boys": 14,
+  "enrollment_class_3_girls": 13,
+  "enrollment_class_4_boys": 16,
+  "enrollment_class_4_girls": 15,
+  "enrollment_class_5_boys": 12,
+  "enrollment_class_5_girls": 14,
+  "sc_students_boys": 8,
+  "sc_students_girls": 7,
+  "st_students_boys": 4,
+  "st_students_girls": 3,
+  "obc_students_boys": 12,
+  "obc_students_girls": 10,
+  "total_teachers": 6,
+  "male_teachers": 3,
+  "female_teachers": 3,
+  "trained_teachers": 5,
+  "total_classrooms": 10,
+  "classrooms_good_condition": 8,
+  "classrooms_minor_repair": 2,
+  "classrooms_major_repair": 0,
+  "boundary_wall": true,
+  "drinking_water": true,
+  "toilet_facility": true,
+  "electricity": true,
+  "library": true,
+  "playground": true,
+  "midday_meal_available": true,
+  "total_grant_received": 500000.00,
+  "grant_utilized": 450000.00
+}
+
+### 11. Get Census Data by School
+GET {{baseUrl}}/udise/census/school/{{schoolId}}?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 12. Get Enrollment Statistics
+GET {{baseUrl}}/udise/census/1/stats
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 13. Update Census Data
+PUT {{baseUrl}}/udise/census/1
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "enrollment_class_1_boys": 16,
+  "enrollment_class_1_girls": 13,
+  "data_status": "validated",
+  "remarks": "Data verified and validated by headmaster"
+}
+
+### 14. Create Compliance Record
+POST {{baseUrl}}/udise/compliance
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "udise_registration_id": 1,
+  "school_id": "{{schoolId}}",
+  "academic_year": "{{academicYear}}",
+  "compliance_date": "2024-08-20",
+  "rte_compliance_status": "compliant",
+  "rte_25_percent_admission": true,
+  "rte_infrastructure_norms": true,
+  "rte_teacher_qualification": true,
+  "rte_ptr_compliance": true,
+  "nep_2020_implementation": "partially_implemented",
+  "foundational_literacy_numeracy": true,
+  "multilingual_education": true,
+  "assessment_reforms": false,
+  "vocational_education": false,
+  "building_safety_certificate": true,
+  "fire_safety_certificate": true,
+  "playground_space_adequate": true,
+  "library_books_adequate": true,
+  "drinking_water_safe": true,
+  "toilet_facilities_adequate": true,
+  "teacher_verification_complete": true,
+  "teacher_training_updated": true,
+  "staff_police_verification": true,
+  "fee_structure_approved": true,
+  "financial_audit_current": true,
+  "grant_utilization_compliant": true,
+  "transparency_financial": true,
+  "curriculum_board_approved": true,
+  "textbooks_prescribed": true,
+  "assessment_system_compliant": true,
+  "academic_calendar_followed": true,
+  "child_protection_policy": true,
+  "anti_ragging_measures": true,
+  "pocso_awareness": true,
+  "grievance_mechanism": true,
+  "digital_learning_implemented": false,
+  "data_privacy_compliant": true,
+  "technology_policy_exists": false,
+  "green_practices_adopted": true,
+  "waste_management_system": true,
+  "health_checkup_regular": true,
+  "nutrition_program_compliant": true,
+  "inspection_officer": "Mr. Rajesh Kumar",
+  "inspection_agency": "District Education Office"
+}
+
+### 15. Get Compliance Records by School
+GET {{baseUrl}}/udise/compliance/school/{{schoolId}}?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 16. Update Compliance Record
+PUT {{baseUrl}}/udise/compliance/1
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "digital_learning_implemented": true,
+  "technology_policy_exists": true,
+  "vocational_education": true,
+  "inspector_remarks": "Significant improvements noted in digital infrastructure",
+  "record_status": "approved"
+}
+
+### 17. Generate Registration Summary Report
+GET {{baseUrl}}/udise/reports/registration_summary?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 18. Generate Enrollment Statistics Report
+GET {{baseUrl}}/udise/reports/enrollment_statistics?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 19. Generate Compliance Dashboard Report
+GET {{baseUrl}}/udise/reports/compliance_dashboard?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 20. Generate Integration Status Report
+GET {{baseUrl}}/udise/reports/integration_status?date_from=2024-08-01&date_to=2024-08-31
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 21. Get UDISE Dashboard
+GET {{baseUrl}}/udise/dashboard?academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 22. Get Filtered Registrations - By State
+GET {{baseUrl}}/udise/registration?state_code=06&registration_status=submitted
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 23. Get Filtered Registrations - By District
+GET {{baseUrl}}/udise/registration?district_code=001&academic_year={{academicYear}}
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+### 24. Create Census Data - March 31 Collection
+POST {{baseUrl}}/udise/census
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+{
+  "udise_registration_id": 1,
+  "school_id": "{{schoolId}}",
+  "academic_year": "{{academicYear}}",
+  "census_date": "2025-03-31",
+  "data_collection_phase": "march_31",
+  "enrollment_class_1_boys": 14,
+  "enrollment_class_1_girls": 11,
+  "enrollment_class_2_boys": 17,
+  "enrollment_class_2_girls": 15,
+  "enrollment_class_3_boys": 13,
+  "enrollment_class_3_girls": 12,
+  "enrollment_class_4_boys": 15,
+  "enrollment_class_4_girls": 14,
+  "enrollment_class_5_boys": 11,
+  "enrollment_class_5_girls": 13,
+  "sc_students_boys": 7,
+  "sc_students_girls": 6,
+  "st_students_boys": 3,
+  "st_students_girls": 2,
+  "obc_students_boys": 11,
+  "obc_students_girls": 9,
+  "total_teachers": 6,
+  "male_teachers": 3,
+  "female_teachers": 3,
+  "trained_teachers": 6,
+  "data_status": "submitted",
+  "remarks": "End of year data collection - final numbers"
+}
+
+### 25. Complex Query - Multi-filter Registration Search
+GET {{baseUrl}}/udise/registration?state_code=06&school_management=government&school_category=primary&limit=20
+Content-Type: application/json
+Authorization: Bearer {{systemToken}}
+
+###
+# Test Results Expected:
+# 1. All UDISE registration operations should work seamlessly
+# 2. Census data collection for both September and March phases
+# 3. Comprehensive compliance tracking with scoring
+# 4. Multi-dimensional reporting capabilities
+# 5. Integration logging and monitoring
+# 6. Dashboard with real-time statistics
+# 7. Multi-tenant isolation maintained
+# 8. Government compliance standards met
+###
