@@ -1,0 +1,292 @@
+###
+# School ERP Validation Testing - Complete Test Suite
+# Use VS Code REST Client extension
+# Server should be running on localhost:3000
+###
+
+@baseUrl = http://localhost:3000
+
+###############################################
+# SYSTEM ADMIN API VALIDATION TESTS
+###############################################
+
+### 1. System Login - Valid (Should succeed)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 2. System Login - Missing Username (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "password": "admin123"
+}
+
+### 3. System Login - Empty Username (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "admin123"
+}
+
+### 4. System Login - Missing Password (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+### 5. System Login - Empty Password (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": ""
+}
+
+###############################################
+# WEB LOGIN VALIDATION TESTS (Q59 FIXES)
+###############################################
+
+### 6. Web Login - Valid System Admin (Should succeed)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin",
+  "password": "admin123"
+}
+
+### 7. Web Login - Missing Email (Should fail with validation error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "password": "admin123"
+}
+
+### 8. Web Login - Empty Email (Should fail with validation error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": "admin123"
+}
+
+### 9. Web Login - Missing Password (Should fail with validation error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin"
+}
+
+### 10. Web Login - Empty Password (Should fail with validation error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin",
+  "password": ""
+}
+
+### 11. Web Login - Both Empty (Should fail with validation error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": ""
+}
+
+### 12. Web Login - Invalid JSON (Should fail with 400 error)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin"
+  "password": "admin123"  // Missing comma - invalid JSON
+}
+
+###############################################
+# TENANT USER API VALIDATION TESTS
+###############################################
+
+### 13. Tenant Login - Valid (Requires demo tenant)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "demo_principal",
+  "password": "demo123"
+}
+
+### 14. Tenant Login - Missing Username (Should fail with validation error)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "password": "demo123"
+}
+
+### 15. Tenant Login - Empty Username (Should fail with validation error)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": "demo123"
+}
+
+### 16. Tenant Login - Missing Password (Should fail with validation error)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "demo_principal"
+}
+
+### 17. Tenant Login - Empty Password (Should fail with validation error)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "demo_principal",
+  "password": ""
+}
+
+###############################################
+# VALIDATION PATTERN CONSISTENCY TESTS
+###############################################
+
+### 18. Trust Creation - Valid (Requires authentication)
+# First login to get session
+POST {{baseUrl}}/api/v1/admin/system/trusts
+Content-Type: application/json
+
+{
+  "trust_name": "Test Education Trust",
+  "trust_code": "test_edu_trust",
+  "subdomain": "testedu",
+  "contact_email": "admin@testedu.school",
+  "contact_phone": "9876543210",
+  "address": "123 Education Street, Learning City"
+}
+
+### 19. Trust Creation - Invalid Email (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/trusts
+Content-Type: application/json
+
+{
+  "trust_name": "Test Education Trust",
+  "trust_code": "test_edu_trust",
+  "subdomain": "testedu",
+  "contact_email": "invalid-email",
+  "contact_phone": "9876543210",
+  "address": "123 Education Street, Learning City"
+}
+
+### 20. Trust Creation - Short Trust Name (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/trusts
+Content-Type: application/json
+
+{
+  "trust_name": "X",
+  "trust_code": "test_edu_trust",
+  "subdomain": "testedu",
+  "contact_email": "admin@testedu.school",
+  "contact_phone": "9876543210"
+}
+
+### 21. Trust Creation - Invalid Phone (Should fail with validation error)
+POST {{baseUrl}}/api/v1/admin/system/trusts
+Content-Type: application/json
+
+{
+  "trust_name": "Test Education Trust",
+  "trust_code": "test_edu_trust",
+  "subdomain": "testedu",
+  "contact_email": "admin@testedu.school",
+  "contact_phone": "123",
+  "address": "123 Education Street, Learning City"
+}
+
+###############################################
+# SYSTEM HEALTH & STATUS TESTS
+###############################################
+
+### 22. Health Check (Should always work)
+GET {{baseUrl}}/api/v1/admin/system/health
+
+### 23. System Status (Should always work)
+GET {{baseUrl}}/api/v1/status
+
+### 24. Web Health Check (Frontend route)
+GET {{baseUrl}}/health
+
+###############################################
+# ERROR HANDLING TESTS
+###############################################
+
+### 25. Invalid Route (Should return 404)
+GET {{baseUrl}}/api/v1/invalid/route
+
+### 26. Wrong HTTP Method (Should return 405 or appropriate error)
+DELETE {{baseUrl}}/api/v1/admin/system/health
+
+### 27. Invalid Content-Type (Should handle gracefully)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: text/plain
+
+admin:admin123
+
+### 28. Malformed JSON (Should return 400)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{ "username": "admin", "password": }
+
+###############################################
+# EXPECTED RESULTS
+###############################################
+
+# ✅ SHOULD SUCCEED:
+# - Tests 1, 6, 22, 23, 24
+# - Test 18 (if authenticated)
+# - Test 13 (if demo tenant exists)
+
+# ❌ SHOULD FAIL WITH VALIDATION ERRORS:
+# - Tests 2, 3, 4, 5, 7, 8, 9, 10, 11
+# - Tests 14, 15, 16, 17
+# - Tests 19, 20, 21
+
+# 🔧 SHOULD FAIL WITH HTTP ERRORS:
+# - Test 12: 400 (Invalid JSON)
+# - Test 25: 404 (Not Found)
+# - Test 26: 405 (Method Not Allowed)
+# - Test 27: 400 (Invalid Content-Type)
+# - Test 28: 400 (Malformed JSON)
+
+###
+# Instructions:
+# 1. Make sure server is running: node server.js
+# 2. Install REST Client extension in VS Code
+# 3. Click "Send Request" above each test
+# 4. Verify validation errors have proper format
+# 5. Check that consistent error messages are returned
+###

@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { logSystem, logError } = require('../utils/logger');
+const { systemAuthService } = require('../services/systemServices');
+const createUserService = require('../modules/user/services/UserService');
+const { systemUserValidationSchemas } = require('../models/SystemUser');
+const { userValidationSchemas } = require('../models');
 
 /**
  * Middleware to require authentication
@@ -81,31 +85,51 @@ router.post('/login', async (req, res) => {
    try {
       const { email, password, remember } = req.body;
 
-      // Basic validation
-      if (!email || !password) {
+      // Determine validation schema based on login type
+      const isSystemLogin = !email.includes('@') || email.includes('admin');
+
+      let validationSchema;
+      if (isSystemLogin) {
+         validationSchema = systemUserValidationSchemas.login;
+      } else {
+         validationSchema = userValidationSchemas.login;
+      }
+
+      // Validate input using proper schema
+      const { error } = validationSchema.validate(
+         {
+            username: email,
+            password,
+         },
+         {
+            abortEarly: false,
+            stripUnknown: true,
+            convert: true,
+         }
+      );
+
+      if (error) {
+         const validationErrors = {};
+         error.details.forEach((detail) => {
+            const key = detail.path[0];
+            validationErrors[key === 'username' ? 'email' : key] = detail.message;
+         });
+
          if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
             return res.json({
                success: false,
-               error: 'Email and password are required',
-               errors: {
-                  email: !email ? 'Email is required' : null,
-                  password: !password ? 'Password is required' : null,
-               },
+               error: 'Validation failed',
+               errors: validationErrors,
             });
          }
-         req.flash('error', 'Email and password are required');
+         req.flash('error', Object.values(validationErrors).join(', '));
          return res.redirect('/auth/login');
       }
-
-      // Determine if this is a system admin login or tenant user login
-      // System admin usernames typically don't have @ symbol
-      const isSystemLogin = !email.includes('@') || email.includes('admin');
 
       let authResult;
 
       if (isSystemLogin) {
          // Use existing system authentication API
-         const { systemAuthService } = require('../services/systemServices');
 
          try {
             authResult = await systemAuthService.login({

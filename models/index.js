@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const { dbManager } = require('./database');
 const { defineTrustModel } = require('./Trust');
 const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
@@ -485,6 +486,68 @@ function createTenantModels(tenantDB) {
    return models;
 }
 
+/**
+ * Validation schemas for tenant User model
+ */
+const { commonSchemas } = require('../utils/errors');
+
+const userValidationSchemas = {
+   create: Joi.object({
+      username: Joi.string()
+         .trim()
+         .lowercase()
+         .min(3)
+         .max(100)
+         .pattern(/^[a-z0-9_-]+$/)
+         .required()
+         .messages({
+            'string.empty': 'Username is required',
+            'string.pattern.base': 'Username can only contain lowercase letters, numbers, hyphens and underscores',
+            'string.min': 'Username must be at least 3 characters',
+            'string.max': 'Username cannot exceed 100 characters',
+         }),
+
+      email: commonSchemas.email,
+
+      password: commonSchemas.password,
+
+      role: Joi.string().valid('admin', 'teacher', 'student', 'parent').required().messages({
+         'any.only': 'Role must be one of: admin, teacher, student, parent',
+      }),
+
+      school_id: Joi.number().integer().positive().required(),
+   }),
+
+   update: Joi.object({
+      username: Joi.string()
+         .trim()
+         .lowercase()
+         .min(3)
+         .max(100)
+         .pattern(/^[a-z0-9_-]+$/)
+         .optional(),
+
+      email: Joi.string().email().max(255).optional(),
+
+      role: Joi.string().valid('admin', 'teacher', 'student', 'parent').optional(),
+
+      is_active: Joi.boolean().optional(),
+   }),
+
+   login: Joi.object({
+      username: Joi.string().trim().required(),
+      password: Joi.string().required(),
+   }),
+
+   changePassword: Joi.object({
+      currentPassword: Joi.string().required(),
+      newPassword: commonSchemas.password,
+      confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+         'any.only': 'Password confirmation does not match',
+      }),
+   }),
+};
+
 // Export convenience functions
 module.exports = createTenantModels;
 
@@ -499,6 +562,9 @@ module.exports.getSystemAuditLogModel = () => modelRegistry.getSystemModels().Sy
 
 // Tenant model getters
 module.exports.getTenantModels = (tenantCode) => modelRegistry.getTenantModels(tenantCode);
+
+// Validation schemas
+module.exports.userValidationSchemas = userValidationSchemas;
 
 // Initialize functions
 module.exports.initializeSystemModels = () => modelRegistry.initializeSystemModels();

@@ -1,6 +1,8 @@
 const express = require('express');
 const UserController = require('../controllers/UserController');
 const { authenticate, requireTrustAdmin } = require('../../../middleware/auth');
+const { validators } = require('../../../utils/errors');
+const { userValidationSchemas } = require('../../../models');
 
 const router = express.Router();
 const userController = new UserController();
@@ -15,7 +17,7 @@ const userController = new UserController();
  * @desc Authenticate tenant user
  * @access Public (within tenant)
  */
-router.post('/auth/login', (req, res) => {
+router.post('/auth/login', validators.validateBody(userValidationSchemas.login), (req, res) => {
    userController.authenticateUser(req, res);
 });
 
@@ -45,7 +47,7 @@ router.get('/', (req, res) => {
  * @desc Create a new user
  * @access Admin/Trust Admin
  */
-router.post('/', requireTrustAdmin, (req, res) => {
+router.post('/', requireTrustAdmin, validators.validateBody(userValidationSchemas.create), (req, res) => {
    userController.createUser(req, res);
 });
 
@@ -63,7 +65,7 @@ router.get('/:user_id', (req, res) => {
  * @desc Update user
  * @access Admin/Trust Admin/Self
  */
-router.put('/:user_id', (req, res) => {
+router.put('/:user_id', validators.validateBody(userValidationSchemas.update), (req, res) => {
    userController.updateUser(req, res);
 });
 

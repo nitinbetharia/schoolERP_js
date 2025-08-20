@@ -1,0 +1,145 @@
+###
+# Validation Testing - School ERP System
+# Use VS Code REST Client extension to run these tests
+# Make sure server is running on localhost:3000
+###
+
+@baseUrl = http://localhost:3000
+
+### Test 1: System Login - Valid Credentials
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Test 2: System Login - Missing Username (Should fail validation)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "password": "admin123"
+}
+
+### Test 3: System Login - Missing Password (Should fail validation)
+POST {{baseUrl}}/api/v1/admin/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+### Test 4: Web Login - Valid Credentials (System)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin",
+  "password": "admin123"
+}
+
+### Test 5: Web Login - Empty Email (Should fail validation)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": "admin123"
+}
+
+### Test 6: Web Login - Empty Password (Should fail validation)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin",
+  "password": ""
+}
+
+### Test 7: Web Login - Both Empty (Should fail validation)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "",
+  "password": ""
+}
+
+### Test 8: Tenant User Login - Demo School (Replace demo with actual subdomain)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "demo_principal",
+  "password": "demo123"
+}
+
+### Test 9: Tenant User Login - Missing Username (Should fail validation)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "password": "demo123"
+}
+
+### Test 10: Tenant User Login - Missing Password (Should fail validation)
+POST {{baseUrl}}/api/v1/users/auth/login
+Host: demo.localhost:3000
+Content-Type: application/json
+
+{
+  "username": "demo_principal"
+}
+
+### Test 11: Create System User - Valid Data
+POST {{baseUrl}}/api/v1/admin/system/users
+Content-Type: application/json
+# Note: This requires authentication - run system login first
+
+{
+  "username": "testadmin",
+  "email": "test@system.edu",
+  "password": "TestPassword123!",
+  "full_name": "Test Administrator"
+}
+
+### Test 12: Create System User - Invalid Email (Should fail validation)
+POST {{baseUrl}}/api/v1/admin/system/users
+Content-Type: application/json
+
+{
+  "username": "testadmin2",
+  "email": "invalid-email",
+  "password": "TestPassword123!",
+  "full_name": "Test Administrator"
+}
+
+### Test 13: Create System User - Weak Password (Should fail validation)
+POST {{baseUrl}}/api/v1/admin/system/users
+Content-Type: application/json
+
+{
+  "username": "testadmin3",
+  "email": "test3@system.edu",
+  "password": "weak",
+  "full_name": "Test Administrator"
+}
+
+### Test 14: Health Check (Should always work)
+GET {{baseUrl}}/api/v1/admin/system/health
+
+### Test 15: List Trusts (Requires authentication)
+GET {{baseUrl}}/api/v1/admin/system/trusts
+
+###
+# Instructions for running tests:
+# 1. Start the server: npm start or node server.js
+# 2. Open this file in VS Code
+# 3. Install REST Client extension if not installed
+# 4. Click "Send Request" above each test
+# 5. Check responses for validation errors
+###
