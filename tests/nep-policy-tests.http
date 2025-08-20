@@ -1,0 +1,169 @@
+### School ERP NEP Adoption Flag System Tests
+### Test the Board Compliance and NEP Policy Management APIs
+
+### Prerequisites:
+### 1. Server running on localhost:3000
+### 2. Valid authentication session
+### 3. Valid trust and school setup
+
+### Health Check
+GET http://localhost:3000/api/v1/admin/system/health
+Content-Type: application/json
+
+###
+
+### API Status Check
+GET http://localhost:3000/api/v1/status
+Content-Type: application/json
+
+###
+
+### =================
+### NEP POLICY TESTS
+### =================
+
+### Get effective NEP policy for a school
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/compliance/schools/1/nep-policy
+Content-Type: application/json
+
+###
+
+### Set NEP adoption policy at trust level
+### Requires: trust_admin or system_admin role
+PUT http://localhost:3000/api/v1/school/compliance/trust/nep-policy
+Content-Type: application/json
+
+{
+  "policy": "adopting",
+  "adoption_config": {
+    "phases": ["phase1", "phase2", "phase3"],
+    "current_phase": "phase1",
+    "target_completion": "2025-06-01",
+    "allow_school_override": true
+  },
+  "implementation_timeline": {
+    "curriculum_transition": "2024-04-01",
+    "assessment_framework": "2024-06-01",
+    "teacher_training": "2024-03-01",
+    "infrastructure_upgrade": "2024-05-01"
+  }
+}
+
+###
+
+### Set NEP adoption policy at school level (override trust policy)
+### Requires: school_admin, principal, trust_admin, or system_admin role
+PUT http://localhost:3000/api/v1/school/compliance/schools/1/nep-policy
+Content-Type: application/json
+
+{
+  "policy": "transition",
+  "adoption_config": {
+    "phases": ["phase1"],
+    "current_phase": "phase1",
+    "target_completion": "2025-12-31",
+    "gradual_implementation": true
+  },
+  "implementation_timeline": {
+    "curriculum_transition": "2025-04-01",
+    "assessment_framework": "2025-06-01",
+    "teacher_training": "2025-01-01",
+    "infrastructure_upgrade": "2025-03-01"
+  }
+}
+
+###
+
+### ========================
+### BOARD AFFILIATION TESTS
+### ========================
+
+### Get board compliance status for a school
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/compliance/schools/1/board-compliance
+Content-Type: application/json
+
+###
+
+### Set board affiliation for a school
+### Requires: school_admin, principal, trust_admin, or system_admin role
+PUT http://localhost:3000/api/v1/school/compliance/schools/1/board-affiliation
+Content-Type: application/json
+
+{
+  "board_type": "CBSE",
+  "affiliation_details": {
+    "code": "30123456",
+    "status": "affiliated",
+    "valid_from": "2024-04-01",
+    "valid_until": "2027-03-31",
+    "renewal_due": "2027-01-01"
+  },
+  "nep_compatibility": {
+    "status": "fully_compatible",
+    "assessment": "CBSE has fully adopted NEP 2020 framework",
+    "compliance_score": 95,
+    "areas_of_alignment": [
+      "flexible_curriculum",
+      "skill_based_assessment",
+      "multidisciplinary_approach",
+      "mother_tongue_education"
+    ]
+  },
+  "compliance_requirements": {
+    "academic_year": "april_march",
+    "curriculum_framework": "ncf_2023",
+    "assessment_pattern": "continuous_comprehensive",
+    "mandatory_subjects": [
+      "languages",
+      "mathematics", 
+      "science",
+      "social_studies",
+      "arts_education",
+      "physical_education"
+    ]
+  }
+}
+
+###
+
+### ==============
+### REPORTS TESTS
+### ==============
+
+### Get NEP compliance report
+### Requires: trust_admin or system_admin role
+GET http://localhost:3000/api/v1/school/compliance/reports/nep-compliance
+Content-Type: application/json
+
+###
+
+### Get NEP compliance report with filters
+### Requires: trust_admin or system_admin role
+GET http://localhost:3000/api/v1/school/compliance/reports/nep-compliance?adoption_status=adopting
+Content-Type: application/json
+
+###
+
+### ===============================
+### AUTHENTICATION FAILURE TESTS
+### ===============================
+
+### These should return 401 Unauthorized without authentication
+
+### Try to access NEP policy without authentication (should fail)
+GET http://localhost:3000/api/v1/school/compliance/schools/1/nep-policy
+# No Content-Type or authentication headers
+
+###
+
+### Try to set trust NEP policy without authentication (should fail)
+PUT http://localhost:3000/api/v1/school/compliance/trust/nep-policy
+# No Content-Type or authentication headers
+
+{
+  "policy": "adopting"
+}
+
+###

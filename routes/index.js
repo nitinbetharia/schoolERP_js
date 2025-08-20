@@ -5,18 +5,14 @@ const router = express.Router();
 const systemRoutes = require('./system');
 const setupRoutes = require('../modules/setup/routes/setupRoutes');
 const userRoutes = require('../modules/user/routes/userRoutes');
-const schoolRoutes = require('../modules/school/routes/schoolRoutes');
-const classRoutes = require('../modules/school/routes/classRoutes');
-const sectionRoutes = require('../modules/school/routes/sectionRoutes');
+const schoolModuleRoutes = require('../modules/school/routes');
 const studentRoutes = require('../modules/student/routes/studentRoutes');
 
 // Mount routes
 router.use('/admin/system', systemRoutes);
 router.use('/setup', setupRoutes);
 router.use('/users', userRoutes);
-router.use('/schools', schoolRoutes);
-router.use('/classes', classRoutes);
-router.use('/sections', sectionRoutes);
+router.use('/school', schoolModuleRoutes);
 router.use('/students', studentRoutes);
 
 // API status endpoint

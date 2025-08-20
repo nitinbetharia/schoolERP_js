@@ -76,8 +76,16 @@ const defineTrustModel = (sequelize) => {
          tenant_config: {
             type: DataTypes.JSON,
             allowNull: true,
-            defaultValue: {},
-            comment: 'Trust-specific configuration settings',
+            defaultValue: {
+               nep_2020_adoption: {
+                  enabled: false,
+                  adoption_date: null,
+                  policy: 'TRADITIONAL', // 'TRADITIONAL', 'NEP_2020', 'HYBRID'
+                  allow_school_override: true,
+                  academic_year_from: null,
+               },
+            },
+            comment: 'Trust-specific configuration settings including NEP 2020 policy',
          },
 
          setup_completed_at: {

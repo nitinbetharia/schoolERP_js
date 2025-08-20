@@ -181,8 +181,69 @@ const commonSchemas = {
 
 /**
  * Error response formatter
+ * Handles all types of errors including Sequelize errors
  */
 const formatErrorResponse = (error) => {
+   // Handle Sequelize validation errors
+   if (error.name === 'SequelizeValidationError') {
+      return {
+         success: false,
+         error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Validation failed',
+            details: error.errors.map((err) => ({
+               field: err.path,
+               message: err.message,
+               value: err.value,
+            })),
+            timestamp: new Date().toISOString(),
+         },
+      };
+   }
+
+   // Handle Sequelize unique constraint errors
+   if (error.name === 'SequelizeUniqueConstraintError') {
+      return {
+         success: false,
+         error: {
+            code: 'DUPLICATE_ENTRY',
+            message: 'Duplicate entry found',
+            details: error.errors.map((err) => ({
+               field: err.path,
+               message: `${err.path} already exists`,
+               value: err.value,
+            })),
+            timestamp: new Date().toISOString(),
+         },
+      };
+   }
+
+   // Handle Sequelize foreign key constraint errors
+   if (error.name === 'SequelizeForeignKeyConstraintError') {
+      return {
+         success: false,
+         error: {
+            code: 'FOREIGN_KEY_CONSTRAINT',
+            message: 'Referenced record not found',
+            details: { field: error.field, value: error.value },
+            timestamp: new Date().toISOString(),
+         },
+      };
+   }
+
+   // Handle JWT errors
+   if (error.name === 'JsonWebTokenError') {
+      return {
+         success: false,
+         error: {
+            code: 'INVALID_TOKEN',
+            message: 'Invalid authentication token',
+            timestamp: new Date().toISOString(),
+         },
+      };
+   }
+
+   // Handle operational errors (our custom error classes)
    return {
       success: false,
       error: {
@@ -192,6 +253,23 @@ const formatErrorResponse = (error) => {
          timestamp: error.timestamp || new Date().toISOString(),
       },
    };
+};
+
+/**
+ * Get HTTP status code for error
+ */
+const getErrorStatusCode = (error) => {
+   // Handle Sequelize errors
+   if (error.name === 'SequelizeValidationError') return 400;
+   if (error.name === 'SequelizeUniqueConstraintError') return 409;
+   if (error.name === 'SequelizeForeignKeyConstraintError') return 422;
+   if (error.name === 'JsonWebTokenError') return 401;
+
+   // Handle our custom errors
+   if (error.statusCode) return error.statusCode;
+
+   // Default to 500
+   return 500;
 };
 
 /**
@@ -229,4 +307,5 @@ module.exports = {
    // Response formatters
    formatErrorResponse,
    formatSuccessResponse,
+   getErrorStatusCode,
 };

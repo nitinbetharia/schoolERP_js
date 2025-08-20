@@ -1,6 +1,6 @@
 const ClassService = require('../services/ClassService');
 const logger = require('../../../utils/logger');
-const { handleServiceError } = require('../../../utils/errorHandler');
+const { formatErrorResponse, getErrorStatusCode } = require('../../../utils/errors');
 
 /**
  * Class Controller
@@ -47,7 +47,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -90,7 +91,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -131,7 +133,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -174,7 +177,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -216,7 +220,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -257,7 +262,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -301,7 +307,8 @@ class ClassController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }

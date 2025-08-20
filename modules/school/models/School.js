@@ -80,9 +80,15 @@ const defineSchool = (sequelize) => {
             allowNull: true,
          },
          affiliation_board: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.ENUM('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED'),
+            allowNull: false,
+            defaultValue: 'UNAFFILIATED',
+            comment: 'Primary board affiliation',
+         },
+         board_affiliation_details: {
+            type: DataTypes.JSON,
             allowNull: true,
-            comment: 'CBSE, ICSE, State Board, etc.',
+            comment: 'Board-specific details like affiliation codes, registration numbers',
          },
          affiliation_number: {
             type: DataTypes.STRING(50),
@@ -142,7 +148,21 @@ const defineSchool = (sequelize) => {
          additional_info: {
             type: DataTypes.JSON,
             allowNull: true,
-            comment: 'Additional flexible information',
+            defaultValue: {
+               nep_2020_adoption: {
+                  enabled: null, // null = inherit from trust, true/false = override
+                  adoption_date: null,
+                  policy: null, // null = inherit, 'TRADITIONAL', 'NEP_2020', 'HYBRID'
+                  academic_year_from: null,
+                  override_trust_policy: false,
+               },
+               udise_compliance: {
+                  udise_code: null,
+                  registration_status: 'PENDING', // 'PENDING', 'REGISTERED', 'VERIFIED'
+                  last_updated: null,
+               },
+            },
+            comment: 'Additional flexible information including NEP adoption and UDISE compliance',
          },
          created_by: {
             type: DataTypes.INTEGER,

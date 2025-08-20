@@ -6,6 +6,11 @@ const { defineUserProfile } = require('../modules/user/models/UserProfile');
 const { defineSchool } = require('../modules/school/models/School');
 const { defineClass } = require('../modules/school/models/Class');
 const { defineSection } = require('../modules/school/models/Section');
+const { defineBoardCompliance } = require('../modules/school/models/BoardCompliance');
+const { defineNEPCompliance } = require('../modules/school/models/NEPCompliance');
+const { defineUDISESchool } = require('../modules/school/models/UDISESchool');
+const { defineUDISEClassInfrastructure } = require('../modules/school/models/UDISEClassInfrastructure');
+const { defineUDISEFacilities } = require('../modules/school/models/UDISEFacilities');
 const { defineStudent } = require('./Student');
 const { defineAcademicYear } = require('./AcademicYear');
 const { defineStudentEnrollment } = require('./StudentEnrollment');
@@ -113,6 +118,15 @@ class ModelRegistry {
             School: defineSchool(tenantDB),
             Class: defineClass(tenantDB),
             Section: defineSection(tenantDB),
+
+            // Board compliance and NEP models
+            BoardCompliance: defineBoardCompliance(tenantDB),
+            NEPCompliance: defineNEPCompliance(tenantDB),
+
+            // UDISE+ government compliance models
+            UDISESchool: defineUDISESchool(tenantDB),
+            UDISEClassInfrastructure: defineUDISEClassInfrastructure(tenantDB),
+            UDISEFacilities: defineUDISEFacilities(tenantDB),
 
             // Academic year management
             AcademicYear: defineAcademicYear(tenantDB),
@@ -275,6 +289,11 @@ class ModelRegistry {
          Student,
          StudentEnrollment,
          StudentDocument,
+         BoardCompliance,
+         NEPCompliance,
+         UDISESchool,
+         UDISEClassInfrastructure,
+         UDISEFacilities,
          AuditLog,
       } = tenantModels;
 
@@ -308,6 +327,59 @@ class ModelRegistry {
       School.hasMany(AcademicYear, {
          foreignKey: 'school_id',
          as: 'academicYears',
+      });
+
+      // Board compliance associations
+      School.hasOne(BoardCompliance, {
+         foreignKey: 'school_id',
+         as: 'boardCompliance',
+      });
+
+      BoardCompliance.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      // NEP compliance associations
+      School.hasOne(NEPCompliance, {
+         foreignKey: 'school_id',
+         as: 'nepCompliance',
+      });
+
+      NEPCompliance.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      // UDISE+ compliance associations
+      School.hasOne(UDISESchool, {
+         foreignKey: 'school_id',
+         as: 'udiseRegistration',
+      });
+
+      UDISESchool.belongsTo(School, {
+         foreignKey: 'school_id',
+         as: 'school',
+      });
+
+      UDISESchool.hasMany(UDISEClassInfrastructure, {
+         foreignKey: 'udise_school_id',
+         as: 'classInfrastructure',
+      });
+
+      UDISEClassInfrastructure.belongsTo(UDISESchool, {
+         foreignKey: 'udise_school_id',
+         as: 'udiseSchool',
+      });
+
+      UDISESchool.hasMany(UDISEFacilities, {
+         foreignKey: 'udise_school_id',
+         as: 'facilities',
+      });
+
+      UDISEFacilities.belongsTo(UDISESchool, {
+         foreignKey: 'udise_school_id',
+         as: 'udiseSchool',
       });
 
       // Class associations

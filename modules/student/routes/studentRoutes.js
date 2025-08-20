@@ -1,7 +1,6 @@
 const express = require('express');
 const StudentController = require('../controllers/StudentController');
-const { authenticate } = require('../../../middleware/authentication');
-const { requireTrustAdmin } = require('../../../middleware/authorization');
+const { authenticate, requireTrustAdmin } = require('../../../middleware/auth');
 
 const router = express.Router();
 const studentController = new StudentController();

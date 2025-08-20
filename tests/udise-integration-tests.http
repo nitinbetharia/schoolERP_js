@@ -1,0 +1,469 @@
+### School ERP UDISE+ Integration System Tests
+### Test the UDISE+ school registration, enrollment tracking, and census reporting
+
+### Prerequisites:
+### 1. Server running on localhost:3000
+### 2. Valid authentication session
+### 3. Valid trust, school setup, and NEP policy configuration
+
+### Health Check
+GET http://localhost:3000/api/v1/admin/system/health
+Content-Type: application/json
+
+###
+
+### API Status Check
+GET http://localhost:3000/api/v1/status
+Content-Type: application/json
+
+###
+
+### =============================
+### UDISE+ SCHOOL REGISTRATION
+### =============================
+
+### Register school with UDISE+ (Complete Registration)
+### Requires: school_admin, principal, trust_admin, or system_admin role
+POST http://localhost:3000/api/v1/school/udise/schools/1/register
+Content-Type: application/json
+
+{
+  "school_name": "Bright Future Public School",
+  "school_name_hindi": "उज्ज्वल भविष्य पब्लिक स्कूल",
+  "school_type": "PRIMARY_WITH_UPPER_PRIMARY_SEC_HSEC",
+  "school_category": "PRIVATE_UNAIDED",
+  "school_management": "PRIVATE_UNAIDED",
+  
+  "state_code": "27",
+  "district_code": "01",
+  "block_code": "001",
+  "village_code": "01",
+  
+  "address_line1": "123 Education Street",
+  "address_line2": "Near City Hospital",
+  "village_name": "Saraswati Nagar",
+  "block_name": "Mumbai Central",
+  "district_name": "Mumbai",
+  "pincode": "400001",
+  
+  "assembly_constituency": "Mumbai South",
+  "parliament_constituency": "Mumbai South",
+  "municipality_ward": "Ward 15",
+  
+  "recognition_details": {
+    "primary": {
+      "recognized": true,
+      "recognition_date": "2015-04-01",
+      "recognition_number": "EDU/MH/2015/12345"
+    },
+    "secondary": {
+      "recognized": true,
+      "recognition_date": "2018-04-01", 
+      "recognition_number": "EDU/MH/2018/67890"
+    }
+  },
+  
+  "affiliation_details": {
+    "board_type": "CBSE",
+    "affiliation_number": "1234567",
+    "affiliation_date": "2018-04-01",
+    "validity_period": "2028-03-31"
+  },
+  
+  "building_status": "PRIVATE",
+  "building_type": "PUCCA",
+  "academic_session": "APRIL_MARCH",
+  "working_days_per_year": 220,
+  
+  "school_timings": {
+    "shift_1": {
+      "start_time": "08:00",
+      "end_time": "14:30",
+      "classes": ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"]
+    }
+  },
+  
+  "minority_status": "NONE",
+  "is_special_school": false,
+  "is_residential": false,
+  "is_shift_school": false,
+  
+  "medium_of_instruction": {
+    "primary": ["ENGLISH", "HINDI"],
+    "secondary": ["ENGLISH"],
+    "regional_languages": ["MARATHI"]
+  }
+}
+
+###
+
+### Get UDISE+ school information
+### Requires: school_admin, principal, trust_admin, or system_admin role  
+GET http://localhost:3000/api/v1/school/udise/schools/1/info
+Content-Type: application/json
+
+###
+
+### =============================
+### CLASS-WISE ENROLLMENT DATA
+### =============================
+
+### Update Class I enrollment data
+### Requires: school_admin, principal, trust_admin, or system_admin role
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment
+Content-Type: application/json
+
+{
+  "class_name": "I",
+  "class_type": "REGULAR",
+  "academic_year": "2024-2025",
+  
+  "boys_enrolled": 45,
+  "girls_enrolled": 38,
+  "transgender_enrolled": 0,
+  
+  "general_boys": 25,
+  "general_girls": 22,
+  "sc_boys": 8,
+  "sc_girls": 6,
+  "st_boys": 5,
+  "st_girls": 4,
+  "obc_boys": 7,
+  "obc_girls": 6,
+  "minority_boys": 0,
+  "minority_girls": 0,
+  
+  "cwsn_boys": 2,
+  "cwsn_girls": 1,
+  
+  "repeaters_boys": 3,
+  "repeaters_girls": 2,
+  
+  "age_wise_enrollment": {
+    "age_6": {"boys": 40, "girls": 35},
+    "age_7": {"boys": 3, "girls": 2},
+    "above_age": {"boys": 2, "girls": 1}
+  },
+  
+  "number_of_sections": 2,
+  "average_attendance_boys": 92.5,
+  "average_attendance_girls": 94.2,
+  
+  "textbooks_received": true,
+  "textbook_details": {
+    "mathematics": {"received": true, "quantity": 83},
+    "english": {"received": true, "quantity": 83},
+    "hindi": {"received": true, "quantity": 83},
+    "environmental_studies": {"received": true, "quantity": 83}
+  },
+  
+  "medium_of_instruction": {
+    "primary_language": "ENGLISH",
+    "secondary_language": "HINDI",
+    "regional_language": "MARATHI"
+  },
+  
+  "special_programs": {
+    "mid_day_meal": true,
+    "uniforms_provided": true,
+    "scholarships": ["merit", "sc_st"],
+    "remedial_teaching": true,
+    "computer_education": false
+  },
+  
+  "data_collection_date": "2024-09-15",
+  "verified_by": "Head Teacher - Sunita Sharma"
+}
+
+###
+
+### Update Class V enrollment data
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment
+Content-Type: application/json
+
+{
+  "class_name": "V",
+  "class_type": "REGULAR",
+  "academic_year": "2024-2025",
+  
+  "boys_enrolled": 52,
+  "girls_enrolled": 48,
+  "transgender_enrolled": 0,
+  
+  "general_boys": 30,
+  "general_girls": 28,
+  "sc_boys": 10,
+  "sc_girls": 8,
+  "st_boys": 6,
+  "st_girls": 6,
+  "obc_boys": 6,
+  "obc_girls": 6,
+  "minority_boys": 0,
+  "minority_girls": 0,
+  
+  "cwsn_boys": 1,
+  "cwsn_girls": 2,
+  
+  "repeaters_boys": 2,
+  "repeaters_girls": 1,
+  
+  "number_of_sections": 2,
+  "average_attendance_boys": 89.8,
+  "average_attendance_girls": 91.5,
+  
+  "textbooks_received": true,
+  "medium_of_instruction": {
+    "primary_language": "ENGLISH",
+    "secondary_language": "HINDI",
+    "regional_language": "MARATHI"
+  },
+  
+  "data_collection_date": "2024-09-15"
+}
+
+###
+
+### Get class-wise enrollment report
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment-report?academic_year=2024-2025
+Content-Type: application/json
+
+###
+
+### =============================
+### SCHOOL FACILITIES DATA
+### =============================
+
+### Update school facilities data
+### Requires: school_admin, principal, trust_admin, or system_admin role
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/facilities
+Content-Type: application/json
+
+{
+  "assessment_year": "2024-2025",
+  
+  "total_classrooms": 24,
+  "classrooms_in_good_condition": 22,
+  "classrooms_requiring_major_repair": 1,
+  "classrooms_requiring_minor_repair": 1,
+  
+  "other_rooms": 8,
+  "covered_area": 2450.75,
+  "playground_area": 1200.50,
+  
+  "boundary_wall": "COMPLETE",
+  "gate_available": true,
+  
+  "drinking_water_available": true,
+  "drinking_water_source": "TAP_WATER",
+  "water_purifier": true,
+  "hand_wash_facility": true,
+  
+  "boys_toilet_blocks": 2,
+  "girls_toilet_blocks": 2,
+  "boys_toilets_functional": 8,
+  "girls_toilets_functional": 8,
+  "cwsn_toilet_available": true,
+  "toilet_water_source": "CONNECTED_TO_WATER_SUPPLY",
+  
+  "electricity_connection": true,
+  "solar_panels": true,
+  "generator_available": true,
+  
+  "science_laboratory": true,
+  "mathematics_laboratory": false,
+  "computer_laboratory": true,
+  "language_laboratory": false,
+  
+  "library_available": true,
+  "library_books_total": 1850,
+  "reading_room_available": true,
+  
+  "computers_available": 25,
+  "computers_functional": 22,
+  "internet_connection": "BROADBAND",
+  "digital_classroom": true,
+  
+  "kitchen_available": true,
+  "kitchen_type": "PUCCA",
+  "cooking_gas_connection": true,
+  
+  "school_transport_available": true,
+  "number_of_vehicles": 3,
+  
+  "medical_checkup_facility": true,
+  "first_aid_available": true,
+  
+  "ramp_available": true,
+  "handrails_available": true,
+  
+  "playground_available": true,
+  "sports_equipment": {
+    "indoor": ["chess", "carrom", "table_tennis"],
+    "outdoor": ["cricket", "football", "volleyball", "basketball"],
+    "athletics": ["running_track"]
+  },
+  
+  "auditorium_available": true,
+  "staff_quarters": 4,
+  
+  "fire_extinguisher": true,
+  "cctv_cameras": 12,
+  
+  "assessment_date": "2024-09-01",
+  "assessed_by": "State Education Inspector - Dr. Rajesh Kumar",
+  "next_assessment_due": "2025-09-01",
+  
+  "compliance_score": 88.5,
+  "deficiencies": "Minor repairs needed in 2 classrooms, Mathematics lab setup pending",
+  "improvement_plan": "Repair scheduled for October 2024, Math lab equipment procurement in progress"
+}
+
+###
+
+### =============================
+### CENSUS REPORTING & EXPORTS
+### =============================
+
+### Generate annual census report
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/udise/udise-schools/1/census-report?academic_year=2024-2025
+Content-Type: application/json
+
+###
+
+### Get compliance status and data completeness
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/udise/udise-schools/1/compliance?academic_year=2024-2025
+Content-Type: application/json
+
+###
+
+### Export UDISE+ data in JSON format
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/udise/udise-schools/1/export?academic_year=2024-2025&format=JSON
+Content-Type: application/json
+
+###
+
+### Export UDISE+ data in XML format (for government submission)
+### Requires: school_admin, principal, trust_admin, or system_admin role
+GET http://localhost:3000/api/v1/school/udise/udise-schools/1/export?academic_year=2024-2025&format=XML
+Content-Type: application/json
+
+###
+
+### ===============================
+### MULTIPLE CLASSES ENROLLMENT
+### ===============================
+
+### Update Class X enrollment (Board class)
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment
+Content-Type: application/json
+
+{
+  "class_name": "X",
+  "class_type": "REGULAR",
+  "academic_year": "2024-2025",
+  
+  "boys_enrolled": 35,
+  "girls_enrolled": 32,
+  
+  "general_boys": 20,
+  "general_girls": 19,
+  "sc_boys": 6,
+  "sc_girls": 5,
+  "st_boys": 4,
+  "st_girls": 4,
+  "obc_boys": 5,
+  "obc_girls": 4,
+  
+  "cwsn_boys": 1,
+  "cwsn_girls": 0,
+  
+  "number_of_sections": 2,
+  "textbooks_received": true,
+  
+  "examination_results": {
+    "appeared": {"boys": 33, "girls": 30},
+    "passed": {"boys": 32, "girls": 29},
+    "distinction": {"boys": 12, "girls": 15},
+    "first_class": {"boys": 15, "girls": 10},
+    "second_class": {"boys": 5, "girls": 4}
+  },
+  
+  "data_collection_date": "2024-09-15"
+}
+
+###
+
+### Update Class XII enrollment (Higher Secondary)
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment
+Content-Type: application/json
+
+{
+  "class_name": "XII",
+  "class_type": "REGULAR",
+  "academic_year": "2024-2025",
+  
+  "boys_enrolled": 28,
+  "girls_enrolled": 25,
+  
+  "general_boys": 18,
+  "general_girls": 16,
+  "sc_boys": 4,
+  "sc_girls": 4,
+  "st_boys": 3,
+  "st_girls": 2,
+  "obc_boys": 3,
+  "obc_girls": 3,
+  
+  "number_of_sections": 2,
+  
+  "examination_results": {
+    "appeared": {"boys": 26, "girls": 23},
+    "passed": {"boys": 25, "girls": 22},
+    "distinction": {"boys": 10, "girls": 12},
+    "first_class": {"boys": 12, "girls": 8},
+    "second_class": {"boys": 3, "girls": 2}
+  },
+  
+  "data_collection_date": "2024-09-15"
+}
+
+###
+
+### ===============================
+### ERROR HANDLING TESTS
+### ===============================
+
+### Try to register school without required fields (should fail)
+POST http://localhost:3000/api/v1/school/udise/schools/1/register
+Content-Type: application/json
+
+{
+  "school_name": "Incomplete School"
+}
+
+###
+
+### Try to access UDISE data for non-existent school (should fail)
+GET http://localhost:3000/api/v1/school/udise/schools/999/info
+Content-Type: application/json
+
+###
+
+### Try enrollment update with invalid data (should fail - category total exceeds enrollment)
+PUT http://localhost:3000/api/v1/school/udise/udise-schools/1/enrollment
+Content-Type: application/json
+
+{
+  "class_name": "II",
+  "academic_year": "2024-2025",
+  "boys_enrolled": 20,
+  "girls_enrolled": 15,
+  "general_boys": 25,
+  "general_girls": 20
+}
+
+###

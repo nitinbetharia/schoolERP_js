@@ -1,5 +1,5 @@
-const { logger, logError, formatErrorResponse } = require('../utils/logger');
-const { formatErrorResponse: formatError } = require('../utils/errors');
+const { logger, logError } = require('../utils/logger');
+const { formatErrorResponse } = require('../utils/errors');
 
 /**
  * Global error handling middleware
@@ -22,7 +22,7 @@ const errorHandler = (err, req, res, next) => {
 
    if (err.isOperational) {
       // Operational errors (expected errors)
-      errorResponse = formatError(err);
+      errorResponse = formatErrorResponse(err);
    } else if (err.name === 'SequelizeValidationError') {
       // Sequelize validation errors
       statusCode = 400;

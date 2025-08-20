@@ -1,6 +1,6 @@
 const SectionService = require('../services/SectionService');
 const logger = require('../../../utils/logger');
-const { handleServiceError } = require('../../../utils/errorHandler');
+const { formatErrorResponse, getErrorStatusCode } = require('../../../utils/errors');
 
 /**
  * Section Controller
@@ -47,7 +47,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -90,7 +91,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -131,7 +133,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -174,7 +177,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -216,7 +220,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
@@ -260,7 +265,8 @@ class SectionController {
             error: error.message,
          });
 
-         const { statusCode, errorResponse } = handleServiceError(error);
+         const statusCode = getErrorStatusCode(error);
+         const errorResponse = formatErrorResponse(error);
          res.status(statusCode).json(errorResponse);
       }
    }
