@@ -1,6 +1,7 @@
 const { ErrorFactory } = require('../../../utils/errors');
 const { logger, logError, logSystem } = require('../../../utils/logger');
-const UdiseService = require('../services/UdiseService')();
+const createUdiseService = require('../services/UdiseService');
+const UdiseService = createUdiseService();
 
 /**
  * UDISE Controller

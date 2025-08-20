@@ -594,4 +594,4 @@ function createUDISEStudentService() {
    };
 }
 
-module.exports = createUDISEStudentService();
+module.exports = createUDISEStudentService;

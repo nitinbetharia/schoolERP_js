@@ -18,7 +18,11 @@
       "Bash(rm:*)",
       "Bash(npm run:*)",
       "Bash(grep:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(npx eslint:*)",
+      "Bash(find:*)",
+      "Bash(NODE_ENV=development npm start)",
+      "Bash(set NODE_ENV=development)"
     ],
     "deny": [],
     "ask": []

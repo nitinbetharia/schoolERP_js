@@ -69,9 +69,9 @@ function createModelRegistry() {
          // Sync system database with safer options
          // Note: Using { alter: false } to prevent index duplication issues
          // If schema changes are needed, use migrations instead of alter: true
-         await systemDB.sync({ 
-            alter: false,  // Prevents duplicate index creation
-            force: false   // Never drop existing tables
+         await systemDB.sync({
+            alter: false, // Prevents duplicate index creation
+            force: false, // Never drop existing tables
          });
 
          initialized = true;
@@ -180,9 +180,9 @@ function createModelRegistry() {
 
          // Sync tenant database with safer options
          // Note: Using { alter: false } to prevent index duplication issues
-         await tenantDB.sync({ 
-            alter: false,  // Prevents duplicate index creation
-            force: false   // Never drop existing tables
+         await tenantDB.sync({
+            alter: false, // Prevents duplicate index creation
+            force: false, // Never drop existing tables
          });
 
          tenantModels.set(tenantCode, models);

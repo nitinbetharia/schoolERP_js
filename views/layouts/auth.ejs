@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= description || 'School ERP Authentication' %>">
+    <title><%= title %> - <%= tenant ? tenant.name : 'School ERP System' %></title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/app.css">
+    
+    <!-- Tenant-specific CSS variables -->
+    <style>
+        :root {
+            <% if (tenant && tenant.branding) { %>
+            --primary-color: <%= tenant.branding.primaryColor || '#3B82F6' %>;
+            --secondary-color: <%= tenant.branding.secondaryColor || '#64748B' %>;
+            --accent-color: <%= tenant.branding.accentColor || '#10B981' %>;
+            <% } else { %>
+            /* Developer/System branding */
+            --primary-color: #7C3AED;
+            --secondary-color: #4C1D95;
+            --accent-color: #8B5CF6;
+            <% } %>
+        }
+        
+        .brand-primary { background-color: var(--primary-color); }
+        .brand-secondary { background-color: var(--secondary-color); }
+        .brand-accent { background-color: var(--accent-color); }
+        .text-brand-primary { color: var(--primary-color); }
+        .text-brand-secondary { color: var(--secondary-color); }
+        .text-brand-accent { color: var(--accent-color); }
+        .border-brand-primary { border-color: var(--primary-color); }
+        .hover\:bg-brand-primary:hover { background-color: var(--primary-color); }
+        
+        /* Mobile-first authentication styles */
+        .auth-container {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+    </style>
+    
+    <!-- Favicon -->
+    <% if (tenant && tenant.branding && tenant.branding.favicon) { %>
+    <link rel="icon" type="image/png" href="<%= tenant.branding.favicon %>">
+    <% } else { %>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <% } %>
+</head>
+<body class="min-h-screen auth-container">
+    <!-- Flash Messages -->
+    <%- include('../partials/alerts') %>
+    
+    <!-- Authentication Layout -->
+    <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Logo/Branding -->
+            <div class="text-center">
+                <% if (tenant && tenant.branding && tenant.branding.logo) { %>
+                <img class="mx-auto h-12 w-auto" src="<%= tenant.branding.logo %>" alt="<%= tenant.name %>">
+                <% } else { %>
+                <div class="mx-auto h-12 w-12 bg-white rounded-full flex items-center justify-center">
+                    <span class="text-2xl font-bold text-brand-primary">S</span>
+                </div>
+                <% } %>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-white">
+                    <%= tenant ? tenant.name : 'School ERP System' %>
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-200">
+                    <%= subtitle || 'Comprehensive School Management' %>
+                </p>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="bg-white rounded-lg shadow-xl px-8 py-12">
+                <%- body %>
+            </div>
+            
+            <!-- Footer -->
+            <div class="text-center">
+                <p class="text-sm text-gray-200">
+                    © <%= new Date().getFullYear() %> School ERP System. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

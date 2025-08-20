@@ -9,13 +9,14 @@ require('dotenv').config();
 
 async function resetDemoDatabase() {
    let connection;
+   
+   // Get database credentials from config (in outer scope for error handling)
+   const host = appConfig.database.connection.host;
+   const port = appConfig.database.connection.port;
+   const user = process.env.DB_USER;
+   const password = process.env.DB_PASSWORD;
 
    try {
-      // Get database credentials from config
-      const host = appConfig.database.connection.host;
-      const port = appConfig.database.connection.port;
-      const user = process.env.DB_USER;
-      const password = process.env.DB_PASSWORD;
       console.log('🔧 Connecting to MySQL server...');
 
       // Connect to MySQL server (not specific database)

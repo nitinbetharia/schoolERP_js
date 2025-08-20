@@ -157,6 +157,10 @@ class SchoolERPServer {
    setupRoutes() {
       logSystem('Setting up routes');
 
+      // Flash message middleware for web routes
+      const { setupFlashMessages } = require('./middleware/flash');
+      this.app.use(setupFlashMessages);
+
       // Tenant detection middleware (for all routes except system admin)
       this.app.use((req, res, next) => {
          if (
@@ -188,20 +192,13 @@ class SchoolERPServer {
          return next();
       });
 
+      // Mount web routes (for EJS templates)
+      const webRoutes = require('./routes/web');
+      this.app.use('/', webRoutes);
+      this.app.use('/auth', webRoutes);
+
       // Mount API routes
       this.app.use('/api/v1', routes);
-
-      // Root endpoint
-      this.app.get('/', (req, res) => {
-         res.json({
-            success: true,
-            message: 'Welcome to School ERP System',
-            version: '1.0.0',
-            timestamp: new Date().toISOString(),
-            tenant: req.tenantCode || 'system',
-            environment: process.env.NODE_ENV,
-         });
-      });
    }
 
    /**

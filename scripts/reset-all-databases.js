@@ -9,13 +9,15 @@ require('dotenv').config();
 
 async function resetAllDatabases() {
    let connection;
+   
+   // Define variables in outer scope for error handling
+   const host = appConfig.database.connection.host;
+   const port = appConfig.database.connection.port;
+   const user = process.env.DB_USER;
+   const password = process.env.DB_PASSWORD;
+   const systemDbName = appConfig.database.system.name;
 
    try {
-      const host = appConfig.database.connection.host;
-      const port = appConfig.database.connection.port;
-      const user = process.env.DB_USER;
-      const password = process.env.DB_PASSWORD;
-      const systemDbName = appConfig.database.system.name;
 
       console.log('🔧 Connecting to MySQL server...');
 

@@ -18,9 +18,9 @@ async function createSystemTables() {
 
       logSystem('Creating database tables...');
       // Using safe sync options to prevent index duplication
-      await systemDB.sync({ 
-         force: false,  // Never drop existing tables
-         alter: false   // Prevents duplicate index creation
+      await systemDB.sync({
+         force: false, // Never drop existing tables
+         alter: false, // Prevents duplicate index creation
       });
 
       logSystem('Database tables created successfully');

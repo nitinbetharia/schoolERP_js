@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= description || 'School ERP Management System' %>">
+    <title><%= title %> - <%= tenant ? tenant.name : 'School ERP System' %></title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS for tenant branding -->
+    <link rel="stylesheet" href="/static/css/app.css">
+    
+    <!-- Tenant-specific CSS variables -->
+    <style>
+        :root {
+            <% if (tenant && tenant.branding) { %>
+            --primary-color: <%= tenant.branding.primaryColor || '#3B82F6' %>;
+            --secondary-color: <%= tenant.branding.secondaryColor || '#64748B' %>;
+            --accent-color: <%= tenant.branding.accentColor || '#10B981' %>;
+            <% } else { %>
+            /* Developer/System branding */
+            --primary-color: #7C3AED;
+            --secondary-color: #4C1D95;
+            --accent-color: #8B5CF6;
+            <% } %>
+        }
+        
+        .brand-primary { background-color: var(--primary-color); }
+        .brand-secondary { background-color: var(--secondary-color); }
+        .brand-accent { background-color: var(--accent-color); }
+        .text-brand-primary { color: var(--primary-color); }
+        .text-brand-secondary { color: var(--secondary-color); }
+        .text-brand-accent { color: var(--accent-color); }
+        .border-brand-primary { border-color: var(--primary-color); }
+        .hover\:bg-brand-primary:hover { background-color: var(--primary-color); }
+    </style>
+    
+    <!-- Favicon -->
+    <% if (tenant && tenant.branding && tenant.branding.favicon) { %>
+    <link rel="icon" type="image/png" href="<%= tenant.branding.favicon %>">
+    <% } else { %>
+    <link rel="icon" type="image/png" href="/static/images/favicon.png">
+    <% } %>
+    
+    <!-- Custom head content -->
+    <% if (typeof customHead !== 'undefined') { %>
+    <%- customHead %>
+    <% } %>
+</head>
+<body class="bg-gray-50 font-sans antialiased min-h-screen">
+    <!-- Flash Messages -->
+    <%- include('../partials/alerts') %>
+    
+    <!-- Main Layout Content -->
+    <div id="app" class="min-h-screen">
+        <%- body %>
+    </div>
+    
+    <!-- Global JavaScript -->
+    <script src="/static/js/app.js"></script>
+    
+    <!-- Custom footer scripts -->
+    <% if (typeof customScripts !== 'undefined') { %>
+    <%- customScripts %>
+    <% } %>
+</body>
+</html>
