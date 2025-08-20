@@ -17,7 +17,7 @@ const { defineUDISESchool } = require('../modules/school/models/UDISESchool');
 const { defineUDISEClassInfrastructure } = require('../modules/school/models/UDISEClassInfrastructure');
 const { defineUDISEFacilities } = require('../modules/school/models/UDISEFacilities');
 const { defineUDISEStudent } = require('../modules/school/models/UDISEStudent');
-const { defineStudent } = require('./Student');
+const { defineStudent, studentValidationSchemas } = require('./Student');
 const { defineAcademicYear } = require('./AcademicYear');
 const { defineStudentEnrollment } = require('./StudentEnrollment');
 const { defineStudentDocument } = require('./StudentDocument');
@@ -565,6 +565,7 @@ module.exports.getTenantModels = (tenantCode) => modelRegistry.getTenantModels(t
 
 // Validation schemas
 module.exports.userValidationSchemas = userValidationSchemas;
+module.exports.studentValidationSchemas = studentValidationSchemas;
 
 // Initialize functions
 module.exports.initializeSystemModels = () => modelRegistry.initializeSystemModels();

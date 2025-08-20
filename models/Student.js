@@ -474,4 +474,177 @@ const defineStudent = (sequelize) => {
    return Student;
 };
 
-module.exports = { defineStudent };
+/**
+ * Student Validation Schemas
+ * Following Q59-ENFORCED pattern - reusable across API and web routes
+ */
+const Joi = require('joi');
+const { commonSchemas } = require('../utils/errors');
+
+const studentValidationSchemas = {
+   create: Joi.object({
+      // User reference (required)
+      user_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'User ID must be a number',
+         'number.positive': 'User ID must be positive',
+         'any.required': 'User ID is required',
+      }),
+
+      // Basic identification (required)
+      admission_number: Joi.string().trim().uppercase().min(3).max(50).required().messages({
+         'string.empty': 'Admission number is required',
+         'string.min': 'Admission number must be at least 3 characters',
+         'string.max': 'Admission number cannot exceed 50 characters',
+      }),
+
+      school_id: Joi.number().integer().positive().required().messages({
+         'any.required': 'School ID is required',
+      }),
+
+      // Academic information (required)
+      class_id: Joi.number().integer().positive().allow(null).optional(),
+      section_id: Joi.number().integer().positive().allow(null).optional(),
+      academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).required().messages({
+         'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+         'any.required': 'Academic year is required',
+      }),
+
+      admission_date: Joi.date().max('now').required().messages({
+         'date.max': 'Admission date cannot be in the future',
+         'any.required': 'Admission date is required',
+      }),
+
+      // Personal information (required)
+      date_of_birth: Joi.date().max('now').required().messages({
+         'date.max': 'Date of birth cannot be in the future',
+         'any.required': 'Date of birth is required',
+      }),
+
+      gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').required().messages({
+         'any.only': 'Gender must be MALE, FEMALE, or OTHER',
+         'any.required': 'Gender is required',
+      }),
+
+      // Optional personal information
+      blood_group: Joi.string().trim().max(10).allow(null, '').optional(),
+      category: Joi.string().valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER').allow(null).optional(),
+      religion: Joi.string().trim().max(50).allow(null, '').optional(),
+      nationality: Joi.string().trim().max(50).allow(null, '').optional(),
+      mother_tongue: Joi.string().trim().max(50).allow(null, '').optional(),
+
+      // Address information
+      address: Joi.string().trim().max(500).allow(null, '').optional(),
+      city: Joi.string().trim().max(100).allow(null, '').optional(),
+      state: Joi.string().trim().max(100).allow(null, '').optional(),
+      postal_code: Joi.string().trim().pattern(/^\d{5,10}$/).allow(null, '').optional().messages({
+         'string.pattern.base': 'Postal code must be 5-10 digits',
+      }),
+
+      // Contact information
+      phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional().messages({
+         'string.pattern.base': 'Phone number must be 10-15 digits',
+      }),
+      email: Joi.string().email().max(255).allow(null, '').optional(),
+
+      // Parent information
+      father_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      father_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      father_email: Joi.string().email().max(255).allow(null, '').optional(),
+      father_occupation: Joi.string().trim().max(100).allow(null, '').optional(),
+      father_annual_income: Joi.number().positive().allow(null).optional(),
+
+      mother_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      mother_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      mother_email: Joi.string().email().max(255).allow(null, '').optional(),
+      mother_occupation: Joi.string().trim().max(100).allow(null, '').optional(),
+      mother_annual_income: Joi.number().positive().allow(null).optional(),
+
+      // Guardian information
+      guardian_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      guardian_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      guardian_email: Joi.string().email().max(255).allow(null, '').optional(),
+      guardian_relation: Joi.string().trim().max(50).allow(null, '').optional(),
+      guardian_occupation: Joi.string().trim().max(100).allow(null, '').optional(),
+
+      // Emergency contact
+      emergency_contact_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      emergency_contact_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      emergency_contact_relation: Joi.string().trim().max(50).allow(null, '').optional(),
+
+      // Status fields
+      admission_status: Joi.string().valid('APPLIED', 'APPROVED', 'ENROLLED', 'REJECTED', 'WAITLISTED').optional(),
+      student_status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED').optional(),
+
+      // Transport and hostel
+      transport_required: Joi.boolean().optional(),
+      hostel_required: Joi.boolean().optional(),
+   }),
+
+   update: Joi.object({
+      // Allow updating most fields, but not core identity fields
+      admission_number: Joi.forbidden().messages({
+         'any.unknown': 'Admission number cannot be updated',
+      }),
+      user_id: Joi.forbidden().messages({
+         'any.unknown': 'User ID cannot be updated',
+      }),
+
+      school_id: Joi.number().integer().positive().optional(),
+      class_id: Joi.number().integer().positive().allow(null).optional(),
+      section_id: Joi.number().integer().positive().allow(null).optional(),
+      academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).optional(),
+
+      // Personal information updates
+      gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').optional(),
+      blood_group: Joi.string().trim().max(10).allow(null, '').optional(),
+      category: Joi.string().valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER').allow(null).optional(),
+      religion: Joi.string().trim().max(50).allow(null, '').optional(),
+
+      // Contact and address updates
+      phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      email: Joi.string().email().max(255).allow(null, '').optional(),
+      address: Joi.string().trim().max(500).allow(null, '').optional(),
+      city: Joi.string().trim().max(100).allow(null, '').optional(),
+      state: Joi.string().trim().max(100).allow(null, '').optional(),
+      postal_code: Joi.string().trim().pattern(/^\d{5,10}$/).allow(null, '').optional(),
+
+      // Parent information updates
+      father_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      father_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      father_email: Joi.string().email().max(255).allow(null, '').optional(),
+      mother_name: Joi.string().trim().max(100).allow(null, '').optional(),
+      mother_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      mother_email: Joi.string().email().max(255).allow(null, '').optional(),
+
+      // Status updates
+      student_status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED').optional(),
+      transport_required: Joi.boolean().optional(),
+      hostel_required: Joi.boolean().optional(),
+   }),
+
+   transfer: Joi.object({
+      transfer_reason: Joi.string().trim().min(10).max(500).required().messages({
+         'string.empty': 'Transfer reason is required',
+         'string.min': 'Transfer reason must be at least 10 characters',
+      }),
+      transfer_to_school: Joi.string().trim().max(200).allow(null, '').optional(),
+      transfer_date: Joi.date().max('now').required(),
+   }),
+
+   promote: Joi.object({
+      new_class_id: Joi.number().integer().positive().required().messages({
+         'any.required': 'New class ID is required for promotion',
+      }),
+      new_section_id: Joi.number().integer().positive().allow(null).optional(),
+      new_academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).required().messages({
+         'any.required': 'New academic year is required for promotion',
+      }),
+   }),
+
+   statusUpdate: Joi.object({
+      student_status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED').required(),
+      status_reason: Joi.string().trim().min(5).max(200).optional(),
+   }),
+};
+
+module.exports = { defineStudent, studentValidationSchemas };
