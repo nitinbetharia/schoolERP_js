@@ -118,21 +118,8 @@ const defineTrustModel = (sequelize) => {
          createdAt: 'created_at',
          updatedAt: 'updated_at',
          indexes: [
-            {
-               unique: true,
-               fields: ['trust_code'],
-               name: 'idx_trusts_code',
-            },
-            {
-               unique: true,
-               fields: ['subdomain'],
-               name: 'idx_trusts_subdomain',
-            },
-            {
-               unique: true,
-               fields: ['contact_email'],
-               name: 'idx_trusts_email',
-            },
+            // Note: unique constraints on fields automatically create indexes
+            // Only adding non-unique indexes here
             {
                fields: ['status'],
                name: 'idx_trusts_status',

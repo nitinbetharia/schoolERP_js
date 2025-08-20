@@ -247,13 +247,11 @@ module.exports = (sequelize) => {
          timestamps: true,
          underscored: true,
          indexes: [
+            // Note: udise_code already has unique: true in field definition
+            // Only adding non-unique indexes here
             {
-               unique: true,
-               fields: ['udise_code']
+               fields: ['school_id'],
             },
-            {
-               fields: ['school_id']
-            }
          ],
          comment: 'UDISE+ school registration and compliance tracking',
       }

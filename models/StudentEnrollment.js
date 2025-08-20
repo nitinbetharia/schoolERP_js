@@ -136,18 +136,6 @@ const defineStudentEnrollment = (sequelize) => {
                fields: ['class_id', 'section_id'],
             },
             {
-               name: 'enrollment_academic_year_idx',
-               fields: ['academic_year'],
-            },
-            {
-               name: 'enrollment_status_idx',
-               fields: ['status'],
-            },
-            {
-               name: 'enrollment_student_year_idx',
-               fields: ['student_id', 'academic_year'],
-            },
-            {
                name: 'enrollment_roll_class_idx',
                fields: ['roll_number', 'class_id', 'section_id', 'academic_year'],
                unique: true,

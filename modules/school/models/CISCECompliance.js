@@ -287,11 +287,8 @@ const defineCISCECompliance = (sequelize) => {
          createdAt: 'created_at',
          updatedAt: 'updated_at',
          indexes: [
-            {
-               unique: true,
-               fields: ['cisce_code'],
-               name: 'cisce_code_unique',
-            },
+            // Note: cisce_code already has unique: true in field definition
+            // Only adding non-unique indexes here
             {
                fields: ['school_id'],
                name: 'cisce_school_idx',

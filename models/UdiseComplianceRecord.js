@@ -374,8 +374,8 @@ module.exports = (sequelize) => {
          underscored: true,
          indexes: [
             {
-               fields: ['school_id']
-            }
+               fields: ['school_id'],
+            },
          ],
          comment: 'UDISE+ compliance tracking and government regulation adherence',
       }

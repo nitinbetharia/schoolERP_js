@@ -123,22 +123,6 @@ const defineClass = (sequelize) => {
                name: 'class_level_idx',
                fields: ['school_id', 'level'],
             },
-            {
-               name: 'class_category_idx',
-               fields: ['category'],
-            },
-            {
-               name: 'class_teacher_idx',
-               fields: ['class_teacher_id'],
-            },
-            {
-               name: 'class_active_idx',
-               fields: ['is_active'],
-            },
-            {
-               name: 'class_academic_year_idx',
-               fields: ['academic_year'],
-            },
          ],
       }
    );

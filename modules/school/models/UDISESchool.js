@@ -322,16 +322,8 @@ function defineUDISESchool(sequelize) {
          createdAt: 'created_at',
          updatedAt: 'updated_at',
          indexes: [
-            {
-               name: 'idx_udise_schools_udise_code',
-               unique: true,
-               fields: ['udise_code'],
-            },
-            {
-               name: 'idx_udise_schools_school_id',
-               unique: true,
-               fields: ['school_id'],
-            },
+            // Note: udise_code, school_id, and udise_school_id already have unique: true in field definitions
+            // Only adding non-unique indexes here
             {
                name: 'idx_udise_schools_location',
                fields: ['state_code', 'district_name', 'block_name'],

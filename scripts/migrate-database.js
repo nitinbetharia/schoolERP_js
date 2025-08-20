@@ -17,7 +17,11 @@ async function createSystemTables() {
       const systemDB = dbManager.getSystemDB();
 
       logSystem('Creating database tables...');
-      await systemDB.sync({ force: false, alter: true });
+      // Using safe sync options to prevent index duplication
+      await systemDB.sync({ 
+         force: false,  // Never drop existing tables
+         alter: false   // Prevents duplicate index creation
+      });
 
       logSystem('Database tables created successfully');
 

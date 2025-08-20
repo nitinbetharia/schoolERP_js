@@ -325,28 +325,8 @@ function defineFeeCollection(sequelize) {
                fields: ['school_id', 'payment_date', 'payment_status'],
             },
             {
-               name: 'idx_fee_collection_date',
-               fields: ['payment_date', 'payment_status'],
-            },
-            {
-               name: 'idx_fee_collection_method',
-               fields: ['payment_method', 'payment_status'],
-            },
-            {
                name: 'idx_fee_collection_status',
                fields: ['payment_status', 'collection_type'],
-            },
-            {
-               name: 'idx_fee_collection_financial',
-               fields: ['financial_year', 'accounting_date'],
-            },
-            {
-               name: 'idx_fee_collection_reconciled',
-               fields: ['reconciled', 'payment_method', 'payment_date'],
-            },
-            {
-               name: 'idx_fee_collection_reference',
-               fields: ['payment_reference', 'transaction_id'],
             },
          ],
       }

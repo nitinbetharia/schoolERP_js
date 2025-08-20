@@ -369,8 +369,8 @@ module.exports = (sequelize) => {
          underscored: true,
          indexes: [
             {
-               fields: ['school_id']
-            }
+               fields: ['school_id'],
+            },
          ],
          comment: 'UDISE+ annual census data collection',
       }

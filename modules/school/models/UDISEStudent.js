@@ -283,32 +283,8 @@ function defineUDISEStudent(sequelize) {
                name: 'idx_udise_school_id',
             },
             {
-               fields: ['aadhaar_number'],
-               name: 'idx_aadhaar_number',
-            },
-            {
-               fields: ['pen_number'],
-               name: 'idx_pen_number',
-            },
-            {
                fields: ['census_year'],
                name: 'idx_census_year',
-            },
-            {
-               fields: ['academic_session'],
-               name: 'idx_academic_session',
-            },
-            {
-               fields: ['enrollment_date'],
-               name: 'idx_enrollment_date',
-            },
-            {
-               fields: ['data_validation_status'],
-               name: 'idx_data_validation_status',
-            },
-            {
-               fields: ['is_active'],
-               name: 'idx_is_active',
             },
          ],
          comment: 'UDISE+ student government compliance tracking',

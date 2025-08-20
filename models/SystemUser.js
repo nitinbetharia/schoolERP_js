@@ -107,16 +107,9 @@ const defineSystemUserModel = (sequelize) => {
          createdAt: 'created_at',
          updatedAt: 'updated_at',
          indexes: [
-            {
-               unique: true,
-               fields: ['username'],
-               name: 'idx_system_users_username',
-            },
-            {
-               unique: true,
-               fields: ['email'],
-               name: 'idx_system_users_email',
-            },
+            // Note: unique constraints on fields automatically create indexes
+            // username and email already have unique: true in field definitions
+            // Only adding non-unique indexes here
             {
                fields: ['status'],
                name: 'idx_system_users_status',

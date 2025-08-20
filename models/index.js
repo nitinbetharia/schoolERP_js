@@ -30,11 +30,11 @@ const { defineFeeInstallment } = require('../modules/fee/models/FeeInstallment')
 const { defineFeeDiscount } = require('../modules/fee/models/FeeDiscount');
 const { defineStudentFeeDiscount } = require('../modules/fee/models/StudentFeeDiscount');
 
-// UDISE+ Registration System Models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
-// const UdiseSchoolRegistrationModel = require('./UdiseSchoolRegistration');
-// const UdiseCensusDataModel = require('./UdiseCensusData');
-// const UdiseComplianceRecordModel = require('./UdiseComplianceRecord');
-// const UdiseIntegrationLogModel = require('./UdiseIntegrationLog');
+// UDISE+ Registration System Models
+const UdiseSchoolRegistrationModel = require('./UdiseSchoolRegistration');
+const UdiseCensusDataModel = require('./UdiseCensusData');
+const UdiseComplianceRecordModel = require('./UdiseComplianceRecord');
+const UdiseIntegrationLogModel = require('./UdiseIntegrationLog');
 
 /**
  * Model registry for system and tenant databases
@@ -66,8 +66,13 @@ function createModelRegistry() {
          // Setup system associations
          await setupSystemAssociations();
 
-         // Sync system database
-         await systemDB.sync({ alter: true });
+         // Sync system database with safer options
+         // Note: Using { alter: false } to prevent index duplication issues
+         // If schema changes are needed, use migrations instead of alter: true
+         await systemDB.sync({ 
+            alter: false,  // Prevents duplicate index creation
+            force: false   // Never drop existing tables
+         });
 
          initialized = true;
          logSystem('System models initialized successfully');
@@ -160,11 +165,11 @@ function createModelRegistry() {
          models.FeeDiscount = defineFeeDiscount(tenantDB);
          models.StudentFeeDiscount = defineStudentFeeDiscount(tenantDB);
 
-         // UDISE+ Registration System models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
-         // models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
-         // models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
-         // models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
-         // models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
+         // UDISE+ Registration System models
+         models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
+         models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
+         models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
+         models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
 
          // Setup and audit models
          models.SetupConfiguration = defineSetupConfiguration(tenantDB);
@@ -173,8 +178,12 @@ function createModelRegistry() {
          // Setup associations
          await setupTenantAssociations(models);
 
-         // Sync tenant database
-         await tenantDB.sync({ alter: true });
+         // Sync tenant database with safer options
+         // Note: Using { alter: false } to prevent index duplication issues
+         await tenantDB.sync({ 
+            alter: false,  // Prevents duplicate index creation
+            force: false   // Never drop existing tables
+         });
 
          tenantModels.set(tenantCode, models);
          logSystem(`Tenant models initialized successfully for: ${tenantCode}`);
@@ -416,7 +425,7 @@ const modelRegistry = new createModelRegistry();
 // For UDISE and other services that need to initialize models directly
 function createTenantModels(tenantDB) {
    const models = {};
-   
+
    // User management models
    models.User = modelRegistry.defineTenantUserModel(tenantDB);
    models.UserProfile = defineUserProfile(tenantDB);
@@ -456,18 +465,18 @@ function createTenantModels(tenantDB) {
    models.FeeDiscount = defineFeeDiscount(tenantDB);
    models.StudentFeeDiscount = defineStudentFeeDiscount(tenantDB);
 
-   // UDISE+ Registration System models - TEMPORARILY DISABLED DUE TO INDEX LIMITS
-   // models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
-   // models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
-   // models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
-   // models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
+   // UDISE+ Registration System models
+   models.UdiseSchoolRegistration = UdiseSchoolRegistrationModel(tenantDB);
+   models.UdiseCensusData = UdiseCensusDataModel(tenantDB);
+   models.UdiseComplianceRecord = UdiseComplianceRecordModel(tenantDB);
+   models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
 
    // Setup and audit models
    models.SetupConfiguration = defineSetupConfiguration(tenantDB);
    models.AuditLog = modelRegistry.defineTenantAuditLogModel(tenantDB);
 
    // Setup associations
-   Object.values(models).forEach(model => {
+   Object.values(models).forEach((model) => {
       if (model.associate && typeof model.associate === 'function') {
          model.associate(models);
       }

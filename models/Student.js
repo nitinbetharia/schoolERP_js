@@ -443,16 +443,8 @@ const defineStudent = (sequelize) => {
          createdAt: 'created_at',
          updatedAt: 'updated_at',
          indexes: [
-            {
-               name: 'student_user_id_idx',
-               fields: ['user_id'],
-               unique: true,
-            },
-            {
-               name: 'student_admission_number_idx',
-               fields: ['admission_number'],
-               unique: true,
-            },
+            // Note: user_id and admission_number already have unique: true in field definitions
+            // Only adding non-unique indexes here
             {
                name: 'student_school_id_idx',
                fields: ['school_id'],
@@ -460,30 +452,6 @@ const defineStudent = (sequelize) => {
             {
                name: 'student_class_section_idx',
                fields: ['class_id', 'section_id'],
-            },
-            {
-               name: 'student_academic_year_idx',
-               fields: ['academic_year'],
-            },
-            {
-               name: 'student_admission_status_idx',
-               fields: ['admission_status'],
-            },
-            {
-               name: 'student_status_idx',
-               fields: ['student_status'],
-            },
-            {
-               name: 'student_roll_number_idx',
-               fields: ['roll_number', 'class_id', 'section_id'],
-            },
-            {
-               name: 'student_dob_idx',
-               fields: ['date_of_birth'],
-            },
-            {
-               name: 'student_name_search_idx',
-               fields: ['father_name', 'mother_name'],
             },
          ],
          hooks: {

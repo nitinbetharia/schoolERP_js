@@ -333,10 +333,10 @@ module.exports = (sequelize) => {
          underscored: true,
          indexes: [
             {
-               fields: ['school_id']
-            }
+               fields: ['school_id'],
+            },
          ],
-         comment: 'Comprehensive logging for all UDISE+ system integrations and API interactions'
+         comment: 'Comprehensive logging for all UDISE+ system integrations and API interactions',
       }
    );
 
