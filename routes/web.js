@@ -1,10 +1,26 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const { logSystem, logError } = require('../utils/logger');
 const { systemAuthService } = require('../services/systemServices');
 const createUserService = require('../modules/user/services/UserService');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
 const { userValidationSchemas } = require('../models');
+
+// Frontend test route (no auth required)
+router.get('/test-frontend', (req, res) => {
+   try {
+      res.render('pages/test-frontend', {
+         title: 'Frontend Test',
+         subtitle: 'Testing Tailwind CSS, Font Awesome, and Alpine.js',
+         user: null, // No user for this test
+         tenant: null,
+      });
+   } catch (error) {
+      console.error('Frontend test route error:', error);
+      res.status(500).send('Error rendering test page');
+   }
+});
 
 /**
  * Middleware to require authentication
@@ -32,6 +48,15 @@ const requireAuth = (req, res, next) => {
  * Renders EJS templates for login/logout functionality
  * Mobile-first, tenant-aware authentication pages
  */
+
+/**
+ * @route GET /test-ui
+ * @desc Test Tailwind CSS and Font Awesome implementation
+ * @access Public
+ */
+router.get('/test-ui', (req, res) => {
+   res.sendFile(path.join(__dirname, '../public/test-tailwind.html'));
+});
 
 /**
  * @route GET /auth/login

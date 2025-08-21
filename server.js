@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
+const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 require('dotenv').config();
 
@@ -112,8 +113,8 @@ class SchoolERPServer {
             'Content-Security-Policy',
             "default-src 'self'; " +
                "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com unpkg.com; " +
-               "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com; " +
-               "font-src 'self' fonts.gstatic.com; " +
+               "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com cdnjs.cloudflare.com; " +
+               "font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; " +
                "img-src 'self' data: https:; " +
                "connect-src 'self'; " +
                "frame-src 'none';"
@@ -142,9 +143,13 @@ class SchoolERPServer {
       // Static files
       this.app.use('/static', express.static(path.join(__dirname, 'public')));
 
-      // View engine setup (for future frontend implementation)
+      // View engine setup with single layout
+      this.app.use(expressLayouts);
       this.app.set('view engine', 'ejs');
       this.app.set('views', path.join(__dirname, 'views'));
+      this.app.set('layout', 'layout'); // Use our single layout.ejs file
+      this.app.set('layout extractScripts', true);
+      this.app.set('layout extractStyles', true);
    }
 
    /**
