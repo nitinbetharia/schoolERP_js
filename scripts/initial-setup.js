@@ -15,7 +15,7 @@ async function setupInitialData() {
 
       // Check if system admin already exists
       const { getSystemUserModel } = require('../models');
-      const SystemUser = getSystemUserModel();
+      const SystemUser = await getSystemUserModel();
 
       const existingAdmin = await SystemUser.findOne({
          where: { username: 'admin' },

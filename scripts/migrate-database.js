@@ -14,7 +14,7 @@ async function createSystemTables() {
 
       // Force sync to create tables
       const { dbManager } = require('../models/database');
-      const systemDB = dbManager.getSystemDB();
+      const systemDB = await dbManager.getSystemDB();
 
       logSystem('Creating database tables...');
       // Using safe sync options to prevent index duplication

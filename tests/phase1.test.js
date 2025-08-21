@@ -1,15 +1,60 @@
 const request = require('supertest');
 const SchoolERPServer = require('../server');
 
+/**
+ * Ensure system admin exists for testing
+ */
+async function ensureSystemAdminExists() {
+   try {
+      const { systemAuthService } = require('../services/systemServices');
+      const { initializeSystemModels, getSystemModels } = require('../models');
+
+      // Initialize system models first
+      await initializeSystemModels();
+      const systemModels = await getSystemModels();
+
+      if (!systemModels.SystemUser) {
+         throw new Error('SystemUser model not available after initialization');
+      }
+
+      const existingAdmin = await systemModels.SystemUser.findOne({
+         where: { username: 'admin' },
+      });
+
+      if (!existingAdmin) {
+         const systemAdmin = {
+            username: 'admin',
+            email: 'admin@system.local',
+            password: 'admin123',
+            full_name: 'System Administrator',
+         };
+
+         await systemAuthService.createSystemUser(systemAdmin);
+         console.log('✅ Test system admin created');
+      } else {
+         console.log('✅ Test system admin already exists');
+      }
+   } catch (error) {
+      console.error('❌ Failed to ensure system admin exists:', error.message);
+      // Don't throw - let tests run and fail naturally if auth doesn't work
+   }
+}
+
 describe('Phase 1A & 1B - Foundation Layer', () => {
    let app;
    let server;
 
    beforeAll(async () => {
+      // Set test environment
+      process.env.NODE_ENV = 'test';
+
       server = new SchoolERPServer();
       await server.initialize();
       app = server.app;
-   });
+
+      // Ensure system admin exists for tests
+      await ensureSystemAdminExists();
+   }, 30000); // Increase timeout for database setup
 
    afterAll(async () => {
       if (server.server) {
@@ -105,11 +150,12 @@ describe('Phase 1A & 1B - Foundation Layer', () => {
       });
 
       test('POST /api/v1/admin/system/trusts should create a new trust', async () => {
+         const timestamp = Date.now();
          const trustData = {
-            trust_name: 'Demo Trust',
-            trust_code: 'demo',
-            subdomain: 'demo',
-            contact_email: 'admin@demo.school',
+            trust_name: `Demo Trust ${timestamp}`,
+            trust_code: `demo_${timestamp}`,
+            subdomain: `demo${timestamp}`,
+            contact_email: `admin${timestamp}@demo.school`,
             contact_phone: '9876543210',
             address: 'Demo Address',
          };
@@ -121,7 +167,7 @@ describe('Phase 1A & 1B - Foundation Layer', () => {
             .expect(201);
 
          expect(response.body.success).toBe(true);
-         expect(response.body.data).toHaveProperty('trust_name', 'Demo Trust');
+         expect(response.body.data).toHaveProperty('trust_name', `Demo Trust ${timestamp}`);
          expect(response.body.data).toHaveProperty('status', 'SETUP_PENDING');
 
          trustId = response.body.data.id;

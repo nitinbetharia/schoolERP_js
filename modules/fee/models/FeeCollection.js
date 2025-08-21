@@ -1,5 +1,198 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
 const { logger } = require('../../../utils/logger');
+
+/**
+ * Q59-ENFORCED: Comprehensive validation schemas for fee collection operations
+ * These schemas enforce business rules and data integrity for all fee collection operations
+ */
+const feeCollectionValidationSchemas = {
+   // Fee Collection/Payment Recording Validation
+   recordPayment: Joi.object({
+      receipt_number: Joi.string().max(50).required().messages({
+         'string.max': 'Receipt number cannot exceed 50 characters',
+         'any.required': 'Receipt number is required',
+      }),
+      student_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Student ID must be a number',
+         'number.integer': 'Student ID must be an integer',
+         'number.positive': 'Student ID must be positive',
+         'any.required': 'Student ID is required',
+      }),
+      student_fee_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Student fee ID must be a number',
+         'number.integer': 'Student fee ID must be an integer',
+         'number.positive': 'Student fee ID must be positive',
+         'any.required': 'Student fee ID is required',
+      }),
+      fee_structure_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Fee structure ID must be a number',
+         'number.integer': 'Fee structure ID must be an integer',
+         'number.positive': 'Fee structure ID must be positive',
+         'any.required': 'Fee structure ID is required',
+      }),
+      school_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'School ID must be a number',
+         'number.integer': 'School ID must be an integer',
+         'number.positive': 'School ID must be positive',
+         'any.required': 'School ID is required',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'any.required': 'Academic year is required',
+         }),
+      payment_date: Joi.date().required().messages({
+         'any.required': 'Payment date is required',
+      }),
+      payment_amount: Joi.number().min(0.01).max(999999.99).precision(2).required().messages({
+         'number.min': 'Payment amount must be greater than 0',
+         'number.max': 'Payment amount cannot exceed 999,999.99',
+         'any.required': 'Payment amount is required',
+      }),
+      fee_amount: Joi.number().min(0).max(999999.99).precision(2).required().messages({
+         'number.min': 'Fee amount cannot be negative',
+         'number.max': 'Fee amount cannot exceed 999,999.99',
+         'any.required': 'Fee amount is required',
+      }),
+      late_fee_amount: Joi.number().min(0).max(99999.99).precision(2).default(0).messages({
+         'number.min': 'Late fee amount cannot be negative',
+         'number.max': 'Late fee amount cannot exceed 99,999.99',
+      }),
+      discount_amount: Joi.number().min(0).max(999999.99).precision(2).default(0).messages({
+         'number.min': 'Discount amount cannot be negative',
+         'number.max': 'Discount amount cannot exceed 999,999.99',
+      }),
+      tax_amount: Joi.number().min(0).max(999999.99).precision(2).default(0).messages({
+         'number.min': 'Tax amount cannot be negative',
+         'number.max': 'Tax amount cannot exceed 999,999.99',
+      }),
+      payment_method: Joi.string()
+         .valid('CASH', 'CHEQUE', 'DD', 'NEFT', 'UPI', 'CARD', 'ONLINE', 'WALLET')
+         .required()
+         .messages({
+            'any.only': 'Payment method must be CASH, CHEQUE, DD, NEFT, UPI, CARD, ONLINE, or WALLET',
+            'any.required': 'Payment method is required',
+         }),
+      reference_number: Joi.string().max(100).optional().allow(null, ''),
+      bank_name: Joi.string().max(100).optional().allow(null, ''),
+      branch_name: Joi.string().max(100).optional().allow(null, ''),
+      cheque_date: Joi.date().optional().allow(null),
+      payment_status: Joi.string()
+         .valid('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED')
+         .default('COMPLETED')
+         .messages({
+            'any.only': 'Payment status must be PENDING, COMPLETED, FAILED, CANCELLED, or REFUNDED',
+         }),
+      collected_by: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Collected by user ID must be positive',
+         'any.required': 'Collected by user ID is required',
+      }),
+      verified_by: Joi.number().integer().positive().optional().allow(null).messages({
+         'number.positive': 'Verified by user ID must be positive',
+      }),
+      remarks: Joi.string().max(500).optional().allow(null, ''),
+      transaction_details: Joi.object().optional().allow(null),
+      receipt_generated: Joi.boolean().default(false),
+   }),
+
+   // Fee Collection Update Validation
+   updateCollection: Joi.object({
+      payment_status: Joi.string()
+         .valid('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED')
+         .optional()
+         .messages({
+            'any.only': 'Payment status must be PENDING, COMPLETED, FAILED, CANCELLED, or REFUNDED',
+         }),
+      verified_by: Joi.number().integer().positive().optional().allow(null).messages({
+         'number.positive': 'Verified by user ID must be positive',
+      }),
+      verification_date: Joi.date().optional().allow(null),
+      remarks: Joi.string().max(500).optional().allow(null, ''),
+      receipt_generated: Joi.boolean().optional(),
+      transaction_details: Joi.object().optional().allow(null),
+   }),
+
+   // Fee Collection Query Validation
+   queryCollections: Joi.object({
+      student_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'Student ID must be positive',
+      }),
+      school_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'School ID must be positive',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .optional()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY',
+         }),
+      receipt_number: Joi.string().max(50).optional(),
+      payment_method: Joi.string().valid('CASH', 'CHEQUE', 'DD', 'NEFT', 'UPI', 'CARD', 'ONLINE', 'WALLET').optional(),
+      payment_status: Joi.string().valid('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED').optional(),
+      payment_from: Joi.date().optional(),
+      payment_to: Joi.date().optional(),
+      amount_min: Joi.number().min(0).optional(),
+      amount_max: Joi.number().min(0).optional(),
+      collected_by: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'Collected by user ID must be positive',
+      }),
+      verification_status: Joi.string().valid('VERIFIED', 'UNVERIFIED').optional(),
+      limit: Joi.number().integer().min(1).max(1000).default(50).messages({
+         'number.min': 'Limit must be at least 1',
+         'number.max': 'Limit cannot exceed 1000',
+      }),
+      offset: Joi.number().integer().min(0).default(0).messages({
+         'number.min': 'Offset cannot be negative',
+      }),
+      sortBy: Joi.string().valid('id', 'payment_date', 'payment_amount', 'receipt_number', 'created_at').default('id'),
+      sortOrder: Joi.string().valid('ASC', 'DESC').default('DESC'),
+   })
+      .min(1)
+      .messages({
+         'object.min': 'At least one filter parameter is required',
+      }),
+
+   // Bulk Payment Processing
+   bulkPaymentProcessing: Joi.object({
+      payments: Joi.array()
+         .items(
+            Joi.object({
+               student_id: Joi.number().integer().positive().required(),
+               student_fee_id: Joi.number().integer().positive().required(),
+               payment_amount: Joi.number().min(0.01).max(999999.99).precision(2).required(),
+               payment_method: Joi.string()
+                  .valid('CASH', 'CHEQUE', 'DD', 'NEFT', 'UPI', 'CARD', 'ONLINE', 'WALLET')
+                  .required(),
+               payment_date: Joi.date().required(),
+               collected_by: Joi.number().integer().positive().required(),
+            })
+         )
+         .min(1)
+         .max(200)
+         .required()
+         .messages({
+            'array.min': 'At least one payment is required',
+            'array.max': 'Maximum 200 payments allowed per bulk operation',
+            'any.required': 'Payments array is required',
+         }),
+   }),
+
+   // Receipt Generation Validation
+   generateReceipt: Joi.object({
+      collection_id: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Collection ID must be positive',
+         'any.required': 'Collection ID is required',
+      }),
+      receipt_format: Joi.string().valid('PDF', 'HTML', 'THERMAL_PRINT').default('PDF').messages({
+         'any.only': 'Receipt format must be PDF, HTML, or THERMAL_PRINT',
+      }),
+      include_breakdown: Joi.boolean().default(true),
+      include_school_logo: Joi.boolean().default(true),
+   }),
+};
 
 /**
  * Fee Collection Model
@@ -631,50 +824,56 @@ function defineFeeCollection(sequelize) {
       }
    };
 
-   // Validation schemas for API endpoints
-   FeeCollection.validationSchemas = {
-      create: {
-         student_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         student_fee_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         payment_amount: {
-            required: true,
-            type: 'number',
-            min: 0.01,
-            max: 999999.99,
-         },
-         payment_method: {
-            required: true,
-            type: 'string',
-            enum: ['CASH', 'CHEQUE', 'DD', 'BANK_TRANSFER', 'ONLINE', 'CARD', 'UPI', 'WALLET', 'OTHER'],
-         },
-         payment_date: {
-            required: true,
-            type: 'date',
-         },
-      },
-      update: {
-         payment_status: {
-            required: false,
-            type: 'string',
-            enum: ['SUCCESS', 'PENDING', 'FAILED', 'CANCELLED', 'REFUNDED', 'BOUNCED'],
-         },
-         remarks: {
-            required: false,
-            type: 'string',
-            maxLength: 1000,
-         },
-      },
+   // Model associations
+   FeeCollection.associate = function (models) {
+      // Belongs to Student
+      FeeCollection.belongsTo(models.Student, {
+         foreignKey: 'student_id',
+         as: 'student',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to Student Fee
+      FeeCollection.belongsTo(models.StudentFee, {
+         foreignKey: 'student_fee_id',
+         as: 'studentFee',
+         onDelete: 'RESTRICT',
+      });
+
+      // Belongs to Fee Structure
+      FeeCollection.belongsTo(models.FeeStructure, {
+         foreignKey: 'fee_structure_id',
+         as: 'feeStructure',
+         onDelete: 'RESTRICT',
+      });
+
+      // Belongs to School
+      FeeCollection.belongsTo(models.School, {
+         foreignKey: 'school_id',
+         as: 'school',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to User (collected by)
+      FeeCollection.belongsTo(models.User, {
+         foreignKey: 'collected_by',
+         as: 'collector',
+         onDelete: 'RESTRICT',
+      });
+
+      // Belongs to User (verified by)
+      FeeCollection.belongsTo(models.User, {
+         foreignKey: 'verified_by',
+         as: 'verifier',
+         onDelete: 'SET NULL',
+      });
    };
 
    return FeeCollection;
 }
 
-module.exports = defineFeeCollection;
+// Q59-ENFORCED: Export validation schemas
+module.exports = {
+   defineFeeCollection,
+   feeCollectionValidationSchemas,
+};

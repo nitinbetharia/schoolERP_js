@@ -2,6 +2,10 @@ const express = require('express');
 const SetupController = require('../controllers/SetupController');
 const { requireSystemAdmin } = require('../../../middleware/auth');
 
+// Q59-ENFORCED: Import validation schemas for setup operations
+const { validators } = require('../../../middleware');
+const { setupConfigurationValidationSchemas } = require('../../../models/index');
+
 const router = express.Router();
 const setupController = new SetupController();
 
@@ -36,9 +40,13 @@ router.get('/:trust_id/progress', (req, res) => {
  * @desc Complete a setup step
  * @access System Admin
  */
-router.post('/:trust_id/step/:step_name/complete', (req, res) => {
-   setupController.completeStep(req, res);
-});
+router.post(
+   '/:trust_id/step/:step_name/complete',
+   validators.validateBody(setupConfigurationValidationSchemas.updateSetupConfiguration), // Q59-ENFORCED validation
+   (req, res) => {
+      setupController.completeStep(req, res);
+   }
+);
 
 /**
  * @route GET /api/v1/setup/:trust_id/step/:step_name

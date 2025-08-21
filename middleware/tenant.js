@@ -4,7 +4,7 @@ const { logSystem, logError } = require('../utils/logger');
 const {
    ErrorFactory,
    // Legacy classes for backward compatibility
-   AuthenticationError
+   AuthenticationError,
 } = require('../utils/errors');
 const appConfig = require('../config/app-config.json');
 
@@ -32,7 +32,7 @@ const tenantDetection = async (req, res, next) => {
       req.subdomain = subdomain;
 
       // Skip tenant database initialization for system admin routes
-      if (req.path.startsWith('/api/v1/admin/system')) {
+      if (req.path.startsWith('/api/v1/admin/system') || req.path.startsWith('/admin/system')) {
          return next();
       }
 
@@ -43,6 +43,22 @@ const tenantDetection = async (req, res, next) => {
 
       // Skip for status endpoint
       if (req.path === '/api/v1/status' || req.path === '/status') {
+         return next();
+      }
+
+      // Skip for auth routes to allow login without tenant initialization
+      if (req.path === '/auth/login' || req.path.startsWith('/auth/')) {
+         req.tenantCode = tenantCode; // Set tenant code but don't initialize models
+         return next();
+      }
+
+      // Skip for static files
+      if (req.path.startsWith('/static/')) {
+         return next();
+      }
+
+      // Skip for logout
+      if (req.path === '/logout' || req.path === '/auth/logout') {
          return next();
       }
 
@@ -131,7 +147,7 @@ const validateTenant = async (req, res, next) => {
       }
 
       const { getTrustModel } = require('../models');
-      const Trust = getTrustModel();
+      const Trust = await getTrustModel();
 
       // Find trust by subdomain or tenant code
       const trust = await Trust.findOne({

@@ -172,7 +172,8 @@ const logHelpers = {
       dbLogger.debug('Database Operation', {
          category: 'DATABASE',
          operation,
-         query: query ? query.substring(0, 500) : '', // Truncate long queries
+         query:
+            query && typeof query === 'string' ? query.substring(0, 500) : query ? String(query).substring(0, 500) : '', // Handle both string and object queries
          executionTime,
          timestamp: new Date().toISOString(),
          ...meta,

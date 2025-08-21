@@ -22,7 +22,8 @@
       "Bash(npx eslint:*)",
       "Bash(find:*)",
       "Bash(NODE_ENV=development npm start)",
-      "Bash(set NODE_ENV=development)"
+      "Bash(set NODE_ENV=development)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

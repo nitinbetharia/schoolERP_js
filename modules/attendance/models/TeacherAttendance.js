@@ -497,4 +497,175 @@ function defineTeacherAttendance(sequelize) {
    return TeacherAttendance;
 }
 
-module.exports = defineTeacherAttendance;
+/**
+ * Teacher Attendance Validation Schemas
+ * Following Q59-ENFORCED pattern - reusable across API and web routes
+ */
+const Joi = require('joi');
+
+const teacherAttendanceValidationSchemas = {
+   markAttendance: Joi.object({
+      // Required fields
+      teacher_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Teacher ID must be a number',
+         'number.positive': 'Teacher ID must be positive',
+         'any.required': 'Teacher ID is required',
+      }),
+
+      school_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'School ID must be a number',
+         'number.positive': 'School ID must be positive',
+         'any.required': 'School ID is required',
+      }),
+
+      attendance_date: Joi.date().max('now').required().messages({
+         'date.max': 'Attendance cannot be marked for future dates',
+         'any.required': 'Attendance date is required',
+      }),
+
+      status: Joi.string()
+         .valid('PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK', 'LEAVE', 'HALF_DAY')
+         .required()
+         .messages({
+            'any.only': 'Status must be PRESENT, ABSENT, LATE, EXCUSED, SICK, LEAVE, or HALF_DAY',
+            'any.required': 'Attendance status is required',
+         }),
+
+      academic_year: Joi.number().integer().min(2000).max(2100).required().messages({
+         'number.min': 'Academic year must be 2000 or later',
+         'number.max': 'Academic year must be before 2100',
+         'any.required': 'Academic year is required',
+      }),
+
+      // Optional timing fields
+      check_in_time: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .allow(null, '')
+         .optional()
+         .messages({
+            'string.pattern.base': 'Check in time must be in format HH:MM:SS',
+         }),
+
+      check_out_time: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .allow(null, '')
+         .optional()
+         .messages({
+            'string.pattern.base': 'Check out time must be in format HH:MM:SS',
+         }),
+
+      scheduled_start: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .optional(),
+      scheduled_end: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .optional(),
+
+      minutes_late: Joi.number().integer().min(0).max(1440).allow(null).optional().messages({
+         'number.min': 'Minutes late cannot be negative',
+         'number.max': 'Minutes late cannot exceed 24 hours (1440 minutes)',
+      }),
+
+      early_departure_minutes: Joi.number().integer().min(0).max(1440).allow(null).optional(),
+      total_hours_worked: Joi.number().min(0).max(24).allow(null).optional(),
+      overtime_hours: Joi.number().min(0).max(24).allow(null).optional(),
+
+      // Leave specific fields
+      leave_type: Joi.when('status', {
+         is: 'LEAVE',
+         then: Joi.string()
+            .valid('SICK', 'CASUAL', 'EARNED', 'MATERNITY', 'PATERNITY', 'EMERGENCY', 'OTHER')
+            .required(),
+         otherwise: Joi.string()
+            .valid('SICK', 'CASUAL', 'EARNED', 'MATERNITY', 'PATERNITY', 'EMERGENCY', 'OTHER')
+            .allow(null)
+            .optional(),
+      }),
+
+      reason: Joi.string().trim().max(500).allow(null, '').optional(),
+      is_holiday: Joi.boolean().optional(),
+      additional_info: Joi.object().allow(null).optional(),
+   }),
+
+   updateAttendance: Joi.object({
+      // Prevent updating core identity fields
+      id: Joi.forbidden().messages({
+         'any.unknown': 'Attendance ID cannot be updated',
+      }),
+      teacher_id: Joi.forbidden().messages({
+         'any.unknown': 'Teacher ID cannot be updated',
+      }),
+      attendance_date: Joi.forbidden().messages({
+         'any.unknown': 'Attendance date cannot be updated',
+      }),
+
+      // Allow updating attendance details
+      status: Joi.string().valid('PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK', 'LEAVE', 'HALF_DAY').optional(),
+
+      check_in_time: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .allow(null, '')
+         .optional(),
+      check_out_time: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .allow(null, '')
+         .optional(),
+
+      scheduled_start: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .optional(),
+      scheduled_end: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .optional(),
+
+      minutes_late: Joi.number().integer().min(0).max(1440).allow(null).optional(),
+      early_departure_minutes: Joi.number().integer().min(0).max(1440).allow(null).optional(),
+      total_hours_worked: Joi.number().min(0).max(24).allow(null).optional(),
+      overtime_hours: Joi.number().min(0).max(24).allow(null).optional(),
+
+      leave_type: Joi.string()
+         .valid('SICK', 'CASUAL', 'EARNED', 'MATERNITY', 'PATERNITY', 'EMERGENCY', 'OTHER')
+         .allow(null)
+         .optional(),
+      reason: Joi.string().trim().max(500).allow(null, '').optional(),
+      additional_info: Joi.object().allow(null).optional(),
+   }),
+
+   checkOut: Joi.object({
+      check_out_time: Joi.string()
+         .pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Check out time must be in format HH:MM:SS',
+            'any.required': 'Check out time is required',
+         }),
+
+      early_departure_minutes: Joi.number().integer().min(0).max(1440).allow(null).optional(),
+      overtime_hours: Joi.number().min(0).max(24).allow(null).optional(),
+      reason: Joi.string().trim().max(500).allow(null, '').optional(),
+   }),
+
+   attendanceQuery: Joi.object({
+      teacher_id: Joi.number().integer().positive().optional(),
+      school_id: Joi.number().integer().positive().optional(),
+      status: Joi.string().valid('PRESENT', 'ABSENT', 'LATE', 'EXCUSED', 'SICK', 'LEAVE', 'HALF_DAY').optional(),
+      leave_type: Joi.string()
+         .valid('SICK', 'CASUAL', 'EARNED', 'MATERNITY', 'PATERNITY', 'EMERGENCY', 'OTHER')
+         .optional(),
+      academic_year: Joi.number().integer().min(2000).max(2100).optional(),
+
+      start_date: Joi.date().optional(),
+      end_date: Joi.date().min(Joi.ref('start_date')).optional().messages({
+         'date.min': 'End date must be after start date',
+      }),
+
+      // Pagination
+      page: Joi.number().integer().min(1).optional(),
+      limit: Joi.number().integer().min(1).max(1000).optional(),
+
+      // Filters
+      is_holiday: Joi.boolean().optional(),
+   }),
+};
+
+module.exports = { defineTeacherAttendance, teacherAttendanceValidationSchemas };

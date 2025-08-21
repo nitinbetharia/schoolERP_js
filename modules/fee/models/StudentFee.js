@@ -1,5 +1,250 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
 const { logger } = require('../../../utils/logger');
+
+/**
+ * Q59-ENFORCED: Comprehensive validation schemas for student fee operations
+ * These schemas enforce business rules and data integrity for all student fee operations
+ */
+const studentFeeValidationSchemas = {
+   // Student Fee Assignment Validation
+   createStudentFee: Joi.object({
+      student_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Student ID must be a number',
+         'number.integer': 'Student ID must be an integer',
+         'number.positive': 'Student ID must be positive',
+         'any.required': 'Student ID is required',
+      }),
+      fee_structure_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Fee structure ID must be a number',
+         'number.integer': 'Fee structure ID must be an integer',
+         'number.positive': 'Fee structure ID must be positive',
+         'any.required': 'Fee structure ID is required',
+      }),
+      school_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'School ID must be a number',
+         'number.integer': 'School ID must be an integer',
+         'number.positive': 'School ID must be positive',
+         'any.required': 'School ID is required',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'any.required': 'Academic year is required',
+         }),
+      original_amount: Joi.number().min(0).max(999999.99).precision(2).required().messages({
+         'number.base': 'Original amount must be a number',
+         'number.min': 'Original amount cannot be negative',
+         'number.max': 'Original amount cannot exceed 999,999.99',
+         'any.required': 'Original amount is required',
+      }),
+      discount_amount: Joi.number().min(0).max(999999.99).precision(2).default(0).messages({
+         'number.min': 'Discount amount cannot be negative',
+         'number.max': 'Discount amount cannot exceed 999,999.99',
+      }),
+      discount_percentage: Joi.number().min(0).max(100).precision(2).optional().allow(null).messages({
+         'number.min': 'Discount percentage cannot be negative',
+         'number.max': 'Discount percentage cannot exceed 100%',
+      }),
+      discount_reason: Joi.string().max(200).optional().allow(null, ''),
+      final_amount: Joi.number().min(0).max(999999.99).precision(2).required().messages({
+         'number.min': 'Final amount cannot be negative',
+         'number.max': 'Final amount cannot exceed 999,999.99',
+         'any.required': 'Final amount is required',
+      }),
+      tax_amount: Joi.number().min(0).max(999999.99).precision(2).default(0).messages({
+         'number.min': 'Tax amount cannot be negative',
+         'number.max': 'Tax amount cannot exceed 999,999.99',
+      }),
+      total_payable: Joi.number().min(0).max(999999.99).precision(2).required().messages({
+         'number.min': 'Total payable cannot be negative',
+         'number.max': 'Total payable cannot exceed 999,999.99',
+         'any.required': 'Total payable amount is required',
+      }),
+      due_date: Joi.date().optional().allow(null),
+      installment_plan: Joi.number().integer().min(1).max(12).optional().allow(null).messages({
+         'number.min': 'Installment plan must be at least 1',
+         'number.max': 'Maximum 12 installments allowed',
+      }),
+      payment_status: Joi.string()
+         .valid('PENDING', 'PARTIAL', 'PAID', 'OVERDUE', 'WAIVED', 'REFUNDED')
+         .default('PENDING')
+         .messages({
+            'any.only': 'Payment status must be PENDING, PARTIAL, PAID, OVERDUE, WAIVED, or REFUNDED',
+         }),
+      priority: Joi.string().valid('HIGH', 'MEDIUM', 'LOW').default('MEDIUM').messages({
+         'any.only': 'Priority must be HIGH, MEDIUM, or LOW',
+      }),
+      waiver_reason: Joi.string().max(500).optional().allow(null, ''),
+      notes: Joi.string().max(1000).optional().allow(null, ''),
+      created_by: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Created by user ID must be positive',
+         'any.required': 'Created by user ID is required',
+      }),
+      additional_charges: Joi.object().optional().allow(null),
+      discount_breakdown: Joi.object().optional().allow(null),
+   }),
+
+   // Student Fee Update Validation
+   updateStudentFee: Joi.object({
+      discount_amount: Joi.number().min(0).max(999999.99).precision(2).optional().messages({
+         'number.min': 'Discount amount cannot be negative',
+         'number.max': 'Discount amount cannot exceed 999,999.99',
+      }),
+      discount_percentage: Joi.number().min(0).max(100).precision(2).optional().allow(null).messages({
+         'number.min': 'Discount percentage cannot be negative',
+         'number.max': 'Discount percentage cannot exceed 100%',
+      }),
+      discount_reason: Joi.string().max(200).optional().allow(null, ''),
+      final_amount: Joi.number().min(0).max(999999.99).precision(2).optional().messages({
+         'number.min': 'Final amount cannot be negative',
+         'number.max': 'Final amount cannot exceed 999,999.99',
+      }),
+      tax_amount: Joi.number().min(0).max(999999.99).precision(2).optional().messages({
+         'number.min': 'Tax amount cannot be negative',
+         'number.max': 'Tax amount cannot exceed 999,999.99',
+      }),
+      total_payable: Joi.number().min(0).max(999999.99).precision(2).optional().messages({
+         'number.min': 'Total payable cannot be negative',
+         'number.max': 'Total payable cannot exceed 999,999.99',
+      }),
+      due_date: Joi.date().optional().allow(null),
+      installment_plan: Joi.number().integer().min(1).max(12).optional().allow(null).messages({
+         'number.min': 'Installment plan must be at least 1',
+         'number.max': 'Maximum 12 installments allowed',
+      }),
+      payment_status: Joi.string()
+         .valid('PENDING', 'PARTIAL', 'PAID', 'OVERDUE', 'WAIVED', 'REFUNDED')
+         .optional()
+         .messages({
+            'any.only': 'Payment status must be PENDING, PARTIAL, PAID, OVERDUE, WAIVED, or REFUNDED',
+         }),
+      priority: Joi.string().valid('HIGH', 'MEDIUM', 'LOW').optional().messages({
+         'any.only': 'Priority must be HIGH, MEDIUM, or LOW',
+      }),
+      waiver_reason: Joi.string().max(500).optional().allow(null, ''),
+      notes: Joi.string().max(1000).optional().allow(null, ''),
+      additional_charges: Joi.object().optional().allow(null),
+      discount_breakdown: Joi.object().optional().allow(null),
+   }),
+
+   // Student Fee Payment Validation
+   recordPayment: Joi.object({
+      student_fee_id: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Student fee ID must be positive',
+         'any.required': 'Student fee ID is required',
+      }),
+      payment_amount: Joi.number().min(0.01).max(999999.99).precision(2).required().messages({
+         'number.min': 'Payment amount must be greater than 0',
+         'number.max': 'Payment amount cannot exceed 999,999.99',
+         'any.required': 'Payment amount is required',
+      }),
+      payment_date: Joi.date()
+         .optional()
+         .default(() => new Date()),
+      payment_method: Joi.string()
+         .valid('CASH', 'CHEQUE', 'DD', 'NEFT', 'UPI', 'CARD', 'ONLINE', 'WALLET')
+         .required()
+         .messages({
+            'any.only': 'Payment method must be CASH, CHEQUE, DD, NEFT, UPI, CARD, ONLINE, or WALLET',
+            'any.required': 'Payment method is required',
+         }),
+      reference_number: Joi.string().max(100).optional().allow(null, ''),
+      collected_by: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Collected by user ID must be positive',
+         'any.required': 'Collected by user ID is required',
+      }),
+      remarks: Joi.string().max(500).optional().allow(null, ''),
+   }),
+
+   // Student Fee Query Validation
+   queryStudentFees: Joi.object({
+      student_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'Student ID must be positive',
+      }),
+      school_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'School ID must be positive',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .optional()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY',
+         }),
+      fee_category: Joi.string()
+         .valid(
+            'TUITION',
+            'ADMISSION',
+            'DEVELOPMENT',
+            'TRANSPORT',
+            'LIBRARY',
+            'LABORATORY',
+            'COMPUTER',
+            'SPORTS',
+            'ACTIVITY',
+            'EXAMINATION',
+            'ANNUAL',
+            'CAUTION_MONEY',
+            'UNIFORM',
+            'BOOKS',
+            'STATIONERY',
+            'HOSTEL',
+            'MESS',
+            'MEDICAL',
+            'INSURANCE',
+            'OTHER'
+         )
+         .optional(),
+      payment_status: Joi.string().valid('PENDING', 'PARTIAL', 'PAID', 'OVERDUE', 'WAIVED', 'REFUNDED').optional(),
+      priority: Joi.string().valid('HIGH', 'MEDIUM', 'LOW').optional(),
+      due_from: Joi.date().optional(),
+      due_to: Joi.date().optional(),
+      amount_min: Joi.number().min(0).optional(),
+      amount_max: Joi.number().min(0).optional(),
+      limit: Joi.number().integer().min(1).max(1000).default(50).messages({
+         'number.min': 'Limit must be at least 1',
+         'number.max': 'Limit cannot exceed 1000',
+      }),
+      offset: Joi.number().integer().min(0).default(0).messages({
+         'number.min': 'Offset cannot be negative',
+      }),
+      sortBy: Joi.string().valid('id', 'due_date', 'total_payable', 'payment_status', 'created_at').default('id'),
+      sortOrder: Joi.string().valid('ASC', 'DESC').default('ASC'),
+   })
+      .min(1)
+      .messages({
+         'object.min': 'At least one filter parameter is required',
+      }),
+
+   // Bulk Student Fee Operations
+   bulkCreateStudentFees: Joi.object({
+      studentFees: Joi.array()
+         .items(
+            Joi.object({
+               student_id: Joi.number().integer().positive().required(),
+               fee_structure_id: Joi.number().integer().positive().required(),
+               school_id: Joi.number().integer().positive().required(),
+               academic_year: Joi.string()
+                  .pattern(/^\d{4}-\d{2}$/)
+                  .required(),
+               original_amount: Joi.number().min(0).max(999999.99).precision(2).required(),
+               final_amount: Joi.number().min(0).max(999999.99).precision(2).required(),
+               total_payable: Joi.number().min(0).max(999999.99).precision(2).required(),
+               created_by: Joi.number().integer().positive().required(),
+            })
+         )
+         .min(1)
+         .max(500)
+         .required()
+         .messages({
+            'array.min': 'At least one student fee is required',
+            'array.max': 'Maximum 500 student fees allowed per bulk operation',
+            'any.required': 'Student fees array is required',
+         }),
+   }),
+};
 
 /**
  * Student Fee Model
@@ -556,57 +801,56 @@ function defineStudentFee(sequelize) {
       }
    };
 
-   // Validation schemas for API endpoints
-   StudentFee.validationSchemas = {
-      create: {
-         student_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         fee_structure_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         discount_amount: {
-            required: false,
-            type: 'number',
-            min: 0,
-         },
-         discount_percentage: {
-            required: false,
-            type: 'number',
-            min: 0,
-            max: 100,
-         },
-         installment_plan: {
-            required: false,
-            type: 'integer',
-            min: 1,
-            max: 12,
-         },
-      },
-      update: {
-         discount_amount: {
-            required: false,
-            type: 'number',
-            min: 0,
-         },
-         payment_status: {
-            required: false,
-            type: 'string',
-            enum: ['PENDING', 'PARTIAL', 'PAID', 'OVERDUE', 'WAIVED', 'REFUNDED'],
-         },
-         notes: {
-            required: false,
-            type: 'string',
-            maxLength: 1000,
-         },
-      },
+   // Model associations
+   StudentFee.associate = function (models) {
+      // Belongs to Student
+      StudentFee.belongsTo(models.Student, {
+         foreignKey: 'student_id',
+         as: 'student',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to Fee Structure
+      StudentFee.belongsTo(models.FeeStructure, {
+         foreignKey: 'fee_structure_id',
+         as: 'feeStructure',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to School
+      StudentFee.belongsTo(models.School, {
+         foreignKey: 'school_id',
+         as: 'school',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to User (created by)
+      StudentFee.belongsTo(models.User, {
+         foreignKey: 'created_by',
+         as: 'creator',
+         onDelete: 'RESTRICT',
+      });
+
+      // Has many Fee Collections
+      StudentFee.hasMany(models.FeeCollection, {
+         foreignKey: 'student_fee_id',
+         as: 'collections',
+         onDelete: 'RESTRICT',
+      });
+
+      // Has many Student Fee Discounts
+      StudentFee.hasMany(models.StudentFeeDiscount, {
+         foreignKey: 'student_fee_id',
+         as: 'discounts',
+         onDelete: 'CASCADE',
+      });
    };
 
    return StudentFee;
 }
 
-module.exports = defineStudentFee;
+// Q59-ENFORCED: Export validation schemas
+module.exports = {
+   defineStudentFee,
+   studentFeeValidationSchemas,
+};

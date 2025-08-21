@@ -161,10 +161,11 @@ class SchoolERPServer {
       const { setupFlashMessages } = require('./middleware/flash');
       this.app.use(setupFlashMessages);
 
-      // Tenant detection middleware (for all routes except system admin)
+      // Tenant detection middleware (for all routes except system admin and trust-scoped routes)
       this.app.use((req, res, next) => {
          if (
             req.path.startsWith('/api/v1/admin/system') ||
+            req.path.startsWith('/api/v1/trust/') ||
             req.path === '/api/v1/health' ||
             req.path === '/api/v1/status' ||
             req.path === '/health' ||
@@ -175,10 +176,11 @@ class SchoolERPServer {
          return tenantDetection(req, res, next);
       });
 
-      // Tenant validation middleware (for tenant-specific routes)
+      // Tenant validation middleware (for tenant-specific routes except trust-scoped routes)
       this.app.use((req, res, next) => {
          if (
             req.path.startsWith('/api/v1/admin/system') ||
+            req.path.startsWith('/api/v1/trust/') ||
             req.path === '/api/v1/health' ||
             req.path === '/api/v1/status' ||
             req.path === '/health' ||
@@ -227,7 +229,7 @@ class SchoolERPServer {
             logSystem(`Server started successfully on port ${port}`, {
                port,
                environment: process.env.NODE_ENV,
-               version: '1.0.0',
+               version: '2.0.0',
             });
 
             console.log(`\n🚀 School ERP Server is running!`);

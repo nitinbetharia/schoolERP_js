@@ -1,4 +1,102 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
+
+/**
+ * Q59-ENFORCED: Comprehensive validation schemas for UDISE census data collection
+ */
+const udiseCensusDataValidationSchemas = {
+   // Census Data Creation
+   createCensusData: Joi.object({
+      udise_registration_id: Joi.number().integer().positive().required().messages({
+         'number.positive': 'UDISE registration ID must be positive',
+         'any.required': 'UDISE registration ID is required',
+      }),
+      school_id: Joi.string().max(50).required().messages({
+         'any.required': 'School ID is required',
+      }),
+      academic_year: Joi.string()
+         .length(7)
+         .pattern(/^\d{4}-\d{2}$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY',
+            'any.required': 'Academic year is required',
+         }),
+      census_date: Joi.date().required().messages({
+         'any.required': 'Census date is required',
+      }),
+      data_collection_phase: Joi.string().valid('september_30', 'march_31', 'special').required().messages({
+         'any.only': 'Data collection phase must be september_30, march_31, or special',
+         'any.required': 'Data collection phase is required',
+      }),
+      // Enrollment data (simplified - all integer, non-negative)
+      enrollment_pre_primary_boys: Joi.number().integer().min(0).default(0),
+      enrollment_pre_primary_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_1_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_1_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_2_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_2_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_3_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_3_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_4_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_4_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_5_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_5_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_6_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_6_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_7_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_7_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_8_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_8_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_9_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_9_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_10_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_10_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_11_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_11_girls: Joi.number().integer().min(0).default(0),
+      enrollment_class_12_boys: Joi.number().integer().min(0).default(0),
+      enrollment_class_12_girls: Joi.number().integer().min(0).default(0),
+      sc_students_boys: Joi.number().integer().min(0).default(0),
+      sc_students_girls: Joi.number().integer().min(0).default(0),
+      st_students_boys: Joi.number().integer().min(0).default(0),
+      st_students_girls: Joi.number().integer().min(0).default(0),
+      obc_students_boys: Joi.number().integer().min(0).default(0),
+      obc_students_girls: Joi.number().integer().min(0).default(0),
+   }),
+
+   // Census Data Update
+   updateCensusData: Joi.object({
+      census_date: Joi.date().optional(),
+      data_collection_phase: Joi.string().valid('september_30', 'march_31', 'special').optional(),
+      // Allow updating any enrollment numbers
+      enrollment_pre_primary_boys: Joi.number().integer().min(0).optional(),
+      enrollment_pre_primary_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_1_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_1_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_2_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_2_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_3_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_3_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_4_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_4_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_5_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_5_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_6_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_6_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_7_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_7_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_8_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_8_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_9_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_9_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_10_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_10_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_11_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_11_girls: Joi.number().integer().min(0).optional(),
+      enrollment_class_12_boys: Joi.number().integer().min(0).optional(),
+      enrollment_class_12_girls: Joi.number().integer().min(0).optional(),
+   }),
+};
 
 /**
  * UDISE Census Data Model
@@ -387,3 +485,6 @@ module.exports = (sequelize) => {
 
    return UdiseCensusData;
 };
+
+// Q59-ENFORCED: Export validation schemas
+module.exports.udiseCensusDataValidationSchemas = udiseCensusDataValidationSchemas;

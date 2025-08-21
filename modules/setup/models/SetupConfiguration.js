@@ -1,4 +1,59 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
+
+/**
+ * Q59-ENFORCED: Comprehensive validation schemas for setup configuration operations
+ */
+const setupConfigurationValidationSchemas = {
+   // Setup Configuration Creation
+   createSetupConfiguration: Joi.object({
+      trust_id: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Trust ID must be positive',
+         'any.required': 'Trust ID is required',
+      }),
+      step_name: Joi.string().max(100).required().messages({
+         'string.max': 'Step name cannot exceed 100 characters',
+         'any.required': 'Step name is required',
+      }),
+      step_order: Joi.number().integer().min(1).required().messages({
+         'number.min': 'Step order must be at least 1',
+         'any.required': 'Step order is required',
+      }),
+      is_completed: Joi.boolean().default(false),
+      completed_by: Joi.number().integer().positive().optional().allow(null).messages({
+         'number.positive': 'Completed by user ID must be positive',
+      }),
+      configuration_data: Joi.object().optional().allow(null),
+      validation_errors: Joi.array().items(Joi.string()).optional().allow(null),
+   }),
+
+   // Setup Configuration Update
+   updateSetupConfiguration: Joi.object({
+      is_completed: Joi.boolean().optional(),
+      completed_by: Joi.number().integer().positive().optional().allow(null).messages({
+         'number.positive': 'Completed by user ID must be positive',
+      }),
+      configuration_data: Joi.object().optional().allow(null),
+      validation_errors: Joi.array().items(Joi.string()).optional().allow(null),
+   }),
+
+   // Setup Configuration Query
+   querySetupConfigurations: Joi.object({
+      trust_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'Trust ID must be positive',
+      }),
+      step_name: Joi.string().max(100).optional(),
+      is_completed: Joi.boolean().optional(),
+      limit: Joi.number().integer().min(1).max(1000).default(50),
+      offset: Joi.number().integer().min(0).default(0),
+      sortBy: Joi.string().valid('step_order', 'step_name', 'completed_at', 'created_at').default('step_order'),
+      sortOrder: Joi.string().valid('ASC', 'DESC').default('ASC'),
+   })
+      .min(1)
+      .messages({
+         'object.min': 'At least one filter parameter is required',
+      }),
+};
 
 /**
  * Setup Configuration Model
@@ -98,4 +153,8 @@ const defineSetupConfiguration = (sequelize) => {
    return SetupConfiguration;
 };
 
-module.exports = { defineSetupConfiguration };
+// Q59-ENFORCED: Export validation schemas
+module.exports = {
+   defineSetupConfiguration,
+   setupConfigurationValidationSchemas,
+};

@@ -1,6 +1,10 @@
 const express = require('express');
 const UdiseController = require('../controllers/UdiseController')();
 
+// Q59-ENFORCED: Import validation schemas for UDISE operations
+const { validators } = require('../../../middleware');
+const { udiseSchoolRegistrationValidationSchemas, udiseCensusDataValidationSchemas } = require('../../../models/index');
+
 /**
  * UDISE Routes
  * Defines all routes for UDISE+ School Registration System
@@ -18,14 +22,22 @@ function createUdiseRoutes() {
     * @desc    Create new UDISE school registration
     * @access  Private (School Admin, System Admin)
     */
-   router.post('/registration', UdiseController.registration.createRegistration);
+   router.post(
+      '/registration',
+      validators.validateBody(udiseSchoolRegistrationValidationSchemas.createRegistration), // Q59-ENFORCED validation
+      UdiseController.registration.createRegistration
+   );
 
    /**
     * @route   PUT /api/v1/udise/registration/:id
     * @desc    Update UDISE registration
     * @access  Private (School Admin, System Admin)
     */
-   router.put('/registration/:id', UdiseController.registration.updateRegistration);
+   router.put(
+      '/registration/:id',
+      validators.validateBody(udiseSchoolRegistrationValidationSchemas.updateRegistration), // Q59-ENFORCED validation
+      UdiseController.registration.updateRegistration
+   );
 
    /**
     * @route   POST /api/v1/udise/registration/:id/submit
@@ -65,14 +77,22 @@ function createUdiseRoutes() {
     * @desc    Create census data record
     * @access  Private (School Admin, Data Entry Operator)
     */
-   router.post('/census', UdiseController.census.createCensusData);
+   router.post(
+      '/census',
+      validators.validateBody(udiseCensusDataValidationSchemas.createCensusData), // Q59-ENFORCED validation
+      UdiseController.census.createCensusData
+   );
 
    /**
     * @route   PUT /api/v1/udise/census/:id
     * @desc    Update census data
     * @access  Private (School Admin, Data Entry Operator)
     */
-   router.put('/census/:id', UdiseController.census.updateCensusData);
+   router.put(
+      '/census/:id',
+      validators.validateBody(udiseCensusDataValidationSchemas.updateCensusData), // Q59-ENFORCED validation
+      UdiseController.census.updateCensusData
+   );
 
    /**
     * @route   GET /api/v1/udise/census/:id/stats
@@ -150,7 +170,7 @@ function createUdiseRoutes() {
          success: true,
          message: 'UDISE+ module is operational',
          timestamp: new Date().toISOString(),
-         version: '1.0.0',
+         version: '2.0.0',
       });
    });
 
@@ -165,7 +185,7 @@ function createUdiseRoutes() {
          message: 'UDISE+ module status',
          data: {
             module: 'UDISE+ School Registration System',
-            version: '1.0.0',
+            version: '2.0.0',
             features: [
                'School Registration Management',
                'Annual Census Data Collection',

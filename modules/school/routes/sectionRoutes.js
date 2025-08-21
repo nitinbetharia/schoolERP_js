@@ -18,7 +18,8 @@ router.use(authenticate);
 router.use(requireTrustAdmin);
 
 // Create new section with Q59-ENFORCED validation
-router.post('/', 
+router.post(
+   '/',
    validators.validateBody(sectionValidationSchemas.create),
    sectionController.createSection.bind(sectionController)
 );
@@ -27,7 +28,8 @@ router.post('/',
 router.get('/class/:classId', sectionController.getSectionsByClass.bind(sectionController));
 
 // Bulk create sections for a class with Q59-ENFORCED validation
-router.post('/bulk/:classId', 
+router.post(
+   '/bulk/:classId',
    validators.validateBody(sectionValidationSchemas.bulkCreate),
    sectionController.bulkCreateSections.bind(sectionController)
 );
@@ -36,13 +38,15 @@ router.post('/bulk/:classId',
 router.get('/:id', sectionController.getSectionById.bind(sectionController));
 
 // Update section with Q59-ENFORCED validation
-router.put('/:id', 
+router.put(
+   '/:id',
    validators.validateBody(sectionValidationSchemas.update),
    sectionController.updateSection.bind(sectionController)
 );
 
 // Assign teacher to section with Q59-ENFORCED validation
-router.patch('/:id/teacher', 
+router.patch(
+   '/:id/teacher',
    validators.validateBody(sectionValidationSchemas.assignTeacher),
    sectionController.assignTeacher.bind(sectionController)
 );

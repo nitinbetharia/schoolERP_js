@@ -1,7 +1,7 @@
 # Backend API Sitemap - School ERP System
 
-**Generated**: August 20, 2025  
-**Version**: 1.0  
+**Generated**: August 21, 2025  
+**Version**: 2.0.0  
 **Base URL**: `http://localhost:3000/api/v1`  
 **Documentation**: Following Q59-ENFORCED validation patterns - all routes use existing validation schemas
 

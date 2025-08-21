@@ -1,7 +1,4 @@
-const {
-   ErrorFactory,
-   validators
-} = require('../utils/errors');
+const { ErrorFactory, validators } = require('../utils/errors');
 
 // Re-export all middleware for easy importing
 const errorHandler = require('./errorHandler');
@@ -23,5 +20,6 @@ module.exports = {
    ...security,
 
    // Validation helpers
-   ...validators,
+   validators,
+   ErrorFactory,
 };

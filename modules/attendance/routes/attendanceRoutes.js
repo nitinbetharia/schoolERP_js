@@ -5,6 +5,10 @@ const AttendanceController = require('../controllers/AttendanceController');
 const { authenticateToken, authorizeRoles } = require('../middleware/mockAuth');
 const models = require('../models'); // Use local models instead of corrupted main models
 
+// Q59-ENFORCED: Import validation schemas for attendance
+const { validators } = require('../../../middleware');
+const { studentAttendanceValidationSchemas, teacherAttendanceValidationSchemas } = require('../../../models/index');
+
 /**
  * Attendance Routes
  * REST API endpoints for attendance management
@@ -26,6 +30,7 @@ router.post(
    '/student',
    authenticateToken,
    authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
+   validators.validateBody(studentAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
    (req, res, next) => attendanceController.markStudentAttendance(req, res, next)
 );
 
@@ -38,6 +43,7 @@ router.post(
    '/student/bulk',
    authenticateToken,
    authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
+   validators.validateBody(studentAttendanceValidationSchemas.bulkMarkAttendance), // Q59-ENFORCED validation
    (req, res, next) => attendanceController.markBulkStudentAttendance(req, res, next)
 );
 
@@ -50,6 +56,7 @@ router.put(
    '/student/:id',
    authenticateToken,
    authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
+   validators.validateBody(studentAttendanceValidationSchemas.updateAttendance), // Q59-ENFORCED validation
    (req, res, next) => attendanceController.updateStudentAttendance(req, res, next)
 );
 
@@ -84,6 +91,7 @@ router.post(
    '/teacher',
    authenticateToken,
    authorizeRoles(['ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN', 'TEACHER']),
+   validators.validateBody(teacherAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
    (req, res, next) => attendanceController.markTeacherAttendance(req, res, next)
 );
 
@@ -96,6 +104,7 @@ router.put(
    '/teacher/:id/checkout',
    authenticateToken,
    authorizeRoles(['ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN', 'TEACHER']),
+   validators.validateBody(teacherAttendanceValidationSchemas.checkOut), // Q59-ENFORCED validation
    (req, res, next) => attendanceController.updateTeacherCheckOut(req, res, next)
 );
 

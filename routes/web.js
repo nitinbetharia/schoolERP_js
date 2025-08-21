@@ -245,19 +245,62 @@ router.post('/logout', (req, res) => {
 
 /**
  * @route GET /dashboard
- * @desc Dashboard page
+ * @desc Dashboard page (Trust Admin)
  * @access Private
  */
 router.get('/dashboard', requireAuth, (req, res) => {
    try {
-      res.render('pages/dashboard/index', {
-         title: 'Dashboard',
+      const userType = req.session.userType;
+      
+      // Redirect system admins to their specific dashboard
+      if (userType === 'system') {
+         return res.redirect('/admin/system');
+      }
+
+      // Render trust admin dashboard for tenant users
+      res.render('layouts/main', {
+         title: 'Trust Dashboard',
+         description: 'Trust administration dashboard for managing schools, students, and staff',
          user: req.session.user,
-         tenant: req.session.tenant,
+         tenant: req.session.tenant || req.tenant,
+         userType: userType,
+         body: 'pages/dashboard/trust-admin',
+         currentPath: '/dashboard'
       });
    } catch (error) {
       logError(error, { context: 'dashboard GET' });
       req.flash('error', 'Unable to load dashboard');
+      res.redirect('/auth/login');
+   }
+});
+
+/**
+ * @route GET /admin/system
+ * @desc System Admin Dashboard page
+ * @access Private (System Admin only)
+ */
+router.get('/admin/system', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      
+      // Only allow system admins
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('layouts/main', {
+         title: 'System Administration',
+         description: 'System administration dashboard for managing trusts and system configuration',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         body: 'pages/dashboard/system-admin',
+         currentPath: '/admin/system'
+      });
+   } catch (error) {
+      logError(error, { context: 'admin/system GET' });
+      req.flash('error', 'Unable to load system dashboard');
       res.redirect('/auth/login');
    }
 });

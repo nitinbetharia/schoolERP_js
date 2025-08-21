@@ -2,16 +2,19 @@ const Joi = require('joi');
 const { dbManager } = require('./database');
 const { defineTrustModel } = require('./Trust');
 const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
-const { defineSetupConfiguration } = require('../modules/setup/models/SetupConfiguration');
+const {
+   defineSetupConfiguration,
+   setupConfigurationValidationSchemas,
+} = require('../modules/setup/models/SetupConfiguration');
 const { defineUserProfile } = require('../modules/user/models/UserProfile');
 const { defineSchool, schoolValidationSchemas } = require('../modules/school/models/School');
 const { defineClass, classValidationSchemas } = require('../modules/school/models/Class');
 const { defineSection, sectionValidationSchemas } = require('../modules/school/models/Section');
 const { defineBoardCompliance } = require('../modules/school/models/BoardCompliance');
-const { defineCBSECompliance } = require('../modules/school/models/CBSECompliance');
-const { defineCISCECompliance } = require('../modules/school/models/CISCECompliance');
-const { defineStateBoardCompliance } = require('../modules/school/models/StateBoardCompliance');
-const { defineInternationalBoardCompliance } = require('../modules/school/models/InternationalBoardCompliance');
+const defineCBSECompliance = require('../modules/school/models/CBSECompliance');
+const defineCISCECompliance = require('../modules/school/models/CISCECompliance');
+const defineStateBoardCompliance = require('../modules/school/models/StateBoardCompliance');
+const defineInternationalBoardCompliance = require('../modules/school/models/InternationalBoardCompliance');
 const { defineNEPCompliance } = require('../modules/school/models/NEPCompliance');
 const { defineUDISESchool } = require('../modules/school/models/UDISESchool');
 const { defineUDISEClassInfrastructure } = require('../modules/school/models/UDISEClassInfrastructure');
@@ -21,19 +24,32 @@ const { defineStudent, studentValidationSchemas } = require('./Student');
 const { defineAcademicYear } = require('./AcademicYear');
 const { defineStudentEnrollment } = require('./StudentEnrollment');
 const { defineStudentDocument } = require('./StudentDocument');
+
+// Attendance System Models
+const {
+   defineStudentAttendance,
+   studentAttendanceValidationSchemas,
+} = require('../modules/attendance/models/StudentAttendance');
+const {
+   defineTeacherAttendance,
+   teacherAttendanceValidationSchemas,
+} = require('../modules/attendance/models/TeacherAttendance');
+
 const { logger, logSystem, logError } = require('../utils/logger');
 
 // Fee Management Models
-const { defineFeeStructure } = require('../modules/fee/models/FeeStructure');
-const { defineStudentFee } = require('../modules/fee/models/StudentFee');
-const { defineFeeCollection } = require('../modules/fee/models/FeeCollection');
-const { defineFeeInstallment } = require('../modules/fee/models/FeeInstallment');
-const { defineFeeDiscount } = require('../modules/fee/models/FeeDiscount');
-const { defineStudentFeeDiscount } = require('../modules/fee/models/StudentFeeDiscount');
+const { defineFeeStructure, feeStructureValidationSchemas } = require('../modules/fee/models/FeeStructure');
+const { defineStudentFee, studentFeeValidationSchemas } = require('../modules/fee/models/StudentFee');
+const { defineFeeCollection, feeCollectionValidationSchemas } = require('../modules/fee/models/FeeCollection');
+const defineFeeInstallment = require('../modules/fee/models/FeeInstallment');
+const defineFeeDiscount = require('../modules/fee/models/FeeDiscount');
+const defineStudentFeeDiscount = require('../modules/fee/models/StudentFeeDiscount');
 
 // UDISE+ Registration System Models
 const UdiseSchoolRegistrationModel = require('./UdiseSchoolRegistration');
+const { udiseSchoolRegistrationValidationSchemas } = require('./UdiseSchoolRegistration');
 const UdiseCensusDataModel = require('./UdiseCensusData');
+const { udiseCensusDataValidationSchemas } = require('./UdiseCensusData');
 const UdiseComplianceRecordModel = require('./UdiseComplianceRecord');
 const UdiseIntegrationLogModel = require('./UdiseIntegrationLog');
 
@@ -173,17 +189,17 @@ function createModelRegistry() {
          models.UdiseIntegrationLog = UdiseIntegrationLogModel(tenantDB);
 
          // Setup and audit models
-         models.SetupConfiguration = defineSetupConfiguration(tenantDB);
+         // Note: SetupConfiguration is system-level only, not included in tenant databases
          models.AuditLog = defineTenantAuditLogModel(tenantDB);
 
          // Setup associations
          await setupTenantAssociations(models);
 
          // Sync tenant database with safer options
-         // Note: Using { alter: false } to prevent index duplication issues
+         // Note: Using force: false to create tables without dropping
          await tenantDB.sync({
             alter: false, // Prevents duplicate index creation
-            force: false, // Never drop existing tables
+            force: false, // Don't drop existing tables
          });
 
          tenantModels.set(tenantCode, models);
@@ -421,7 +437,7 @@ function createModelRegistry() {
 }
 
 // Create singleton instance
-const modelRegistry = new createModelRegistry();
+const modelRegistry = createModelRegistry();
 
 // For UDISE and other services that need to initialize models directly
 function createTenantModels(tenantDB) {
@@ -556,9 +572,18 @@ module.exports.modelRegistry = modelRegistry;
 
 // System model getters
 module.exports.getSystemModels = () => modelRegistry.getSystemModels();
-module.exports.getTrustModel = () => modelRegistry.getSystemModels().Trust;
-module.exports.getSystemUserModel = () => modelRegistry.getSystemModels().SystemUser;
-module.exports.getSystemAuditLogModel = () => modelRegistry.getSystemModels().SystemAuditLog;
+module.exports.getTrustModel = async () => {
+   const models = await modelRegistry.getSystemModels();
+   return models.Trust;
+};
+module.exports.getSystemUserModel = async () => {
+   const models = await modelRegistry.getSystemModels();
+   return models.SystemUser;
+};
+module.exports.getSystemAuditLogModel = async () => {
+   const models = await modelRegistry.getSystemModels();
+   return models.SystemAuditLog;
+};
 
 // Tenant model getters
 module.exports.getTenantModels = (tenantCode) => modelRegistry.getTenantModels(tenantCode);
@@ -569,6 +594,14 @@ module.exports.studentValidationSchemas = studentValidationSchemas;
 module.exports.schoolValidationSchemas = schoolValidationSchemas;
 module.exports.classValidationSchemas = classValidationSchemas;
 module.exports.sectionValidationSchemas = sectionValidationSchemas;
+module.exports.studentAttendanceValidationSchemas = studentAttendanceValidationSchemas;
+module.exports.teacherAttendanceValidationSchemas = teacherAttendanceValidationSchemas;
+module.exports.feeStructureValidationSchemas = feeStructureValidationSchemas;
+module.exports.studentFeeValidationSchemas = studentFeeValidationSchemas;
+module.exports.feeCollectionValidationSchemas = feeCollectionValidationSchemas;
+module.exports.udiseSchoolRegistrationValidationSchemas = udiseSchoolRegistrationValidationSchemas;
+module.exports.udiseCensusDataValidationSchemas = udiseCensusDataValidationSchemas;
+module.exports.setupConfigurationValidationSchemas = setupConfigurationValidationSchemas;
 
 // Initialize functions
 module.exports.initializeSystemModels = () => modelRegistry.initializeSystemModels();

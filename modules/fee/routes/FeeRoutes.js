@@ -2,7 +2,14 @@ const express = require('express');
 const FeeController = require('../controllers/FeeController');
 const { requireAuth, requireRole } = require('../../../middleware/auth');
 const { requireTenant } = require('../../../middleware/tenant');
-const { validateInput } = require('../../../middleware');
+
+// Q59-ENFORCED: Import validation schemas for fee management
+const { validators } = require('../../../middleware');
+const {
+   feeStructureValidationSchemas,
+   studentFeeValidationSchemas,
+   feeCollectionValidationSchemas,
+} = require('../../../models/index');
 
 /**
  * Fee Routes
@@ -20,7 +27,7 @@ function createFeeRoutes() {
    router.post(
       '/structures',
       requireRole(['admin', 'teacher']),
-      validateInput('fee-structure'),
+      validators.validateBody(feeStructureValidationSchemas.createFeeStructure), // Q59-ENFORCED validation
       feeController.createFeeStructure
    );
 
@@ -34,7 +41,7 @@ function createFeeRoutes() {
    router.post(
       '/student-fees',
       requireRole(['admin', 'teacher']),
-      validateInput('student-fee'),
+      validators.validateBody(studentFeeValidationSchemas.createStudentFee), // Q59-ENFORCED validation
       feeController.createStudentFee
    );
 
@@ -48,27 +55,22 @@ function createFeeRoutes() {
    router.post(
       '/payments',
       requireRole(['admin', 'teacher']),
-      validateInput('fee-payment'),
+      validators.validateBody(feeCollectionValidationSchemas.recordPayment), // Q59-ENFORCED validation
       feeController.processFeePayment
    );
 
    router.get('/collections', requireRole(['admin', 'teacher']), feeController.getFeeCollections);
 
    // Fee Discount Routes
-   router.post('/discounts', requireRole(['admin']), validateInput('fee-discount'), feeController.createFeeDiscount);
+   router.post('/discounts', requireRole(['admin']), feeController.createFeeDiscount);
 
-   router.post(
-      '/discounts/apply',
-      requireRole(['admin']),
-      validateInput('student-discount'),
-      feeController.applyStudentDiscount
-   );
+   router.post('/discounts/apply', requireRole(['admin']), feeController.applyStudentDiscount);
 
    // Fee Reports Routes
    router.get('/reports', requireRole(['admin', 'teacher']), feeController.getFeeReports);
 
    // Bulk Operations Routes
-   router.post('/bulk', requireRole(['admin']), validateInput('bulk-fee-operation'), feeController.bulkFeeOperations);
+   router.post('/bulk', requireRole(['admin']), feeController.bulkFeeOperations);
 
    return router;
 }

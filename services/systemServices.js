@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { logger, logSystem, logAuth } = require('../utils/logger');
+const { logSystem, logAuth, logError } = require('../utils/logger');
 const { ErrorFactory } = require('../utils/errors');
 const appConfig = require('../config/app-config.json');
 
@@ -166,9 +166,9 @@ function createSystemAuthService() {
             username: userData.username.toLowerCase(),
             email: userData.email.toLowerCase(),
             password_hash: passwordHash,
+            full_name: userData.full_name,
             role: userData.role || 'SYSTEM_ADMIN',
             status: userData.status || 'ACTIVE',
-            profile: userData.profile || {},
             created_by: createdBy,
          });
 
@@ -212,7 +212,7 @@ function createTrustService() {
    async function createTrust(trustData) {
       try {
          const { getTrustModel } = require('../models');
-         const Trust = getTrustModel();
+         const Trust = await getTrustModel();
 
          // Check if trust code already exists
          const existingTrustCode = await Trust.findOne({
@@ -237,6 +237,7 @@ function createTrustService() {
             trust_name: trustData.trust_name,
             trust_code: trustData.trust_code.toLowerCase(),
             subdomain: trustData.subdomain.toLowerCase(),
+            database_name: `school_erp_trust_${trustData.trust_code.toLowerCase()}`,
             contact_email: trustData.contact_email.toLowerCase(),
             contact_phone: trustData.contact_phone,
             address: trustData.address,
@@ -263,7 +264,7 @@ function createTrustService() {
    async function getTrust(identifier, field = 'id') {
       try {
          const { getTrustModel } = require('../models');
-         const Trust = getTrustModel();
+         const Trust = await getTrustModel();
 
          const whereClause = {};
          whereClause[field] = field === 'id' ? parseInt(identifier) : identifier;
@@ -289,7 +290,7 @@ function createTrustService() {
    async function updateTrust(trustId, updateData, updatedBy) {
       try {
          const { getTrustModel } = require('../models');
-         const Trust = getTrustModel();
+         const Trust = await getTrustModel();
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
@@ -335,7 +336,7 @@ function createTrustService() {
    async function listTrusts(query = {}) {
       try {
          const { getTrustModel } = require('../models');
-         const Trust = getTrustModel();
+         const Trust = await getTrustModel();
 
          const { page = 1, limit = 10, status, search } = query;
          const offset = (page - 1) * limit;
@@ -383,8 +384,9 @@ function createTrustService() {
     */
    async function completeSetup(trustId, completedBy) {
       try {
-         const { getTrustModel } = require('../models');
-         const Trust = getTrustModel();
+         const { getTrustModel, initializeTenantModels } = require('../models');
+         const { dbManager } = require('../models/database');
+         const Trust = await getTrustModel();
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
@@ -395,9 +397,30 @@ function createTrustService() {
             throw ErrorFactory.conflict('Trust setup is already complete');
          }
 
+         // Ensure tenant database exists
+         const dbExists = await dbManager.tenantDatabaseExists(trust.trust_code);
+         if (!dbExists) {
+            logSystem(`Creating tenant database for: ${trust.trust_code}`, { trustId: trust.id });
+            await dbManager.createTenantDatabase(trust.trust_code);
+         }
+
+         // Initialize tenant models
+         try {
+            logSystem(`Initializing tenant models for: ${trust.trust_code}`, { trustId: trust.id });
+            await initializeTenantModels(trust.trust_code);
+            logSystem(`Tenant models initialized successfully for: ${trust.trust_code}`, { trustId: trust.id });
+         } catch (modelError) {
+            logError(modelError, {
+               context: 'completeSetup',
+               trustId: trust.id,
+               trustCode: trust.trust_code,
+               message: 'Failed to initialize tenant models',
+            });
+            // Don't throw error if models fail to initialize - they can be initialized later
+         }
+
          // Mark setup as complete and activate trust
          await trust.markSetupComplete();
-         await trust.activate();
 
          logSystem(`Trust setup completed: ${trust.trust_name}`, { trustId: trust.id, completedBy });
 

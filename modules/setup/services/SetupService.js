@@ -1,10 +1,5 @@
 const logger = require('../../../utils/logger');
-const {
-   ErrorFactory,
-   ValidationError,
-   NotFoundError,
-   DuplicateError
-} = require('../../../utils/errors');
+const { ErrorFactory, ValidationError, NotFoundError, DuplicateError } = require('../../../utils/errors');
 
 /**
  * Setup Service
@@ -67,7 +62,7 @@ function createSetupService() {
 
          // Check if setup already exists
          const existingSetup = await SetupConfiguration.findOne({
-            where: { trust_id: trustId }
+            where: { trust_id: trustId },
          });
 
          if (existingSetup) {
@@ -113,7 +108,7 @@ function createSetupService() {
          const { SetupConfiguration } = models;
 
          const setupConfig = await SetupConfiguration.findOne({
-            where: { trust_id: trustId }
+            where: { trust_id: trustId },
          });
 
          if (!setupConfig) {
@@ -136,7 +131,7 @@ function createSetupService() {
             completed_steps: completedSteps.length,
             progress_percentage: progressPercentage,
             current_step: setupConfig.current_step,
-            steps: setupSteps.map(step => ({
+            steps: setupSteps.map((step) => ({
                ...step,
                completed: completedSteps.includes(step.name),
                is_current: step.name === setupConfig.current_step,
@@ -164,7 +159,7 @@ function createSetupService() {
          const { SetupConfiguration } = models;
 
          const setupConfig = await SetupConfiguration.findOne({
-            where: { trust_id: trustId }
+            where: { trust_id: trustId },
          });
 
          if (!setupConfig) {
@@ -172,7 +167,7 @@ function createSetupService() {
          }
 
          // Validate step exists
-         const step = setupSteps.find(s => s.name === stepName);
+         const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
             throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
          }
@@ -198,7 +193,7 @@ function createSetupService() {
          };
 
          // Determine next step
-         const nextStep = setupSteps.find(s => s.order === step.order + 1);
+         const nextStep = setupSteps.find((s) => s.order === step.order + 1);
          setupConfig.current_step = nextStep ? nextStep.name : null;
 
          // Check if all steps completed
@@ -237,7 +232,7 @@ function createSetupService() {
    async function finalizeSetup(trustId, systemUserId) {
       try {
          const { getTrustModel } = require('../../../models');
-         const Trust = getTrustModel();
+         const Trust = await getTrustModel();
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
@@ -331,10 +326,10 @@ function createSetupService() {
          const { SetupConfiguration } = models;
 
          const setupConfig = await SetupConfiguration.findOne({
-            where: { trust_id: trustId }
+            where: { trust_id: trustId },
          });
 
-         const step = setupSteps.find(s => s.name === stepName);
+         const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
             throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
          }
@@ -368,7 +363,7 @@ function createSetupService() {
          const { SetupConfiguration } = models;
 
          await SetupConfiguration.destroy({
-            where: { trust_id: trustId }
+            where: { trust_id: trustId },
          });
 
          logger.info('Setup Service Info', {

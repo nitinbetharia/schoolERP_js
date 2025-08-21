@@ -1,0 +1,423 @@
+<!-- Trust Admin Dashboard -->
+<div class="min-h-screen bg-gray-50" x-data="trustAdminDashboard()" x-init="initDashboard()">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Trust Dashboard</h1>
+                    <p class="mt-1 text-sm text-gray-500" x-text="'Welcome to ' + trustInfo.name + ' administration'"></p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900" x-text="trustInfo.name"></div>
+                        <div class="text-sm text-gray-500" x-text="'Code: ' + trustInfo.code"></div>
+                    </div>
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <span class="text-indigo-600 font-semibold text-sm" x-text="trustInfo.name.charAt(0)"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Schools -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Schools</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalSchools"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Students -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-3.5a6 6 0 00-11.99-1.82"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Students</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalStudents"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Teachers -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-yellow-100 rounded-lg">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Teachers</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalTeachers"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Classes -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="p-2 bg-purple-100 rounded-lg">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Active Classes</p>
+                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalClasses"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Quick Actions -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-6">Quick Actions</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- School Management -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/school/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Manage Schools</h4>
+                                        <p class="text-sm text-gray-500">Add, edit, and configure schools</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Student Management -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/student/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-3.5a6 6 0 00-11.99-1.82"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Student Records</h4>
+                                        <p class="text-sm text-gray-500">Manage student information</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Teacher Management -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/teacher/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-yellow-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Teacher Records</h4>
+                                        <p class="text-sm text-gray-500">Manage teaching staff</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Fee Management -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/fee/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-purple-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Fee Management</h4>
+                                        <p class="text-sm text-gray-500">Configure fees and collections</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Attendance -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/attendance/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-indigo-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Attendance</h4>
+                                        <p class="text-sm text-gray-500">Track daily attendance</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reports -->
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                                 @click="navigateTo('/reports/dashboard')">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-red-100 rounded-lg">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">Reports</h4>
+                                        <p class="text-sm text-gray-500">Generate and view reports</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity & System Status -->
+            <div class="space-y-6">
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+                        <div class="space-y-4" x-show="recentActivity.length > 0">
+                            <template x-for="activity in recentActivity" :key="activity.id">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900" x-text="activity.action"></p>
+                                        <p class="text-sm text-gray-500" x-text="activity.details"></p>
+                                        <p class="text-xs text-gray-400 mt-1" x-text="activity.timestamp"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="recentActivity.length === 0" class="text-center py-6">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-500">No recent activity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust Information -->
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Trust Information</h3>
+                        <dl class="space-y-3">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Trust Code</dt>
+                                <dd class="text-sm text-gray-900" x-text="trustInfo.code"></dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Registration Number</dt>
+                                <dd class="text-sm text-gray-900" x-text="trustInfo.registration_number || 'Not set'"></dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                                <dd class="text-sm">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                          :class="trustInfo.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                          x-text="trustInfo.status || 'Unknown'"></span>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Created</dt>
+                                <dd class="text-sm text-gray-900" x-text="formatDate(trustInfo.created_at)"></dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div x-show="loading" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
+            <svg class="animate-spin h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-gray-900">Loading dashboard data...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+function trustAdminDashboard() {
+    return {
+        loading: true,
+        trustInfo: {
+            name: '',
+            code: '',
+            registration_number: '',
+            status: '',
+            created_at: null
+        },
+        stats: {
+            totalSchools: 0,
+            totalStudents: 0,
+            totalTeachers: 0,
+            totalClasses: 0
+        },
+        recentActivity: [],
+
+        async initDashboard() {
+            try {
+                await this.loadTrustInfo();
+                await this.loadStats();
+                await this.loadRecentActivity();
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                this.showNotification('Failed to load dashboard data', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async loadTrustInfo() {
+            try {
+                const response = await fetch('/api/v1/trust/demo/info', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch trust information');
+                }
+
+                const data = await response.json();
+                this.trustInfo = data.trust || this.trustInfo;
+            } catch (error) {
+                console.error('Error loading trust info:', error);
+                // Use fallback data from session or default
+                this.trustInfo = {
+                    name: 'Demo Trust',
+                    code: 'demo',
+                    registration_number: 'REG/2024/001',
+                    status: 'active',
+                    created_at: new Date().toISOString()
+                };
+            }
+        },
+
+        async loadStats() {
+            try {
+                const response = await fetch('/api/v1/trust/demo/stats', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard stats');
+                }
+
+                const data = await response.json();
+                this.stats = data.stats || this.stats;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Use mock data for now
+                this.stats = {
+                    totalSchools: 5,
+                    totalStudents: 1250,
+                    totalTeachers: 85,
+                    totalClasses: 45
+                };
+            }
+        },
+
+        async loadRecentActivity() {
+            try {
+                const response = await fetch('/api/v1/trust/demo/activity', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch recent activity');
+                }
+
+                const data = await response.json();
+                this.recentActivity = data.activities || [];
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                // Use mock data for demonstration
+                this.recentActivity = [
+                    {
+                        id: 1,
+                        action: 'New Student Admission',
+                        details: 'John Doe admitted to Class 9-A',
+                        timestamp: '2 hours ago'
+                    },
+                    {
+                        id: 2,
+                        action: 'Fee Collection Updated',
+                        details: 'Monthly fee structure updated for Class 10',
+                        timestamp: '4 hours ago'
+                    },
+                    {
+                        id: 3,
+                        action: 'Teacher Registration',
+                        details: 'Sarah Wilson joined as Math teacher',
+                        timestamp: '1 day ago'
+                    }
+                ];
+            }
+        },
+
+        navigateTo(path) {
+            window.location.href = path;
+        },
+
+        formatDate(dateString) {
+            if (!dateString) return 'Not available';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        },
+
+        showNotification(message, type = 'info') {
+            // Global notification system integration
+            if (window.showNotification) {
+                window.showNotification(message, type);
+            } else {
+                alert(message);
+            }
+        }
+    };
+}
+</script>

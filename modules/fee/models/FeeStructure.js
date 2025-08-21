@@ -1,5 +1,279 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
 const { logger } = require('../../../utils/logger');
+
+/**
+ * Q59-ENFORCED: Comprehensive validation schemas for fee structure operations
+ * These schemas enforce business rules and data integrity for all fee structure operations
+ */
+const feeStructureValidationSchemas = {
+   // Fee Structure Creation Validation
+   createFeeStructure: Joi.object({
+      school_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'School ID must be a number',
+         'number.integer': 'School ID must be an integer',
+         'number.positive': 'School ID must be positive',
+         'any.required': 'School ID is required',
+      }),
+      class_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Class ID must be a number',
+         'number.integer': 'Class ID must be an integer',
+         'number.positive': 'Class ID must be positive',
+         'any.required': 'Class ID is required',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'any.required': 'Academic year is required',
+         }),
+      fee_category: Joi.string()
+         .valid(
+            'TUITION',
+            'ADMISSION',
+            'DEVELOPMENT',
+            'TRANSPORT',
+            'LIBRARY',
+            'LABORATORY',
+            'COMPUTER',
+            'SPORTS',
+            'ACTIVITY',
+            'EXAMINATION',
+            'ANNUAL',
+            'CAUTION_MONEY',
+            'UNIFORM',
+            'BOOKS',
+            'STATIONERY',
+            'HOSTEL',
+            'MESS',
+            'MEDICAL',
+            'INSURANCE',
+            'OTHER'
+         )
+         .required()
+         .messages({
+            'any.only': 'Fee category must be a valid category',
+            'any.required': 'Fee category is required',
+         }),
+      fee_type: Joi.string().valid('MANDATORY', 'OPTIONAL', 'CONDITIONAL').default('MANDATORY').messages({
+         'any.only': 'Fee type must be MANDATORY, OPTIONAL, or CONDITIONAL',
+      }),
+      amount: Joi.number().min(0).max(999999.99).precision(2).required().messages({
+         'number.base': 'Amount must be a number',
+         'number.min': 'Amount cannot be negative',
+         'number.max': 'Amount cannot exceed 999,999.99',
+         'any.required': 'Amount is required',
+      }),
+      frequency: Joi.string()
+         .valid('YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME')
+         .default('YEARLY')
+         .messages({
+            'any.only': 'Frequency must be YEARLY, HALF_YEARLY, QUARTERLY, MONTHLY, or ONE_TIME',
+         }),
+      due_date: Joi.date().optional().allow(null),
+      due_month: Joi.number().integer().min(1).max(12).optional().allow(null).messages({
+         'number.min': 'Due month must be between 1 and 12',
+         'number.max': 'Due month must be between 1 and 12',
+      }),
+      installments: Joi.number().integer().min(1).max(12).default(1).messages({
+         'number.min': 'Installments must be at least 1',
+         'number.max': 'Maximum 12 installments allowed',
+      }),
+      late_fee_applicable: Joi.boolean().default(true),
+      late_fee_amount: Joi.number().min(0).precision(2).optional().allow(null).messages({
+         'number.min': 'Late fee amount cannot be negative',
+      }),
+      late_fee_percentage: Joi.number().min(0).max(100).precision(2).optional().allow(null).messages({
+         'number.min': 'Late fee percentage cannot be negative',
+         'number.max': 'Late fee percentage cannot exceed 100%',
+      }),
+      grace_period_days: Joi.number().integer().min(0).max(365).default(0).messages({
+         'number.min': 'Grace period cannot be negative',
+         'number.max': 'Grace period cannot exceed 365 days',
+      }),
+      discount_applicable: Joi.boolean().default(true),
+      refundable: Joi.boolean().default(false),
+      description: Joi.string().max(1000).optional().allow(null, ''),
+      conditions: Joi.object().optional().allow(null),
+      tax_applicable: Joi.boolean().default(false),
+      tax_percentage: Joi.number().min(0).max(50).precision(2).optional().allow(null).messages({
+         'number.min': 'Tax percentage cannot be negative',
+         'number.max': 'Tax percentage cannot exceed 50%',
+      }),
+      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'DRAFT').default('ACTIVE').messages({
+         'any.only': 'Status must be ACTIVE, INACTIVE, or DRAFT',
+      }),
+      effective_from: Joi.date().required().messages({
+         'any.required': 'Effective from date is required',
+      }),
+      effective_to: Joi.date().optional().allow(null),
+      created_by: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Created by user ID must be positive',
+         'any.required': 'Created by user ID is required',
+      }),
+      additional_info: Joi.object().optional().allow(null),
+   }),
+
+   // Fee Structure Update Validation
+   updateFeeStructure: Joi.object({
+      amount: Joi.number().min(0).max(999999.99).precision(2).optional().messages({
+         'number.min': 'Amount cannot be negative',
+         'number.max': 'Amount cannot exceed 999,999.99',
+      }),
+      frequency: Joi.string().valid('YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME').optional().messages({
+         'any.only': 'Frequency must be YEARLY, HALF_YEARLY, QUARTERLY, MONTHLY, or ONE_TIME',
+      }),
+      due_date: Joi.date().optional().allow(null),
+      due_month: Joi.number().integer().min(1).max(12).optional().allow(null).messages({
+         'number.min': 'Due month must be between 1 and 12',
+         'number.max': 'Due month must be between 1 and 12',
+      }),
+      installments: Joi.number().integer().min(1).max(12).optional().messages({
+         'number.min': 'Installments must be at least 1',
+         'number.max': 'Maximum 12 installments allowed',
+      }),
+      late_fee_applicable: Joi.boolean().optional(),
+      late_fee_amount: Joi.number().min(0).precision(2).optional().allow(null).messages({
+         'number.min': 'Late fee amount cannot be negative',
+      }),
+      late_fee_percentage: Joi.number().min(0).max(100).precision(2).optional().allow(null).messages({
+         'number.min': 'Late fee percentage cannot be negative',
+         'number.max': 'Late fee percentage cannot exceed 100%',
+      }),
+      grace_period_days: Joi.number().integer().min(0).max(365).optional().messages({
+         'number.min': 'Grace period cannot be negative',
+         'number.max': 'Grace period cannot exceed 365 days',
+      }),
+      discount_applicable: Joi.boolean().optional(),
+      refundable: Joi.boolean().optional(),
+      description: Joi.string().max(1000).optional().allow(null, ''),
+      conditions: Joi.object().optional().allow(null),
+      tax_applicable: Joi.boolean().optional(),
+      tax_percentage: Joi.number().min(0).max(50).precision(2).optional().allow(null).messages({
+         'number.min': 'Tax percentage cannot be negative',
+         'number.max': 'Tax percentage cannot exceed 50%',
+      }),
+      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'DRAFT').optional().messages({
+         'any.only': 'Status must be ACTIVE, INACTIVE, or DRAFT',
+      }),
+      effective_to: Joi.date().optional().allow(null),
+      approved_by: Joi.number().integer().positive().optional().allow(null).messages({
+         'number.positive': 'Approved by user ID must be positive',
+      }),
+      additional_info: Joi.object().optional().allow(null),
+   }),
+
+   // Fee Structure Query Validation
+   queryFeeStructures: Joi.object({
+      school_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'School ID must be positive',
+      }),
+      class_id: Joi.number().integer().positive().optional().messages({
+         'number.positive': 'Class ID must be positive',
+      }),
+      academic_year: Joi.string()
+         .pattern(/^\d{4}-\d{2}$/)
+         .optional()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY',
+         }),
+      fee_category: Joi.string()
+         .valid(
+            'TUITION',
+            'ADMISSION',
+            'DEVELOPMENT',
+            'TRANSPORT',
+            'LIBRARY',
+            'LABORATORY',
+            'COMPUTER',
+            'SPORTS',
+            'ACTIVITY',
+            'EXAMINATION',
+            'ANNUAL',
+            'CAUTION_MONEY',
+            'UNIFORM',
+            'BOOKS',
+            'STATIONERY',
+            'HOSTEL',
+            'MESS',
+            'MEDICAL',
+            'INSURANCE',
+            'OTHER'
+         )
+         .optional(),
+      fee_type: Joi.string().valid('MANDATORY', 'OPTIONAL', 'CONDITIONAL').optional(),
+      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'DRAFT').optional(),
+      frequency: Joi.string().valid('YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME').optional(),
+      effective_from: Joi.date().optional(),
+      effective_to: Joi.date().optional(),
+      limit: Joi.number().integer().min(1).max(1000).default(50).messages({
+         'number.min': 'Limit must be at least 1',
+         'number.max': 'Limit cannot exceed 1000',
+      }),
+      offset: Joi.number().integer().min(0).default(0).messages({
+         'number.min': 'Offset cannot be negative',
+      }),
+      sortBy: Joi.string().valid('id', 'fee_category', 'amount', 'effective_from', 'created_at').default('id'),
+      sortOrder: Joi.string().valid('ASC', 'DESC').default('ASC'),
+   })
+      .min(1)
+      .messages({
+         'object.min': 'At least one filter parameter is required',
+      }),
+
+   // Bulk Fee Structure Operations
+   bulkCreateFeeStructures: Joi.object({
+      feeStructures: Joi.array()
+         .items(
+            Joi.object({
+               school_id: Joi.number().integer().positive().required(),
+               class_id: Joi.number().integer().positive().required(),
+               academic_year: Joi.string()
+                  .pattern(/^\d{4}-\d{2}$/)
+                  .required(),
+               fee_category: Joi.string()
+                  .valid(
+                     'TUITION',
+                     'ADMISSION',
+                     'DEVELOPMENT',
+                     'TRANSPORT',
+                     'LIBRARY',
+                     'LABORATORY',
+                     'COMPUTER',
+                     'SPORTS',
+                     'ACTIVITY',
+                     'EXAMINATION',
+                     'ANNUAL',
+                     'CAUTION_MONEY',
+                     'UNIFORM',
+                     'BOOKS',
+                     'STATIONERY',
+                     'HOSTEL',
+                     'MESS',
+                     'MEDICAL',
+                     'INSURANCE',
+                     'OTHER'
+                  )
+                  .required(),
+               amount: Joi.number().min(0).max(999999.99).precision(2).required(),
+               frequency: Joi.string()
+                  .valid('YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME')
+                  .default('YEARLY'),
+               effective_from: Joi.date().required(),
+               created_by: Joi.number().integer().positive().required(),
+            })
+         )
+         .min(1)
+         .max(100)
+         .required()
+         .messages({
+            'array.min': 'At least one fee structure is required',
+            'array.max': 'Maximum 100 fee structures allowed per bulk operation',
+            'any.required': 'Fee structures array is required',
+         }),
+   }),
+};
 
 /**
  * Fee Structure Model
@@ -525,91 +799,56 @@ function defineFeeStructure(sequelize) {
       }
    };
 
-   // Validation schemas for API endpoints
-   FeeStructure.validationSchemas = {
-      create: {
-         school_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         class_id: {
-            required: true,
-            type: 'integer',
-            min: 1,
-         },
-         academic_year: {
-            required: true,
-            type: 'string',
-            pattern: /^\d{4}-\d{2}$/,
-         },
-         fee_category: {
-            required: true,
-            type: 'string',
-            enum: [
-               'TUITION',
-               'ADMISSION',
-               'DEVELOPMENT',
-               'TRANSPORT',
-               'LIBRARY',
-               'LABORATORY',
-               'COMPUTER',
-               'SPORTS',
-               'ACTIVITY',
-               'EXAMINATION',
-               'ANNUAL',
-               'CAUTION_MONEY',
-               'UNIFORM',
-               'BOOKS',
-               'STATIONERY',
-               'HOSTEL',
-               'MESS',
-               'MEDICAL',
-               'INSURANCE',
-               'OTHER',
-            ],
-         },
-         amount: {
-            required: true,
-            type: 'number',
-            min: 0,
-            max: 999999.99,
-         },
-         frequency: {
-            required: false,
-            type: 'string',
-            enum: ['YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME'],
-         },
-         effective_from: {
-            required: true,
-            type: 'date',
-         },
-      },
-      update: {
-         amount: {
-            required: false,
-            type: 'number',
-            min: 0,
-            max: 999999.99,
-         },
-         frequency: {
-            required: false,
-            type: 'string',
-            enum: ['YEARLY', 'HALF_YEARLY', 'QUARTERLY', 'MONTHLY', 'ONE_TIME'],
-         },
-         status: {
-            required: false,
-            type: 'string',
-            enum: ['ACTIVE', 'INACTIVE', 'DRAFT'],
-         },
-         effective_to: {
-            required: false,
-            type: 'date',
-         },
-      },
+   // Model associations
+   FeeStructure.associate = function (models) {
+      // Belongs to School
+      FeeStructure.belongsTo(models.School, {
+         foreignKey: 'school_id',
+         as: 'school',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to Class
+      FeeStructure.belongsTo(models.Class, {
+         foreignKey: 'class_id',
+         as: 'class',
+         onDelete: 'CASCADE',
+      });
+
+      // Belongs to User (created by)
+      FeeStructure.belongsTo(models.User, {
+         foreignKey: 'created_by',
+         as: 'creator',
+         onDelete: 'RESTRICT',
+      });
+
+      // Belongs to User (approved by)
+      FeeStructure.belongsTo(models.User, {
+         foreignKey: 'approved_by',
+         as: 'approver',
+         onDelete: 'SET NULL',
+      });
+
+      // Has many Student Fees
+      FeeStructure.hasMany(models.StudentFee, {
+         foreignKey: 'fee_structure_id',
+         as: 'studentFees',
+         onDelete: 'CASCADE',
+      });
+
+      // Has many Fee Collections
+      FeeStructure.hasMany(models.FeeCollection, {
+         foreignKey: 'fee_structure_id',
+         as: 'collections',
+         onDelete: 'RESTRICT',
+      });
    };
 
    return FeeStructure;
 }
 
-module.exports = defineFeeStructure;
+// Q59-ENFORCED: Export validation schemas
+module.exports = {
+   defineFeeStructure,
+   feeStructureValidationSchemas,
+};

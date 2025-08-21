@@ -169,10 +169,14 @@ const classValidationSchemas = {
          'any.required': 'Category is required',
       }),
 
-      academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).required().messages({
-         'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
-         'any.required': 'Academic year is required',
-      }),
+      academic_year: Joi.string()
+         .trim()
+         .pattern(/^\d{4}-\d{2}$/)
+         .required()
+         .messages({
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'any.required': 'Academic year is required',
+         }),
 
       // Optional fields
       capacity: Joi.number().integer().positive().allow(null).optional().messages({
@@ -207,7 +211,10 @@ const classValidationSchemas = {
       name: Joi.string().trim().min(1).max(50).optional(),
       level: Joi.number().integer().min(0).max(20).optional(),
       category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').optional(),
-      academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).optional(),
+      academic_year: Joi.string()
+         .trim()
+         .pattern(/^\d{4}-\d{2}$/)
+         .optional(),
 
       capacity: Joi.number().integer().positive().allow(null).optional(),
       subjects: Joi.array().items(Joi.string().trim().min(1).max(100)).allow(null).optional(),
@@ -220,23 +227,31 @@ const classValidationSchemas = {
 
    bulkCreate: Joi.object({
       school_id: Joi.number().integer().positive().required(),
-      academic_year: Joi.string().trim().pattern(/^\d{4}-\d{2}$/).required(),
-      
-      classes: Joi.array().items(
-         Joi.object({
-            name: Joi.string().trim().min(1).max(50).required(),
-            code: Joi.string().trim().uppercase().min(1).max(20).required(),
-            level: Joi.number().integer().min(0).max(20).required(),
-            category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').required(),
-            capacity: Joi.number().integer().positive().allow(null).optional(),
-            subjects: Joi.array().items(Joi.string().trim()).allow(null).optional(),
-            room_number: Joi.string().trim().max(50).allow(null, '').optional(),
-            description: Joi.string().trim().max(1000).allow(null, '').optional(),
-         })
-      ).min(1).max(50).required().messages({
-         'array.min': 'At least one class is required',
-         'array.max': 'Cannot create more than 50 classes at once',
-      }),
+      academic_year: Joi.string()
+         .trim()
+         .pattern(/^\d{4}-\d{2}$/)
+         .required(),
+
+      classes: Joi.array()
+         .items(
+            Joi.object({
+               name: Joi.string().trim().min(1).max(50).required(),
+               code: Joi.string().trim().uppercase().min(1).max(20).required(),
+               level: Joi.number().integer().min(0).max(20).required(),
+               category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').required(),
+               capacity: Joi.number().integer().positive().allow(null).optional(),
+               subjects: Joi.array().items(Joi.string().trim()).allow(null).optional(),
+               room_number: Joi.string().trim().max(50).allow(null, '').optional(),
+               description: Joi.string().trim().max(1000).allow(null, '').optional(),
+            })
+         )
+         .min(1)
+         .max(50)
+         .required()
+         .messages({
+            'array.min': 'At least one class is required',
+            'array.max': 'Cannot create more than 50 classes at once',
+         }),
    }),
 
    assignTeacher: Joi.object({

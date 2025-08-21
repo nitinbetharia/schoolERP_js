@@ -173,19 +173,24 @@ const sectionValidationSchemas = {
 
    bulkCreate: Joi.object({
       class_id: Joi.number().integer().positive().required(),
-      
-      sections: Joi.array().items(
-         Joi.object({
-            name: Joi.string().trim().min(1).max(10).required(),
-            capacity: Joi.number().integer().positive().allow(null).optional(),
-            section_teacher_id: Joi.number().integer().positive().allow(null).optional(),
-            room_number: Joi.string().trim().max(50).allow(null, '').optional(),
-            description: Joi.string().trim().max(1000).allow(null, '').optional(),
-         })
-      ).min(1).max(20).required().messages({
-         'array.min': 'At least one section is required',
-         'array.max': 'Cannot create more than 20 sections at once',
-      }),
+
+      sections: Joi.array()
+         .items(
+            Joi.object({
+               name: Joi.string().trim().min(1).max(10).required(),
+               capacity: Joi.number().integer().positive().allow(null).optional(),
+               section_teacher_id: Joi.number().integer().positive().allow(null).optional(),
+               room_number: Joi.string().trim().max(50).allow(null, '').optional(),
+               description: Joi.string().trim().max(1000).allow(null, '').optional(),
+            })
+         )
+         .min(1)
+         .max(20)
+         .required()
+         .messages({
+            'array.min': 'At least one section is required',
+            'array.max': 'Cannot create more than 20 sections at once',
+         }),
    }),
 };
 

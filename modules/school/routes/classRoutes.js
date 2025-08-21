@@ -18,7 +18,8 @@ router.use(authenticate);
 router.use(requireTrustAdmin);
 
 // Create new class with Q59-ENFORCED validation
-router.post('/', 
+router.post(
+   '/',
    validators.validateBody(classValidationSchemas.create),
    classController.createClass.bind(classController)
 );
@@ -27,7 +28,8 @@ router.post('/',
 router.get('/school/:schoolId', classController.getClassesBySchool.bind(classController));
 
 // Bulk create classes for a school with Q59-ENFORCED validation
-router.post('/bulk/:schoolId', 
+router.post(
+   '/bulk/:schoolId',
    validators.validateBody(classValidationSchemas.bulkCreate),
    classController.bulkCreateClasses.bind(classController)
 );
@@ -36,13 +38,15 @@ router.post('/bulk/:schoolId',
 router.get('/:id', classController.getClassById.bind(classController));
 
 // Update class with Q59-ENFORCED validation
-router.put('/:id', 
+router.put(
+   '/:id',
    validators.validateBody(classValidationSchemas.update),
    classController.updateClass.bind(classController)
 );
 
 // Assign teacher to class with Q59-ENFORCED validation
-router.patch('/:id/teacher', 
+router.patch(
+   '/:id/teacher',
    validators.validateBody(classValidationSchemas.assignTeacher),
    classController.assignTeacher.bind(classController)
 );
