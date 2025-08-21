@@ -232,7 +232,7 @@ class SchoolERPServer {
           version: "2.0.0",
         });
 
-        console.log(`\n🚀 School ERP Server is running!`);
+        console.log("\n🚀 School ERP Server is running!");
         console.log(`📍 URL: http://localhost:${port}`);
         console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
         console.log(

@@ -1,6 +1,6 @@
-const express = require("express");
-const BoardComplianceController = require("../controllers/BoardComplianceController");
-const { authenticate, authorize } = require("../../../middleware/auth");
+const express = require('express');
+const BoardComplianceController = require('../controllers/BoardComplianceController');
+const { authenticate, authorize } = require('../../../middleware/auth');
 
 const router = express.Router();
 const boardComplianceController = new BoardComplianceController();
@@ -12,40 +12,40 @@ const boardComplianceController = new BoardComplianceController();
 
 // Trust-level NEP policy management (Trust Admin only)
 router.put(
-  "/trust/nep-policy",
-  authenticate,
-  authorize("trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.setTrustNEPPolicy(req, res),
+   '/trust/nep-policy',
+   authenticate,
+   authorize('trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.setTrustNEPPolicy(req, res),
 );
 
 // School-level NEP policy management
 router.get(
-  "/schools/:schoolId/nep-policy",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.getEffectiveNEPPolicy(req, res),
+   '/schools/:schoolId/nep-policy',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.getEffectiveNEPPolicy(req, res),
 );
 
 router.put(
-  "/schools/:schoolId/nep-policy",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.setSchoolNEPPolicy(req, res),
+   '/schools/:schoolId/nep-policy',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.setSchoolNEPPolicy(req, res),
 );
 
 // General board affiliation management
 router.get(
-  "/schools/:schoolId/board-compliance",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.getBoardCompliance(req, res),
+   '/schools/:schoolId/board-compliance',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.getBoardCompliance(req, res),
 );
 
 router.put(
-  "/schools/:schoolId/board-affiliation",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.setBoardAffiliation(req, res),
+   '/schools/:schoolId/board-affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.setBoardAffiliation(req, res),
 );
 
 // ============================================================================
@@ -54,26 +54,26 @@ router.put(
 
 // CBSE affiliation registration and management
 router.post(
-  "/schools/:schoolId/cbse/affiliation",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.registerCBSEAffiliation(req, res),
+   '/schools/:schoolId/cbse/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerCBSEAffiliation(req, res),
 );
 
 router.put(
-  "/schools/:schoolId/cbse/compliance",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.updateCBSECompliance(req, res),
+   '/schools/:schoolId/cbse/compliance',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.updateCBSECompliance(req, res),
 );
 
 // CBSE transfer certificate generation
 router.post(
-  "/schools/:schoolId/cbse/students/:studentId/transfer-certificate",
-  authenticate,
-  authorize("school_admin", "principal", "academic_coordinator"),
-  (req, res) =>
-    boardComplianceController.generateCBSETransferCertificate(req, res),
+   '/schools/:schoolId/cbse/students/:studentId/transfer-certificate',
+   authenticate,
+   authorize('school_admin', 'principal', 'academic_coordinator'),
+   (req, res) =>
+      boardComplianceController.generateCBSETransferCertificate(req, res),
 );
 
 // ============================================================================
@@ -82,19 +82,19 @@ router.post(
 
 // CISCE affiliation registration and management
 router.post(
-  "/schools/:schoolId/cisce/affiliation",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.registerCISCEAffiliation(req, res),
+   '/schools/:schoolId/cisce/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.registerCISCEAffiliation(req, res),
 );
 
 // CISCE transfer certificate generation
 router.post(
-  "/schools/:schoolId/cisce/students/:studentId/transfer-certificate",
-  authenticate,
-  authorize("school_admin", "principal", "academic_coordinator"),
-  (req, res) =>
-    boardComplianceController.generateCISCETransferCertificate(req, res),
+   '/schools/:schoolId/cisce/students/:studentId/transfer-certificate',
+   authenticate,
+   authorize('school_admin', 'principal', 'academic_coordinator'),
+   (req, res) =>
+      boardComplianceController.generateCISCETransferCertificate(req, res),
 );
 
 // ============================================================================
@@ -103,11 +103,11 @@ router.post(
 
 // State Board affiliation registration and management
 router.post(
-  "/schools/:schoolId/state-board/affiliation",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) =>
-    boardComplianceController.registerStateBoardAffiliation(req, res),
+   '/schools/:schoolId/state-board/affiliation',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) =>
+      boardComplianceController.registerStateBoardAffiliation(req, res),
 );
 
 // ============================================================================
@@ -116,11 +116,11 @@ router.post(
 
 // International Board authorization registration and management
 router.post(
-  "/schools/:schoolId/international-board/authorization",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) =>
-    boardComplianceController.registerInternationalBoardAuthorization(req, res),
+   '/schools/:schoolId/international-board/authorization',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) =>
+      boardComplianceController.registerInternationalBoardAuthorization(req, res),
 );
 
 // ============================================================================
@@ -129,19 +129,19 @@ router.post(
 
 // Comprehensive board compliance report
 router.get(
-  "/schools/:schoolId/comprehensive-report",
-  authenticate,
-  authorize("school_admin", "principal", "trust_admin", "system_admin"),
-  (req, res) =>
-    boardComplianceController.getComprehensiveBoardComplianceReport(req, res),
+   '/schools/:schoolId/comprehensive-report',
+   authenticate,
+   authorize('school_admin', 'principal', 'trust_admin', 'system_admin'),
+   (req, res) =>
+      boardComplianceController.getComprehensiveBoardComplianceReport(req, res),
 );
 
 // NEP compliance report (existing)
 router.get(
-  "/reports/nep-compliance",
-  authenticate,
-  authorize("trust_admin", "system_admin"),
-  (req, res) => boardComplianceController.getNEPComplianceReport(req, res),
+   '/reports/nep-compliance',
+   authenticate,
+   authorize('trust_admin', 'system_admin'),
+   (req, res) => boardComplianceController.getNEPComplianceReport(req, res),
 );
 
 module.exports = router;
