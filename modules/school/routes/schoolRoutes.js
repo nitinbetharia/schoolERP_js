@@ -1,6 +1,8 @@
 const express = require('express');
 const SchoolController = require('../controllers/SchoolController');
 const { authenticate, requireTrustAdmin } = require('../../../middleware/auth');
+const { validators } = require('../../../utils/errors');
+const { schoolValidationSchemas } = require('../../../models');
 
 const router = express.Router();
 const schoolController = new SchoolController();
@@ -8,6 +10,7 @@ const schoolController = new SchoolController();
 /**
  * School Routes
  * Handles school management endpoints within a tenant
+ * Q59-ENFORCED: All routes use validators.validateBody() with schemas
  */
 
 // Apply authentication to all school routes
@@ -26,10 +29,15 @@ router.get('/', (req, res) => {
  * @route POST /api/v1/schools
  * @desc Create a new school
  * @access Admin/Trust Admin
+ * @validation Q59-ENFORCED
  */
-router.post('/', requireTrustAdmin, (req, res) => {
-   schoolController.createSchool(req, res);
-});
+router.post('/', 
+   requireTrustAdmin,
+   validators.validateBody(schoolValidationSchemas.create),
+   (req, res) => {
+      schoolController.createSchool(req, res);
+   }
+);
 
 /**
  * @route GET /api/v1/schools/:id
@@ -44,10 +52,29 @@ router.get('/:id', (req, res) => {
  * @route PUT /api/v1/schools/:id
  * @desc Update school by ID
  * @access Admin/Trust Admin
+ * @validation Q59-ENFORCED
  */
-router.put('/:id', requireTrustAdmin, (req, res) => {
-   schoolController.updateSchool(req, res);
-});
+router.put('/:id', 
+   requireTrustAdmin,
+   validators.validateBody(schoolValidationSchemas.update),
+   (req, res) => {
+      schoolController.updateSchool(req, res);
+   }
+);
+
+/**
+ * @route DELETE /api/v1/schools/:id
+ * @desc Delete school by ID (soft delete)
+ * @access Admin/Trust Admin
+ * @validation Q59-ENFORCED - Status update validation
+ */
+router.patch('/:id/status', 
+   requireTrustAdmin,
+   validators.validateBody(schoolValidationSchemas.statusUpdate),
+   (req, res) => {
+      schoolController.updateSchoolStatus(req, res);
+   }
+);
 
 /**
  * @route DELETE /api/v1/schools/:id
@@ -57,6 +84,20 @@ router.put('/:id', requireTrustAdmin, (req, res) => {
 router.delete('/:id', requireTrustAdmin, (req, res) => {
    schoolController.deleteSchool(req, res);
 });
+
+/**
+ * @route PATCH /api/v1/schools/:id/compliance
+ * @desc Update school compliance information
+ * @access Admin/Trust Admin
+ * @validation Q59-ENFORCED
+ */
+router.patch('/:id/compliance', 
+   requireTrustAdmin,
+   validators.validateBody(schoolValidationSchemas.compliance),
+   (req, res) => {
+      schoolController.updateSchoolCompliance(req, res);
+   }
+);
 
 /**
  * @route GET /api/v1/schools/:id/stats

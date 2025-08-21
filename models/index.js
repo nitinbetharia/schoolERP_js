@@ -4,9 +4,9 @@ const { defineTrustModel } = require('./Trust');
 const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
 const { defineSetupConfiguration } = require('../modules/setup/models/SetupConfiguration');
 const { defineUserProfile } = require('../modules/user/models/UserProfile');
-const { defineSchool } = require('../modules/school/models/School');
-const { defineClass } = require('../modules/school/models/Class');
-const { defineSection } = require('../modules/school/models/Section');
+const { defineSchool, schoolValidationSchemas } = require('../modules/school/models/School');
+const { defineClass, classValidationSchemas } = require('../modules/school/models/Class');
+const { defineSection, sectionValidationSchemas } = require('../modules/school/models/Section');
 const { defineBoardCompliance } = require('../modules/school/models/BoardCompliance');
 const { defineCBSECompliance } = require('../modules/school/models/CBSECompliance');
 const { defineCISCECompliance } = require('../modules/school/models/CISCECompliance');
@@ -566,6 +566,9 @@ module.exports.getTenantModels = (tenantCode) => modelRegistry.getTenantModels(t
 // Validation schemas
 module.exports.userValidationSchemas = userValidationSchemas;
 module.exports.studentValidationSchemas = studentValidationSchemas;
+module.exports.schoolValidationSchemas = schoolValidationSchemas;
+module.exports.classValidationSchemas = classValidationSchemas;
+module.exports.sectionValidationSchemas = sectionValidationSchemas;
 
 // Initialize functions
 module.exports.initializeSystemModels = () => modelRegistry.initializeSystemModels();

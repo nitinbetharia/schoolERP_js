@@ -109,4 +109,84 @@ const defineSection = (sequelize) => {
    return Section;
 };
 
-module.exports = { defineSection };
+/**
+ * Section Validation Schemas
+ * Following Q59-ENFORCED pattern - reusable across API and web routes
+ */
+const Joi = require('joi');
+
+const sectionValidationSchemas = {
+   create: Joi.object({
+      // Required fields
+      class_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Class ID must be a number',
+         'number.positive': 'Class ID must be positive',
+         'any.required': 'Class ID is required',
+      }),
+
+      name: Joi.string().trim().min(1).max(10).required().messages({
+         'string.empty': 'Section name is required',
+         'string.min': 'Section name must be at least 1 character',
+         'string.max': 'Section name cannot exceed 10 characters',
+      }),
+
+      // Optional fields
+      capacity: Joi.number().integer().positive().allow(null).optional().messages({
+         'number.positive': 'Capacity must be positive',
+      }),
+
+      section_teacher_id: Joi.number().integer().positive().allow(null).optional().messages({
+         'number.positive': 'Section teacher ID must be positive',
+      }),
+
+      room_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      description: Joi.string().trim().max(1000).allow(null, '').optional(),
+      is_active: Joi.boolean().optional(),
+      additional_info: Joi.object().allow(null).optional(),
+   }),
+
+   update: Joi.object({
+      // Prevent updating core identity fields
+      id: Joi.forbidden().messages({
+         'any.unknown': 'Section ID cannot be updated',
+      }),
+      class_id: Joi.forbidden().messages({
+         'any.unknown': 'Class ID cannot be updated after creation',
+      }),
+
+      // Allow updating other fields
+      name: Joi.string().trim().min(1).max(10).optional(),
+      capacity: Joi.number().integer().positive().allow(null).optional(),
+      section_teacher_id: Joi.number().integer().positive().allow(null).optional(),
+      room_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      description: Joi.string().trim().max(1000).allow(null, '').optional(),
+      is_active: Joi.boolean().optional(),
+      additional_info: Joi.object().allow(null).optional(),
+   }),
+
+   assignTeacher: Joi.object({
+      section_teacher_id: Joi.number().integer().positive().required().messages({
+         'number.positive': 'Teacher ID must be positive',
+         'any.required': 'Teacher ID is required',
+      }),
+   }),
+
+   bulkCreate: Joi.object({
+      class_id: Joi.number().integer().positive().required(),
+      
+      sections: Joi.array().items(
+         Joi.object({
+            name: Joi.string().trim().min(1).max(10).required(),
+            capacity: Joi.number().integer().positive().allow(null).optional(),
+            section_teacher_id: Joi.number().integer().positive().allow(null).optional(),
+            room_number: Joi.string().trim().max(50).allow(null, '').optional(),
+            description: Joi.string().trim().max(1000).allow(null, '').optional(),
+         })
+      ).min(1).max(20).required().messages({
+         'array.min': 'At least one section is required',
+         'array.max': 'Cannot create more than 20 sections at once',
+      }),
+   }),
+};
+
+module.exports = { defineSection, sectionValidationSchemas };

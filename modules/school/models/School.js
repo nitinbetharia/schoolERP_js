@@ -217,4 +217,158 @@ const defineSchool = (sequelize) => {
    return School;
 };
 
-module.exports = { defineSchool };
+/**
+ * School Validation Schemas
+ * Following Q59-ENFORCED pattern - reusable across API and web routes
+ */
+const Joi = require('joi');
+
+const schoolValidationSchemas = {
+   create: Joi.object({
+      // Required fields
+      trust_id: Joi.number().integer().positive().required().messages({
+         'number.base': 'Trust ID must be a number',
+         'number.positive': 'Trust ID must be positive',
+         'any.required': 'Trust ID is required',
+      }),
+
+      name: Joi.string().trim().min(2).max(200).required().messages({
+         'string.empty': 'School name is required',
+         'string.min': 'School name must be at least 2 characters',
+         'string.max': 'School name cannot exceed 200 characters',
+      }),
+
+      code: Joi.string().trim().uppercase().min(2).max(20).required().messages({
+         'string.empty': 'School code is required',
+         'string.min': 'School code must be at least 2 characters',
+         'string.max': 'School code cannot exceed 20 characters',
+      }),
+
+      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').required().messages({
+         'any.only': 'School type must be PRIMARY, SECONDARY, HIGHER_SECONDARY, NURSERY, or MIXED',
+         'any.required': 'School type is required',
+      }),
+
+      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').required().messages({
+         'any.only': 'Affiliation board must be CBSE, CISCE, STATE_BOARD, INTERNATIONAL, or UNAFFILIATED',
+         'any.required': 'Affiliation board is required',
+      }),
+
+      // Optional contact information
+      address: Joi.string().trim().max(1000).allow(null, '').optional(),
+      city: Joi.string().trim().max(100).allow(null, '').optional(),
+      state: Joi.string().trim().max(100).allow(null, '').optional(),
+      postal_code: Joi.string().trim().pattern(/^\d{5,10}$/).allow(null, '').optional().messages({
+         'string.pattern.base': 'Postal code must be 5-10 digits',
+      }),
+
+      phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional().messages({
+         'string.pattern.base': 'Phone number must be 10-15 digits',
+      }),
+
+      email: Joi.string().email().max(255).allow(null, '').optional(),
+      website: Joi.string().uri().max(500).allow(null, '').optional(),
+
+      // Principal information
+      principal_name: Joi.string().trim().max(200).allow(null, '').optional(),
+      principal_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      principal_email: Joi.string().email().max(255).allow(null, '').optional(),
+
+      // School details
+      established_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).allow(null).optional(),
+      affiliation_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      registration_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      capacity: Joi.number().integer().positive().allow(null).optional(),
+
+      // Configuration
+      academic_session_start_month: Joi.number().integer().min(1).max(12).optional(),
+      working_days: Joi.array().items(Joi.number().integer().min(1).max(7)).allow(null).optional(),
+      
+      // JSON fields
+      school_timings: Joi.object({
+         start_time: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+         end_time: Joi.string().pattern(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/).optional(),
+      }).allow(null).optional(),
+
+      facilities: Joi.array().items(Joi.string().trim()).allow(null).optional(),
+      board_affiliation_details: Joi.object().allow(null).optional(),
+
+      // Contact person
+      contact_person: Joi.string().trim().max(200).allow(null, '').optional(),
+      contact_person_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+
+      // Status
+      is_active: Joi.boolean().optional(),
+   }),
+
+   update: Joi.object({
+      // Prevent updating core identity fields
+      id: Joi.forbidden().messages({
+         'any.unknown': 'School ID cannot be updated',
+      }),
+      trust_id: Joi.forbidden().messages({
+         'any.unknown': 'Trust ID cannot be updated',
+      }),
+      code: Joi.forbidden().messages({
+         'any.unknown': 'School code cannot be updated after creation',
+      }),
+
+      // Allow updating other fields
+      name: Joi.string().trim().min(2).max(200).optional(),
+      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').optional(),
+      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').optional(),
+
+      // Contact updates
+      address: Joi.string().trim().max(1000).allow(null, '').optional(),
+      city: Joi.string().trim().max(100).allow(null, '').optional(),
+      state: Joi.string().trim().max(100).allow(null, '').optional(),
+      postal_code: Joi.string().trim().pattern(/^\d{5,10}$/).allow(null, '').optional(),
+      phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      email: Joi.string().email().max(255).allow(null, '').optional(),
+      website: Joi.string().uri().max(500).allow(null, '').optional(),
+
+      // Principal updates
+      principal_name: Joi.string().trim().max(200).allow(null, '').optional(),
+      principal_phone: Joi.string().pattern(/^\d{10,15}$/).allow(null, '').optional(),
+      principal_email: Joi.string().email().max(255).allow(null, '').optional(),
+
+      // Configuration updates
+      capacity: Joi.number().integer().positive().allow(null).optional(),
+      academic_session_start_month: Joi.number().integer().min(1).max(12).optional(),
+      working_days: Joi.array().items(Joi.number().integer().min(1).max(7)).allow(null).optional(),
+      
+      // Status updates
+      is_active: Joi.boolean().optional(),
+   }),
+
+   statusUpdate: Joi.object({
+      is_active: Joi.boolean().required().messages({
+         'any.required': 'Active status is required',
+      }),
+      status_reason: Joi.string().trim().min(5).max(200).optional(),
+   }),
+
+   compliance: Joi.object({
+      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').required(),
+      affiliation_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      registration_number: Joi.string().trim().max(50).allow(null, '').optional(),
+      board_affiliation_details: Joi.object().allow(null).optional(),
+      
+      // NEP 2020 compliance
+      nep_adoption: Joi.object({
+         enabled: Joi.boolean().allow(null).optional(),
+         adoption_date: Joi.date().allow(null).optional(),
+         policy: Joi.string().valid('TRADITIONAL', 'NEP_2020', 'HYBRID').allow(null).optional(),
+         academic_year_from: Joi.string().pattern(/^\d{4}-\d{2}$/).allow(null).optional(),
+         override_trust_policy: Joi.boolean().optional(),
+      }).allow(null).optional(),
+
+      // UDISE compliance
+      udise_compliance: Joi.object({
+         udise_code: Joi.string().trim().max(50).allow(null, '').optional(),
+         registration_status: Joi.string().valid('PENDING', 'REGISTERED', 'VERIFIED').optional(),
+      }).allow(null).optional(),
+   }),
+};
+
+module.exports = { defineSchool, schoolValidationSchemas };
