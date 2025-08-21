@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= description || 'School ERP Error Page' %>">
+    <title><%= title %> - School ERP System</title>
+    
+    <!-- Tailwind CSS (Q3 ENFORCED) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for reactive components -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom CSS for branding -->
+    <link rel="stylesheet" href="/static/css/app.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+</head>
+<body class="bg-gray-50">
+    <%- body %>
+</body>
+</html>

@@ -16,12 +16,12 @@ The Student module has been successfully implemented as requested, providing **c
 
 - **Purpose**: Core student entity with complete lifecycle data
 - **Fields**: 50+ comprehensive fields covering:
-   - Personal information (name, DOB, gender, contact details)
-   - Academic information (admission details, class assignments, performance)
-   - Family information (parents, guardians, emergency contacts)
-   - Medical information (conditions, allergies, doctor details)
-   - Administrative information (fees, transport, hostel, documents)
-   - Status tracking (admission status, student status, academic progression)
+  - Personal information (name, DOB, gender, contact details)
+  - Academic information (admission details, class assignments, performance)
+  - Family information (parents, guardians, emergency contacts)
+  - Medical information (conditions, allergies, doctor details)
+  - Administrative information (fees, transport, hostel, documents)
+  - Status tracking (admission status, student status, academic progression)
 
 #### **AcademicYear Model** (`models/AcademicYear.js`)
 
@@ -70,7 +70,7 @@ The Student module has been successfully implemented as requested, providing **c
 7. `POST /api/students/:id/promote` - Promote student
 8. `POST /api/students/bulk` - Bulk operations
 9. `GET /api/students/class/:classId` - Class-based queries
-10.   `PATCH /api/students/:id/status` - Status management
+10. `PATCH /api/students/:id/status` - Status management
 
 ### 4. Route Integration (`modules/student/routes/studentRoutes.js`)
 

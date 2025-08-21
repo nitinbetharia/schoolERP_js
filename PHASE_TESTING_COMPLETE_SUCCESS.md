@@ -26,26 +26,26 @@
 
 - **Problem**: School routes were disabled (404 errors)
 - **Solution**: Created comprehensive trust-scoped routing system:
-   - `routes/trust.js` - Trust-scoped API endpoints
-   - `middleware/trustTenant.js` - Tenant context switching
-   - URL pattern: `/api/v1/trust/:trustId/schools`
+  - `routes/trust.js` - Trust-scoped API endpoints
+  - `middleware/trustTenant.js` - Tenant context switching
+  - URL pattern: `/api/v1/trust/:trustId/schools`
 - **Result**: All school operations now accessible via trust context
 
 ### 3. School CRUD Implementation
 
 - **Problem**: Missing school management functionality
 - **Solution**: Complete school management system:
-   - `modules/school/controllers/SchoolController.js` - Full CRUD controller
-   - `modules/school/services/SchoolService.js` - Business logic layer
-   - All CRUD operations working with tenant models
+  - `modules/school/controllers/SchoolController.js` - Full CRUD controller
+  - `modules/school/services/SchoolService.js` - Business logic layer
+  - All CRUD operations working with tenant models
 - **Result**: School creation, reading, updating, deletion fully operational
 
 ### 4. Model Import Consistency
 
 - **Problem**: Mixed export patterns causing import failures
 - **Solution**: Fixed compliance model imports:
-   - CBSECompliance: Direct export pattern
-   - NEPCompliance: Destructured export pattern
+  - CBSECompliance: Direct export pattern
+  - NEPCompliance: Destructured export pattern
 - **Result**: All model imports now working correctly
 
 ### 5. Cross-Database Foreign Key Constraint Fix

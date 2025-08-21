@@ -1,11 +1,11 @@
 const {
-   ErrorFactory,
-   formatErrorResponse,
-   getErrorStatusCode,
-   isOperationalError,
-   logError,
-} = require('../utils/errors');
-const { logger } = require('../utils/logger');
+  ErrorFactory,
+  formatErrorResponse,
+  getErrorStatusCode,
+  isOperationalError,
+  logError,
+} = require("../utils/errors");
+const { logger } = require("../utils/logger");
 
 /**
  * Centralized Error Handler Middleware
@@ -13,44 +13,64 @@ const { logger } = require('../utils/logger');
  * Handles all error types: operational, system, Sequelize, JWT, etc.
  */
 function errorHandler(err, req, res, next) {
-   let error = err;
+  let error = err;
 
-   // Convert known errors to http-errors format
-   if (!isOperationalError(err)) {
-      // Handle Sequelize errors
-      if (err.name?.startsWith('Sequelize')) {
-         error = ErrorFactory.fromSequelize(err);
-      }
-      // Handle JWT errors
-      else if (err.name?.includes('JsonWebToken') || err.name === 'TokenExpiredError') {
-         error = ErrorFactory.fromJWT(err);
-      }
-      // Handle generic system errors
-      else {
-         error = ErrorFactory.internal('An unexpected error occurred', err);
-      }
-   }
+  // Convert known errors to http-errors format
+  if (!isOperationalError(err)) {
+    // Handle Sequelize errors
+    if (err.name?.startsWith("Sequelize")) {
+      error = ErrorFactory.fromSequelize(err);
+    }
+    // Handle JWT errors
+    else if (
+      err.name?.includes("JsonWebToken") ||
+      err.name === "TokenExpiredError"
+    ) {
+      error = ErrorFactory.fromJWT(err);
+    }
+    // Handle generic system errors
+    else {
+      error = ErrorFactory.internal("An unexpected error occurred", err);
+    }
+  }
 
-   // Log the error with context
-   logError(error, {
-      requestId: req.id,
-      method: req.method,
-      url: req.url,
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
-      user: req.user ? { id: req.user.id, email: req.user.email } : null,
-      tenant: req.tenant ? { id: req.tenant.id, name: req.tenant.name } : null,
-      tenantCode: req.tenantCode,
-   });
+  // Log the error with context
+  logError(error, {
+    requestId: req.id,
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    userAgent: req.get("User-Agent"),
+    user: req.user ? { id: req.user.id, email: req.user.email } : null,
+    tenant: req.tenant ? { id: req.tenant.id, name: req.tenant.name } : null,
+    tenantCode: req.tenantCode,
+  });
 
-   // Get status code
-   const statusCode = getErrorStatusCode(error);
+  // Get status code
+  const statusCode = getErrorStatusCode(error);
 
-   // Format error response
-   const errorResponse = formatErrorResponse(error);
+  // Format error response
+  const errorResponse = formatErrorResponse(error);
 
-   // Send error response
-   res.status(statusCode).json(errorResponse);
+  // Check if this is a web request (HTML) or API request (JSON)
+  const acceptsHTML =
+    req.headers.accept && req.headers.accept.includes("text/html");
+  const isWebRoute = !req.originalUrl.startsWith("/api/");
+
+  if (acceptsHTML && isWebRoute) {
+    // Render user-friendly error page for web requests using error layout
+    return res.status(statusCode).render("pages/error", {
+      layout: "layouts/error",
+      title: `Error ${statusCode}`,
+      description: `Error ${statusCode} - ${error.message || "An unexpected error occurred"}`,
+      errorCode: statusCode.toString(),
+      errorMessage: error.message || "An unexpected error occurred",
+      errorDetails: process.env.NODE_ENV === "development" ? error.stack : null,
+    });
+  }
+
+  // Send JSON response for API requests
+  res.status(statusCode).json(errorResponse);
 }
 
 /**
@@ -58,41 +78,41 @@ function errorHandler(err, req, res, next) {
  * Creates standardized 404 responses
  */
 function notFoundHandler(req, res, next) {
-   const error = ErrorFactory.notFound(`Route ${req.method} ${req.originalUrl}`);
-   next(error);
+  const error = ErrorFactory.notFound(`Route ${req.method} ${req.originalUrl}`);
+  next(error);
 }
 
 /**
  * Request logging middleware
  */
 function requestLogger(req, res, next) {
-   const startTime = Date.now();
+  const startTime = Date.now();
 
-   // Log request
-   logger.info('API Request Started', {
+  // Log request
+  logger.info("API Request Started", {
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip,
+    userAgent: req.get("User-Agent"),
+    userId: req.user?.id,
+    tenantCode: req.tenantCode,
+  });
+
+  // Log response when finished
+  res.on("finish", () => {
+    const duration = Date.now() - startTime;
+
+    logger.info("API Request Completed", {
       method: req.method,
       url: req.originalUrl,
-      ip: req.ip,
-      userAgent: req.get('User-Agent'),
+      statusCode: res.statusCode,
+      responseTime: `${duration}ms`,
       userId: req.user?.id,
       tenantCode: req.tenantCode,
-   });
+    });
+  });
 
-   // Log response when finished
-   res.on('finish', () => {
-      const duration = Date.now() - startTime;
-
-      logger.info('API Request Completed', {
-         method: req.method,
-         url: req.originalUrl,
-         statusCode: res.statusCode,
-         responseTime: `${duration}ms`,
-         userId: req.user?.id,
-         tenantCode: req.tenantCode,
-      });
-   });
-
-   next();
+  next();
 }
 
 /**
@@ -100,9 +120,9 @@ function requestLogger(req, res, next) {
  * Catches async errors and passes to error handler
  */
 function asyncHandler(fn) {
-   return (req, res, next) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
-   };
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
 }
 
 /**
@@ -110,60 +130,60 @@ function asyncHandler(fn) {
  * Usage: router.get('/route', catchAsync(async (req, res) => { ... }))
  */
 function catchAsync(fn) {
-   return (req, res, next) => {
-      Promise.resolve(fn(req, res, next)).catch((err) => {
-         // Log async handler error
-         logError(err, {
-            handler: 'asyncHandler',
-            method: req.method,
-            url: req.url,
-            user: req.user?.id,
-         });
-         next(err);
+  return (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch((err) => {
+      // Log async handler error
+      logError(err, {
+        handler: "asyncHandler",
+        method: req.method,
+        url: req.url,
+        user: req.user?.id,
       });
-   };
+      next(err);
+    });
+  };
 }
 
 /**
  * Health check middleware
  */
 async function healthCheck(req, res) {
-   try {
-      const { dbManager } = require('../models/database');
-      const { modelRegistry } = require('../models');
+  try {
+    const { dbManager } = require("../models/database");
+    const { modelRegistry } = require("../models");
 
-      // Check database health
-      const dbHealth = await dbManager.healthCheck();
+    // Check database health
+    const dbHealth = await dbManager.healthCheck();
 
-      // Check model registry health
-      const modelHealth = await modelRegistry.healthCheck();
+    // Check model registry health
+    const modelHealth = await modelRegistry.healthCheck();
 
-      const health = {
-         status: 'healthy',
-         timestamp: new Date().toISOString(),
-         uptime: process.uptime(),
-         memory: process.memoryUsage(),
-         database: dbHealth,
-         models: modelHealth,
-         environment: process.env.NODE_ENV,
-      };
+    const health = {
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      database: dbHealth,
+      models: modelHealth,
+      environment: process.env.NODE_ENV,
+    };
 
-      res.json({
-         success: true,
-         data: health,
-      });
-   } catch (error) {
-      logError(error, { context: 'healthCheck' });
+    res.json({
+      success: true,
+      data: health,
+    });
+  } catch (error) {
+    logError(error, { context: "healthCheck" });
 
-      res.status(503).json({
-         success: false,
-         error: {
-            code: 'HEALTH_CHECK_FAILED',
-            message: 'System health check failed',
-            timestamp: new Date().toISOString(),
-         },
-      });
-   }
+    res.status(503).json({
+      success: false,
+      error: {
+        code: "HEALTH_CHECK_FAILED",
+        message: "System health check failed",
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
 }
 
 /**
@@ -171,37 +191,37 @@ async function healthCheck(req, res) {
  * Should only be used as last resort - proper error handling is preferred
  */
 function setupProcessErrorHandlers() {
-   // Handle uncaught exceptions
-   process.on('uncaughtException', (err) => {
-      logError(err, {
-         type: 'uncaughtException',
-         fatal: true,
-      });
+  // Handle uncaught exceptions
+  process.on("uncaughtException", (err) => {
+    logError(err, {
+      type: "uncaughtException",
+      fatal: true,
+    });
 
-      // Give time for logging then exit
-      setTimeout(() => {
-         process.exit(1);
-      }, 1000);
-   });
+    // Give time for logging then exit
+    setTimeout(() => {
+      process.exit(1);
+    }, 1000);
+  });
 
-   // Handle unhandled promise rejections
-   process.on('unhandledRejection', (reason, promise) => {
-      const err = reason instanceof Error ? reason : new Error(reason);
-      logError(err, {
-         type: 'unhandledRejection',
-         promise: promise.toString(),
-      });
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (reason, promise) => {
+    const err = reason instanceof Error ? reason : new Error(reason);
+    logError(err, {
+      type: "unhandledRejection",
+      promise: promise.toString(),
+    });
 
-      // Don't exit on unhandled rejections - just log them
-   });
+    // Don't exit on unhandled rejections - just log them
+  });
 }
 
 module.exports = {
-   errorHandler,
-   notFoundHandler,
-   requestLogger,
-   asyncHandler,
-   catchAsync,
-   healthCheck,
-   setupProcessErrorHandlers,
+  errorHandler,
+  notFoundHandler,
+  requestLogger,
+  asyncHandler,
+  catchAsync,
+  healthCheck,
+  setupProcessErrorHandlers,
 };

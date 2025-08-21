@@ -19,20 +19,11 @@
     "no-console": [
       "error",
       {
-        "allow": [
-          "warn",
-          "error"
-        ]
+        "allow": ["warn", "error"]
       }
     ],
-    "eqeqeq": [
-      "error",
-      "always"
-    ],
-    "curly": [
-      "error",
-      "all"
-    ],
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
     "no-var": "error",
     "prefer-const": "error",
     "promise/catch-or-return": "error",
@@ -41,10 +32,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.test.js",
-        "tests/**/*.js"
-      ],
+      "files": ["**/*.test.js", "tests/**/*.js"],
       "rules": {
         "no-console": "off"
       }

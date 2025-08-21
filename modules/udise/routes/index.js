@@ -1,17 +1,17 @@
-const express = require('express');
-const udiseRoutes = require('./UdiseRoutes');
+const express = require("express");
+const udiseRoutes = require("./UdiseRoutes");
 
 /**
  * UDISE Module Routes Index
  * Consolidates all UDISE-related routes
  */
 function createUdiseModuleRoutes() {
-   const router = express.Router();
+  const router = express.Router();
 
-   // Mount UDISE routes
-   router.use('/', udiseRoutes());
+  // Mount UDISE routes
+  router.use("/", udiseRoutes());
 
-   return router;
+  return router;
 }
 
 module.exports = createUdiseModuleRoutes;

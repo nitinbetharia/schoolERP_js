@@ -1,8 +1,8 @@
-const express = require('express');
-const SchoolController = require('../controllers/SchoolController');
-const { requireTrustAdmin } = require('../../../middleware/auth');
-const { validators } = require('../../../utils/errors');
-const { schoolValidationSchemas } = require('../../../models');
+const express = require("express");
+const SchoolController = require("../controllers/SchoolController");
+const { requireTrustAdmin } = require("../../../middleware/auth");
+const { validators } = require("../../../utils/errors");
+const { schoolValidationSchemas } = require("../../../models");
 
 const router = express.Router({ mergeParams: true });
 const schoolController = new SchoolController();
@@ -21,8 +21,8 @@ const schoolController = new SchoolController();
  * @desc Get all schools with filters
  * @access Private
  */
-router.get('/', (req, res) => {
-   schoolController.getSchools(req, res);
+router.get("/", (req, res) => {
+  schoolController.getSchools(req, res);
 });
 
 /**
@@ -31,17 +31,22 @@ router.get('/', (req, res) => {
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED
  */
-router.post('/', requireTrustAdmin, validators.validateBody(schoolValidationSchemas.create), (req, res) => {
-   schoolController.createSchool(req, res);
-});
+router.post(
+  "/",
+  requireTrustAdmin,
+  validators.validateBody(schoolValidationSchemas.create),
+  (req, res) => {
+    schoolController.createSchool(req, res);
+  },
+);
 
 /**
  * @route GET /api/v1/trust/:trustId/schools/:id
  * @desc Get school by ID with classes
  * @access Private
  */
-router.get('/:id', (req, res) => {
-   schoolController.getSchoolById(req, res);
+router.get("/:id", (req, res) => {
+  schoolController.getSchoolById(req, res);
 });
 
 /**
@@ -50,9 +55,14 @@ router.get('/:id', (req, res) => {
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED
  */
-router.put('/:id', requireTrustAdmin, validators.validateBody(schoolValidationSchemas.update), (req, res) => {
-   schoolController.updateSchool(req, res);
-});
+router.put(
+  "/:id",
+  requireTrustAdmin,
+  validators.validateBody(schoolValidationSchemas.update),
+  (req, res) => {
+    schoolController.updateSchool(req, res);
+  },
+);
 
 /**
  * @route PATCH /api/v1/trust/:trustId/schools/:id/status
@@ -61,12 +71,12 @@ router.put('/:id', requireTrustAdmin, validators.validateBody(schoolValidationSc
  * @validation Q59-ENFORCED - Status update validation
  */
 router.patch(
-   '/:id/status',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.statusUpdate),
-   (req, res) => {
-      schoolController.updateSchoolStatus(req, res);
-   }
+  "/:id/status",
+  requireTrustAdmin,
+  validators.validateBody(schoolValidationSchemas.statusUpdate),
+  (req, res) => {
+    schoolController.updateSchoolStatus(req, res);
+  },
 );
 
 /**
@@ -74,8 +84,8 @@ router.patch(
  * @desc Delete school by ID (soft delete)
  * @access Admin/Trust Admin
  */
-router.delete('/:id', requireTrustAdmin, (req, res) => {
-   schoolController.deleteSchool(req, res);
+router.delete("/:id", requireTrustAdmin, (req, res) => {
+  schoolController.deleteSchool(req, res);
 });
 
 /**
@@ -85,12 +95,12 @@ router.delete('/:id', requireTrustAdmin, (req, res) => {
  * @validation Q59-ENFORCED
  */
 router.patch(
-   '/:id/compliance',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.compliance),
-   (req, res) => {
-      schoolController.updateSchoolCompliance(req, res);
-   }
+  "/:id/compliance",
+  requireTrustAdmin,
+  validators.validateBody(schoolValidationSchemas.compliance),
+  (req, res) => {
+    schoolController.updateSchoolCompliance(req, res);
+  },
 );
 
 module.exports = router;
@@ -100,8 +110,8 @@ module.exports = router;
  * @desc Get school statistics
  * @access Private
  */
-router.get('/:id/stats', (req, res) => {
-   schoolController.getSchoolStats(req, res);
+router.get("/:id/stats", (req, res) => {
+  schoolController.getSchoolStats(req, res);
 });
 
 module.exports = router;

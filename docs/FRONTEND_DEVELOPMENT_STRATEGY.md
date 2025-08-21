@@ -33,13 +33,13 @@ Build frontend interfaces that complement the bulletproof backend architecture, 
 
 ### **✅ REQUIRED TECHNOLOGIES (Per Documentation)**
 
-| Decision | Implementation | Rationale |
-|----------|----------------|-----------|
-| **Q3: CSS Framework** | Tailwind CSS 3.x (CDN only) | ENFORCED - No Bootstrap/custom frameworks |
-| **Q7: API Architecture** | MVC + EJS + JSON endpoints | ENFORCED - No SPA-only, no GraphQL |
-| **Q2: Module System** | CommonJS `require`/`module.exports` | ENFORCED - No ES6 imports, no TypeScript |
-| **Q6: Sessions** | Express sessions + MySQL store | ENFORCED - No JWT, no Redis sessions |
-| **Q59: Validation** | Reuse API endpoint schemas | ENFORCED - No custom web validation |
+| Decision                 | Implementation                      | Rationale                                 |
+| ------------------------ | ----------------------------------- | ----------------------------------------- |
+| **Q3: CSS Framework**    | Tailwind CSS 3.x (CDN only)         | ENFORCED - No Bootstrap/custom frameworks |
+| **Q7: API Architecture** | MVC + EJS + JSON endpoints          | ENFORCED - No SPA-only, no GraphQL        |
+| **Q2: Module System**    | CommonJS `require`/`module.exports` | ENFORCED - No ES6 imports, no TypeScript  |
+| **Q6: Sessions**         | Express sessions + MySQL store      | ENFORCED - No JWT, no Redis sessions      |
+| **Q59: Validation**      | Reuse API endpoint schemas          | ENFORCED - No custom web validation       |
 
 ```json
 {
@@ -76,7 +76,7 @@ System Database: school_erp_system
 │   └── Redirect: /admin/system
 │
 Trust Database: school_erp_trust_{trustCode}
-├── Trust Context Authentication  
+├── Trust Context Authentication
 │   ├── Route: /auth/login (user@demo.school)
 │   ├── Validation: userValidationSchemas.login
 │   └── Redirect: /dashboard
@@ -98,19 +98,19 @@ const tenantDetection = async (req, res, next) => {
 
 ```javascript
 // routes/web.js - Already implemented Q59 compliant authentication
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  
+
   // Determine validation schema based on login type
-  const isSystemLogin = !email.includes('@') || email.includes('admin');
-  
+  const isSystemLogin = !email.includes("@") || email.includes("admin");
+
   let validationSchema;
   if (isSystemLogin) {
     validationSchema = systemUserValidationSchemas.login; // Q59 COMPLIANT
   } else {
     validationSchema = userValidationSchemas.login; // Q59 COMPLIANT
   }
-  
+
   // Validate using existing schemas (Q59 ENFORCED)
   const { error } = validationSchema.validate({ username: email, password });
 });
@@ -123,12 +123,14 @@ router.post('/login', async (req, res) => {
 ### **Phase 1: Foundation & Authentication (Week 1)**
 
 #### **1.1 System Authentication UI** ✅ COMPLETED
+
 - **File**: `views/pages/auth/login.ejs`
 - **Features**: Dual login detection, Alpine.js validation
 - **Validation**: Q59 compliant - reuses existing schemas
 - **Status**: Production ready
 
 #### **1.2 Trust Context Selection**
+
 ```javascript
 // Tenant branding support (existing in auth.ejs)
 <style>
@@ -143,6 +145,7 @@ router.post('/login', async (req, res) => {
 ### **Phase 2: Core Management (Week 2-3)**
 
 #### **2.1 Dashboard Templates**
+
 ```
 views/pages/dashboard/
 ├── system-admin.ejs     # Trust management interface
@@ -155,48 +158,57 @@ views/pages/dashboard/
 ```
 
 #### **2.2 School Setup Module**
+
 ```javascript
 // Q59 ENFORCED: Reuse existing validation schemas
-const { setupConfigurationValidationSchemas } = require('../modules/setup/models/SetupConfiguration');
-const { validators } = require('../utils/errors');
+const {
+  setupConfigurationValidationSchemas,
+} = require("../modules/setup/models/SetupConfiguration");
+const { validators } = require("../utils/errors");
 
-router.post('/setup/school', 
+router.post(
+  "/setup/school",
   validators.validateBody(setupConfigurationValidationSchemas.create),
   async (req, res) => {
     // req.body is validated using existing backend schema
-  }
+  },
 );
 ```
 
 #### **2.3 School Management**
+
 ```javascript
 // Q59 ENFORCED: Reuse school validation schemas
-const { schoolValidationSchemas } = require('../modules/school/models/School');
+const { schoolValidationSchemas } = require("../modules/school/models/School");
 
-router.post('/schools', 
+router.post(
+  "/schools",
   validators.validateBody(schoolValidationSchemas.create),
   async (req, res) => {
     // Validated school creation
-  }
+  },
 );
 ```
 
 ### **Phase 3: Student Management (Week 4-5)**
 
 #### **3.1 Student Registration Form**
-```javascript
-// Q59 ENFORCED: Reuse student validation schemas  
-const { studentValidationSchemas } = require('../models');
 
-router.post('/students/new',
+```javascript
+// Q59 ENFORCED: Reuse student validation schemas
+const { studentValidationSchemas } = require("../models");
+
+router.post(
+  "/students/new",
   validators.validateBody(studentValidationSchemas.create),
   async (req, res) => {
     // Multi-step form with existing validation
-  }
+  },
 );
 ```
 
 **Template Structure**:
+
 ```
 views/pages/students/
 ├── register.ejs         # Multi-tab registration form
@@ -209,56 +221,69 @@ views/pages/students/
 ```
 
 #### **3.2 Student Directory**
+
 ```javascript
 // Server-side pagination (config compliant)
 const pageSize = appConfig.ui.pagination.defaultPageSize; // 20
 const students = await Student.findAndCountAll({
   limit: pageSize,
   offset: (page - 1) * pageSize,
-  where: filters
+  where: filters,
 });
 ```
 
 ### **Phase 4: Fee Management (Week 6)**
 
 #### **4.1 Fee Structure Setup**
+
 ```javascript
 // Q59 ENFORCED: Reuse fee validation schemas
-const { feeStructureValidationSchemas } = require('../modules/fee/models/FeeStructure');
+const {
+  feeStructureValidationSchemas,
+} = require("../modules/fee/models/FeeStructure");
 
-router.post('/fees/structures',
+router.post(
+  "/fees/structures",
   validators.validateBody(feeStructureValidationSchemas.create),
   async (req, res) => {
     // Fee structure with existing validation
-  }
+  },
 );
 ```
 
 #### **4.2 Fee Collection Interface**
+
 ```javascript
 // Q59 ENFORCED: Reuse fee collection schemas
-const { feeCollectionValidationSchemas } = require('../modules/fee/models/FeeCollection');
+const {
+  feeCollectionValidationSchemas,
+} = require("../modules/fee/models/FeeCollection");
 
-router.post('/fees/collect',
+router.post(
+  "/fees/collect",
   validators.validateBody(feeCollectionValidationSchemas.create),
   async (req, res) => {
     // Receipt generation with pdfkit (existing dependency)
-  }
+  },
 );
 ```
 
 ### **Phase 5: Attendance & Reports (Week 7-8)**
 
 #### **5.1 Attendance Interface**
+
 ```javascript
 // Q59 ENFORCED: Reuse attendance validation schemas
-const { studentAttendanceValidationSchemas } = require('../modules/attendance/models/StudentAttendance');
+const {
+  studentAttendanceValidationSchemas,
+} = require("../modules/attendance/models/StudentAttendance");
 
-router.post('/attendance/mark',
+router.post(
+  "/attendance/mark",
   validators.validateBody(studentAttendanceValidationSchemas.create),
   async (req, res) => {
     // Mobile-first attendance marking
-  }
+  },
 );
 ```
 
@@ -270,10 +295,11 @@ router.post('/attendance/mark',
 
 ```javascript
 // ✅ CORRECT: Always reuse API validation schemas
-const { validators } = require('../utils/errors');
-const { studentValidationSchemas } = require('../models');
+const { validators } = require("../utils/errors");
+const { studentValidationSchemas } = require("../models");
 
-router.post('/web/students', 
+router.post(
+  "/web/students",
   validators.validateBody(studentValidationSchemas.create), // Q59 ENFORCED
   async (req, res) => {
     // req.body is already validated and sanitized
@@ -285,19 +311,20 @@ router.post('/web/students',
       res.status(500).json({
         success: false,
         error: {
-          code: 'STUDENT_CREATION_FAILED',
-          message: 'Failed to create student',
-          timestamp: new Date().toISOString()
-        }
+          code: "STUDENT_CREATION_FAILED",
+          message: "Failed to create student",
+          timestamp: new Date().toISOString(),
+        },
       });
     }
-  }
+  },
 );
 
 // ❌ FORBIDDEN: Custom web validation (Q59 violation)
-router.post('/web/students', async (req, res) => {
-  if (!req.body.name) { // VIOLATION: Custom validation
-    return res.status(400).json({error: 'Name required'});
+router.post("/web/students", async (req, res) => {
+  if (!req.body.name) {
+    // VIOLATION: Custom validation
+    return res.status(400).json({ error: "Name required" });
   }
 });
 ```
@@ -309,42 +336,42 @@ router.post('/web/students', async (req, res) => {
 function studentForm() {
   return {
     formData: {
-      name: '',
-      email: '',
-      classId: ''
+      name: "",
+      email: "",
+      classId: "",
     },
     errors: {},
     loading: false,
-    
+
     async submitForm() {
       this.loading = true;
       this.errors = {};
-      
+
       try {
-        const response = await fetch('/api/v1/students', {
-          method: 'POST',
+        const response = await fetch("/api/v1/students", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
           },
-          body: JSON.stringify(this.formData)
+          body: JSON.stringify(this.formData),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           // Success handling
-          window.location.href = '/students';
+          window.location.href = "/students";
         } else {
           // Error handling using backend validation errors
           this.errors = data.error.details || {};
         }
       } catch (error) {
-        console.error('Form submission error:', error);
+        console.error("Form submission error:", error);
       } finally {
         this.loading = false;
       }
-    }
+    },
   };
 }
 ```
@@ -385,14 +412,20 @@ function studentForm() {
 
 ```javascript
 // utils/webValidators.js - Standardized web validation
-const { validators } = require('./errors');
+const { validators } = require("./errors");
 
 const webValidators = {
   // Reuse existing schemas for web routes
-  validateStudentCreate: validators.validateBody(studentValidationSchemas.create),
+  validateStudentCreate: validators.validateBody(
+    studentValidationSchemas.create,
+  ),
   validateUserCreate: validators.validateBody(userValidationSchemas.create),
-  validateFeeStructure: validators.validateBody(feeStructureValidationSchemas.create),
-  validateAttendance: validators.validateBody(studentAttendanceValidationSchemas.create)
+  validateFeeStructure: validators.validateBody(
+    feeStructureValidationSchemas.create,
+  ),
+  validateAttendance: validators.validateBody(
+    studentAttendanceValidationSchemas.create,
+  ),
 };
 
 module.exports = webValidators;
@@ -406,21 +439,21 @@ const handleValidationError = (error, req, res) => {
   const response = {
     success: false,
     error: {
-      code: 'VALIDATION_FAILED',
-      message: 'Form validation failed',
+      code: "VALIDATION_FAILED",
+      message: "Form validation failed",
       details: {},
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   };
-  
+
   // Transform Joi errors to user-friendly format
   if (error.details) {
-    error.details.forEach(detail => {
+    error.details.forEach((detail) => {
       const key = detail.path[0];
       response.error.details[key] = detail.message;
     });
   }
-  
+
   return res.status(422).json(response);
 };
 ```
@@ -478,30 +511,33 @@ views/
 <!-- layouts/main.ejs - Authenticated users layout -->
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - <%= tenant ? tenant.name : 'School ERP System' %></title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      <%= title %> - <%= tenant ? tenant.name : 'School ERP System' %>
+    </title>
+
     <!-- Tailwind CSS (Q3 ENFORCED) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Alpine.js (Client-side reactivity) -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/app.css">
-</head>
-<body class="bg-gray-50">
-    <%- include('../partials/alerts') %>
-    <%- include('../partials/navigation') %>
-    
-    <main class="container mx-auto px-4 py-8">
-        <%- body %>
-    </main>
-    
+    <link rel="stylesheet" href="/static/css/app.css" />
+  </head>
+  <body class="bg-gray-50">
+    <%- include('../partials/alerts') %> <%- include('../partials/navigation')
+    %>
+
+    <main class="container mx-auto px-4 py-8"><%- body %></main>
+
     <script src="/static/js/app.js"></script>
-</body>
+  </body>
 </html>
 ```
 
@@ -515,19 +551,21 @@ views/
 // Frontend routes align with existing API structure
 const routeMapping = {
   // Authentication (✅ existing)
-  'POST /auth/login': 'systemAuthService.login() || userService.authenticateUser()',
-  
+  "POST /auth/login":
+    "systemAuthService.login() || userService.authenticateUser()",
+
   // Student management
-  'GET  /api/v1/students': 'Student.findAndCountAll() with filters',
-  'POST /api/v1/students': 'StudentService.createStudent() with validation',
-  'PUT  /api/v1/students/:id': 'StudentService.updateStudent() with validation',
-  
-  // Fee management  
-  'GET  /api/v1/fees/structures': 'FeeStructure.findAll() with filters',
-  'POST /api/v1/fees/collect': 'FeeService.collectFee() with validation',
-  
+  "GET  /api/v1/students": "Student.findAndCountAll() with filters",
+  "POST /api/v1/students": "StudentService.createStudent() with validation",
+  "PUT  /api/v1/students/:id": "StudentService.updateStudent() with validation",
+
+  // Fee management
+  "GET  /api/v1/fees/structures": "FeeStructure.findAll() with filters",
+  "POST /api/v1/fees/collect": "FeeService.collectFee() with validation",
+
   // Attendance
-  'POST /api/v1/attendance/mark': 'AttendanceService.markAttendance() with validation'
+  "POST /api/v1/attendance/mark":
+    "AttendanceService.markAttendance() with validation",
 };
 ```
 
@@ -538,16 +576,18 @@ const routeMapping = {
 req.session = {
   user: {
     id: 123,
-    email: 'admin@demo.school',
-    role: 'TRUST_ADMIN'
+    email: "admin@demo.school",
+    role: "TRUST_ADMIN",
   },
-  userType: 'tenant', // or 'system'
-  tenantCode: 'demo',
+  userType: "tenant", // or 'system'
+  tenantCode: "demo",
   tenant: {
     id: 1,
-    name: 'Demo School Trust',
-    branding: { /* theme colors */ }
-  }
+    name: "Demo School Trust",
+    branding: {
+      /* theme colors */
+    },
+  },
 };
 ```
 
@@ -559,11 +599,14 @@ req.session = {
 
 ```javascript
 // ✅ ALWAYS: Reuse existing API validation schemas
-const { studentValidationSchemas } = require('../models');
-router.post('/web/students', validators.validateBody(studentValidationSchemas.create));
+const { studentValidationSchemas } = require("../models");
+router.post(
+  "/web/students",
+  validators.validateBody(studentValidationSchemas.create),
+);
 
-// ❌ NEVER: Create custom validation for web routes  
-router.post('/web/students', customWebValidation); // FORBIDDEN
+// ❌ NEVER: Create custom validation for web routes
+router.post("/web/students", customWebValidation); // FORBIDDEN
 ```
 
 ### **2. Technology Stack Compliance (Q1-Q10)**
@@ -590,15 +633,15 @@ import express from 'express'; // FORBIDDEN
 const errorResponse = {
   success: false,
   error: {
-    code: 'VALIDATION_FAILED',
-    message: 'Form validation failed',
-    details: { name: 'Name is required' },
-    timestamp: new Date().toISOString()
-  }
+    code: "VALIDATION_FAILED",
+    message: "Form validation failed",
+    details: { name: "Name is required" },
+    timestamp: new Date().toISOString(),
+  },
 };
 
 // ❌ FORBIDDEN: Simple error messages
-res.status(400).send('Validation failed'); // FORBIDDEN
+res.status(400).send("Validation failed"); // FORBIDDEN
 ```
 
 ### **4. Async/Await Pattern (Q57-Q58)**
@@ -610,14 +653,14 @@ async function handleFormSubmission(req, res) {
     const result = await StudentService.createStudent(req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    logError(error, { context: 'student creation' });
+    logError(error, { context: "student creation" });
     res.status(500).json({
       success: false,
       error: {
-        code: 'STUDENT_CREATION_FAILED',
-        message: 'Failed to create student',
-        timestamp: new Date().toISOString()
-      }
+        code: "STUDENT_CREATION_FAILED",
+        message: "Failed to create student",
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 }
@@ -633,7 +676,7 @@ async function handleFormSubmission(req, res) {
 
 ```javascript
 // ✅ CORRECT: Use app-config.json for non-secrets
-const appConfig = require('../config/app-config.json');
+const appConfig = require("../config/app-config.json");
 const pageSize = appConfig.ui.pagination.defaultPageSize; // 20
 
 // ✅ CORRECT: Use .env for secrets only
@@ -648,27 +691,32 @@ const pageSize = 20; // Should be in app-config.json
 ## 🚀 **IMPLEMENTATION CHECKLIST**
 
 ### **Phase 1: Foundation ✅**
+
 - [x] System authentication UI (completed)
 - [x] Tenant detection middleware (existing)
 - [x] Q59 validation compliance (implemented)
 - [ ] Trust branding support enhancement
 
 ### **Phase 2: Core Management**
+
 - [ ] Dashboard templates (system/trust/role-based)
 - [ ] School setup wizard with validation
 - [ ] School management CRUD operations
 
-### **Phase 3: Student Management**  
+### **Phase 3: Student Management**
+
 - [ ] Multi-step student registration form
 - [ ] Student directory with filtering
 - [ ] Document upload functionality
 
 ### **Phase 4: Fee Management**
+
 - [ ] Fee structure configuration
-- [ ] Fee collection interface  
+- [ ] Fee collection interface
 - [ ] Receipt generation
 
 ### **Phase 5: Attendance & Reports**
+
 - [ ] Mobile-first attendance marking
 - [ ] Attendance reports and analytics
 
@@ -677,6 +725,7 @@ const pageSize = 20; // Should be in app-config.json
 ## 📋 **QUALITY ASSURANCE**
 
 ### **Before Each Commit**
+
 ```bash
 # Validate all architectural compliance
 npm run validate:all
@@ -690,11 +739,12 @@ npm run format
 ```
 
 ### **Validation Commands**
+
 ```bash
 # Documentation consistency
 npm run validate:docs
 
-# Auto-fix documentation issues  
+# Auto-fix documentation issues
 npm run fix:docs
 
 # Complete validation suite

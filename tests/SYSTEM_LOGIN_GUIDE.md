@@ -31,8 +31,8 @@
 
 ```javascript
 // In middleware/tenant.js - System routes bypass tenant detection
-if (req.path.startsWith('/api/v1/admin/system')) {
-   return next(); // Skip tenant initialization
+if (req.path.startsWith("/api/v1/admin/system")) {
+  return next(); // Skip tenant initialization
 }
 ```
 
@@ -40,7 +40,7 @@ if (req.path.startsWith('/api/v1/admin/system')) {
 
 ```javascript
 // System routes are mounted at /admin/system
-router.use('/admin/system', systemRoutes);
+router.use("/admin/system", systemRoutes);
 
 // Available endpoints:
 // POST /api/v1/admin/system/auth/login
@@ -119,16 +119,16 @@ curl http://localhost:3000/api/v1/admin/system/health
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@system.local",
-      "full_name": "System Administrator",
-      "role": "SYSTEM_ADMIN",
-      "loginTime": "2025-08-19T14:30:00.000Z"
-   },
-   "message": "Login successful"
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@system.local",
+    "full_name": "System Administrator",
+    "role": "SYSTEM_ADMIN",
+    "loginTime": "2025-08-19T14:30:00.000Z"
+  },
+  "message": "Login successful"
 }
 ```
 
@@ -136,13 +136,13 @@ curl http://localhost:3000/api/v1/admin/system/health
 
 ```json
 {
-   "success": true,
-   "data": {
-      "status": "healthy",
-      "timestamp": "2025-08-19T14:30:00.000Z",
-      "uptime": 3600,
-      "version": "1.0.0"
-   }
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2025-08-19T14:30:00.000Z",
+    "uptime": 3600,
+    "version": "1.0.0"
+  }
 }
 ```
 
@@ -150,11 +150,11 @@ curl http://localhost:3000/api/v1/admin/system/health
 
 ```json
 {
-   "success": false,
-   "error": {
-      "code": "AUTHENTICATION_ERROR",
-      "message": "Invalid credentials"
-   }
+  "success": false,
+  "error": {
+    "code": "AUTHENTICATION_ERROR",
+    "message": "Invalid credentials"
+  }
 }
 ```
 

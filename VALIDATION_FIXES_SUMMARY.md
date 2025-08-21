@@ -15,9 +15,13 @@
 - **Fixed**: Added `validators.validateBody()` middleware to all endpoints
 - **Pattern**: Consistent with system routes validation
 - **Example**:
-   ```javascript
-   router.post('/auth/login', validators.validateBody(userValidationSchemas.login), userController.authenticateUser);
-   ```
+  ```javascript
+  router.post(
+    "/auth/login",
+    validators.validateBody(userValidationSchemas.login),
+    userController.authenticateUser,
+  );
+  ```
 
 ### **3. Fixed Web Routes (Q59 Compliance)**
 
@@ -39,11 +43,15 @@
 
 ```javascript
 // 1. Import validation schemas from models
-const { userValidationSchemas } = require('../models/User');
-const { validators } = require('../utils/errors');
+const { userValidationSchemas } = require("../models/User");
+const { validators } = require("../utils/errors");
 
 // 2. Apply validation middleware before controller
-router.post('/endpoint', validators.validateBody(validationSchemas.create), controller.method);
+router.post(
+  "/endpoint",
+  validators.validateBody(validationSchemas.create),
+  controller.method,
+);
 
 // 3. Controllers receive pre-validated req.body
 // No manual validation needed in controllers!
@@ -53,16 +61,16 @@ router.post('/endpoint', validators.validateBody(validationSchemas.create), cont
 
 ```javascript
 const validationSchemas = {
-   create: Joi.object({
-      /* creation fields */
-   }),
-   update: Joi.object({
-      /* update fields */
-   }),
-   login: Joi.object({
-      /* auth fields */
-   }),
-   // Add more as needed
+  create: Joi.object({
+    /* creation fields */
+  }),
+  update: Joi.object({
+    /* update fields */
+  }),
+  login: Joi.object({
+    /* auth fields */
+  }),
+  // Add more as needed
 };
 ```
 

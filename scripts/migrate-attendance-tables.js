@@ -1,4 +1,4 @@
-const { logger } = require('../../utils/logger');
+const { logger } = require("../../utils/logger");
 
 /**
  * Database Migration Script for Attendance Module
@@ -7,14 +7,14 @@ const { logger } = require('../../utils/logger');
  */
 
 async function createAttendanceTables(sequelize) {
-   const transaction = await sequelize.transaction();
+  const transaction = await sequelize.transaction();
 
-   try {
-      logger.info('Starting attendance tables creation...');
+  try {
+    logger.info("Starting attendance tables creation...");
 
-      // Create StudentAttendance table
-      await sequelize.query(
-         `
+    // Create StudentAttendance table
+    await sequelize.query(
+      `
          CREATE TABLE IF NOT EXISTS student_attendance (
             id INT AUTO_INCREMENT PRIMARY KEY,
             student_id INT NOT NULL,
@@ -50,14 +50,14 @@ async function createAttendanceTables(sequelize) {
             FOREIGN KEY (modified_by) REFERENCES users(id) ON DELETE RESTRICT ON UPDATE CASCADE
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      logger.info('StudentAttendance table created successfully');
+    logger.info("StudentAttendance table created successfully");
 
-      // Create TeacherAttendance table
-      await sequelize.query(
-         `
+    // Create TeacherAttendance table
+    await sequelize.query(
+      `
          CREATE TABLE IF NOT EXISTS teacher_attendance (
             id INT AUTO_INCREMENT PRIMARY KEY,
             teacher_id INT NOT NULL,
@@ -103,14 +103,14 @@ async function createAttendanceTables(sequelize) {
             FOREIGN KEY (substituting_for) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      logger.info('TeacherAttendance table created successfully');
+    logger.info("TeacherAttendance table created successfully");
 
-      // Create attendance summary view for reporting
-      await sequelize.query(
-         `
+    // Create attendance summary view for reporting
+    await sequelize.query(
+      `
          CREATE OR REPLACE VIEW attendance_daily_summary AS
          SELECT 
             s.school_id,
@@ -129,21 +129,21 @@ async function createAttendanceTables(sequelize) {
          WHERE s.is_holiday = FALSE
          GROUP BY s.school_id, s.attendance_date, s.academic_year;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      logger.info('Attendance daily summary view created successfully');
+    logger.info("Attendance daily summary view created successfully");
 
-      // Create triggers for automatic calculation of worked hours
-      await sequelize.query(
-         `
+    // Create triggers for automatic calculation of worked hours
+    await sequelize.query(
+      `
          DROP TRIGGER IF EXISTS calculate_teacher_hours_before_update;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      await sequelize.query(
-         `
+    await sequelize.query(
+      `
          CREATE TRIGGER calculate_teacher_hours_before_update
          BEFORE UPDATE ON teacher_attendance
          FOR EACH ROW
@@ -165,18 +165,18 @@ async function createAttendanceTables(sequelize) {
             END IF;
          END;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      await sequelize.query(
-         `
+    await sequelize.query(
+      `
          DROP TRIGGER IF EXISTS calculate_teacher_hours_before_insert;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      await sequelize.query(
-         `
+    await sequelize.query(
+      `
          CREATE TRIGGER calculate_teacher_hours_before_insert
          BEFORE INSERT ON teacher_attendance
          FOR EACH ROW
@@ -198,29 +198,32 @@ async function createAttendanceTables(sequelize) {
             END IF;
          END;
       `,
-         { transaction }
-      );
+      { transaction },
+    );
 
-      logger.info('Database triggers created successfully');
+    logger.info("Database triggers created successfully");
 
-      await transaction.commit();
-      logger.info('Attendance module database migration completed successfully');
+    await transaction.commit();
+    logger.info("Attendance module database migration completed successfully");
 
-      return {
-         success: true,
-         message: 'Attendance tables created successfully',
-         tables_created: ['student_attendance', 'teacher_attendance'],
-         views_created: ['attendance_daily_summary'],
-         triggers_created: ['calculate_teacher_hours_before_insert', 'calculate_teacher_hours_before_update'],
-      };
-   } catch (error) {
-      await transaction.rollback();
-      logger.error('Error creating attendance tables', {
-         error: error.message,
-         stack: error.stack,
-      });
-      throw error;
-   }
+    return {
+      success: true,
+      message: "Attendance tables created successfully",
+      tables_created: ["student_attendance", "teacher_attendance"],
+      views_created: ["attendance_daily_summary"],
+      triggers_created: [
+        "calculate_teacher_hours_before_insert",
+        "calculate_teacher_hours_before_update",
+      ],
+    };
+  } catch (error) {
+    await transaction.rollback();
+    logger.error("Error creating attendance tables", {
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
 }
 
 /**
@@ -229,37 +232,49 @@ async function createAttendanceTables(sequelize) {
  * @returns {Object} Result of the operation
  */
 async function dropAttendanceTables(sequelize) {
-   const transaction = await sequelize.transaction();
+  const transaction = await sequelize.transaction();
 
-   try {
-      logger.info('Dropping attendance tables...');
+  try {
+    logger.info("Dropping attendance tables...");
 
-      // Drop triggers first
-      await sequelize.query('DROP TRIGGER IF EXISTS calculate_teacher_hours_before_insert;', { transaction });
-      await sequelize.query('DROP TRIGGER IF EXISTS calculate_teacher_hours_before_update;', { transaction });
+    // Drop triggers first
+    await sequelize.query(
+      "DROP TRIGGER IF EXISTS calculate_teacher_hours_before_insert;",
+      { transaction },
+    );
+    await sequelize.query(
+      "DROP TRIGGER IF EXISTS calculate_teacher_hours_before_update;",
+      { transaction },
+    );
 
-      // Drop view
-      await sequelize.query('DROP VIEW IF EXISTS attendance_daily_summary;', { transaction });
+    // Drop view
+    await sequelize.query("DROP VIEW IF EXISTS attendance_daily_summary;", {
+      transaction,
+    });
 
-      // Drop tables (foreign key constraints will be handled automatically)
-      await sequelize.query('DROP TABLE IF EXISTS teacher_attendance;', { transaction });
-      await sequelize.query('DROP TABLE IF EXISTS student_attendance;', { transaction });
+    // Drop tables (foreign key constraints will be handled automatically)
+    await sequelize.query("DROP TABLE IF EXISTS teacher_attendance;", {
+      transaction,
+    });
+    await sequelize.query("DROP TABLE IF EXISTS student_attendance;", {
+      transaction,
+    });
 
-      await transaction.commit();
-      logger.info('Attendance tables dropped successfully');
+    await transaction.commit();
+    logger.info("Attendance tables dropped successfully");
 
-      return {
-         success: true,
-         message: 'Attendance tables dropped successfully',
-      };
-   } catch (error) {
-      await transaction.rollback();
-      logger.error('Error dropping attendance tables', {
-         error: error.message,
-         stack: error.stack,
-      });
-      throw error;
-   }
+    return {
+      success: true,
+      message: "Attendance tables dropped successfully",
+    };
+  } catch (error) {
+    await transaction.rollback();
+    logger.error("Error dropping attendance tables", {
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
 }
 
 /**
@@ -268,29 +283,33 @@ async function dropAttendanceTables(sequelize) {
  * @returns {Object} Status of tables
  */
 async function checkAttendanceTables(sequelize) {
-   try {
-      const [results] = await sequelize.query(`
+  try {
+    const [results] = await sequelize.query(`
          SELECT TABLE_NAME 
          FROM INFORMATION_SCHEMA.TABLES 
          WHERE TABLE_SCHEMA = DATABASE() 
          AND TABLE_NAME IN ('student_attendance', 'teacher_attendance')
       `);
 
-      return {
-         student_attendance: results.some((row) => row.TABLE_NAME === 'student_attendance'),
-         teacher_attendance: results.some((row) => row.TABLE_NAME === 'teacher_attendance'),
-         all_present: results.length === 2,
-      };
-   } catch (error) {
-      logger.error('Error checking attendance tables', {
-         error: error.message,
-      });
-      throw error;
-   }
+    return {
+      student_attendance: results.some(
+        (row) => row.TABLE_NAME === "student_attendance",
+      ),
+      teacher_attendance: results.some(
+        (row) => row.TABLE_NAME === "teacher_attendance",
+      ),
+      all_present: results.length === 2,
+    };
+  } catch (error) {
+    logger.error("Error checking attendance tables", {
+      error: error.message,
+    });
+    throw error;
+  }
 }
 
 module.exports = {
-   createAttendanceTables,
-   dropAttendanceTables,
-   checkAttendanceTables,
+  createAttendanceTables,
+  dropAttendanceTables,
+  checkAttendanceTables,
 };

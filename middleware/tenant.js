@@ -1,138 +1,163 @@
-const { getTenantModels, initializeTenantModels } = require('../models');
-const { dbManager } = require('../models/database');
-const { logSystem, logError } = require('../utils/logger');
+const { getTenantModels, initializeTenantModels } = require("../models");
+const { dbManager } = require("../models/database");
+const { logSystem, logError } = require("../utils/logger");
 const {
-   ErrorFactory,
-   // Legacy classes for backward compatibility
-   AuthenticationError,
-} = require('../utils/errors');
-const appConfig = require('../config/app-config.json');
+  ErrorFactory,
+  // Legacy classes for backward compatibility
+  AuthenticationError,
+} = require("../utils/errors");
+const appConfig = require("../config/app-config.json");
 
 /**
  * Tenant detection middleware
  * Detects tenant from subdomain and initializes tenant context
  */
 const tenantDetection = async (req, res, next) => {
-   try {
-      let tenantCode = null;
+  try {
+    let tenantCode = null;
 
-      // Extract tenant from subdomain
-      const host = req.get('host');
-      const subdomain = extractSubdomain(host);
+    // Extract tenant from subdomain
+    const host = req.get("host");
+    const subdomain = extractSubdomain(host);
 
-      if (subdomain && subdomain !== 'www') {
-         tenantCode = subdomain;
-      } else {
-         // Fallback to default tenant for development
-         tenantCode = appConfig.multiTenant.defaultTrustCode;
-      }
+    if (subdomain && subdomain !== "www") {
+      tenantCode = subdomain;
+    } else {
+      // Fallback to default tenant for development
+      tenantCode = appConfig.multiTenant.defaultTrustCode;
+    }
 
-      // Set tenant context
-      req.tenantCode = tenantCode;
-      req.subdomain = subdomain;
+    // Set tenant context
+    req.tenantCode = tenantCode;
+    req.subdomain = subdomain;
 
-      // Skip tenant database initialization for system admin routes
-      if (req.path.startsWith('/api/v1/admin/system') || req.path.startsWith('/admin/system')) {
-         return next();
-      }
+    // Skip tenant database initialization for system admin routes
+    if (
+      req.path.startsWith("/api/v1/admin/system") ||
+      req.path.startsWith("/admin/system")
+    ) {
+      return next();
+    }
 
-      // Skip tenant validation for health check
-      if (req.path === '/api/v1/health' || req.path === '/health') {
-         return next();
-      }
+    // Skip tenant validation for health check
+    if (req.path === "/api/v1/health" || req.path === "/health") {
+      return next();
+    }
 
-      // Skip for status endpoint
-      if (req.path === '/api/v1/status' || req.path === '/status') {
-         return next();
-      }
+    // Skip for status endpoint
+    if (req.path === "/api/v1/status" || req.path === "/status") {
+      return next();
+    }
 
-      // Skip for auth routes to allow login without tenant initialization
-      if (req.path === '/auth/login' || req.path.startsWith('/auth/')) {
-         req.tenantCode = tenantCode; // Set tenant code but don't initialize models
-         return next();
-      }
+    // Skip for auth routes to allow login without tenant initialization
+    if (req.path === "/auth/login" || req.path.startsWith("/auth/")) {
+      req.tenantCode = tenantCode; // Set tenant code but don't initialize models
+      return next();
+    }
 
-      // Skip for static files
-      if (req.path.startsWith('/static/')) {
-         return next();
-      }
+    // Skip for static files
+    if (req.path.startsWith("/static/")) {
+      return next();
+    }
 
-      // Skip for logout
-      if (req.path === '/logout' || req.path === '/auth/logout') {
-         return next();
-      }
+    // Skip for logout
+    if (req.path === "/logout" || req.path === "/auth/logout") {
+      return next();
+    }
 
-      // Initialize tenant models if not already done
-      try {
-         const tenantModels = getTenantModels(tenantCode);
-         req.tenantModels = tenantModels;
-      } catch (error) {
-         // Models not initialized, try to initialize
-         logSystem(`Initializing tenant models for: ${tenantCode}`);
+    // Skip tenant initialization for dashboard if user is system admin
+    if (
+      req.path === "/dashboard" &&
+      req.session &&
+      req.session.userType === "system"
+    ) {
+      return next();
+    }
 
-         // Check if tenant database exists
-         const dbExists = await dbManager.tenantDatabaseExists(tenantCode);
+    // Skip tenant initialization for root route - handled by web routes
+    if (req.path === "/") {
+      return next();
+    }
 
-         if (!dbExists) {
-            return res.status(404).json({
-               success: false,
-               error: {
-                  code: 'TENANT_NOT_FOUND',
-                  message: `Tenant '${tenantCode}' not found`,
-                  timestamp: new Date().toISOString(),
-               },
-            });
-         }
+    // Skip for favicon and other browser requests
+    if (req.path === "/favicon.ico") {
+      return next();
+    }
 
-         // Initialize tenant models
-         const tenantModels = await initializeTenantModels(tenantCode);
-         req.tenantModels = tenantModels;
-      }
+    // Initialize tenant models if not already done
+    try {
+      const tenantModels = getTenantModels(tenantCode);
+      req.tenantModels = tenantModels;
+    } catch (error) {
+      // Models not initialized, try to initialize
+      logSystem(`Initializing tenant models for: ${tenantCode}`);
 
-      logSystem(`Request routed to tenant: ${tenantCode}`, {
-         host,
-         subdomain,
-         path: req.path,
-      });
+      // Check if tenant database exists
+      const dbExists = await dbManager.tenantDatabaseExists(tenantCode);
 
-      next();
-   } catch (error) {
-      logError(error, { context: 'tenantDetection', host: req.get('host') });
-      return res.status(500).json({
-         success: false,
-         error: {
-            code: 'TENANT_DETECTION_FAILED',
-            message: 'Failed to detect tenant',
+      if (!dbExists) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            code: "TENANT_NOT_FOUND",
+            message: `Tenant '${tenantCode}' not found`,
             timestamp: new Date().toISOString(),
-         },
-      });
-   }
+          },
+        });
+      }
+
+      // Initialize tenant models
+      const tenantModels = await initializeTenantModels(tenantCode);
+      req.tenantModels = tenantModels;
+    }
+
+    logSystem(`Request routed to tenant: ${tenantCode}`, {
+      host,
+      subdomain,
+      path: req.path,
+    });
+
+    next();
+  } catch (error) {
+    logError(error, { context: "tenantDetection", host: req.get("host") });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: "TENANT_DETECTION_FAILED",
+        message: "Failed to detect tenant",
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
 };
 
 /**
  * Extract subdomain from host header
  */
 function extractSubdomain(host) {
-   if (!host) return null;
+  if (!host) return null;
 
-   // Remove port if present
-   const hostWithoutPort = host.split(':')[0];
+  // Remove port if present
+  const hostWithoutPort = host.split(":")[0];
 
-   // Split by dots
-   const parts = hostWithoutPort.split('.');
+  // Split by dots
+  const parts = hostWithoutPort.split(".");
 
-   // If localhost or IP address, no subdomain
-   if (parts[0] === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)) {
-      return null;
-   }
+  // If localhost or IP address, no subdomain
+  if (
+    parts[0] === "localhost" ||
+    /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)
+  ) {
+    return null;
+  }
 
-   // If only domain.com, no subdomain
-   if (parts.length <= 2) {
-      return null;
-   }
+  // If only domain.com, no subdomain
+  if (parts.length <= 2) {
+    return null;
+  }
 
-   // Return first part as subdomain
-   return parts[0];
+  // Return first part as subdomain
+  return parts[0];
 }
 
 /**
@@ -140,59 +165,59 @@ function extractSubdomain(host) {
  * Validates that the tenant exists and is active
  */
 const validateTenant = async (req, res, next) => {
-   try {
-      // Skip for system admin routes
-      if (req.path.startsWith('/admin/system')) {
-         return next();
-      }
+  try {
+    // Skip for system admin routes
+    if (req.path.startsWith("/admin/system")) {
+      return next();
+    }
 
-      const { getTrustModel } = require('../models');
-      const Trust = await getTrustModel();
+    const { getTrustModel } = require("../models");
+    const Trust = await getTrustModel();
 
-      // Find trust by subdomain or tenant code
-      const trust = await Trust.findOne({
-         where: {
-            [req.subdomain ? 'subdomain' : 'trust_code']: req.tenantCode,
-         },
+    // Find trust by subdomain or tenant code
+    const trust = await Trust.findOne({
+      where: {
+        [req.subdomain ? "subdomain" : "trust_code"]: req.tenantCode,
+      },
+    });
+
+    if (!trust) {
+      return res.status(404).json({
+        success: false,
+        error: {
+          code: "TENANT_NOT_FOUND",
+          message: `Tenant '${req.tenantCode}' not found`,
+          timestamp: new Date().toISOString(),
+        },
       });
+    }
 
-      if (!trust) {
-         return res.status(404).json({
-            success: false,
-            error: {
-               code: 'TENANT_NOT_FOUND',
-               message: `Tenant '${req.tenantCode}' not found`,
-               timestamp: new Date().toISOString(),
-            },
-         });
-      }
-
-      if (!trust.isActive()) {
-         return res.status(403).json({
-            success: false,
-            error: {
-               code: 'TENANT_INACTIVE',
-               message: `Tenant '${req.tenantCode}' is not active`,
-               timestamp: new Date().toISOString(),
-            },
-         });
-      }
-
-      // Set trust context
-      req.trust = trust;
-
-      next();
-   } catch (error) {
-      logError(error, { context: 'validateTenant', tenantCode: req.tenantCode });
-      return res.status(500).json({
-         success: false,
-         error: {
-            code: 'TENANT_VALIDATION_FAILED',
-            message: 'Failed to validate tenant',
-            timestamp: new Date().toISOString(),
-         },
+    if (!trust.isActive()) {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: "TENANT_INACTIVE",
+          message: `Tenant '${req.tenantCode}' is not active`,
+          timestamp: new Date().toISOString(),
+        },
       });
-   }
+    }
+
+    // Set trust context
+    req.trust = trust;
+
+    next();
+  } catch (error) {
+    logError(error, { context: "validateTenant", tenantCode: req.tenantCode });
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: "TENANT_VALIDATION_FAILED",
+        message: "Failed to validate tenant",
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
 };
 
 /**
@@ -200,34 +225,34 @@ const validateTenant = async (req, res, next) => {
  * Ensures tenant context is available for protected routes
  */
 const requireTenant = (req, res, next) => {
-   if (!req.tenantCode) {
-      return res.status(400).json({
-         success: false,
-         error: {
-            code: 'TENANT_REQUIRED',
-            message: 'Tenant context is required',
-            timestamp: new Date().toISOString(),
-         },
-      });
-   }
+  if (!req.tenantCode) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: "TENANT_REQUIRED",
+        message: "Tenant context is required",
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
 
-   if (!req.tenantModels) {
-      return res.status(500).json({
-         success: false,
-         error: {
-            code: 'TENANT_MODELS_NOT_INITIALIZED',
-            message: 'Tenant models not initialized',
-            timestamp: new Date().toISOString(),
-         },
-      });
-   }
+  if (!req.tenantModels) {
+    return res.status(500).json({
+      success: false,
+      error: {
+        code: "TENANT_MODELS_NOT_INITIALIZED",
+        message: "Tenant models not initialized",
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }
 
-   next();
+  next();
 };
 
 module.exports = {
-   tenantDetection,
-   validateTenant,
-   requireTenant,
-   extractSubdomain,
+  tenantDetection,
+  validateTenant,
+  requireTenant,
+  extractSubdomain,
 };

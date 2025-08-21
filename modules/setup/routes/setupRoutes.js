@@ -1,10 +1,12 @@
-const express = require('express');
-const SetupController = require('../controllers/SetupController');
-const { requireSystemAdmin } = require('../../../middleware/auth');
+const express = require("express");
+const SetupController = require("../controllers/SetupController");
+const { requireSystemAdmin } = require("../../../middleware/auth");
 
 // Q59-ENFORCED: Import validation schemas for setup operations
-const { validators } = require('../../../middleware');
-const { setupConfigurationValidationSchemas } = require('../../../models/index');
+const { validators } = require("../../../middleware");
+const {
+  setupConfigurationValidationSchemas,
+} = require("../../../models/index");
 
 const router = express.Router();
 const setupController = new SetupController();
@@ -22,8 +24,8 @@ router.use(requireSystemAdmin);
  * @desc Initialize setup for a trust
  * @access System Admin
  */
-router.post('/:trust_id/initialize', (req, res) => {
-   setupController.initializeSetup(req, res);
+router.post("/:trust_id/initialize", (req, res) => {
+  setupController.initializeSetup(req, res);
 });
 
 /**
@@ -31,8 +33,8 @@ router.post('/:trust_id/initialize', (req, res) => {
  * @desc Get setup progress for a trust
  * @access System Admin
  */
-router.get('/:trust_id/progress', (req, res) => {
-   setupController.getSetupProgress(req, res);
+router.get("/:trust_id/progress", (req, res) => {
+  setupController.getSetupProgress(req, res);
 });
 
 /**
@@ -41,11 +43,13 @@ router.get('/:trust_id/progress', (req, res) => {
  * @access System Admin
  */
 router.post(
-   '/:trust_id/step/:step_name/complete',
-   validators.validateBody(setupConfigurationValidationSchemas.updateSetupConfiguration), // Q59-ENFORCED validation
-   (req, res) => {
-      setupController.completeStep(req, res);
-   }
+  "/:trust_id/step/:step_name/complete",
+  validators.validateBody(
+    setupConfigurationValidationSchemas.updateSetupConfiguration,
+  ), // Q59-ENFORCED validation
+  (req, res) => {
+    setupController.completeStep(req, res);
+  },
 );
 
 /**
@@ -53,8 +57,8 @@ router.post(
  * @desc Get setup step details
  * @access System Admin
  */
-router.get('/:trust_id/step/:step_name', (req, res) => {
-   setupController.getStepDetails(req, res);
+router.get("/:trust_id/step/:step_name", (req, res) => {
+  setupController.getStepDetails(req, res);
 });
 
 /**
@@ -62,8 +66,8 @@ router.get('/:trust_id/step/:step_name', (req, res) => {
  * @desc Reset setup for a trust (development/testing only)
  * @access System Admin
  */
-router.delete('/:trust_id/reset', (req, res) => {
-   setupController.resetSetup(req, res);
+router.delete("/:trust_id/reset", (req, res) => {
+  setupController.resetSetup(req, res);
 });
 
 module.exports = router;

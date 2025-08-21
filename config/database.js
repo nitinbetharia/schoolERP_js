@@ -1,4 +1,9 @@
-{
+// Database configuration for different environments
+// This file defines Sequelize configuration for development, test, and production
+
+const dbConfig = require('./app-config.json').database;
+
+module.exports = {
   development: {
     username: dbConfig.connection.user,
     password: dbConfig.connection.password,

@@ -121,21 +121,21 @@ For all 56 decisions, see: `docs/architecture/SINGLE_SOURCE_OF_TRUTH.md`
 
 ```json
 {
-   "runtime": "Node.js 22+",
-   "framework": "Express.js 5.1.0",
-   "database": "MySQL 8.4 LTS",
-   "orm": "Sequelize 6.37.7",
-   "templating": "EJS 3.1.10",
-   "styling": "Tailwind CSS 3.x (CDN)",
-   "clientJS": "Alpine.js 3.x",
-   "validation": "Joi 18.0.1 + Sequelize + Q59-ENFORCED pattern",
-   "authentication": "bcryptjs 3.0.2 + express-session 1.18.2",
-   "logging": "Winston 3.17.0 + daily-rotate-file",
-   "security": "Helmet 8.1.0, CORS 2.8.5, rate limiting 8.0.1",
-   "fileHandling": "express-fileupload 1.5.2, archiver 7.0.1",
-   "dateTime": "dayjs 1.11.13",
-   "validation": "joi 18.0.1, validator 13.12.0",
-   "utilities": "uuid 11.1.0, axios 1.11.0, xss 1.0.15"
+  "runtime": "Node.js 18++",
+  "framework": "Express.js 5.1.0",
+  "database": "MySQL 8.4 LTS",
+  "orm": "Sequelize 6.37.7",
+  "templating": "EJS 3.1.10",
+  "styling": "Tailwind CSS 3.x (CDN)",
+  "clientJS": "Alpine.js 3.x",
+  "validation": "Joi 18.0.1 + Sequelize + Q59-ENFORCED pattern",
+  "authentication": "bcryptjs 3.0.2 + express-session 1.18.2",
+  "logging": "Winston 3.17.0 + daily-rotate-file",
+  "security": "Helmet 8.1.0, CORS 2.8.5, rate limiting 8.0.1",
+  "fileHandling": "express-fileupload 1.5.2, archiver 7.0.1",
+  "dateTime": "dayjs 1.11.13",
+  "validation": "joi 18.0.1, validator 13.12.0",
+  "utilities": "uuid 11.1.0, axios 1.11.0, xss 1.0.15"
 }
 ```
 
@@ -312,52 +312,52 @@ CREATE TABLE fee_transactions (
 ### **Model Implementation Pattern**
 
 ```javascript
-const { DataTypes } = require('sequelize');
-const Joi = require('joi');
+const { DataTypes } = require("sequelize");
+const Joi = require("joi");
 
 const Student = sequelize.define(
-   'Student',
-   {
-      id: {
-         type: DataTypes.INTEGER,
-         primaryKey: true,
-         autoIncrement: true,
-      },
-      admission_number: {
-         type: DataTypes.STRING(50),
-         allowNull: false,
-         unique: true,
-      },
-      student_name: {
-         type: DataTypes.STRING(100),
-         allowNull: false,
-         validate: { notEmpty: true },
-      },
-      status: {
-         type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
-         defaultValue: 'ACTIVE',
-      },
-      created_at: {
-         type: DataTypes.DATE,
-         defaultValue: DataTypes.NOW,
-      },
-   },
-   {
-      sequelize,
-      modelName: 'Student',
-      tableName: 'students',
-      timestamps: false,
-      underscored: true,
-   }
+  "Student",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    admission_number: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+    },
+    student_name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      validate: { notEmpty: true },
+    },
+    status: {
+      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
+      defaultValue: "ACTIVE",
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+  },
+  {
+    sequelize,
+    modelName: "Student",
+    tableName: "students",
+    timestamps: false,
+    underscored: true,
+  },
 );
 
 // Validation schemas within model
 Student.validationSchema = {
-   create: Joi.object({
-      studentName: Joi.string().trim().max(100).required(),
-      admissionNumber: Joi.string().trim().max(50).required(),
-      classId: Joi.number().integer().positive().required(),
-   }),
+  create: Joi.object({
+    studentName: Joi.string().trim().max(100).required(),
+    admissionNumber: Joi.string().trim().max(50).required(),
+    classId: Joi.number().integer().positive().required(),
+  }),
 };
 
 module.exports = Student;
@@ -374,19 +374,19 @@ module.exports = Student;
 ```javascript
 // ✅ CORRECT - Every async function MUST use try-catch
 async function createStudent(studentData) {
-   try {
-      const student = await Student.create(studentData);
-      return { success: true, data: student };
-   } catch (error) {
-      logger.error('Student creation failed', { error: error.message });
-      throw new AppError('Failed to create student', 400);
-   }
+  try {
+    const student = await Student.create(studentData);
+    return { success: true, data: student };
+  } catch (error) {
+    logger.error("Student creation failed", { error: error.message });
+    throw new AppError("Failed to create student", 400);
+  }
 }
 
 // ❌ FORBIDDEN - No try-catch
 async function createStudent(studentData) {
-   const student = await Student.create(studentData); // VIOLATION
-   return student;
+  const student = await Student.create(studentData); // VIOLATION
+  return student;
 }
 ```
 
@@ -394,32 +394,32 @@ async function createStudent(studentData) {
 
 ```javascript
 class StudentService {
-   static async enrollStudent(studentData, classId) {
+  static async enrollStudent(studentData, classId) {
+    try {
+      const transaction = await sequelize.transaction();
+
       try {
-         const transaction = await sequelize.transaction();
+        const student = await Student.create(studentData, { transaction });
+        const enrollment = await Enrollment.create(
+          {
+            studentId: student.id,
+            classId,
+            enrollmentDate: new Date(),
+          },
+          { transaction },
+        );
 
-         try {
-            const student = await Student.create(studentData, { transaction });
-            const enrollment = await Enrollment.create(
-               {
-                  studentId: student.id,
-                  classId,
-                  enrollmentDate: new Date(),
-               },
-               { transaction }
-            );
-
-            await transaction.commit();
-            return { student, enrollment };
-         } catch (error) {
-            await transaction.rollback();
-            throw error;
-         }
+        await transaction.commit();
+        return { student, enrollment };
       } catch (error) {
-         logger.error('Enrollment failed', { studentData, classId, error });
-         throw new AppError('Failed to enroll student', 500);
+        await transaction.rollback();
+        throw error;
       }
-   }
+    } catch (error) {
+      logger.error("Enrollment failed", { studentData, classId, error });
+      throw new AppError("Failed to enroll student", 500);
+    }
+  }
 }
 ```
 
@@ -547,24 +547,24 @@ NODE_ENV=development
 
 ```json
 {
-   "development": {
-      "connection": {
-         "host": "localhost",
-         "port": 3306
-      },
-      "system": {
-         "name": "school_erp_system"
-      },
-      "tenant": {
-         "prefix": "school_erp_trust_"
-      },
-      "pool": {
-         "max": 15,
-         "min": 2,
-         "acquire": 60000,
-         "idle": 300000
-      }
-   }
+  "development": {
+    "connection": {
+      "host": "localhost",
+      "port": 3306
+    },
+    "system": {
+      "name": "school_erp_system"
+    },
+    "tenant": {
+      "prefix": "school_erp_trust_"
+    },
+    "pool": {
+      "max": 15,
+      "min": 2,
+      "acquire": 60000,
+      "idle": 300000
+    }
+  }
 }
 ```
 
@@ -686,20 +686,24 @@ GET /health
 
 ```javascript
 // ✅ CORRECT: Reuse existing validation schemas
-const { systemUserValidationSchemas } = require('../models/SystemUser');
-const { validators } = require('../utils/errors');
+const { systemUserValidationSchemas } = require("../models/SystemUser");
+const { validators } = require("../utils/errors");
 
 // System login route
-router.post('/auth/login', validators.validateBody(systemUserValidationSchemas.login), async (req, res, next) => {
-   // Validation already done by middleware
-   // req.body is sanitized and validated
-});
+router.post(
+  "/auth/login",
+  validators.validateBody(systemUserValidationSchemas.login),
+  async (req, res, next) => {
+    // Validation already done by middleware
+    // req.body is sanitized and validated
+  },
+);
 
 // ❌ WRONG: Custom validation in web routes
-router.post('/auth/login', async (req, res, next) => {
-   if (!req.body.username || !req.body.password) {
-      // Custom validation - inconsistent with API
-   }
+router.post("/auth/login", async (req, res, next) => {
+  if (!req.body.username || !req.body.password) {
+    // Custom validation - inconsistent with API
+  }
 });
 ```
 

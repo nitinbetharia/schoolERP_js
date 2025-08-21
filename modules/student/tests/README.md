@@ -25,12 +25,12 @@ modules/student/tests/
 - **Scope**: Individual endpoint functionality
 - **Test Count**: 33 test cases
 - **Coverage**:
-   - Student creation with various data combinations
-   - Student retrieval (individual, list, search, filters)
-   - Student updates (partial, complete, status changes)
-   - Student deletion
-   - Error handling for invalid inputs
-   - Data validation scenarios
+  - Student creation with various data combinations
+  - Student retrieval (individual, list, search, filters)
+  - Student updates (partial, complete, status changes)
+  - Student deletion
+  - Error handling for invalid inputs
+  - Data validation scenarios
 
 #### B. Lifecycle Tests (`student-lifecycle-tests.http`)
 
@@ -38,12 +38,12 @@ modules/student/tests/
 - **Scope**: Business process validation
 - **Test Count**: 25+ workflow scenarios
 - **Coverage**:
-   - Admission process (application → enrollment)
-   - Academic progression (promotion, grade advancement)
-   - Student transfers between schools/classes
-   - Status management (active, suspended, graduated)
-   - Bulk operations for administrative efficiency
-   - Complex business rule validation
+  - Admission process (application → enrollment)
+  - Academic progression (promotion, grade advancement)
+  - Student transfers between schools/classes
+  - Status management (active, suspended, graduated)
+  - Bulk operations for administrative efficiency
+  - Complex business rule validation
 
 #### C. Integration Tests (`student-integration-tests.http`)
 
@@ -51,13 +51,13 @@ modules/student/tests/
 - **Scope**: Full system workflow testing
 - **Test Count**: 40+ comprehensive scenarios
 - **Coverage**:
-   - Complete school setup → student management workflow
-   - Multi-student admission and class assignment
-   - Academic year progression with multiple students
-   - Special cases (international students, special needs, scholarships)
-   - Disciplinary actions and reinstatements
-   - Reporting and analytics functionality
-   - Data integrity validation
+  - Complete school setup → student management workflow
+  - Multi-student admission and class assignment
+  - Academic year progression with multiple students
+  - Special cases (international students, special needs, scholarships)
+  - Disciplinary actions and reinstatements
+  - Reporting and analytics functionality
+  - Data integrity validation
 
 #### D. Performance Tests (`student-performance-tests.http`)
 
@@ -65,13 +65,13 @@ modules/student/tests/
 - **Scope**: Load testing and resource usage
 - **Test Count**: 30+ performance scenarios
 - **Coverage**:
-   - Single operation performance baselines
-   - Bulk operation performance (10+ students)
-   - Concurrent user simulation
-   - Database query performance
-   - Memory usage testing
-   - Stress testing with rapid operations
-   - Error handling under load
+  - Single operation performance baselines
+  - Bulk operation performance (10+ students)
+  - Concurrent user simulation
+  - Database query performance
+  - Memory usage testing
+  - Stress testing with rapid operations
+  - Error handling under load
 
 ## Test Data Strategy
 

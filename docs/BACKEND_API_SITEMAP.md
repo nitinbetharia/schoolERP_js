@@ -24,8 +24,8 @@
 
 ```json
 {
-   "username": "admin",
-   "password": "admin123"
+  "username": "admin",
+  "password": "admin123"
 }
 ```
 
@@ -33,17 +33,17 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@system.local",
-      "role": "SYSTEM_ADMIN",
-      "status": "ACTIVE",
-      "last_login_at": "2025-08-20T10:30:00.000Z",
-      "profile": {}
-   },
-   "message": "Login successful"
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@system.local",
+    "role": "SYSTEM_ADMIN",
+    "status": "ACTIVE",
+    "last_login_at": "2025-08-20T10:30:00.000Z",
+    "profile": {}
+  },
+  "message": "Login successful"
 }
 ```
 
@@ -51,11 +51,11 @@
 
 ```json
 {
-   "success": false,
-   "error": {
-      "code": "AUTHENTICATION_ERROR",
-      "message": "Invalid username or password"
-   }
+  "success": false,
+  "error": {
+    "code": "AUTHENTICATION_ERROR",
+    "message": "Invalid username or password"
+  }
 }
 ```
 
@@ -77,9 +77,9 @@
 
 ```json
 {
-   "success": true,
-   "data": null,
-   "message": "Logout successful"
+  "success": true,
+  "data": null,
+  "message": "Logout successful"
 }
 ```
 
@@ -96,9 +96,9 @@
 
 ```json
 {
-   "currentPassword": "admin123",
-   "newPassword": "newSecurePassword123",
-   "confirmPassword": "newSecurePassword123"
+  "currentPassword": "admin123",
+  "newPassword": "newSecurePassword123",
+  "confirmPassword": "newSecurePassword123"
 }
 ```
 
@@ -106,11 +106,11 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "passwordChanged": true
-   },
-   "message": "Password changed successfully"
+  "success": true,
+  "data": {
+    "passwordChanged": true
+  },
+  "message": "Password changed successfully"
 }
 ```
 
@@ -128,16 +128,16 @@
 
 ```json
 {
-   "trust_name": "ABC Educational Trust",
-   "trust_code": "abc_edu",
-   "subdomain": "abc",
-   "contact_email": "admin@abc.edu",
-   "contact_phone": "1234567890",
-   "address": "123 Education Street, City",
-   "tenant_config": {
-      "theme": "blue",
-      "features": ["attendance", "fees", "exams"]
-   }
+  "trust_name": "ABC Educational Trust",
+  "trust_code": "abc_edu",
+  "subdomain": "abc",
+  "contact_email": "admin@abc.edu",
+  "contact_phone": "1234567890",
+  "address": "123 Education Street, City",
+  "tenant_config": {
+    "theme": "blue",
+    "features": ["attendance", "fees", "exams"]
+  }
 }
 ```
 
@@ -145,18 +145,18 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "trust_name": "ABC Educational Trust",
-      "trust_code": "abc_edu",
-      "subdomain": "abc",
-      "contact_email": "admin@abc.edu",
-      "database_name": "school_erp_tenant_abc_edu",
-      "status": "SETUP_PENDING",
-      "created_at": "2025-08-20T10:30:00.000Z"
-   },
-   "message": "Trust created successfully"
+  "success": true,
+  "data": {
+    "id": 1,
+    "trust_name": "ABC Educational Trust",
+    "trust_code": "abc_edu",
+    "subdomain": "abc",
+    "contact_email": "admin@abc.edu",
+    "database_name": "school_erp_tenant_abc_edu",
+    "status": "SETUP_PENDING",
+    "created_at": "2025-08-20T10:30:00.000Z"
+  },
+  "message": "Trust created successfully"
 }
 ```
 
@@ -174,19 +174,19 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "trust_name": "ABC Educational Trust",
-      "trust_code": "abc_edu",
-      "subdomain": "abc",
-      "contact_email": "admin@abc.edu",
-      "contact_phone": "1234567890",
-      "status": "ACTIVE",
-      "tenant_config": {},
-      "created_at": "2025-08-20T10:30:00.000Z",
-      "updated_at": "2025-08-20T10:30:00.000Z"
-   }
+  "success": true,
+  "data": {
+    "id": 1,
+    "trust_name": "ABC Educational Trust",
+    "trust_code": "abc_edu",
+    "subdomain": "abc",
+    "contact_email": "admin@abc.edu",
+    "contact_phone": "1234567890",
+    "status": "ACTIVE",
+    "tenant_config": {},
+    "created_at": "2025-08-20T10:30:00.000Z",
+    "updated_at": "2025-08-20T10:30:00.000Z"
+  }
 }
 ```
 
@@ -202,11 +202,11 @@
 
 ```json
 {
-   "trust_name": "Updated Trust Name",
-   "contact_email": "newemail@abc.edu",
-   "contact_phone": "9876543210",
-   "address": "New Address",
-   "status": "ACTIVE"
+  "trust_name": "Updated Trust Name",
+  "contact_email": "newemail@abc.edu",
+  "contact_phone": "9876543210",
+  "address": "New Address",
+  "status": "ACTIVE"
 }
 ```
 
@@ -214,14 +214,14 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "trust_name": "Updated Trust Name",
-      "contact_email": "newemail@abc.edu",
-      "updated_at": "2025-08-20T11:00:00.000Z"
-   },
-   "message": "Trust updated successfully"
+  "success": true,
+  "data": {
+    "id": 1,
+    "trust_name": "Updated Trust Name",
+    "contact_email": "newemail@abc.edu",
+    "updated_at": "2025-08-20T11:00:00.000Z"
+  },
+  "message": "Trust updated successfully"
 }
 ```
 
@@ -244,24 +244,24 @@
 
 ```json
 {
-   "success": true,
-   "data": [
-      {
-         "id": 1,
-         "trust_name": "ABC Educational Trust",
-         "trust_code": "abc_edu",
-         "subdomain": "abc",
-         "status": "ACTIVE",
-         "created_at": "2025-08-20T10:30:00.000Z"
-      }
-   ],
-   "message": "Trusts retrieved successfully",
-   "pagination": {
-      "current_page": 1,
-      "total_pages": 1,
-      "total_items": 1,
-      "items_per_page": 10
-   }
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "trust_name": "ABC Educational Trust",
+      "trust_code": "abc_edu",
+      "subdomain": "abc",
+      "status": "ACTIVE",
+      "created_at": "2025-08-20T10:30:00.000Z"
+    }
+  ],
+  "message": "Trusts retrieved successfully",
+  "pagination": {
+    "current_page": 1,
+    "total_pages": 1,
+    "total_items": 1,
+    "items_per_page": 10
+  }
 }
 ```
 
@@ -282,14 +282,14 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "trust_name": "ABC Educational Trust",
-      "status": "ACTIVE",
-      "setup_completed_at": "2025-08-20T11:00:00.000Z"
-   },
-   "message": "Trust setup completed successfully"
+  "success": true,
+  "data": {
+    "id": 1,
+    "trust_name": "ABC Educational Trust",
+    "status": "ACTIVE",
+    "setup_completed_at": "2025-08-20T11:00:00.000Z"
+  },
+  "message": "Trust setup completed successfully"
 }
 ```
 
@@ -307,10 +307,10 @@
 
 ```json
 {
-   "username": "newadmin",
-   "email": "newadmin@system.local",
-   "password": "securePassword123",
-   "full_name": "New Administrator"
+  "username": "newadmin",
+  "email": "newadmin@system.local",
+  "password": "securePassword123",
+  "full_name": "New Administrator"
 }
 ```
 
@@ -318,17 +318,17 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 2,
-      "username": "newadmin",
-      "email": "newadmin@system.local",
-      "role": "SYSTEM_ADMIN",
-      "status": "ACTIVE",
-      "profile": {},
-      "created_at": "2025-08-20T11:00:00.000Z"
-   },
-   "message": "System user created successfully"
+  "success": true,
+  "data": {
+    "id": 2,
+    "username": "newadmin",
+    "email": "newadmin@system.local",
+    "role": "SYSTEM_ADMIN",
+    "status": "ACTIVE",
+    "profile": {},
+    "created_at": "2025-08-20T11:00:00.000Z"
+  },
+  "message": "System user created successfully"
 }
 ```
 
@@ -345,16 +345,16 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "username": "admin",
-      "email": "admin@system.local",
-      "role": "SYSTEM_ADMIN",
-      "status": "ACTIVE",
-      "last_login_at": "2025-08-20T10:30:00.000Z",
-      "profile": {}
-   }
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@system.local",
+    "role": "SYSTEM_ADMIN",
+    "status": "ACTIVE",
+    "last_login_at": "2025-08-20T10:30:00.000Z",
+    "profile": {}
+  }
 }
 ```
 
@@ -371,15 +371,15 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "status": "healthy",
-      "database": "connected",
-      "uptime": "24:15:30",
-      "memory": "156MB",
-      "timestamp": "2025-08-20T10:30:00.000Z",
-      "version": "1.0.0"
-   }
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "database": "connected",
+    "uptime": "24:15:30",
+    "memory": "156MB",
+    "timestamp": "2025-08-20T10:30:00.000Z",
+    "version": "1.0.0"
+  }
 }
 ```
 
@@ -401,8 +401,8 @@
 
 ```json
 {
-   "username": "demo_principal",
-   "password": "demo123"
+  "username": "demo_principal",
+  "password": "demo123"
 }
 ```
 
@@ -410,16 +410,16 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "username": "demo_principal",
-      "email": "principal@demo.school",
-      "role": "admin",
-      "school_id": 1,
-      "last_login_at": "2025-08-20T10:30:00.000Z"
-   },
-   "message": "Authentication successful"
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "demo_principal",
+    "email": "principal@demo.school",
+    "role": "admin",
+    "school_id": 1,
+    "last_login_at": "2025-08-20T10:30:00.000Z"
+  },
+  "message": "Authentication successful"
 }
 ```
 
@@ -440,9 +440,9 @@
 
 ```json
 {
-   "success": true,
-   "data": null,
-   "message": "Logout successful"
+  "success": true,
+  "data": null,
+  "message": "Logout successful"
 }
 ```
 
@@ -459,17 +459,17 @@
 
 ```json
 {
-   "success": true,
-   "data": [
-      {
-         "id": 1,
-         "username": "demo_principal",
-         "email": "principal@demo.school",
-         "role": "admin",
-         "school_id": 1,
-         "is_active": true
-      }
-   ]
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "username": "demo_principal",
+      "email": "principal@demo.school",
+      "role": "admin",
+      "school_id": 1,
+      "is_active": true
+    }
+  ]
 }
 ```
 
@@ -484,11 +484,11 @@
 
 ```json
 {
-   "username": "newteacher",
-   "email": "teacher@demo.school",
-   "password": "password123",
-   "role": "teacher",
-   "school_id": 1
+  "username": "newteacher",
+  "email": "teacher@demo.school",
+  "password": "password123",
+  "role": "teacher",
+  "school_id": 1
 }
 ```
 
@@ -503,15 +503,15 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "username": "demo_principal",
-      "email": "principal@demo.school",
-      "role": "admin",
-      "school_id": 1,
-      "profile": {}
-   }
+  "success": true,
+  "data": {
+    "id": 1,
+    "username": "demo_principal",
+    "email": "principal@demo.school",
+    "role": "admin",
+    "school_id": 1,
+    "profile": {}
+  }
 }
 ```
 
@@ -526,10 +526,10 @@
 
 ```json
 {
-   "email": "newemail@demo.school",
-   "profile": {
-      "full_name": "Updated Name"
-   }
+  "email": "newemail@demo.school",
+  "profile": {
+    "full_name": "Updated Name"
+  }
 }
 ```
 
@@ -791,11 +791,11 @@
 
 ```json
 {
-   "success": true,
-   "message": "School ERP API is running",
-   "version": "1.0.0",
-   "timestamp": "2025-08-20T10:30:00.000Z",
-   "environment": "development"
+  "success": true,
+  "message": "School ERP API is running",
+  "version": "1.0.0",
+  "timestamp": "2025-08-20T10:30:00.000Z",
+  "environment": "development"
 }
 ```
 
@@ -840,14 +840,14 @@
 
 ```json
 {
-   "success": true,
-   "data": {
-      /* response data */
-   },
-   "message": "Operation successful",
-   "pagination": {
-      /* optional pagination info */
-   }
+  "success": true,
+  "data": {
+    /* response data */
+  },
+  "message": "Operation successful",
+  "pagination": {
+    /* optional pagination info */
+  }
 }
 ```
 
@@ -855,15 +855,15 @@
 
 ```json
 {
-   "success": false,
-   "error": {
-      "code": "ERROR_CODE",
-      "message": "Error description",
-      "details": [
-         /* validation errors array */
-      ],
-      "timestamp": "2025-08-20T10:30:00.000Z"
-   }
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error description",
+    "details": [
+      /* validation errors array */
+    ],
+    "timestamp": "2025-08-20T10:30:00.000Z"
+  }
 }
 ```
 
@@ -871,17 +871,17 @@
 
 ```json
 {
-   "success": false,
-   "error": {
-      "code": "VALIDATION_FAILED",
-      "message": "Input validation failed",
-      "details": [
-         {
-            "field": "username",
-            "message": "Username is required"
-         }
-      ]
-   }
+  "success": false,
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Input validation failed",
+    "details": [
+      {
+        "field": "username",
+        "message": "Username is required"
+      }
+    ]
+  }
 }
 ```
 

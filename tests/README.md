@@ -180,17 +180,17 @@ Execute tests in the provided sequence.
 
 ```json
 {
-   "success": true,
-   "data": {
-      "user": {
-         "id": 1,
-         "username": "admin",
-         "role": "SYSTEM_ADMIN",
-         "isActive": true
-      },
-      "sessionExpires": "2025-08-20T12:00:00.000Z"
-   },
-   "message": "Login successful"
+  "success": true,
+  "data": {
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "role": "SYSTEM_ADMIN",
+      "isActive": true
+    },
+    "sessionExpires": "2025-08-20T12:00:00.000Z"
+  },
+  "message": "Login successful"
 }
 ```
 
@@ -198,17 +198,17 @@ Execute tests in the provided sequence.
 
 ```json
 {
-   "success": true,
-   "data": {
-      "id": 1,
-      "name": "Test School Trust",
-      "slug": "test-school-trust",
-      "contactEmail": "admin@testschool.edu",
-      "status": "ACTIVE",
-      "dbName": "trust_1_testschooltrust",
-      "createdAt": "2025-08-19T12:59:59.000Z"
-   },
-   "message": "Trust created successfully"
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "Test School Trust",
+    "slug": "test-school-trust",
+    "contactEmail": "admin@testschool.edu",
+    "status": "ACTIVE",
+    "dbName": "trust_1_testschooltrust",
+    "createdAt": "2025-08-19T12:59:59.000Z"
+  },
+  "message": "Trust created successfully"
 }
 ```
 
@@ -216,19 +216,19 @@ Execute tests in the provided sequence.
 
 ```json
 {
-   "success": false,
-   "error": {
-      "code": "VALIDATION_REQUIRED",
-      "message": "Validation failed",
-      "details": [
-         {
-            "field": "name",
-            "message": "Name is required",
-            "value": ""
-         }
-      ],
-      "timestamp": "2025-08-19T12:59:59.000Z"
-   }
+  "success": false,
+  "error": {
+    "code": "VALIDATION_REQUIRED",
+    "message": "Validation failed",
+    "details": [
+      {
+        "field": "name",
+        "message": "Name is required",
+        "value": ""
+      }
+    ],
+    "timestamp": "2025-08-19T12:59:59.000Z"
+  }
 }
 ```
 

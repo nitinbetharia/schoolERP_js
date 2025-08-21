@@ -1,13 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const AttendanceController = require('../controllers/AttendanceController');
+const AttendanceController = require("../controllers/AttendanceController");
 // Use mock middleware for testing since main middleware is not available
-const { authenticateToken, authorizeRoles } = require('../middleware/mockAuth');
-const models = require('../models'); // Use local models instead of corrupted main models
+const { authenticateToken, authorizeRoles } = require("../middleware/mockAuth");
+const models = require("../models"); // Use local models instead of corrupted main models
 
 // Q59-ENFORCED: Import validation schemas for attendance
-const { validators } = require('../../../middleware');
-const { studentAttendanceValidationSchemas, teacherAttendanceValidationSchemas } = require('../../../models/index');
+const { validators } = require("../../../middleware");
+const {
+  studentAttendanceValidationSchemas,
+  teacherAttendanceValidationSchemas,
+} = require("../../../models/index");
 
 /**
  * Attendance Routes
@@ -27,11 +30,12 @@ const attendanceController = new AttendanceController(models);
  * @access  Private (Teachers, Admins, Principals)
  */
 router.post(
-   '/student',
-   authenticateToken,
-   authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
-   validators.validateBody(studentAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
-   (req, res, next) => attendanceController.markStudentAttendance(req, res, next)
+  "/student",
+  authenticateToken,
+  authorizeRoles(["TEACHER", "ADMIN", "PRINCIPAL", "SYSTEM_ADMIN"]),
+  validators.validateBody(studentAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
+  (req, res, next) =>
+    attendanceController.markStudentAttendance(req, res, next),
 );
 
 /**
@@ -40,11 +44,14 @@ router.post(
  * @access  Private (Teachers, Admins, Principals)
  */
 router.post(
-   '/student/bulk',
-   authenticateToken,
-   authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
-   validators.validateBody(studentAttendanceValidationSchemas.bulkMarkAttendance), // Q59-ENFORCED validation
-   (req, res, next) => attendanceController.markBulkStudentAttendance(req, res, next)
+  "/student/bulk",
+  authenticateToken,
+  authorizeRoles(["TEACHER", "ADMIN", "PRINCIPAL", "SYSTEM_ADMIN"]),
+  validators.validateBody(
+    studentAttendanceValidationSchemas.bulkMarkAttendance,
+  ), // Q59-ENFORCED validation
+  (req, res, next) =>
+    attendanceController.markBulkStudentAttendance(req, res, next),
 );
 
 /**
@@ -53,11 +60,12 @@ router.post(
  * @access  Private (Teachers, Admins, Principals)
  */
 router.put(
-   '/student/:id',
-   authenticateToken,
-   authorizeRoles(['TEACHER', 'ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']),
-   validators.validateBody(studentAttendanceValidationSchemas.updateAttendance), // Q59-ENFORCED validation
-   (req, res, next) => attendanceController.updateStudentAttendance(req, res, next)
+  "/student/:id",
+  authenticateToken,
+  authorizeRoles(["TEACHER", "ADMIN", "PRINCIPAL", "SYSTEM_ADMIN"]),
+  validators.validateBody(studentAttendanceValidationSchemas.updateAttendance), // Q59-ENFORCED validation
+  (req, res, next) =>
+    attendanceController.updateStudentAttendance(req, res, next),
 );
 
 /**
@@ -66,8 +74,8 @@ router.put(
  * @access  Private (All authenticated users)
  * @query   student_id, school_id, class_id, status, start_date, end_date, academic_year
  */
-router.get('/student', authenticateToken, (req, res, next) =>
-   attendanceController.getStudentAttendance(req, res, next)
+router.get("/student", authenticateToken, (req, res, next) =>
+  attendanceController.getStudentAttendance(req, res, next),
 );
 
 /**
@@ -76,8 +84,8 @@ router.get('/student', authenticateToken, (req, res, next) =>
  * @access  Private (All authenticated users)
  * @query   student_id, school_id, class_id, start_date, end_date, academic_year
  */
-router.get('/student/stats', authenticateToken, (req, res, next) =>
-   attendanceController.getStudentAttendanceStats(req, res, next)
+router.get("/student/stats", authenticateToken, (req, res, next) =>
+  attendanceController.getStudentAttendanceStats(req, res, next),
 );
 
 // ==================== TEACHER ATTENDANCE ROUTES ====================
@@ -88,11 +96,12 @@ router.get('/student/stats', authenticateToken, (req, res, next) =>
  * @access  Private (Admins, Principals, Self-marking allowed)
  */
 router.post(
-   '/teacher',
-   authenticateToken,
-   authorizeRoles(['ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN', 'TEACHER']),
-   validators.validateBody(teacherAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
-   (req, res, next) => attendanceController.markTeacherAttendance(req, res, next)
+  "/teacher",
+  authenticateToken,
+  authorizeRoles(["ADMIN", "PRINCIPAL", "SYSTEM_ADMIN", "TEACHER"]),
+  validators.validateBody(teacherAttendanceValidationSchemas.markAttendance), // Q59-ENFORCED validation
+  (req, res, next) =>
+    attendanceController.markTeacherAttendance(req, res, next),
 );
 
 /**
@@ -101,11 +110,12 @@ router.post(
  * @access  Private (Admins, Principals, Self-checkout allowed)
  */
 router.put(
-   '/teacher/:id/checkout',
-   authenticateToken,
-   authorizeRoles(['ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN', 'TEACHER']),
-   validators.validateBody(teacherAttendanceValidationSchemas.checkOut), // Q59-ENFORCED validation
-   (req, res, next) => attendanceController.updateTeacherCheckOut(req, res, next)
+  "/teacher/:id/checkout",
+  authenticateToken,
+  authorizeRoles(["ADMIN", "PRINCIPAL", "SYSTEM_ADMIN", "TEACHER"]),
+  validators.validateBody(teacherAttendanceValidationSchemas.checkOut), // Q59-ENFORCED validation
+  (req, res, next) =>
+    attendanceController.updateTeacherCheckOut(req, res, next),
 );
 
 /**
@@ -114,8 +124,8 @@ router.put(
  * @access  Private (All authenticated users)
  * @query   teacher_id, school_id, status, leave_type, start_date, end_date, academic_year
  */
-router.get('/teacher', authenticateToken, (req, res, next) =>
-   attendanceController.getTeacherAttendance(req, res, next)
+router.get("/teacher", authenticateToken, (req, res, next) =>
+  attendanceController.getTeacherAttendance(req, res, next),
 );
 
 /**
@@ -124,8 +134,8 @@ router.get('/teacher', authenticateToken, (req, res, next) =>
  * @access  Private (All authenticated users)
  * @query   teacher_id, school_id, start_date, end_date, academic_year
  */
-router.get('/teacher/stats', authenticateToken, (req, res, next) =>
-   attendanceController.getTeacherAttendanceStats(req, res, next)
+router.get("/teacher/stats", authenticateToken, (req, res, next) =>
+  attendanceController.getTeacherAttendanceStats(req, res, next),
 );
 
 // ==================== REPORTING ROUTES ====================
@@ -136,8 +146,12 @@ router.get('/teacher/stats', authenticateToken, (req, res, next) =>
  * @access  Private (Admins, Principals)
  * @query   school_id, start_date, end_date, type, academic_year
  */
-router.get('/report', authenticateToken, authorizeRoles(['ADMIN', 'PRINCIPAL', 'SYSTEM_ADMIN']), (req, res, next) =>
-   attendanceController.generateAttendanceReport(req, res, next)
+router.get(
+  "/report",
+  authenticateToken,
+  authorizeRoles(["ADMIN", "PRINCIPAL", "SYSTEM_ADMIN"]),
+  (req, res, next) =>
+    attendanceController.generateAttendanceReport(req, res, next),
 );
 
 /**
@@ -146,8 +160,8 @@ router.get('/report', authenticateToken, authorizeRoles(['ADMIN', 'PRINCIPAL', '
  * @access  Private (All authenticated users)
  * @query   school_id, date
  */
-router.get('/dashboard', authenticateToken, (req, res, next) =>
-   attendanceController.getAttendanceDashboard(req, res, next)
+router.get("/dashboard", authenticateToken, (req, res, next) =>
+  attendanceController.getAttendanceDashboard(req, res, next),
 );
 
 // ==================== MIDDLEWARE ERROR HANDLING ====================
@@ -157,52 +171,52 @@ router.get('/dashboard', authenticateToken, (req, res, next) =>
  * Handles attendance-related errors with appropriate HTTP status codes
  */
 router.use((error, req, res, next) => {
-   // Log the error for debugging
-   console.error('Attendance Route Error:', {
-      path: req.path,
-      method: req.method,
+  // Log the error for debugging
+  console.error("Attendance Route Error:", {
+    path: req.path,
+    method: req.method,
+    error: error.message,
+    stack: error.stack,
+  });
+
+  // Handle specific attendance validation errors
+  if (error.name === "SequelizeValidationError") {
+    return res.status(400).json({
+      success: false,
+      message: "Validation error",
+      errors: error.errors.map((err) => ({
+        field: err.path,
+        message: err.message,
+      })),
+    });
+  }
+
+  if (error.name === "SequelizeUniqueConstraintError") {
+    return res.status(409).json({
+      success: false,
+      message: "Attendance record already exists for this date",
       error: error.message,
-      stack: error.stack,
-   });
+    });
+  }
 
-   // Handle specific attendance validation errors
-   if (error.name === 'SequelizeValidationError') {
-      return res.status(400).json({
-         success: false,
-         message: 'Validation error',
-         errors: error.errors.map((err) => ({
-            field: err.path,
-            message: err.message,
-         })),
-      });
-   }
+  if (error.name === "SequelizeForeignKeyConstraintError") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid reference to student, teacher, or school",
+      error: error.message,
+    });
+  }
 
-   if (error.name === 'SequelizeUniqueConstraintError') {
-      return res.status(409).json({
-         success: false,
-         message: 'Attendance record already exists for this date',
-         error: error.message,
-      });
-   }
+  // Handle attendance-specific business logic errors
+  if (error.message && error.message.includes("attendance")) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
 
-   if (error.name === 'SequelizeForeignKeyConstraintError') {
-      return res.status(400).json({
-         success: false,
-         message: 'Invalid reference to student, teacher, or school',
-         error: error.message,
-      });
-   }
-
-   // Handle attendance-specific business logic errors
-   if (error.message && error.message.includes('attendance')) {
-      return res.status(400).json({
-         success: false,
-         message: error.message,
-      });
-   }
-
-   // Pass to global error handler
-   next(error);
+  // Pass to global error handler
+  next(error);
 });
 
 // ==================== ROUTE DOCUMENTATION ====================

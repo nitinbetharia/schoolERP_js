@@ -94,7 +94,12 @@
 
 ```javascript
 // PERFECT EXAMPLE of Q59-ENFORCED pattern:
-router.post('/', requireTrustAdmin, validators.validateBody(userValidationSchemas.create), userController.createUser);
+router.post(
+  "/",
+  requireTrustAdmin,
+  validators.validateBody(userValidationSchemas.create),
+  userController.createUser,
+);
 ```
 
 **Assessment**: Perfect compliance, all routes validated
@@ -143,14 +148,19 @@ module.exports.studentValidationSchemas = studentValidationSchemas;
 module.exports.schoolValidationSchemas = schoolValidationSchemas;
 module.exports.classValidationSchemas = classValidationSchemas;
 module.exports.sectionValidationSchemas = sectionValidationSchemas;
-module.exports.studentAttendanceValidationSchemas = studentAttendanceValidationSchemas;
-module.exports.teacherAttendanceValidationSchemas = teacherAttendanceValidationSchemas;
+module.exports.studentAttendanceValidationSchemas =
+  studentAttendanceValidationSchemas;
+module.exports.teacherAttendanceValidationSchemas =
+  teacherAttendanceValidationSchemas;
 module.exports.feeStructureValidationSchemas = feeStructureValidationSchemas;
 module.exports.studentFeeValidationSchemas = studentFeeValidationSchemas;
 module.exports.feeCollectionValidationSchemas = feeCollectionValidationSchemas;
-module.exports.udiseSchoolRegistrationValidationSchemas = udiseSchoolRegistrationValidationSchemas;
-module.exports.udiseCensusDataValidationSchemas = udiseCensusDataValidationSchemas;
-module.exports.setupConfigurationValidationSchemas = setupConfigurationValidationSchemas;
+module.exports.udiseSchoolRegistrationValidationSchemas =
+  udiseSchoolRegistrationValidationSchemas;
+module.exports.udiseCensusDataValidationSchemas =
+  udiseCensusDataValidationSchemas;
+module.exports.setupConfigurationValidationSchemas =
+  setupConfigurationValidationSchemas;
 ```
 
 **Grade: A+ (Perfect Implementation)**
