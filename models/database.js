@@ -2,6 +2,7 @@ const { Sequelize } = require('sequelize');
 const { logger, logDB, logError, logSystem } = require('../utils/logger');
 const appConfig = require('../config/app-config.json');
 const { DatabaseError } = require('../utils/errors');
+const { withCriticalRetry, withSequelizeRetry, healthCheckWithRetry } = require('../utils/databaseRetry');
 require('dotenv').config();
 
 /**
@@ -13,74 +14,132 @@ function createDatabaseManager() {
    const tenantConnections = new Map();
    const connectionPool = appConfig.database.pool;
 
+   // Connection cleanup interval (every 5 minutes)
+   const CLEANUP_INTERVAL = 5 * 60 * 1000;
+   let cleanupTimer = null;
+
    /**
-   * Initialize system database connection
-   */
-   async function initializeSystemDB() {
-      try {
-         logSystem('Initializing system database connection');
+    * Start periodic connection cleanup to prevent pool exhaustion
+    */
+   function startConnectionCleanup() {
+      if (cleanupTimer) {
+         clearInterval(cleanupTimer);
+      }
 
-         const config = {
-            host: appConfig.database.connection.host,
-            port: appConfig.database.connection.port,
-            username: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: appConfig.database.system.name,
-            dialect: 'mysql',
-            timezone: appConfig.database.connection.timezone,
-            dialectOptions: {
-               charset: appConfig.database.system.charset,
-               connectTimeout: appConfig.database.connection.connectTimeout,
-               ssl: appConfig.database.connection.ssl
-                  ? {
-                     require: true,
-                     rejectUnauthorized: false,
-                  }
-                  : false,
-            },
-            pool: {
-               max: connectionPool.max,
-               min: connectionPool.min,
-               acquire: connectionPool.acquire,
-               idle: connectionPool.idle,
-            },
-            logging: (msg) => logDB(msg),
-            define: {
-               underscored: true,
-               freezeTableName: true,
-            },
-         };
+      cleanupTimer = setInterval(async () => {
+         try {
+            await cleanupIdleConnections();
+         } catch (error) {
+            logError(error, { context: 'startConnectionCleanup' });
+         }
+      }, CLEANUP_INTERVAL);
 
-         systemDB = new Sequelize(config);
+      logSystem('Started periodic connection cleanup');
+   }
 
-         // Test connection
-         await systemDB.authenticate();
-         logSystem('System database connection established successfully');
+   /**
+    * Cleanup idle tenant connections to prevent pool exhaustion
+    */
+   async function cleanupIdleConnections() {
+      const now = Date.now();
+      const idleThreshold = connectionPool.idle || 10000;
 
-         return systemDB;
-      } catch (error) {
-         logError(error, { context: 'initializeSystemDB' });
-         throw new DatabaseError('Failed to initialize system database', error);
+      for (const [tenantCode, connection] of tenantConnections) {
+         try {
+            // Check if connection is still active
+            await connection.authenticate();
+
+            // Check if connection has been idle too long
+            const lastUsed = connection._lastUsed || connection._created || now;
+            if (now - lastUsed > idleThreshold) {
+               await connection.close();
+               tenantConnections.delete(tenantCode);
+               logSystem(`Closed idle tenant connection: ${tenantCode}`);
+            }
+         } catch (error) {
+            // Connection is dead, remove it
+            tenantConnections.delete(tenantCode);
+            logSystem(`Removed dead tenant connection: ${tenantCode}`);
+         }
       }
    }
 
    /**
-   * Get tenant database connection
-   */
+    * Initialize system database connection with retry logic
+    */
+   async function initializeSystemDB() {
+      return await withCriticalRetry(
+         async () => {
+            logSystem('Initializing system database connection');
+
+            const config = {
+               host: appConfig.database.connection.host,
+               port: appConfig.database.connection.port,
+               username: process.env.DB_USER,
+               password: process.env.DB_PASSWORD,
+               database: appConfig.database.system.name,
+               dialect: 'mysql',
+               timezone: appConfig.database.connection.timezone,
+               dialectOptions: {
+                  charset: appConfig.database.system.charset,
+                  connectTimeout: appConfig.database.connection.connectTimeout,
+                  ssl: appConfig.database.connection.ssl
+                     ? {
+                          require: true,
+                          rejectUnauthorized: false,
+                       }
+                     : false,
+               },
+               pool: {
+                  max: connectionPool.max,
+                  min: connectionPool.min,
+                  acquire: connectionPool.acquire,
+                  idle: connectionPool.idle,
+                  evict: connectionPool.evict || 5000,
+                  handleDisconnects: connectionPool.handleDisconnects || true,
+               },
+               logging: (msg) => logDB(msg),
+               define: {
+                  underscored: true,
+                  freezeTableName: true,
+               },
+            };
+
+            systemDB = new Sequelize(config);
+
+            // Test connection with retry
+            await systemDB.authenticate();
+            logSystem('System database connection established successfully');
+
+            // Start connection cleanup
+            startConnectionCleanup();
+
+            return systemDB;
+         },
+         {
+            operation: 'initializeSystemDB',
+            context: 'system_database_initialization',
+         }
+      );
+   }
+
+   /**
+    * Get tenant database connection
+    */
    async function getTenantDB(tenantCode) {
       try {
-      // Check if connection already exists
+         // Check if connection already exists
          if (tenantConnections.has(tenantCode)) {
             const connection = tenantConnections.get(tenantCode);
             // Test if connection is still alive
             try {
                await connection.authenticate();
+               // Update last used timestamp
+               connection._lastUsed = Date.now();
                return connection;
             } catch (testError) {
                // Connection is dead, remove it and create new one
-               logSystem(
-                  `Tenant DB connection for ${tenantCode} is dead, recreating...`,
-               );
+               logSystem(`Tenant DB connection for ${tenantCode} is dead, recreating...`);
                tenantConnections.delete(tenantCode);
             }
          }
@@ -101,9 +160,9 @@ function createDatabaseManager() {
                connectTimeout: appConfig.database.connection.connectTimeout,
                ssl: appConfig.database.connection.ssl
                   ? {
-                     require: true,
-                     rejectUnauthorized: false,
-                  }
+                       require: true,
+                       rejectUnauthorized: false,
+                    }
                   : false,
             },
             pool: {
@@ -111,6 +170,8 @@ function createDatabaseManager() {
                min: connectionPool.min,
                acquire: connectionPool.acquire,
                idle: connectionPool.idle,
+               evict: connectionPool.evict || 5000,
+               handleDisconnects: connectionPool.handleDisconnects || true,
             },
             logging: (msg) => logDB(msg, { tenantCode }),
             define: {
@@ -121,26 +182,35 @@ function createDatabaseManager() {
 
          const tenantDB = new Sequelize(config);
 
-         // Test connection
-         await tenantDB.authenticate();
+         // Test connection with retry for tenant databases
+         await withSequelizeRetry(
+            async () => {
+               return await tenantDB.authenticate();
+            },
+            {
+               operation: 'tenant_db_authenticate',
+               tenantCode,
+               context: 'tenant_database_connection',
+            }
+         );
+
          logDB(`Tenant database connection established for: ${tenantCode}`);
 
-         // Cache connection
+         // Cache connection with timestamp
+         tenantDB._created = Date.now();
+         tenantDB._lastUsed = Date.now();
          tenantConnections.set(tenantCode, tenantDB);
 
          return tenantDB;
       } catch (error) {
          logError(error, { context: 'getTenantDB', tenantCode });
-         throw new DatabaseError(
-            `Failed to connect to tenant database: ${tenantCode}`,
-            error,
-         );
+         throw new DatabaseError(`Failed to connect to tenant database: ${tenantCode}`, error);
       }
    }
 
    /**
-   * Create tenant database if it doesn't exist
-   */
+    * Create tenant database if it doesn't exist
+    */
    async function createTenantDatabase(tenantCode) {
       try {
          logSystem(`Creating new tenant database for: ${tenantCode}`);
@@ -159,16 +229,13 @@ function createDatabaseManager() {
          return true;
       } catch (error) {
          logError(error, { context: 'createTenantDatabase', tenantCode });
-         throw new DatabaseError(
-            `Failed to create tenant database: ${tenantCode}`,
-            error,
-         );
+         throw new DatabaseError(`Failed to create tenant database: ${tenantCode}`, error);
       }
    }
 
    /**
-   * Get system database connection
-   */
+    * Get system database connection
+    */
    async function getSystemDB() {
       if (!systemDB) {
          await initializeSystemDB();
@@ -177,8 +244,8 @@ function createDatabaseManager() {
    }
 
    /**
-   * Check if tenant database exists
-   */
+    * Check if tenant database exists
+    */
    async function tenantDatabaseExists(tenantCode) {
       try {
          const tenantDbName = `${appConfig.database.tenant.prefix}${tenantCode}`;
@@ -186,7 +253,7 @@ function createDatabaseManager() {
 
          const [results] = await sysDB.query(
             'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?',
-            { replacements: [tenantDbName] },
+            { replacements: [tenantDbName] }
          );
 
          return results.length > 0;
@@ -197,11 +264,17 @@ function createDatabaseManager() {
    }
 
    /**
-   * Close all database connections
-   */
+    * Close all database connections
+    */
    async function closeAllConnections() {
       try {
-      // Close tenant connections
+         // Stop cleanup timer
+         if (cleanupTimer) {
+            clearInterval(cleanupTimer);
+            cleanupTimer = null;
+         }
+
+         // Close tenant connections
          for (const [tenantCode, connection] of tenantConnections) {
             try {
                await connection.close();
@@ -224,25 +297,50 @@ function createDatabaseManager() {
    }
 
    /**
-   * Database health check
-   */
+    * Database health check
+    */
    async function healthCheck() {
       const health = {
          systemDB: false,
          tenantConnections: 0,
          activeTenants: [],
+         connectionPoolStatus: {
+            system: null,
+            tenants: [],
+         },
       };
 
       try {
-      // Check system DB
+         // Check system DB with retry
          if (systemDB) {
-            await systemDB.authenticate();
+            await healthCheckWithRetry(
+               async () => {
+                  return await systemDB.authenticate();
+               },
+               {
+                  operation: 'system_db_health_check',
+                  context: 'database_health_monitoring',
+               }
+            );
             health.systemDB = true;
+            health.connectionPoolStatus.system = {
+               pool: systemDB.connectionManager?.pool?.config || null,
+               used: systemDB.connectionManager?.pool?._allConnections?.length || 0,
+            };
          }
 
          // Check tenant connections
          health.tenantConnections = tenantConnections.size;
          health.activeTenants = Array.from(tenantConnections.keys());
+
+         for (const [tenantCode, connection] of tenantConnections) {
+            health.connectionPoolStatus.tenants.push({
+               tenant: tenantCode,
+               pool: connection.connectionManager?.pool?.config || null,
+               used: connection.connectionManager?.pool?._allConnections?.length || 0,
+               lastUsed: connection._lastUsed || connection._created || null,
+            });
+         }
 
          return health;
       } catch (error) {
@@ -259,6 +357,8 @@ function createDatabaseManager() {
       tenantDatabaseExists,
       closeAllConnections,
       healthCheck,
+      cleanupIdleConnections,
+      startConnectionCleanup,
    };
 }
 

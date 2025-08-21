@@ -23,7 +23,8 @@
       "Bash(find:*)",
       "Bash(NODE_ENV=development npm start)",
       "Bash(set NODE_ENV=development)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(start \"d:\\Users\\Nitin Betharia\\Documents\\Projects\\schoolERP_js\\static-login.html\")"
     ],
     "deny": [],
     "ask": []

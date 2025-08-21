@@ -49,9 +49,85 @@ Build frontend interfaces that complement the bulletproof backend architecture, 
     "clientJS": "Alpine.js 3.x",
     "validation": "Joi (reused from API endpoints)",
     "fileHandling": "express-fileupload 1.5.2",
-    "dateTime": "dayjs 1.11.13"
+    "dateTime": "dayjs 1.11.13",
+    "fonts": "Google Fonts (Inter) with system fallbacks",
+    "icons": "Font Awesome 6 Free (CDN) + Heroicons inline",
+    "animations": "CSS transforms + Alpine.js transitions"
   }
 }
+```
+
+### **🎨 ENHANCED UI ASSETS**
+
+#### **Typography & Fonts**
+```html
+<!-- Google Fonts - Professional system (CDN) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- CSS Font Stack with System Fallbacks -->
+<style>
+  :root {
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 
+                    'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', 
+                 Consolas, 'Courier New', monospace;
+  }
+  
+  body { 
+    font-family: var(--font-primary);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+</style>
+```
+
+#### **Icons Strategy**
+```html
+<!-- Font Awesome 6 Free - Core Icons (CDN) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+
+<!-- Icon Implementation Pattern -->
+<i class="fas fa-dashboard mr-3 h-5 w-5"></i> <!-- Font Awesome -->
+<svg class="h-5 w-5 mr-3">...</svg>         <!-- Heroicons inline (existing) -->
+```
+
+#### **Subtle Animations**
+```css
+/* CSS-only animations for performance */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scale-in {
+  animation: scaleIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Alpine.js transition classes */
+.transition-enter { @apply transition duration-300 ease-out; }
+.transition-leave { @apply transition duration-200 ease-in; }
 ```
 
 ### **❌ FORBIDDEN TECHNOLOGIES**
@@ -61,6 +137,9 @@ Build frontend interfaces that complement the bulletproof backend architecture, 
 - TypeScript, ES6 imports (Q2 violation)
 - JWT authentication (Q6 violation)
 - Custom validation for web routes (Q59 violation)
+- Heavy animation libraries (Framer Motion, GSAP) - Use CSS/Alpine.js only
+- Icon fonts beyond Font Awesome 6 Free (licensing/performance)
+- Custom font hosting (use Google Fonts CDN only)
 
 ---
 
@@ -332,7 +411,7 @@ router.post("/web/students", async (req, res) => {
 ### **Alpine.js Component Pattern**
 
 ```javascript
-// Form component with Q59 compliant validation
+// Enhanced form component with animations and better UX
 function studentForm() {
   return {
     formData: {
@@ -342,10 +421,12 @@ function studentForm() {
     },
     errors: {},
     loading: false,
+    success: false,
 
     async submitForm() {
       this.loading = true;
       this.errors = {};
+      this.success = false;
 
       try {
         const response = await fetch("/api/v1/students", {
@@ -360,14 +441,33 @@ function studentForm() {
         const data = await response.json();
 
         if (data.success) {
-          // Success handling
-          window.location.href = "/students";
+          // Success animation
+          this.success = true;
+          
+          // Show success notification
+          this.$dispatch('notify', {
+            type: 'success',
+            message: 'Student created successfully!'
+          });
+          
+          // Redirect after animation
+          setTimeout(() => {
+            window.location.href = "/students";
+          }, 1500);
         } else {
-          // Error handling using backend validation errors
+          // Error handling with shake animation
           this.errors = data.error.details || {};
+          this.$refs.form.classList.add('animate-shake');
+          setTimeout(() => {
+            this.$refs.form.classList.remove('animate-shake');
+          }, 500);
         }
       } catch (error) {
         console.error("Form submission error:", error);
+        this.$dispatch('notify', {
+          type: 'error',
+          message: 'Network error. Please try again.'
+        });
       } finally {
         this.loading = false;
       }
@@ -465,9 +565,21 @@ const handleValidationError = (error, req, res) => {
 ```
 views/
 ├── layouts/
-│   ├── auth.ejs           # Authentication pages (✅ existing)
-│   ├── main.ejs           # Authenticated pages layout
-│   └── admin.ejs          # System admin pages layout
+│   └── base.ejs           # Single universal layout (fonts, icons, scripts)
+├── partials/
+│   ├── head/
+│   │   ├── seo.ejs        # SEO meta tags
+│   │   ├── assets.ejs     # Fonts, icons, scripts (consistent loading)
+│   │   └── theme.ejs      # Tenant branding variables
+│   ├── nav/
+│   │   ├── system-admin.ejs   # System admin navigation
+│   │   ├── trust-admin.ejs    # Trust admin navigation  
+│   │   ├── teacher.ejs        # Teacher navigation
+│   │   └── auth.ejs           # Authentication layout nav
+│   ├── layout/
+│   │   ├── sidebar.ejs        # Main sidebar wrapper
+│   │   ├── header.ejs         # Top header bar
+│   │   └── footer.ejs         # Footer content
 ├── pages/
 │   ├── auth/
 │   │   └── login.ejs      # ✅ Already implemented
@@ -505,40 +617,147 @@ views/
     └── form-fields.ejs    # Reusable form fields
 ```
 
-### **Layout Implementation**
+### **Single Layout Architecture**
 
 ```html
-<!-- layouts/main.ejs - Authenticated users layout -->
+<!-- layouts/base.ejs - Universal layout with consistent asset loading -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      <%= title %> - <%= tenant ? tenant.name : 'School ERP System' %>
-    </title>
-
-    <!-- Tailwind CSS (Q3 ENFORCED) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Alpine.js (Client-side reactivity) -->
-    <script
-      defer
-      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
-    ></script>
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/app.css" />
+    <!-- SEO & Meta -->
+    <%- include('../partials/head/seo') %>
+    
+    <!-- Consistent Asset Loading -->
+    <%- include('../partials/head/assets') %>
+    
+    <!-- Tenant Theme Variables -->
+    <%- include('../partials/head/theme') %>
   </head>
-  <body class="bg-gray-50">
-    <%- include('../partials/alerts') %> <%- include('../partials/navigation')
+  <body class="bg-gray-50 font-sans antialiased fade-in" x-data="{ sidebarOpen: false }">
+    <!-- Flash Messages -->
+    <%- include('../partials/alerts') %>
+    
+    <!-- Role-based Navigation -->
+    <% 
+      const navPartial = user?.role === 'SYSTEM_ADMIN' ? 'system-admin' :
+                        user?.role === 'TRUST_ADMIN' ? 'trust-admin' :
+                        user?.role === 'TEACHER' ? 'teacher' : 'auth';
     %>
+    <%- include('../partials/nav/' + navPartial) %>
 
-    <main class="container mx-auto px-4 py-8"><%- body %></main>
+    <!-- Dynamic Layout Structure -->
+    <% if (layout === 'auth') { %>
+      <!-- Authentication pages - minimal layout -->
+      <main class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full space-y-8 slide-up"><%- body %></div>
+      </main>
+    <% } else if (layout === 'dashboard') { %>
+      <!-- Dashboard layout with sidebar -->
+      <div class="flex h-screen bg-gray-50">
+        <%- include('../partials/layout/sidebar') %>
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <%- include('../partials/layout/header') %>
+          <main class="flex-1 relative overflow-y-auto focus:outline-none slide-up">
+            <div class="py-6"><%- body %></div>
+          </main>
+        </div>
+      </div>
+    <% } else { %>
+      <!-- Default content layout -->
+      <main class="container mx-auto px-4 py-8 slide-up"><%- body %></main>
+    <% } %>
 
+    <!-- Footer for non-auth layouts -->
+    <% if (layout !== 'auth') { %>
+      <%- include('../partials/layout/footer') %>
+    <% } %>
+
+    <!-- Global JavaScript -->
     <script src="/static/js/app.js"></script>
   </body>
 </html>
+
+<!-- Partial Templates for Consistent Asset Loading -->
+
+<!-- partials/head/seo.ejs -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="<%= description || 'School ERP Management System' %>">
+<title><%= title %> - <%= tenant ? tenant.name : 'School ERP System' %></title>
+
+<!-- partials/head/assets.ejs - CONSISTENT LOADING -->
+<!-- Google Fonts - Professional typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome 6 Free - Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+
+<!-- Tailwind CSS (Q3 ENFORCED) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+        },
+        animation: {
+          'fade-in': 'fadeIn 0.3s ease-in-out',
+          'slide-up': 'slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          'shake': 'shake 0.5s ease-in-out'
+        }
+      }
+    }
+  }
+</script>
+
+<!-- Alpine.js (Client-side reactivity) -->
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<!-- Custom CSS -->
+<link rel="stylesheet" href="/static/css/app.css">
+
+<!-- partials/head/theme.ejs -->
+<style>
+  :root {
+    <% if (tenant && tenant.branding) { %>
+    --primary-color: <%= tenant.branding.primaryColor || '#3B82F6' %>;
+    --secondary-color: <%= tenant.branding.secondaryColor || '#64748B' %>;
+    <% } else { %>
+    --primary-color: #1E40AF;
+    --secondary-color: #1E3A8A;
+    <% } %>
+    
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+  }
+  
+  body { 
+    font-family: var(--font-primary);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+  
+  /* Animation keyframes */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+</style>
 ```
 
 ---
@@ -595,7 +814,24 @@ req.session = {
 
 ## 📋 **CRITICAL DEVELOPMENT RULES**
 
-### **1. Validation Compliance (Q59 ENFORCED)**
+### **1. Single Layout Principle**
+
+```javascript
+// ✅ ALWAYS: Use base.ejs for all pages
+router.get('/dashboard', (req, res) => {
+  res.render('pages/dashboard/index', {
+    layout: 'dashboard',  // Controls content structure within base.ejs
+    title: 'Dashboard',
+    user: req.session.user,
+    tenant: req.tenant
+  });
+});
+
+// ✅ ALWAYS: Role-based navigation via partials
+// Navigation automatically selected based on user.role in base.ejs
+```
+
+### **2. Validation Compliance (Q59 ENFORCED)**
 
 ```javascript
 // ✅ ALWAYS: Reuse existing API validation schemas

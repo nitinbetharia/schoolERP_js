@@ -1,10 +1,7 @@
 module.exports = [
    {
       ignores: [
-         'node_module         quotes: ['error', 'single', { avoidEscape: true }], // Match Prettier
-         semi: ['error', 'always'], // Match Prettier
-         'comma-dangle': ['error', 'es5'], // Match Prettier trailingComma
-         indent: ['error', 3, { SwitchCase: 1 }], // Match our tab width preference',
+         'node_modules/**',
          'dist/**',
          'build/**',
          '.git/**',

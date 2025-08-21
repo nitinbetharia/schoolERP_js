@@ -36,10 +36,19 @@ POST {{baseUrl}}/auth/logout
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
 
 ###############################################################################
-### 2. TRUST MANAGEMENT (Working)
+### 2. SYSTEM STATS (Dashboard Support)
 ###############################################################################
 
-### 2.1 Create Trust
+### 2.1 Get System Stats
+GET {{baseUrl}}/stats
+Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
+Accept: application/json
+
+###############################################################################
+### 3. TRUST MANAGEMENT (Working)
+###############################################################################
+
+### 3.1 Create Trust
 # @name createTrust
 POST {{baseUrl}}/trusts
 Content-Type: application/json
@@ -59,17 +68,17 @@ Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
   "description": "A demonstration school trust for testing"
 }
 
-### 2.2 Get All Trusts
+### 3.2 Get All Trusts
 GET {{baseUrl}}/trusts
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
 Accept: application/json
 
-### 2.3 Get Trust by ID
+### 3.3 Get Trust by ID
 GET {{baseUrl}}/trusts/1
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
 Accept: application/json
 
-### 2.4 Update Trust
+### 3.4 Update Trust
 PUT {{baseUrl}}/trusts/1
 Content-Type: application/json
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
@@ -79,15 +88,15 @@ Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
   "description": "Updated description for testing"
 }
 
-### 2.5 Complete Trust Setup
+### 3.5 Complete Trust Setup
 POST {{baseUrl}}/trusts/1/complete-setup
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
 
 ###############################################################################
-### 3. VALIDATION TESTS
+### 4. VALIDATION TESTS
 ###############################################################################
 
-### 3.1 Create Trust - Missing Required Field (Should Fail)
+### 4.1 Create Trust - Missing Required Field (Should Fail)
 POST {{baseUrl}}/trusts
 Content-Type: application/json
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
@@ -96,7 +105,7 @@ Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
   "contactEmail": "missing-name@test.edu"
 }
 
-### 3.2 Create Trust - Invalid Email (Should Fail)  
+### 4.2 Create Trust - Invalid Email (Should Fail)  
 POST {{baseUrl}}/trusts
 Content-Type: application/json
 Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
@@ -107,14 +116,14 @@ Cookie: connect.sid=REPLACE_WITH_SESSION_COOKIE_VALUE
 }
 
 ###############################################################################
-### 4. AUTHENTICATION TESTS
+### 5. AUTHENTICATION TESTS
 ###############################################################################
 
-### 4.1 Access Trusts Without Login (Should Fail)
+### 5.1 Access Trusts Without Login (Should Fail)
 GET {{baseUrl}}/trusts
 Accept: application/json
 
-### 4.2 Create Trust Without Login (Should Fail)
+### 5.2 Create Trust Without Login (Should Fail)
 POST {{baseUrl}}/trusts
 Content-Type: application/json
 

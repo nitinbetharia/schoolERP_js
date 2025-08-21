@@ -221,10 +221,40 @@ function createSystemAuthService() {
       }
    }
 
+   /**
+    * Update system user profile
+    */
+   async function updateProfile(userId, updateData) {
+      try {
+         const { getSystemModels } = require('../models');
+         const { SystemUser } = await getSystemModels();
+         
+         const [updatedCount] = await SystemUser.update(updateData, {
+            where: { id: userId },
+            returning: true
+         });
+
+         if (updatedCount === 0) {
+            throw ErrorFactory.unauthorized('User not found or unauthorized');
+         }
+
+         const updatedUser = await SystemUser.findByPk(userId, {
+            attributes: { exclude: ['password_hash'] }
+         });
+
+         logSystem('PROFILE_UPDATED', userId, { updatedFields: Object.keys(updateData) });
+         return updatedUser;
+      } catch (error) {
+         logError(error, { context: 'updateProfile', userId, updateData });
+         throw error;
+      }
+   }
+
    return {
       login,
       changePassword,
       createSystemUser,
+      updateProfile,
    };
 }
 

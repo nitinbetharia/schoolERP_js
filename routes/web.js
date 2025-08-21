@@ -56,21 +56,18 @@ router.get('/login', async (req, res) => {
          info: req.flash('info'),
       };
 
-      res.render('layouts/auth', {
+      res.render('layouts/base', {
          ...renderData,
-         body: await new Promise((resolve, reject) => {
-            res.app.render('pages/auth/login', renderData, (err, html) => {
-               if (err) {reject(err);}
-               else {resolve(html);}
-            });
-         }),
+         layout: 'auth', // Use minimal auth layout
+         body: 'pages/auth/login',
       });
    } catch (error) {
       logError(error, { context: 'auth/login GET' });
-      res.status(500).render('layouts/auth', {
+      res.status(500).render('layouts/base', {
          title: 'Error',
          tenant: req.tenant || null,
          error: 'Unable to load login page',
+         layout: 'auth',
          body: '<div class="text-center"><h3>Service Unavailable</h3><p>Please try again later.</p></div>',
       });
    }
@@ -105,7 +102,7 @@ router.post('/login', async (req, res) => {
             abortEarly: false,
             stripUnknown: true,
             convert: true,
-         },
+         }
       );
 
       if (error) {
@@ -129,7 +126,7 @@ router.post('/login', async (req, res) => {
       let authResult;
 
       if (isSystemLogin) {
-      // Use existing system authentication API
+         // Use existing system authentication API
 
          try {
             authResult = await systemAuthService.login({
@@ -151,17 +148,13 @@ router.post('/login', async (req, res) => {
             return res.redirect('/auth/login');
          }
       } else {
-      // Use existing tenant user authentication
+         // Use existing tenant user authentication
          const tenantCode = req.tenantCode || 'demo';
          const createUserService = require('../modules/user/services/UserService');
          const userService = createUserService();
 
          try {
-            authResult = await userService.authenticateUser(
-               tenantCode,
-               email,
-               password,
-            );
+            authResult = await userService.authenticateUser(tenantCode, email, password);
 
             // Set tenant user session
             req.session.user = authResult;
@@ -221,35 +214,7 @@ router.post('/login', async (req, res) => {
    }
 });
 
-/**
- * @route POST /auth/logout
- * @desc Process logout
- * @access Private
- */
-router.post('/logout', (req, res) => {
-   try {
-      if (req.session) {
-         req.session.destroy((err) => {
-            if (err) {
-               logError(err, { context: 'logout' });
-            }
-         });
-      }
-
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-         return res.json({ success: true, message: 'Logged out successfully' });
-      }
-
-      req.flash('success', 'You have been logged out successfully');
-      res.redirect('/auth/login');
-   } catch (error) {
-      logError(error, { context: 'logout' });
-      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-         return res.json({ success: false, error: 'Logout failed' });
-      }
-      res.redirect('/auth/login');
-   }
-});
+// REMOVED: Duplicate logout route - keeping the improved version below at line 320
 
 /**
  * @route GET /dashboard
@@ -266,13 +231,13 @@ router.get('/dashboard', requireAuth, (req, res) => {
       }
 
       // Render trust admin dashboard for tenant users
-      res.render('layouts/main', {
+      res.render('layouts/base', {
          title: 'Trust Dashboard',
-         description:
-        'Trust administration dashboard for managing schools, students, and staff',
+         description: 'Trust administration dashboard for managing schools, students, and staff',
          user: req.session.user,
          tenant: req.session.tenant || req.tenant,
          userType: userType,
+         layout: 'default', // Use default content layout
          body: 'pages/dashboard/trust-admin',
          currentPath: '/dashboard',
       });
@@ -298,13 +263,13 @@ router.get('/admin/system', requireAuth, (req, res) => {
          return res.redirect('/dashboard');
       }
 
-      res.render('layouts/main', {
+      res.render('layouts/base', {
          title: 'System Administration',
-         description:
-        'System administration dashboard for managing trusts and system configuration',
+         description: 'System administration dashboard for managing trusts and system configuration',
          user: req.session.user,
          tenant: null,
          userType: userType,
+         layout: 'default', // Use default content layout
          body: 'pages/dashboard/system-admin',
          currentPath: '/admin/system',
       });
@@ -359,10 +324,11 @@ router.post('/logout', (req, res) => {
  */
 router.get('/logout', (req, res) => {
    // Redirect GET to POST for security
-   res.render('layouts/auth', {
+   res.render('layouts/base', {
       title: 'Logout',
       description: 'Logging out of School ERP System',
       tenant: req.tenant || null,
+      layout: 'auth',
       body: `
             <div class="text-center space-y-4">
                 <h3 class="text-lg font-semibold">Logging out...</h3>
@@ -375,6 +341,38 @@ router.get('/logout', (req, res) => {
             </div>
         `,
    });
+});
+
+/**
+ * @route GET /admin/system/profile
+ * @desc System Admin Profile page
+ * @access Private (System Admin only)
+ */
+router.get('/admin/system/profile', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+
+      // Only allow system admins
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('layouts/base', {
+         title: 'Profile Settings',
+         description: 'System administrator profile settings and account management',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         layout: 'default', // Use default content layout
+         body: 'pages/profile/system-admin',
+         currentPath: '/admin/system/profile',
+      });
+   } catch (error) {
+      logError(error, { context: 'admin/system/profile GET' });
+      req.flash('error', 'Unable to load profile page');
+      res.redirect('/admin/system');
+   }
 });
 
 /**

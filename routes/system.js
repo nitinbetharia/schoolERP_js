@@ -208,4 +208,24 @@ router.get(
    }),
 );
 
+// Update current user profile
+router.put(
+   '/profile',
+   authenticate,
+   requireSystemAdmin,
+   validators.validateBody(Joi.object({
+      username: Joi.string().min(3).max(50).optional(),
+      email: Joi.string().email().optional(),
+      fullName: Joi.string().max(100).optional(),
+   })),
+   asyncHandler(async (req, res) => {
+      const updatedUser = await systemAuthService.updateProfile(
+         req.user.id,
+         req.body
+      );
+
+      res.json(formatSuccessResponse(updatedUser, 'Profile updated successfully'));
+   }),
+);
+
 module.exports = router;

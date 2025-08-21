@@ -1,87 +1,173 @@
 // Database configuration for different environments
 // This file defines Sequelize configuration for development, test, and production
 
-const dbConfig = require('./app-config.json').database;
+const { Sequelize } = require('sequelize');
+const config = require('./app-config.json');
 
-module.exports = {
-   development: {
-      username: dbConfig.connection.user,
-      password: dbConfig.connection.password,
-      database: dbConfig.system.name,
-      host: dbConfig.connection.host,
-      port: dbConfig.connection.port,
-      dialect: 'mysql',
+/**
+ * Enhanced Database Connection with Retry Logic
+ */
+class DatabaseManager {
+  constructor() {
+    this.sequelize = null;
+    this.retryCount = 0;
+    this.maxRetries = 5;
+    this.baseDelay = 2000; // 2 seconds base delay
+    this.initialized = false;
+  }
 
-      // Q11: Moderate connection pooling
-      pool: {
-         max: 15,
-         min: 2,
-         acquire: 60000,
-         idle: 300000,
-      },
+  async initialize() {
+    if (this.initialized) return this.sequelize;
+    
+    console.log('🔧 Initializing database connection with enhanced retry logic...');
+    
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        console.log(`📡 Database connection attempt ${attempt}/${this.maxRetries}`);
+        
+        // Calculate exponential backoff delay
+        if (attempt > 1) {
+          const delay = this.baseDelay * Math.pow(2, attempt - 2);
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await this.sleep(delay);
+        }
 
-      // Q16: Snake_case database, camelCase JavaScript
-      define: {
-         underscored: true,
-         timestamps: true,
-         paranoid: true,
-         createdAt: 'created_at',
-         updatedAt: 'updated_at',
-         deletedAt: 'deleted_at',
-      },
+        // Create sequelize instance with minimal pool
+        this.sequelize = new Sequelize(
+          config.database.connection.database,
+          config.database.connection.username,
+          config.database.connection.password,
+          {
+            host: config.database.connection.host,
+            port: config.database.connection.port,
+            dialect: config.database.connection.dialect,
+            logging: false, // Reduce logging during initialization
+            pool: {
+              max: 1, // Absolute minimum for initialization
+              min: 0,
+              acquire: 15000, // 15 second acquire timeout
+              idle: 5000,     // 5 second idle timeout
+              evict: 1000,    // Check for idle connections every 1 second
+              handleDisconnects: true
+            },
+            retry: {
+              match: [
+                /ECONNRESET/,
+                /ENOTFOUND/,
+                /ECONNREFUSED/,
+                /ETIMEDOUT/,
+                /Too many connections/
+              ],
+              max: 3
+            },
+            dialectOptions: {
+              connectTimeout: 10000,
+              acquireTimeout: 10000,
+              timeout: 10000
+            }
+          }
+        );
 
-      dialectOptions: {
-         charset: dbConfig.system.charset,
-         collate: dbConfig.system.collation,
-         timezone: dbConfig.connection.timezone,
-      },
+        // Test the connection
+        await this.sequelize.authenticate();
+        
+        console.log('✅ Database connection established successfully');
+        
+        // Gradually increase pool size after successful connection
+        await this.optimizePoolSize();
+        
+        this.initialized = true;
+        return this.sequelize;
+        
+      } catch (error) {
+        console.error(`❌ Connection attempt ${attempt} failed:`, error.message);
+        
+        if (this.sequelize) {
+          try {
+            await this.sequelize.close();
+          } catch (closeError) {
+            console.error('Error closing failed connection:', closeError.message);
+          }
+          this.sequelize = null;
+        }
+        
+        // If this was the last attempt, throw the error
+        if (attempt === this.maxRetries) {
+          throw new Error(`Failed to connect to database after ${this.maxRetries} attempts. Last error: ${error.message}`);
+        }
+      }
+    }
+  }
 
-      // Migration settings
-      migrationStorage: 'sequelize',
-      migrationStorageTableName: '_sequelize_migrations',
-      seederStorage: 'sequelize',
-      seederStorageTableName: '_sequelize_seeders',
-   },
+  async optimizePoolSize() {
+    try {
+      // Test if we can safely increase pool size
+      console.log('🔧 Optimizing connection pool size...');
+      
+      // Close the initial minimal connection
+      await this.sequelize.close();
+      
+      // Recreate with optimized pool
+      this.sequelize = new Sequelize(
+        config.database.connection.database,
+        config.database.connection.username,
+        config.database.connection.password,
+        {
+          host: config.database.connection.host,
+          port: config.database.connection.port,
+          dialect: config.database.connection.dialect,
+          logging: config.database.logging,
+          pool: config.database.pool, // Use configured pool settings
+          retry: config.database.retry,
+          dialectOptions: {
+            connectTimeout: 30000,
+            acquireTimeout: 30000,
+            timeout: 30000
+          }
+        }
+      );
+      
+      await this.sequelize.authenticate();
+      console.log('✅ Pool size optimized successfully');
+      
+    } catch (error) {
+      console.warn('⚠️ Could not optimize pool size, continuing with minimal pool:', error.message);
+      // Continue with minimal pool if optimization fails
+    }
+  }
 
-   production: {
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_SYSTEM_NAME,
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      dialect: 'mysql',
+  async getInstance() {
+    if (!this.initialized) {
+      await this.initialize();
+    }
+    return this.sequelize;
+  }
 
-      // Q11: Moderate connection pooling
-      pool: {
-         max: 15,
-         min: 2,
-         acquire: 60000,
-         idle: 300000,
-      },
+  async gracefulShutdown() {
+    if (this.sequelize) {
+      console.log('🔌 Closing database connections...');
+      await this.sequelize.close();
+      this.initialized = false;
+    }
+  }
 
-      // Q16: Snake_case database, camelCase JavaScript
-      define: {
-         underscored: true,
-         timestamps: true,
-         paranoid: true,
-         createdAt: 'created_at',
-         updatedAt: 'updated_at',
-         deletedAt: 'deleted_at',
-      },
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
 
-      dialectOptions: {
-         charset: 'utf8mb4',
-         collate: 'utf8mb4_unicode_ci',
-         timezone: '+00:00',
-      },
+// Create singleton instance
+const dbManager = new DatabaseManager();
 
-      // Migration settings
-      migrationStorage: 'sequelize',
-      migrationStorageTableName: '_sequelize_migrations',
-      seederStorage: 'sequelize',
-      seederStorageTableName: '_sequelize_seeders',
+// Handle process termination
+process.on('SIGINT', async () => {
+  await dbManager.gracefulShutdown();
+  process.exit(0);
+});
 
-      // Production safety
-      logging: false,
-   },
-};
+process.on('SIGTERM', async () => {
+  await dbManager.gracefulShutdown();
+  process.exit(0);
+});
+
+module.exports = dbManager.getInstance();

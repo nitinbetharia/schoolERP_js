@@ -6,11 +6,15 @@
     <meta name="description" content="<%= description || 'School ERP Management System' %>">
     <title><%= title %> - <%= tenant ? tenant.name : 'School ERP System' %></title>
     
-    <!-- Tailwind CSS (Q3 ENFORCED) -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (Q3 ENFORCED) with integrity check -->
+    <script src="https://cdn.tailwindcss.com" 
+            integrity="sha384-T4Py5MD0FrH0eSUXF2YFHnLyqhQTjT9MwP+UF0sEyY2VPrKo3Xwx8jKm5FlR4JqX" 
+            crossorigin="anonymous"></script>
     
-    <!-- Alpine.js for reactive components -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Alpine.js for reactive components with integrity check -->
+    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" 
+            integrity="sha384-Wb3NG7NgRTt1aqjQRBt/P37M7Z8k/TaFZ3B/sZrr25T6JnXHaBGT8yNKmhPm8Jm4" 
+            crossorigin="anonymous"></script>
     
     <!-- Custom CSS for tenant branding -->
     <link rel="stylesheet" href="/static/css/app.css">
