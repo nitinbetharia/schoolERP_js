@@ -3,7 +3,7 @@
  * Handles both system and tenant database migrations for enhanced ERP features
  */
 
-const { logger, logSystem, logError } = require('../utils/logger');
+const { logSystem, logError } = require('../utils/logger');
 const { dbManager } = require('../models/database');
 
 // Import migration files

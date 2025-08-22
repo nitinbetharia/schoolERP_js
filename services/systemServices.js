@@ -1,6 +1,5 @@
 const bcrypt = require('bcryptjs');
 const { logSystem, logAuth, logError } = require('../utils/logger');
-const { ErrorFactory } = require('../utils/validation');
 const appConfig = require('../config/app-config.json');
 
 async function initializeTenantModelsHelper(trustCode) {
@@ -52,7 +51,9 @@ function createSystemAuthService() {
 
          if (!user) {
             logAuth('LOGIN_FAILED_USER_NOT_FOUND', null, null, { username });
-            const error = ErrorFactory.authentication('Invalid username or password', 'AUTH_001');
+            const error = new Error('Invalid username or password');
+            error.statusCode = 401;
+            error.code = 'AUTH_001';
             error.userMessage = 'Invalid username or password. Please check your credentials.';
             throw error;
          }
@@ -63,10 +64,11 @@ function createSystemAuthService() {
                lockedUntil: user.locked_until,
                loginAttempts: user.login_attempts,
             });
-            const error = ErrorFactory.authentication(
-               'Account is temporarily locked due to multiple failed login attempts',
-               'AUTH_ACCOUNT_LOCKED'
+            const error = new Error(
+               'Account is temporarily locked due to multiple failed login attempts'
             );
+            error.statusCode = 401;
+            error.code = 'AUTH_ACCOUNT_LOCKED';
             error.userMessage = 'Account locked due to failed attempts. Try again later.';
             throw error;
          }
@@ -89,7 +91,9 @@ function createSystemAuthService() {
             logAuth('LOGIN_FAILED_INVALID_PASSWORD', user.id, null, {
                loginAttempts: user.login_attempts,
             });
-            const error = ErrorFactory.authentication('Invalid username or password', 'AUTH_001');
+            const error = new Error('Invalid username or password');
+            error.statusCode = 401;
+            error.code = 'AUTH_001';
             error.userMessage = 'Invalid username or password. Please check your credentials.';
             throw error;
          }
@@ -118,7 +122,11 @@ function createSystemAuthService() {
             throw error;
          }
          logAuth('LOGIN_ERROR', null, null, { error: error.message });
-         throw ErrorFactory.internal('An error occurred during login', 'AUTH_ERROR', { originalError: error.message });
+         const err = new Error('An error occurred during login');
+         err.statusCode = 500;
+         err.code = 'AUTH_ERROR';
+         err.originalError = error.message;
+         throw err;
       }
    }
 
@@ -132,7 +140,7 @@ function createSystemAuthService() {
 
          const user = await SystemUser.findByPk(userId);
          if (!user) {
-            throw ErrorFactory.notFound('User not found');
+            const err = new Error('User not found'); err.statusCode = 404; throw err;
          }
 
          // Verify current password
@@ -338,7 +346,7 @@ function createTrustService() {
          const trust = await Trust.findOne({ where: whereClause });
 
          if (!trust) {
-            throw ErrorFactory.notFound(`Trust not found with ${field}: ${identifier}`);
+            const err = new Error(`Trust not found with ${field}: ${identifier}`); err.statusCode = 404; throw err;
          }
 
          return trust;
@@ -360,7 +368,7 @@ function createTrustService() {
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            throw ErrorFactory.notFound('Trust not found');
+            const err = new Error('Trust not found'); err.statusCode = 404; throw err;
          }
 
          // Check for conflicts if updating unique fields
@@ -461,7 +469,7 @@ function createTrustService() {
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            throw ErrorFactory.notFound('Trust not found');
+            const err = new Error('Trust not found'); err.statusCode = 404; throw err;
          }
 
          if (trust.isSetupComplete()) {

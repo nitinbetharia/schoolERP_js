@@ -101,6 +101,7 @@ module.exports = [
             SchoolERP: 'readonly',
             setLoading: 'readonly',
             notify: 'readonly',
+            bootstrap: 'readonly',
          },
       },
       rules: {

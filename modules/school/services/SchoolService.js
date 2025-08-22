@@ -1,5 +1,7 @@
 const { dbManager } = require('../../../models/database');
 const logger = require('../../../utils/logger');
+const { ErrorFactory } = require('../../../utils/errors');
+const models = require('../../../models/database');
 
 /**
  * SchoolService

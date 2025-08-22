@@ -57,7 +57,11 @@
             </div>
             
             <!-- Quick Actions (Role-based) -->
-            <% if (user.role === 'system-admin') { %>
+            <% 
+            // Check if user has system admin privileges (flexible role checking)
+            const isSystemAdmin = user.role && (user.role.toUpperCase() === 'SYSTEM_ADMIN' || user.role.toLowerCase() === 'system-admin');
+            %>
+            <% if (isSystemAdmin) { %>
             <div class="dropdown">
                 <button class="btn btn-outline-primary btn-sm dropdown-toggle" 
                         type="button" 
@@ -131,7 +135,7 @@
                     <li><a class="dropdown-item" href="/settings">
                         <i class="fas fa-cog me-2"></i>Settings
                     </a></li>
-                    <% if (user.role === 'system-admin') { %>
+                    <% if (isSystemAdmin) { %>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="/system/health">
                         <i class="fas fa-heartbeat me-2"></i>System Health

@@ -331,6 +331,9 @@ router.post('/logout', (req, res) => {
    try {
       const user = req.session?.user;
 
+      // Store flash message before destroying session
+      const flashMessage = 'You have been logged out successfully.';
+
       req.session.destroy((err) => {
          if (err) {
             logError(err, { context: 'logout', userId: user?.id });
@@ -343,17 +346,16 @@ router.post('/logout', (req, res) => {
 
          res.clearCookie('connect.sid');
 
-         if (req.xhr) {
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
             return res.json({
                success: true,
                message: 'Logged out successfully',
                redirect: '/auth/login',
-               flash: { success: ['You have been logged out successfully.'] },
+               flash: { success: [flashMessage] },
             });
          }
 
-         // Add flash message for next page load
-         req.flash('success', 'You have been logged out successfully.');
+         // For web requests, redirect without flash since session is destroyed
          res.redirect('/auth/login');
       });
    } catch (error) {
@@ -497,10 +499,26 @@ router.get('/test-long-message', (req, res) => {
    try {
       // Test with a very long success message
       const longSuccessMessage =
-         "This is an extremely long success message that should definitely exceed three lines of text when displayed in the flash message container. The purpose of this message is to test the automatic truncation functionality that we've implemented. When this message is displayed, it should be truncated to fit within approximately three lines, and a 'View Full Message' button should appear, allowing users to see the complete message in a modal dialog. This feature helps maintain a clean user interface while still providing access to complete information when needed. The truncation system uses CSS line-clamp and JavaScript calculations to determine when messages are too long and need to be truncated for better user experience.";
+         'This is an extremely long success message that should ' +
+         'definitely exceed three lines of text when displayed in the flash message container. ' +
+         'The purpose of this message is to test the automatic truncation functionality that ' +
+         "we've implemented. When this message is displayed, it should be truncated to fit " +
+         "within approximately three lines, and a 'View Full Message' button should appear, " +
+         'allowing users to see the complete message in a modal dialog. This feature helps ' +
+         'maintain a clean user interface while still providing access to complete information ' +
+         'when needed. The truncation system uses CSS line-clamp and JavaScript calculations ' +
+         'to determine when messages are too long and need to be truncated for better user experience.';
 
       const longErrorMessage =
-         "This is a comprehensive error message that contains detailed information about what went wrong during the process. Error messages tend to be longer because they often need to provide specific details about the failure, including error codes, possible causes, and suggested solutions. This particular message is intentionally made very long to test our truncation system's ability to handle error messages appropriately. The system should detect that this message exceeds the three-line limit and provide a modal option for viewing the complete error details. This is especially important for developers and administrators who need to see full error information for debugging purposes, while regular users can see a concise summary in the toast notification.";
+         'This is a comprehensive error message that contains detailed ' +
+         'information about what went wrong during the process. Error messages tend to be longer ' +
+         'because they often need to provide specific details about the failure, including error ' +
+         'codes, possible causes, and suggested solutions. This particular message is intentionally ' +
+         "made very long to test our truncation system's ability to handle error messages " +
+         'appropriately. The system should detect that this message exceeds the three-line limit ' +
+         'and provide a modal option for viewing the complete error details. This is especially ' +
+         'important for developers and administrators who need to see full error information for ' +
+         'debugging purposes, while regular users can see a concise summary in the toast notification.';
 
       // Flash both messages
       req.flash('success', longSuccessMessage);

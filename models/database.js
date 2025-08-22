@@ -1,5 +1,5 @@
 const { Sequelize } = require('sequelize');
-const { logger, logDB, logError, logSystem } = require('../utils/logger');
+const { logDB, logError, logSystem } = require('../utils/logger');
 const appConfig = require('../config/app-config.json');
 // Simple database error class
 class DatabaseError extends Error {
@@ -63,7 +63,7 @@ function createDatabaseManager() {
                tenantConnections.delete(tenantCode);
                logSystem(`Closed idle tenant connection: ${tenantCode}`);
             }
-         } catch (error) {
+         } catch (_error) {
             // Connection is dead, remove it
             tenantConnections.delete(tenantCode);
             logSystem(`Removed dead tenant connection: ${tenantCode}`);
@@ -92,9 +92,9 @@ function createDatabaseManager() {
                   connectTimeout: appConfig.database.connection.connectTimeout,
                   ssl: appConfig.database.connection.ssl
                      ? {
-                          require: true,
-                          rejectUnauthorized: false,
-                       }
+                        require: true,
+                        rejectUnauthorized: false,
+                     }
                      : false,
                },
                pool: {
@@ -144,7 +144,7 @@ function createDatabaseManager() {
                // Update last used timestamp
                connection._lastUsed = Date.now();
                return connection;
-            } catch (testError) {
+            } catch (_testError) {
                // Connection is dead, remove it and create new one
                logSystem(`Tenant DB connection for ${tenantCode} is dead, recreating...`);
                tenantConnections.delete(tenantCode);
@@ -167,9 +167,9 @@ function createDatabaseManager() {
                connectTimeout: appConfig.database.connection.connectTimeout,
                ssl: appConfig.database.connection.ssl
                   ? {
-                       require: true,
-                       rejectUnauthorized: false,
-                    }
+                     require: true,
+                     rejectUnauthorized: false,
+                  }
                   : false,
             },
             pool: {

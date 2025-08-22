@@ -316,7 +316,7 @@ async function runMockFeeSystemTests() {
       studentProfiles.forEach(profile => {
          console.log(`\nStudent Profile: ${profile.name}`);
          const applicableComponents = Object.entries(feeConfig.fee_components).filter(([_, component]) => {
-            if (component.is_mandatory) return true;
+            if (component.is_mandatory) {return true;}
             if (component.conditional) {
                const field = component.conditional.field;
                const value = component.conditional.value;

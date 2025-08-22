@@ -1,11 +1,5 @@
 const { dbManager } = require('../models/database');
 const { logSystem, logError } = require('../utils/logger');
-const {
-   ErrorFactory,
-   // Legacy classes for backward compatibility
-   AuthenticationError,
-} = require('../utils/validation');
-const appConfig = require('../config/app-config.json');
 
 /**
  * Tenant detection middleware
@@ -95,7 +89,7 @@ const tenantDetection = async (req, res, next) => {
       try {
          const tenantModels = await dbManager.getTenantModels(tenantCode);
          req.tenantModels = tenantModels;
-      } catch (error) {
+      } catch (_error) {
          // Models not initialized, try to initialize
          logSystem(`Initializing tenant models for: ${tenantCode}`);
 

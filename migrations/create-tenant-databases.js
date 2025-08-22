@@ -3,7 +3,7 @@
  * Creates the actual MySQL databases for trusts before migration
  */
 
-const { logger, logSystem, logError } = require('../utils/logger');
+const { logSystem, logError } = require('../utils/logger');
 const { dbManager } = require('../models/database');
 
 /**
@@ -29,8 +29,8 @@ async function createTenantDatabases() {
       logSystem(`Found ${trusts.length} active trusts`);
       
       let created = 0;
-      let existing = 0;
-      let errors = [];
+      const existing = 0;
+      const errors = [];
       
       for (const trust of trusts) {
          try {

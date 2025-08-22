@@ -19,7 +19,7 @@ console.log('✅ All required environment variables are present');
 
 // Import configurations and utilities
 const appConfig = require('./config/app-config.json');
-const { logger, logSystem, logError } = require('./utils/logger');
+const { logSystem, logError } = require('./utils/logger');
 
 // Import middleware
 // Import middleware directly from their specific files

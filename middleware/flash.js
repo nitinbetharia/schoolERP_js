@@ -8,7 +8,7 @@ function setupFlashMessages(req, res, next) {
       console.log('🎯 FLASH MIDDLEWARE:', {
          path: req.path,
          hasSession: !!req.session,
-         hasFlash: !!(req.session && req.session.flash)
+         hasFlash: !!(req.session && req.session.flash),
       });
 
       // Check if session exists
@@ -28,6 +28,12 @@ function setupFlashMessages(req, res, next) {
 
    // Flash function to set messages
    req.flash = function (type, message) {
+      // Safety check: ensure session and flash are available
+      if (!req.session || !req.session.flash) {
+         console.warn('Flash message attempted but session/flash not available');
+         return message ? undefined : [];
+      }
+
       if (!req.session.flash[type]) {
          req.session.flash[type] = [];
       }
@@ -64,24 +70,30 @@ function addFlashHelpers(req, res, next) {
    res.json = function (obj) {
       if (obj && typeof obj === 'object') {
          // Add flash messages to API responses
-         if (req.session && req.session.flash) {
-            obj.flash = {
-               success: req.flash('success'),
-               error: req.flash('error'),
-               warning: req.flash('warning'),
-               info: req.flash('info'),
-            };
+         // Safety check: ensure session exists and flash is available
+         if (req.session && req.session.flash && typeof req.flash === 'function') {
+            try {
+               obj.flash = {
+                  success: req.flash('success'),
+                  error: req.flash('error'),
+                  warning: req.flash('warning'),
+                  info: req.flash('info'),
+               };
 
-            // Clean up empty flash arrays
-            Object.keys(obj.flash).forEach((key) => {
-               if (!obj.flash[key] || (Array.isArray(obj.flash[key]) && obj.flash[key].length === 0)) {
-                  delete obj.flash[key];
+               // Clean up empty flash arrays
+               Object.keys(obj.flash).forEach((key) => {
+                  if (!obj.flash[key] || (Array.isArray(obj.flash[key]) && obj.flash[key].length === 0)) {
+                     delete obj.flash[key];
+                  }
+               });
+
+               // Remove flash object if empty
+               if (Object.keys(obj.flash).length === 0) {
+                  delete obj.flash;
                }
-            });
-
-            // Remove flash object if empty
-            if (Object.keys(obj.flash).length === 0) {
-               delete obj.flash;
+            } catch (error) {
+               // If flash fails (e.g., session destroyed), silently continue without flash
+               console.warn('Flash message retrieval failed:', error.message);
             }
          }
       }

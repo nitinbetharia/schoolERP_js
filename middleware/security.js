@@ -173,8 +173,6 @@ const sanitizeInput = (req, res, next) => {
  * Request size limiting middleware
  */
 const requestSizeLimit = (req, res, next) => {
-   const maxSize = appConfig.app.requestSizeLimit || '10mb';
-
    // This is handled by express.json() and express.urlencoded() middleware
    // but we can add additional checks here if needed
 

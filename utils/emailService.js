@@ -202,10 +202,10 @@ async function sendFeeReminder(studentEmail, studentName, feeDetails, schoolData
         </div>
         
         ${
-           isOverdue
-              ? '<p style="color: red;"><strong>This payment is overdue. Please make the payment immediately to avoid any inconvenience.</strong></p>'
-              : '<p>Please make the payment by the due date to avoid any late fees.</p>'
-        }
+   isOverdue
+      ? '<p style="color: red;"><strong>This payment is overdue. Please make the payment immediately to avoid any inconvenience.</strong></p>'
+      : '<p>Please make the payment by the due date to avoid any late fees.</p>'
+}
         
         <p><strong>Payment Methods:</strong></p>
         <ul>
@@ -294,12 +294,12 @@ async function sendFeeReceipt(studentEmail, studentName, receiptData, receiptPdf
          to: studentEmail,
          attachments: receiptPdfPath
             ? [
-                 {
-                    filename: `fee-receipt-${receiptData.receiptNo}.pdf`,
-                    path: receiptPdfPath,
-                    contentType: 'application/pdf',
-                 },
-              ]
+               {
+                  filename: `fee-receipt-${receiptData.receiptNo}.pdf`,
+                  path: receiptPdfPath,
+                  contentType: 'application/pdf',
+               },
+            ]
             : [],
          ...template,
       };
@@ -351,10 +351,10 @@ async function sendAttendanceNotification(parentEmail, studentName, attendanceDa
         </div>
         
         ${
-           isAbsent
-              ? '<p style="color: red;"><strong>Your child was marked absent today. If this is incorrect, please contact the school immediately.</strong></p>'
-              : '<p style="color: green;">Your child was present at school today.</p>'
-        }
+   isAbsent
+      ? '<p style="color: red;"><strong>Your child was marked absent today. If this is incorrect, please contact the school immediately.</strong></p>'
+      : '<p style="color: green;">Your child was present at school today.</p>'
+}
         
         <p>If you have any concerns about your child\'s attendance, please contact the class teacher or school office.</p>
         
@@ -436,15 +436,15 @@ async function sendErrorAlert(errorData) {
       </div>
       
       ${
-         error.stack
-            ? `
+   error.stack
+      ? `
       <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin: 15px 0;">
          <h3>🔧 Stack Trace</h3>
          <pre style="font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">${error.stack}</pre>
       </div>
       `
-            : ''
-      }
+      : ''
+}
       
       <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin: 15px 0;">
          <h3>⚡ Action Required</h3>

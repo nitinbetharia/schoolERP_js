@@ -61,7 +61,7 @@
             --tenant-secondary: <%= tenant.branding.secondaryColor || '#6c757d' %>;
             --tenant-accent: <%= tenant.branding.accentColor || '#198754' %>;
             --tenant-logo: url('<%= tenant.branding.logo || "" %>');
-            <% } else if (user && user.role === 'system-admin') { %>
+            <% } else if (user && (user.role && (user.role.toUpperCase() === 'SYSTEM_ADMIN' || user.role.toLowerCase() === 'system-admin'))) { %>
             /* System Admin Theme */
             --tenant-primary: #1e40af;
             --tenant-secondary: #1e3a8a;
@@ -86,6 +86,17 @@
         body {
             font-family: var(--app-font-family);
             background-color: #f8f9fa;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        html {
+            overflow-x: hidden; /* Prevent horizontal scroll at document level */
+        }
+        
+        /* Container safety */
+        .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
         }
         
         .brand-primary { background-color: var(--tenant-primary) !important; }
@@ -134,6 +145,32 @@
             right: 20px;
             z-index: 1060;
             max-width: 400px;
+        }
+        
+        /* Fix dropdown z-index issues */
+        .dropdown-menu {
+            z-index: 1070 !important;
+            position: absolute !important;
+        }
+        
+        .navbar .dropdown-menu,
+        .header .dropdown-menu,
+        .app-header .dropdown-menu {
+            z-index: 1070 !important;
+            position: absolute !important;
+        }
+        
+        /* Ensure header has proper stacking context */
+        .app-header {
+            z-index: 1030;
+            position: relative;
+        }
+        
+        /* Main content should be below dropdowns */
+        .main-content,
+        main {
+            z-index: 1;
+            position: relative;
         }
         
         /* Custom Scrollbar */
@@ -201,15 +238,23 @@
         <!-- Navigation Section -->
         <% if (user && !hideNav) { %>
         <nav class="no-print">
-            <% if (user.role === 'system-admin') { %>
-                <%- include('../partials/nav/system-admin') %>
-            <% } else if (user.role === 'trust-admin') { %>
-                <%- include('../partials/nav/trust-admin') %>
-            <% } else if (user.role === 'teacher') { %>
-                <%- include('../partials/nav/teacher') %>
-            <% } else { %>
-                <%- include('../partials/nav/default') %>
-            <% } %>
+            <% 
+            // Dynamic navigation mapping - easily configurable
+            const navMap = {
+                'SYSTEM_ADMIN': 'system-admin',
+                'system-admin': 'system-admin',
+                'TRUST_ADMIN': 'trust-admin',
+                'trust-admin': 'trust-admin',
+                'TEACHER': 'teacher',
+                'teacher': 'teacher',
+                'STAFF': 'default',
+                'staff': 'default'
+            };
+            
+            // Get navigation template name, fallback to default
+            const navTemplate = navMap[user.role] || 'default';
+            %>
+            <%- include('../partials/nav/' + navTemplate) %>
         </nav>
         <% } %>
         

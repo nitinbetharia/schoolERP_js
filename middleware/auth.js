@@ -3,9 +3,6 @@ const rateLimit = require('express-rate-limit');
 const { logAuth, logError } = require('../utils/logger');
 const {
    ErrorFactory,
-   // Legacy classes for backward compatibility
-   AuthenticationError,
-   AuthorizationError,
 } = require('../utils/validation');
 const { USER_ROLES, SYSTEM } = require('../config/business-constants');
 const appConfig = require('../config/app-config.json');
