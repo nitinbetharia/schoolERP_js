@@ -3,8 +3,30 @@ const logger = require('../../../utils/logger');
 /**
  * Setup Service
  * Handles trust setup workflow management
- * Uses centralized error handling - just throw regular Error objects
+ * Uses centralized error handling with rich error objects
  */
+
+/**
+ * Create enhanced error object with debugging information
+ */
+function createEnhancedError(message, type = 'Error', details = null, context = null) {
+   const error = new Error(message);
+   error.name = type;
+   error.userMessage = message; // User-friendly message
+
+   if (details) {
+      error.details = details; // Additional debugging details
+   }
+
+   if (context) {
+      error.context = context; // Context information for debugging
+   }
+
+   // Add timestamp for tracking
+   error.timestamp = new Date().toISOString();
+
+   return error;
+}
 function createSetupService() {
    const setupSteps = [
       {
@@ -66,7 +88,12 @@ function createSetupService() {
          });
 
          if (existingSetup) {
-            throw new Error('Setup already initialized for this trust');
+            throw createEnhancedError(
+               'Setup already initialized for this trust',
+               'ConflictError',
+               { existingSetup: existingSetup.setup_id },
+               { trustId, operation: 'initializeSetup' }
+            );
          }
 
          // Create initial setup configuration
@@ -163,25 +190,43 @@ function createSetupService() {
          });
 
          if (!setupConfig) {
-            throw new Error(`Setup configuration not found for trust: ${trustId}`);
+            throw createEnhancedError(`Setup configuration not found for trust: ${trustId}`, 'NotFoundError', null, {
+               trustId,
+               operation: 'updateStep',
+            });
          }
 
          // Validate step exists
          const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
-            throw new Error(`Setup step '${stepName}' not found`);
+            throw createEnhancedError(
+               `Setup step '${stepName}' not found`,
+               'NotFoundError',
+               { availableSteps: setupSteps.map((s) => s.name) },
+               { trustId, stepName, operation: 'updateStep' }
+            );
          }
 
          // Check if step already completed
          const completedSteps = setupConfig.steps_completed || [];
          if (completedSteps.includes(stepName)) {
-            throw ErrorFactory.createError('ConflictError', `Setup step '${stepName}' already completed`);
+            throw createEnhancedError(
+               `Setup step '${stepName}' already completed`,
+               'ConflictError',
+               { completedSteps: completedSteps },
+               { trustId, stepName, operation: 'updateStep' }
+            );
          }
 
          // Validate step data
          const validationErrors = this.validateStepData(stepName, stepData);
          if (validationErrors.length > 0) {
-            throw ErrorFactory.createError('ValidationError', 'Step validation failed', { validationErrors });
+            throw createEnhancedError(
+               'Step validation failed',
+               'ValidationError',
+               { validationErrors, invalidFields: validationErrors.map((e) => e.field) },
+               { trustId, stepName, stepData, operation: 'updateStep' }
+            );
          }
 
          // Update setup configuration
@@ -236,7 +281,10 @@ function createSetupService() {
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            throw ErrorFactory.createError('NotFoundError', `Trust not found: ${trustId}`);
+            throw createEnhancedError(`Trust not found: ${trustId}`, 'NotFoundError', null, {
+               trustId,
+               operation: 'finalizeSetup',
+            });
          }
 
          await trust.markSetupComplete();
@@ -331,7 +379,12 @@ function createSetupService() {
 
          const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
-            throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
+            throw createEnhancedError(
+               `Setup step '${stepName}' not found`,
+               'NotFoundError',
+               { availableSteps: setupSteps.map((s) => s.name) },
+               { stepName, operation: 'validateStepData' }
+            );
          }
 
          return {

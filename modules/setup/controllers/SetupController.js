@@ -1,10 +1,4 @@
 const SetupService = require('../services/SetupService');
-const {
-   ErrorFactory,
-   ValidationError,
-   NotFoundError,
-   DuplicateError,
-} = require('../../../utils/errors');
 const logger = require('../../../utils/logger');
 
 /**
@@ -15,8 +9,8 @@ function createSetupController() {
    const setupService = new SetupService();
 
    /**
-   * Initialize setup for a trust
-   */
+    * Initialize setup for a trust
+    */
    async function initializeSetup(req, res) {
       try {
          const { trust_id } = req.body;
@@ -58,8 +52,8 @@ function createSetupController() {
    }
 
    /**
-   * Get setup progress for a trust
-   */
+    * Get setup progress for a trust
+    */
    async function getSetupProgress(req, res) {
       try {
          const { trust_id } = req.params;
@@ -100,8 +94,8 @@ function createSetupController() {
    }
 
    /**
-   * Complete a setup step
-   */
+    * Complete a setup step
+    */
    async function completeStep(req, res) {
       try {
          const { trust_id, step_name } = req.body;
@@ -116,11 +110,7 @@ function createSetupController() {
             });
          }
 
-         const result = await setupService.completeStep(
-            trust_id,
-            step_name,
-            req.body.data,
-         );
+         const result = await setupService.completeStep(trust_id, step_name, req.body.data);
 
          res.json({
             success: true,
@@ -147,8 +137,8 @@ function createSetupController() {
    }
 
    /**
-   * Get step details
-   */
+    * Get step details
+    */
    async function getStepDetails(req, res) {
       try {
          const { trust_id, step_name } = req.params;
@@ -163,10 +153,7 @@ function createSetupController() {
             });
          }
 
-         const stepDetails = await setupService.getStepDetails(
-            trust_id,
-            step_name,
-         );
+         const stepDetails = await setupService.getStepDetails(trust_id, step_name);
 
          res.json({
             success: true,
@@ -192,8 +179,8 @@ function createSetupController() {
    }
 
    /**
-   * Reset setup for a trust
-   */
+    * Reset setup for a trust
+    */
    async function resetSetup(req, res) {
       try {
          const { trust_id } = req.body;

@@ -62,6 +62,10 @@ function extractUserMessage(err) {
    }
 
    if (err.name === 'ValidationError') {
+      if (err.details && err.details.validationErrors && Array.isArray(err.details.validationErrors)) {
+         const messages = err.details.validationErrors.map((ve) => ve.message || 'Invalid value');
+         return messages.join(', ');
+      }
       if (err.details && Array.isArray(err.details)) {
          return err.details.map((d) => d.message).join(', ');
       }
@@ -90,19 +94,48 @@ function extractUserMessage(err) {
 function formatFlashError(err, userMessage) {
    const isDevelopment = process.env.NODE_ENV === 'development';
 
-   if (isDevelopment && err.stack) {
-      // In development, provide more details but keep it readable
-      return {
-         message: userMessage,
-         details: err.stack.split('\n').slice(0, 5).join('\n'), // First 5 lines of stack
-         technical: true,
-      };
+   // Create base flash message
+   const flashMessage = {
+      message: userMessage,
+      technical: isDevelopment,
+   };
+
+   // Add validation errors if present (for user-friendly display)
+   if (err.details && err.details.validationErrors) {
+      flashMessage.validationErrors = err.details.validationErrors.map((ve) => ({
+         field: ve.field || 'unknown',
+         message: ve.message || 'Invalid value',
+      }));
    }
 
-   return {
-      message: userMessage,
-      technical: false,
-   };
+   // Add available options for NotFoundErrors
+   if (err.name === 'NotFoundError' && err.details) {
+      if (err.details.availableSteps) {
+         flashMessage.suggestions = `Available options: ${err.details.availableSteps.join(', ')}`;
+      }
+   }
+
+   // In development, add comprehensive debugging information
+   if (isDevelopment) {
+      if (err.context) {
+         flashMessage.context = err.context;
+      }
+
+      if (err.details) {
+         flashMessage.debugDetails = err.details;
+      }
+
+      if (err.timestamp) {
+         flashMessage.timestamp = err.timestamp;
+      }
+
+      if (err.stack) {
+         // First 5 lines of stack for debugging
+         flashMessage.stack = err.stack.split('\n').slice(0, 5).join('\n');
+      }
+   }
+
+   return flashMessage;
 }
 
 /**

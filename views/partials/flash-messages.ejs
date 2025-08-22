@@ -13,7 +13,17 @@
                 </div>
                 <div class="flex-grow-1">
                     <strong>Success!</strong>
-                    <span class="d-block flash-message-text"><%= typeof message === 'object' ? JSON.stringify(message) : message %></span>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
                 </div>
                 <button type="button" 
                         class="btn-close ms-2" 
@@ -41,7 +51,73 @@
                 </div>
                 <div class="flex-grow-1">
                     <strong>Error!</strong>
-                    <span class="d-block flash-message-text"><%= typeof message === 'object' ? JSON.stringify(message) : message %></span>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text mb-2"><%= message.message %></span>
+                            <% } %>
+                            
+                            <% if (message.validationErrors && message.validationErrors.length > 0) { %>
+                                <div class="validation-errors mt-2">
+                                    <small class="text-muted d-block mb-1">Validation Issues:</small>
+                                    <% message.validationErrors.forEach(function(ve) { %>
+                                        <div class="validation-error-item small">
+                                            <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                            <strong><%= ve.field %>:</strong> <%= ve.message %>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                            
+                            <% if (message.suggestions) { %>
+                                <div class="error-suggestions mt-2">
+                                    <small class="text-info d-block">
+                                        <i class="fas fa-lightbulb me-1"></i><%= message.suggestions %>
+                                    </small>
+                                </div>
+                            <% } %>
+                            
+                            <% if (message.technical && (message.context || message.debugDetails || message.stack)) { %>
+                                <div class="debug-info mt-2">
+                                    <button class="btn btn-link btn-sm p-0 text-muted" type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#debug-<%= index %>" 
+                                            aria-expanded="false">
+                                        <i class="fas fa-code me-1"></i>Debug Info
+                                    </button>
+                                    <div class="collapse mt-2" id="debug-<%= index %>">
+                                        <div class="card card-body bg-dark text-light small">
+                                            <% if (message.context) { %>
+                                                <div class="mb-2">
+                                                    <strong>Context:</strong>
+                                                    <pre class="text-light mb-0"><%= JSON.stringify(message.context, null, 2) %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.debugDetails) { %>
+                                                <div class="mb-2">
+                                                    <strong>Details:</strong>
+                                                    <pre class="text-light mb-0"><%= JSON.stringify(message.debugDetails, null, 2) %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.stack) { %>
+                                                <div class="mb-2">
+                                                    <strong>Stack:</strong>
+                                                    <pre class="text-light mb-0"><%= message.stack %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.timestamp) { %>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-clock me-1"></i><%= new Date(message.timestamp).toLocaleString() %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
                 </div>
                 <button type="button" 
                         class="btn-close ms-2" 
@@ -69,7 +145,17 @@
                 </div>
                 <div class="flex-grow-1">
                     <strong>Warning!</strong>
-                    <span class="d-block flash-message-text"><%= typeof message === 'object' ? JSON.stringify(message) : message %></span>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
                 </div>
                 <button type="button" 
                         class="btn-close ms-2" 
@@ -97,7 +183,17 @@
                 </div>
                 <div class="flex-grow-1">
                     <strong>Info!</strong>
-                    <span class="d-block flash-message-text"><%= typeof message === 'object' ? JSON.stringify(message) : message %></span>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
                 </div>
                 <button type="button" 
                         class="btn-close ms-2" 
@@ -263,6 +359,41 @@
 
 .flash-alert:hover .alert-progress-bar {
     animation-play-state: paused;
+}
+
+/* Enhanced Error Display Styles */
+.flash-message-content .validation-errors {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #ffc107;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.validation-error-item {
+    margin: 0.25rem 0;
+    color: #6c757d;
+}
+
+.error-suggestions {
+    background: rgba(13, 202, 240, 0.1);
+    border-left: 3px solid #0dcaf0;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.debug-info .card {
+    font-size: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.debug-info pre {
+    font-size: 0.7rem;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 @keyframes slideOutRight {

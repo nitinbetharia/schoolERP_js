@@ -7,8 +7,8 @@ const systemRoutes = require('./system');
 // Module routes (working)
 const userRoutes = require('../modules/users/routes/userRoutes');
 const studentRoutes = require('../modules/students/routes/studentRoutes');
+const setupRoutes = require('../modules/setup/routes/setupRoutes'); // PHASE 1: ENABLED
 // TODO: Refactor these modules to use centralized error handling
-// const setupRoutes = require('../modules/setup/routes/setupRoutes');
 // const schoolRoutes = require('../modules/school/routes/index');
 // const udiseRoutes = require('../modules/udise/routes/UdiseRoutes');
 
@@ -18,8 +18,8 @@ router.use('/admin/system', systemRoutes);
 // Mount working module routes
 router.use('/users', userRoutes);
 router.use('/students', studentRoutes);
+router.use('/setup', setupRoutes); // PHASE 1: ENABLED
 // TODO: Enable after refactoring error handling
-// router.use('/setup', setupRoutes);
 // router.use('/school', schoolRoutes);
 // router.use('/udise', udiseRoutes());
 
