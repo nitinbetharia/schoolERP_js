@@ -1,4 +1,3 @@
-const { ErrorFactory } = require('../../../utils/errors');
 const { logger, logError, logSystem } = require('../../../utils/logger');
 const createUdiseService = require('../services/UdiseService');
 const UdiseService = createUdiseService();
@@ -7,16 +6,17 @@ const UdiseService = createUdiseService();
  * UDISE Controller
  * Handles HTTP requests for UDISE+ School Registration System
  * Manages registration, census data, compliance, and reporting endpoints
+ * Uses centralized error handling - just throw regular Error objects
  */
 function createUdiseController() {
    /**
-   * UDISE School Registration Endpoints
-   */
+    * UDISE School Registration Endpoints
+    */
    const registrationController = {
       /**
-     * Create new UDISE school registration
-     * POST /api/v1/udise/registration
-     */
+       * Create new UDISE school registration
+       * POST /api/v1/udise/registration
+       */
       async createRegistration(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -35,7 +35,7 @@ function createUdiseController() {
                tenantCode,
                school_id,
                req.body,
-               createdBy,
+               createdBy
             );
 
             res.status(201).json({
@@ -53,9 +53,9 @@ function createUdiseController() {
       },
 
       /**
-     * Update UDISE registration
-     * PUT /api/v1/udise/registration/:id
-     */
+       * Update UDISE registration
+       * PUT /api/v1/udise/registration/:id
+       */
       async updateRegistration(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -66,7 +66,7 @@ function createUdiseController() {
                tenantCode,
                id,
                req.body,
-               updatedBy,
+               updatedBy
             );
 
             res.json({
@@ -84,20 +84,16 @@ function createUdiseController() {
       },
 
       /**
-     * Submit registration for approval
-     * POST /api/v1/udise/registration/:id/submit
-     */
+       * Submit registration for approval
+       * POST /api/v1/udise/registration/:id/submit
+       */
       async submitRegistration(req, res, next) {
          try {
             const { tenantCode } = req.user;
             const { id } = req.params;
             const submittedBy = req.user.user_id || req.user.email;
 
-            const registration = await UdiseService.registration.submitRegistration(
-               tenantCode,
-               id,
-               submittedBy,
-            );
+            const registration = await UdiseService.registration.submitRegistration(tenantCode, id, submittedBy);
 
             res.json({
                success: true,
@@ -114,9 +110,9 @@ function createUdiseController() {
       },
 
       /**
-     * Get UDISE registrations
-     * GET /api/v1/udise/registration
-     */
+       * Get UDISE registrations
+       * GET /api/v1/udise/registration
+       */
       async getRegistrations(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -130,10 +126,7 @@ function createUdiseController() {
                offset: parseInt(req.query.offset) || 0,
             };
 
-            const registrations = await UdiseService.registration.getRegistrations(
-               tenantCode,
-               filters,
-            );
+            const registrations = await UdiseService.registration.getRegistrations(tenantCode, filters);
 
             res.json({
                success: true,
@@ -155,9 +148,9 @@ function createUdiseController() {
       },
 
       /**
-     * Get single UDISE registration
-     * GET /api/v1/udise/registration/:id
-     */
+       * Get single UDISE registration
+       * GET /api/v1/udise/registration/:id
+       */
       async getRegistration(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -199,18 +192,15 @@ function createUdiseController() {
       },
 
       /**
-     * Validate registration
-     * POST /api/v1/udise/registration/:id/validate
-     */
+       * Validate registration
+       * POST /api/v1/udise/registration/:id/validate
+       */
       async validateRegistration(req, res, next) {
          try {
             const { tenantCode } = req.user;
             const { id } = req.params;
 
-            const validation = await UdiseService.registration.validateRegistration(
-               tenantCode,
-               id,
-            );
+            const validation = await UdiseService.registration.validateRegistration(tenantCode, id);
 
             res.json({
                success: true,
@@ -228,13 +218,13 @@ function createUdiseController() {
    };
 
    /**
-   * UDISE Census Data Endpoints
-   */
+    * UDISE Census Data Endpoints
+    */
    const censusController = {
       /**
-     * Create census data
-     * POST /api/v1/udise/census
-     */
+       * Create census data
+       * POST /api/v1/udise/census
+       */
       async createCensusData(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -252,7 +242,7 @@ function createUdiseController() {
                tenantCode,
                udise_registration_id,
                req.body,
-               createdBy,
+               createdBy
             );
 
             res.status(201).json({
@@ -270,9 +260,9 @@ function createUdiseController() {
       },
 
       /**
-     * Update census data
-     * PUT /api/v1/udise/census/:id
-     */
+       * Update census data
+       * PUT /api/v1/udise/census/:id
+       */
       async updateCensusData(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -309,18 +299,15 @@ function createUdiseController() {
       },
 
       /**
-     * Get enrollment statistics
-     * GET /api/v1/udise/census/:id/stats
-     */
+       * Get enrollment statistics
+       * GET /api/v1/udise/census/:id/stats
+       */
       async getEnrollmentStats(req, res, next) {
          try {
             const { tenantCode } = req.user;
             const { id } = req.params;
 
-            const stats = await UdiseService.census.calculateEnrollmentStats(
-               tenantCode,
-               id,
-            );
+            const stats = await UdiseService.census.calculateEnrollmentStats(tenantCode, id);
 
             res.json({
                success: true,
@@ -337,9 +324,9 @@ function createUdiseController() {
       },
 
       /**
-     * Get census data by school
-     * GET /api/v1/udise/census/school/:schoolId
-     */
+       * Get census data by school
+       * GET /api/v1/udise/census/school/:schoolId
+       */
       async getCensusDataBySchool(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -349,7 +336,9 @@ function createUdiseController() {
             const models = await UdiseService.getModels(tenantCode);
 
             const whereClause = { school_id: schoolId };
-            if (academic_year) {whereClause.academic_year = academic_year;}
+            if (academic_year) {
+               whereClause.academic_year = academic_year;
+            }
 
             const censusData = await models.UdiseCensusData.findAll({
                where: whereClause,
@@ -378,13 +367,13 @@ function createUdiseController() {
    };
 
    /**
-   * UDISE Compliance Endpoints
-   */
+    * UDISE Compliance Endpoints
+    */
    const complianceController = {
       /**
-     * Create compliance record
-     * POST /api/v1/udise/compliance
-     */
+       * Create compliance record
+       * POST /api/v1/udise/compliance
+       */
       async createComplianceRecord(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -398,13 +387,12 @@ function createUdiseController() {
                });
             }
 
-            const complianceRecord =
-          await UdiseService.compliance.createComplianceRecord(
-             tenantCode,
-             udise_registration_id,
-             req.body,
-             createdBy,
-          );
+            const complianceRecord = await UdiseService.compliance.createComplianceRecord(
+               tenantCode,
+               udise_registration_id,
+               req.body,
+               createdBy
+            );
 
             res.status(201).json({
                success: true,
@@ -421,9 +409,9 @@ function createUdiseController() {
       },
 
       /**
-     * Update compliance record
-     * PUT /api/v1/udise/compliance/:id
-     */
+       * Update compliance record
+       * PUT /api/v1/udise/compliance/:id
+       */
       async updateComplianceRecord(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -431,8 +419,7 @@ function createUdiseController() {
             const updatedBy = req.user.user_id || req.user.email;
 
             const models = await UdiseService.getModels(tenantCode);
-            const complianceRecord =
-          await models.UdiseComplianceRecord.findByPk(id);
+            const complianceRecord = await models.UdiseComplianceRecord.findByPk(id);
 
             if (!complianceRecord) {
                return res.status(404).json({
@@ -469,9 +456,9 @@ function createUdiseController() {
       },
 
       /**
-     * Get compliance records by school
-     * GET /api/v1/udise/compliance/school/:schoolId
-     */
+       * Get compliance records by school
+       * GET /api/v1/udise/compliance/school/:schoolId
+       */
       async getComplianceBySchool(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -481,7 +468,9 @@ function createUdiseController() {
             const models = await UdiseService.getModels(tenantCode);
 
             const whereClause = { school_id: schoolId };
-            if (academic_year) {whereClause.academic_year = academic_year;}
+            if (academic_year) {
+               whereClause.academic_year = academic_year;
+            }
 
             const complianceRecords = await models.UdiseComplianceRecord.findAll({
                where: whereClause,
@@ -510,13 +499,13 @@ function createUdiseController() {
    };
 
    /**
-   * UDISE Reports Endpoints
-   */
+    * UDISE Reports Endpoints
+    */
    const reportsController = {
       /**
-     * Generate UDISE reports
-     * GET /api/v1/udise/reports/:reportType
-     */
+       * Generate UDISE reports
+       * GET /api/v1/udise/reports/:reportType
+       */
       async generateReport(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -531,11 +520,7 @@ function createUdiseController() {
                date_to: req.query.date_to,
             };
 
-            const reportData = await UdiseService.generateReports(
-               tenantCode,
-               reportType,
-               filters,
-            );
+            const reportData = await UdiseService.generateReports(tenantCode, reportType, filters);
 
             res.json({
                success: true,
@@ -554,9 +539,9 @@ function createUdiseController() {
       },
 
       /**
-     * Get dashboard summary
-     * GET /api/v1/udise/dashboard
-     */
+       * Get dashboard summary
+       * GET /api/v1/udise/dashboard
+       */
       async getDashboard(req, res, next) {
          try {
             const { tenantCode } = req.user;
@@ -568,10 +553,7 @@ function createUdiseController() {
             const registrationStats = await models.UdiseSchoolRegistration.findAll({
                attributes: [
                   'registration_status',
-                  [
-                     models.UdiseSchoolRegistration.sequelize.fn('COUNT', '*'),
-                     'count',
-                  ],
+                  [models.UdiseSchoolRegistration.sequelize.fn('COUNT', '*'), 'count'],
                ],
                where: academic_year ? { academic_year } : {},
                group: ['registration_status'],
@@ -586,7 +568,7 @@ function createUdiseController() {
                   [
                      models.UdiseComplianceRecord.sequelize.fn(
                         'AVG',
-                        models.UdiseComplianceRecord.sequelize.col('compliance_score'),
+                        models.UdiseComplianceRecord.sequelize.col('compliance_score')
                      ),
                      'avg_score',
                   ],
@@ -600,12 +582,7 @@ function createUdiseController() {
             const recentIntegrations = await models.UdiseIntegrationLog.findAll({
                limit: 10,
                order: [['created_at', 'DESC']],
-               attributes: [
-                  'integration_type',
-                  'operation_status',
-                  'created_at',
-                  'processing_time_ms',
-               ],
+               attributes: ['integration_type', 'operation_status', 'created_at', 'processing_time_ms'],
             });
 
             res.json({

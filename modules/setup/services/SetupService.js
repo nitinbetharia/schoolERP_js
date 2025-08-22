@@ -1,14 +1,9 @@
 const logger = require('../../../utils/logger');
-const {
-   ErrorFactory,
-   ValidationError,
-   NotFoundError,
-   DuplicateError,
-} = require('../../../utils/errors');
 
 /**
  * Setup Service
  * Handles trust setup workflow management
+ * Uses centralized error handling - just throw regular Error objects
  */
 function createSetupService() {
    const setupSteps = [
@@ -57,8 +52,8 @@ function createSetupService() {
    ];
 
    /**
-   * Initialize setup for a trust
-   */
+    * Initialize setup for a trust
+    */
    async function initializeSetup(trustId) {
       try {
          const { getTenantModels } = require('../../../models');
@@ -71,10 +66,7 @@ function createSetupService() {
          });
 
          if (existingSetup) {
-            throw ErrorFactory.createError(
-               'ConflictError',
-               'Setup already initialized for this trust',
-            );
+            throw new Error('Setup already initialized for this trust');
          }
 
          // Create initial setup configuration
@@ -107,8 +99,8 @@ function createSetupService() {
    }
 
    /**
-   * Get setup progress for a trust
-   */
+    * Get setup progress for a trust
+    */
    async function getSetupProgress(trustId) {
       try {
          const { getTenantModels } = require('../../../models');
@@ -131,9 +123,7 @@ function createSetupService() {
          }
 
          const completedSteps = setupConfig.steps_completed || [];
-         const progressPercentage = Math.round(
-            (completedSteps.length / setupSteps.length) * 100,
-         );
+         const progressPercentage = Math.round((completedSteps.length / setupSteps.length) * 100);
 
          return {
             is_initialized: true,
@@ -160,8 +150,8 @@ function createSetupService() {
    }
 
    /**
-   * Complete a setup step
-   */
+    * Complete a setup step
+    */
    async function completeStep(trustId, stepName, stepData, systemUserId) {
       try {
          const { getTenantModels } = require('../../../models');
@@ -173,38 +163,25 @@ function createSetupService() {
          });
 
          if (!setupConfig) {
-            throw ErrorFactory.createError(
-               'NotFoundError',
-               `Setup configuration not found for trust: ${trustId}`,
-            );
+            throw new Error(`Setup configuration not found for trust: ${trustId}`);
          }
 
          // Validate step exists
          const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
-            throw ErrorFactory.createError(
-               'NotFoundError',
-               `Setup step '${stepName}' not found`,
-            );
+            throw new Error(`Setup step '${stepName}' not found`);
          }
 
          // Check if step already completed
          const completedSteps = setupConfig.steps_completed || [];
          if (completedSteps.includes(stepName)) {
-            throw ErrorFactory.createError(
-               'ConflictError',
-               `Setup step '${stepName}' already completed`,
-            );
+            throw ErrorFactory.createError('ConflictError', `Setup step '${stepName}' already completed`);
          }
 
          // Validate step data
          const validationErrors = this.validateStepData(stepName, stepData);
          if (validationErrors.length > 0) {
-            throw ErrorFactory.createError(
-               'ValidationError',
-               'Step validation failed',
-               { validationErrors },
-            );
+            throw ErrorFactory.createError('ValidationError', 'Step validation failed', { validationErrors });
          }
 
          // Update setup configuration
@@ -250,19 +227,16 @@ function createSetupService() {
    }
 
    /**
-   * Finalize setup (activate trust)
-   */
-   async function finalizeSetup(trustId, systemUserId) {
+    * Finalize setup (activate trust)
+    */
+   async function finalizeSetup(trustId, _systemUserId) {
       try {
          const { getTrustModel } = require('../../../models');
          const Trust = await getTrustModel();
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            throw ErrorFactory.createError(
-               'NotFoundError',
-               `Trust not found: ${trustId}`,
-            );
+            throw ErrorFactory.createError('NotFoundError', `Trust not found: ${trustId}`);
          }
 
          await trust.markSetupComplete();
@@ -288,8 +262,8 @@ function createSetupService() {
    }
 
    /**
-   * Get required fields for a step
-   */
+    * Get required fields for a step
+    */
    function getRequiredFields(stepName) {
       const fieldMappings = {
          trust_info: ['name', 'code', 'address', 'contact_email', 'contact_phone'],
@@ -305,8 +279,8 @@ function createSetupService() {
    }
 
    /**
-   * Validate step data
-   */
+    * Validate step data
+    */
    function validateStepData(stepName, data) {
       const errors = [];
       const requiredFields = this.getRequiredFields(stepName);
@@ -325,11 +299,7 @@ function createSetupService() {
             }
             break;
          case 'academic_year':
-            if (
-               data.start_date &&
-          data.end_date &&
-          new Date(data.start_date) >= new Date(data.end_date)
-            ) {
+            if (data.start_date && data.end_date && new Date(data.start_date) >= new Date(data.end_date)) {
                errors.push('End date must be after start date');
             }
             break;
@@ -339,16 +309,16 @@ function createSetupService() {
    }
 
    /**
-   * Validate email format
-   */
+    * Validate email format
+    */
    function isValidEmail(email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
    }
 
    /**
-   * Get step details
-   */
+    * Get step details
+    */
    async function getStepDetails(trustId, stepName) {
       try {
          const { getTenantModels } = require('../../../models');
@@ -361,10 +331,7 @@ function createSetupService() {
 
          const step = setupSteps.find((s) => s.name === stepName);
          if (!step) {
-            throw ErrorFactory.createError(
-               'NotFoundError',
-               `Setup step '${stepName}' not found`,
-            );
+            throw ErrorFactory.createError('NotFoundError', `Setup step '${stepName}' not found`);
          }
 
          return {
@@ -387,8 +354,8 @@ function createSetupService() {
    }
 
    /**
-   * Reset setup for a trust
-   */
+    * Reset setup for a trust
+    */
    async function resetSetup(trustId) {
       try {
          const { getTenantModels } = require('../../../models');

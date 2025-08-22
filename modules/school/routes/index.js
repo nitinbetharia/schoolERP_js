@@ -18,7 +18,7 @@ router.use('/schools', schoolRoutes);
 router.use('/classes', classRoutes);
 router.use('/sections', sectionRoutes);
 router.use('/compliance', boardComplianceRoutes);
-router.use('/udise', udiseRoutes);
-router.use('/udise', udiseStudentRoutes); // UDISE+ student specific routes
+router.use('/udise/schools', udiseRoutes);
+router.use('/udise/students', udiseStudentRoutes); // UDISE+ student specific routes
 
 module.exports = router;

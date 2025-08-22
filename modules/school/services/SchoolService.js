@@ -1,10 +1,10 @@
 const { dbManager } = require('../../../models/database');
 const logger = require('../../../utils/logger');
-const { ErrorFactory } = require('../../../utils/errors');
 
 /**
  * SchoolService
  * Handles business logic for school management
+ * Uses centralized error handling - just throw regular Error objects
  */
 class SchoolService {
    constructor() {
@@ -12,8 +12,8 @@ class SchoolService {
    }
 
    /**
-   * Create a new school
-   */
+    * Create a new school
+    */
    async createSchool(trustId, schoolData) {
       try {
          logger.info('Creating school', {
@@ -47,8 +47,8 @@ class SchoolService {
    }
 
    /**
-   * Get schools for a trust
-   */
+    * Get schools for a trust
+    */
    async getSchools(trustId, _filters = {}) {
       try {
          logger.info('Getting schools', {
@@ -78,8 +78,8 @@ class SchoolService {
    }
 
    /**
-   * Get school by ID
-   */
+    * Get school by ID
+    */
    async getSchoolById(trustId, schoolId) {
       try {
          logger.info('Getting school by ID', {
@@ -117,8 +117,8 @@ class SchoolService {
    }
 
    /**
-   * Update school
-   */
+    * Update school
+    */
    async updateSchool(trustId, schoolId, updateData) {
       try {
          logger.info('Updating school', {
@@ -139,13 +139,11 @@ class SchoolService {
                   id: schoolId,
                   trust_id: trustId,
                },
-            },
+            }
          );
 
          if (updatedRowsCount === 0) {
-            throw ErrorFactory.createClientError(
-               'School not found or no changes made',
-            );
+            throw ErrorFactory.createClientError('School not found or no changes made');
          }
 
          return await this.getSchoolById(trustId, schoolId);
@@ -161,8 +159,8 @@ class SchoolService {
    }
 
    /**
-   * Delete school (soft delete)
-   */
+    * Delete school (soft delete)
+    */
    async deleteSchool(trustId, schoolId) {
       try {
          logger.info('Deleting school', {
@@ -187,7 +185,7 @@ class SchoolService {
                   id: schoolId,
                   trust_id: trustId,
                },
-            },
+            }
          );
 
          if (updatedRowsCount === 0) {

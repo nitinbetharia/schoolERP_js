@@ -4,16 +4,24 @@ const router = express.Router();
 // Import core route modules
 const systemRoutes = require('./system');
 
-// Module routes
+// Module routes (working)
 const userRoutes = require('../modules/users/routes/userRoutes');
 const studentRoutes = require('../modules/students/routes/studentRoutes');
+// TODO: Refactor these modules to use centralized error handling
+// const setupRoutes = require('../modules/setup/routes/setupRoutes');
+// const schoolRoutes = require('../modules/school/routes/index');
+// const udiseRoutes = require('../modules/udise/routes/UdiseRoutes');
 
 // Mount core routes
 router.use('/admin/system', systemRoutes);
 
-// Mount simplified routes
+// Mount working module routes
 router.use('/users', userRoutes);
 router.use('/students', studentRoutes);
+// TODO: Enable after refactoring error handling
+// router.use('/setup', setupRoutes);
+// router.use('/school', schoolRoutes);
+// router.use('/udise', udiseRoutes());
 
 // API status endpoint
 router.get('/status', (req, res) => {
