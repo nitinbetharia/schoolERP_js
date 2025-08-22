@@ -17,16 +17,16 @@ function createTransporter() {
    if (transporter) {
       return transporter;
    }
-  
+
    // Validate required environment variables
    const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASSWORD'];
-   const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-  
+   const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+
    if (missingVars.length > 0) {
       logger.warn('Email service not configured - missing environment variables', { missingVars });
       return null;
    }
-  
+
    try {
       transporter = nodemailer.createTransporter({
          host: process.env.SMTP_HOST,
@@ -34,17 +34,16 @@ function createTransporter() {
          secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
          auth: {
             user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASSWORD
+            pass: process.env.SMTP_PASSWORD,
          },
          // Additional security options
          tls: {
-            rejectUnauthorized: process.env.NODE_ENV === 'production'
-         }
+            rejectUnauthorized: process.env.NODE_ENV === 'production',
+         },
       });
-    
+
       logger.info('Email transporter created successfully');
       return transporter;
-    
    } catch (error) {
       logger.error('Failed to create email transporter', error);
       return null;
@@ -56,7 +55,7 @@ function createTransporter() {
  */
 function createEmailTemplate(subject, content, recipientName, schoolData = {}) {
    const schoolName = schoolData.name || 'School ERP System';
-  
+
    return {
       subject: subject,
       html: `
@@ -108,7 +107,7 @@ function createEmailTemplate(subject, content, recipientName, schoolData = {}) {
       School Administration
       
       This is an automated email. Please do not reply.
-    `
+    `,
    };
 }
 
@@ -122,7 +121,7 @@ async function sendWelcomeEmail(userEmail, userName, temporaryPassword, schoolDa
          logger.warn('Email service not available - skipping welcome email');
          return { success: false, reason: 'Email service not configured' };
       }
-    
+
       const template = createEmailTemplate(
          'Welcome to School ERP System',
          `
@@ -150,23 +149,22 @@ async function sendWelcomeEmail(userEmail, userName, temporaryPassword, schoolDa
          userName,
          schoolData
       );
-    
+
       const mailOptions = {
          from: `"${schoolData.name || 'School ERP System'}" <${process.env.SMTP_USER}>`,
          to: userEmail,
-         ...template
+         ...template,
       };
-    
+
       const result = await emailTransporter.sendMail(mailOptions);
-    
-      logger.info('Welcome email sent successfully', { 
-         to: userEmail, 
+
+      logger.info('Welcome email sent successfully', {
+         to: userEmail,
          messageId: result.messageId,
-         userName 
+         userName,
       });
-    
+
       return { success: true, messageId: result.messageId };
-    
    } catch (error) {
       logger.error('Failed to send welcome email', { error: error.message, userEmail, userName });
       throw error;
@@ -183,10 +181,10 @@ async function sendFeeReminder(studentEmail, studentName, feeDetails, schoolData
          logger.warn('Email service not available - skipping fee reminder');
          return { success: false, reason: 'Email service not configured' };
       }
-    
+
       const dueDate = new Date(feeDetails.dueDate);
       const isOverdue = dueDate < new Date();
-    
+
       const template = createEmailTemplate(
          `${isOverdue ? 'URGENT: Overdue' : ''} Fee Payment Reminder`,
          `
@@ -203,10 +201,11 @@ async function sendFeeReminder(studentEmail, studentName, feeDetails, schoolData
           </ul>
         </div>
         
-        ${isOverdue ? 
-      '<p style="color: red;"><strong>This payment is overdue. Please make the payment immediately to avoid any inconvenience.</strong></p>' :
-      '<p>Please make the payment by the due date to avoid any late fees.</p>'
-}
+        ${
+           isOverdue
+              ? '<p style="color: red;"><strong>This payment is overdue. Please make the payment immediately to avoid any inconvenience.</strong></p>'
+              : '<p>Please make the payment by the due date to avoid any late fees.</p>'
+        }
         
         <p><strong>Payment Methods:</strong></p>
         <ul>
@@ -222,25 +221,24 @@ async function sendFeeReminder(studentEmail, studentName, feeDetails, schoolData
          studentName,
          schoolData
       );
-    
+
       const mailOptions = {
          from: `"${schoolData.name || 'School ERP System'}" <${process.env.SMTP_USER}>`,
          to: studentEmail,
-         ...template
+         ...template,
       };
-    
+
       const result = await emailTransporter.sendMail(mailOptions);
-    
-      logger.info('Fee reminder email sent successfully', { 
-         to: studentEmail, 
+
+      logger.info('Fee reminder email sent successfully', {
+         to: studentEmail,
          messageId: result.messageId,
          studentName,
          amount: feeDetails.amount,
-         isOverdue
+         isOverdue,
       });
-    
+
       return { success: true, messageId: result.messageId };
-    
    } catch (error) {
       logger.error('Failed to send fee reminder email', { error: error.message, studentEmail, studentName });
       throw error;
@@ -257,7 +255,7 @@ async function sendFeeReceipt(studentEmail, studentName, receiptData, receiptPdf
          logger.warn('Email service not available - skipping fee receipt');
          return { success: false, reason: 'Email service not configured' };
       }
-    
+
       const template = createEmailTemplate(
          'Fee Payment Receipt',
          `
@@ -290,31 +288,32 @@ async function sendFeeReceipt(studentEmail, studentName, receiptData, receiptPdf
          studentName,
          schoolData
       );
-    
+
       const mailOptions = {
          from: `"${schoolData.name || 'School ERP System'}" <${process.env.SMTP_USER}>`,
          to: studentEmail,
-         attachments: receiptPdfPath ? [
-            {
-               filename: `fee-receipt-${receiptData.receiptNo}.pdf`,
-               path: receiptPdfPath,
-               contentType: 'application/pdf'
-            }
-         ] : [],
-         ...template
+         attachments: receiptPdfPath
+            ? [
+                 {
+                    filename: `fee-receipt-${receiptData.receiptNo}.pdf`,
+                    path: receiptPdfPath,
+                    contentType: 'application/pdf',
+                 },
+              ]
+            : [],
+         ...template,
       };
-    
+
       const result = await emailTransporter.sendMail(mailOptions);
-    
-      logger.info('Fee receipt email sent successfully', { 
-         to: studentEmail, 
+
+      logger.info('Fee receipt email sent successfully', {
+         to: studentEmail,
          messageId: result.messageId,
          studentName,
-         receiptNo: receiptData.receiptNo
+         receiptNo: receiptData.receiptNo,
       });
-    
+
       return { success: true, messageId: result.messageId };
-    
    } catch (error) {
       logger.error('Failed to send fee receipt email', { error: error.message, studentEmail, studentName });
       throw error;
@@ -331,9 +330,9 @@ async function sendAttendanceNotification(parentEmail, studentName, attendanceDa
          logger.warn('Email service not available - skipping attendance notification');
          return { success: false, reason: 'Email service not configured' };
       }
-    
+
       const isAbsent = attendanceData.status === 'ABSENT';
-    
+
       const template = createEmailTemplate(
          `Attendance Notification - ${studentName}`,
          `
@@ -351,10 +350,11 @@ async function sendAttendanceNotification(parentEmail, studentName, attendanceDa
           </ul>
         </div>
         
-        ${isAbsent ? 
-      '<p style="color: red;"><strong>Your child was marked absent today. If this is incorrect, please contact the school immediately.</strong></p>' :
-      '<p style="color: green;">Your child was present at school today.</p>'
-}
+        ${
+           isAbsent
+              ? '<p style="color: red;"><strong>Your child was marked absent today. If this is incorrect, please contact the school immediately.</strong></p>'
+              : '<p style="color: green;">Your child was present at school today.</p>'
+        }
         
         <p>If you have any concerns about your child\'s attendance, please contact the class teacher or school office.</p>
         
@@ -365,27 +365,133 @@ async function sendAttendanceNotification(parentEmail, studentName, attendanceDa
          'Parent/Guardian',
          schoolData
       );
-    
+
       const mailOptions = {
          from: `"${schoolData.name || 'School ERP System'}" <${process.env.SMTP_USER}>`,
          to: parentEmail,
-         ...template
+         ...template,
       };
-    
+
       const result = await emailTransporter.sendMail(mailOptions);
-    
-      logger.info('Attendance notification email sent successfully', { 
-         to: parentEmail, 
+
+      logger.info('Attendance notification email sent successfully', {
+         to: parentEmail,
          messageId: result.messageId,
          studentName,
-         status: attendanceData.status
+         status: attendanceData.status,
       });
-    
+
       return { success: true, messageId: result.messageId };
-    
    } catch (error) {
       logger.error('Failed to send attendance notification email', { error: error.message, parentEmail, studentName });
       throw error;
+   }
+}
+
+/**
+ * Send error alert email to administrators
+ * For production error monitoring
+ */
+async function sendErrorAlert(errorData) {
+   const emailTransporter = createTransporter();
+   if (!emailTransporter) {
+      throw new Error('Email service not configured');
+   }
+
+   const { error, request, severity, timestamp } = errorData;
+
+   // Determine recipients based on severity
+   const adminEmails = process.env.ADMIN_ALERT_EMAILS
+      ? process.env.ADMIN_ALERT_EMAILS.split(',').map((email) => email.trim())
+      : ['admin@schoolerp.com'];
+
+   // Create severity-based subject
+   const severityLabels = {
+      low: '🔵 Low',
+      medium: '🟡 Medium',
+      high: '🟠 High',
+      critical: '🔴 CRITICAL',
+   };
+
+   const severityLabel = severityLabels[severity] || '⚪ Unknown';
+   const subject = `${severityLabel} Error Alert - School ERP [${severity.toUpperCase()}]`;
+
+   // Format error details
+   const errorContent = `
+      <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 5px; margin: 15px 0;">
+         <h3>🚨 Error Details</h3>
+         <p><strong>Severity:</strong> ${severityLabel} ${severity.toUpperCase()}</p>
+         <p><strong>Message:</strong> ${error.message || 'Unknown error'}</p>
+         <p><strong>Timestamp:</strong> ${timestamp}</p>
+      </div>
+      
+      <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 5px; margin: 15px 0;">
+         <h3>📋 Request Information</h3>
+         <p><strong>Method:</strong> ${request.method}</p>
+         <p><strong>URL:</strong> ${request.url}</p>
+         <p><strong>IP Address:</strong> ${request.ip}</p>
+         <p><strong>User Agent:</strong> ${request.userAgent}</p>
+         ${request.user ? `<p><strong>User:</strong> ${request.user.email || request.user.username} (ID: ${request.user.id})</p>` : ''}
+         ${request.tenant ? `<p><strong>Tenant:</strong> ${request.tenant.name} (Code: ${request.tenantCode})</p>` : ''}
+      </div>
+      
+      ${
+         error.stack
+            ? `
+      <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin: 15px 0;">
+         <h3>🔧 Stack Trace</h3>
+         <pre style="font-size: 12px; white-space: pre-wrap; word-wrap: break-word;">${error.stack}</pre>
+      </div>
+      `
+            : ''
+      }
+      
+      <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin: 15px 0;">
+         <h3>⚡ Action Required</h3>
+         <p>This error requires immediate attention from the development team.</p>
+         <ul>
+            <li>Review the error logs for additional context</li>
+            <li>Check system health and performance metrics</li>
+            <li>Consider implementing additional monitoring for this error type</li>
+         </ul>
+      </div>
+   `;
+
+   try {
+      const emailTemplate = createEmailTemplate(subject, errorContent, 'System Administrator', {
+         name: 'School ERP System',
+      });
+
+      const mailOptions = {
+         from: process.env.SMTP_FROM || process.env.SMTP_USER,
+         to: adminEmails,
+         subject: emailTemplate.subject,
+         html: emailTemplate.html,
+         text: emailTemplate.text,
+         priority: severity === 'critical' ? 'high' : 'normal',
+      };
+
+      const result = await emailTransporter.sendMail(mailOptions);
+
+      logger.info('Error alert email sent successfully', {
+         messageId: result.messageId,
+         recipients: adminEmails,
+         severity: severity,
+         errorMessage: error.message,
+      });
+
+      return {
+         success: true,
+         messageId: result.messageId,
+         recipients: adminEmails,
+      };
+   } catch (emailError) {
+      logger.error('Failed to send error alert email', {
+         error: emailError.message,
+         originalError: error.message,
+         severity: severity,
+      });
+      throw emailError;
    }
 }
 
@@ -398,13 +504,12 @@ async function testEmailConfiguration() {
       if (!emailTransporter) {
          return { success: false, error: 'Email service not configured' };
       }
-    
+
       // Verify connection
       await emailTransporter.verify();
-    
+
       logger.info('Email configuration test successful');
       return { success: true, message: 'Email service is properly configured' };
-    
    } catch (error) {
       logger.error('Email configuration test failed', error);
       return { success: false, error: error.message };
@@ -416,5 +521,6 @@ module.exports = {
    sendFeeReminder,
    sendFeeReceipt,
    sendAttendanceNotification,
-   testEmailConfiguration
+   sendErrorAlert,
+   testEmailConfiguration,
 };

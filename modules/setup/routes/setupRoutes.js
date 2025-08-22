@@ -4,7 +4,7 @@ const { requireSystemAdmin } = require('../../../middleware/auth');
 
 // Q59-ENFORCED: Import validation schemas for setup operations
 const { validateBody } = require('../../../utils/validation');
-const { setupConfigurationValidationSchemas } = require('../../../models/index');
+const { setupConfigurationValidationSchemas } = require('../models/SetupConfiguration');
 
 const router = express.Router();
 const setupController = new SetupController();

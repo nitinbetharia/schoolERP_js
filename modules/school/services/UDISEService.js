@@ -1,4 +1,4 @@
-const { models } = require('../../../models');
+const { dbManager } = require('../../../models/database');
 const logger = require('../../../utils/logger');
 const { ErrorFactory } = require('../../../utils/errors');
 

@@ -3,6 +3,28 @@ const { logSystem, logAuth, logError } = require('../utils/logger');
 const { ErrorFactory } = require('../utils/validation');
 const appConfig = require('../config/app-config.json');
 
+async function initializeTenantModelsHelper(trustCode) {
+   const { dbManager } = require('../models/database');
+   return await dbManager.initializeTenantModels(trustCode);
+}
+
+// Helper function to get system models
+async function getSystemModels() {
+   const { dbManager } = require('../models/database');
+   const { defineSystemUserModel } = require('../models/SystemUser');
+   const systemDB = await dbManager.getSystemDB();
+   const SystemUser = defineSystemUserModel(systemDB);
+   return { SystemUser };
+}
+
+async function getTrustModel() {
+   const { dbManager } = require('../models/database');
+   const { defineTrustModel } = require('../models/Trust');
+   const systemDB = await dbManager.getSystemDB();
+   const Trust = defineTrustModel(systemDB);
+   return Trust;
+}
+
 /**
  * System Authentication Service
  * Handles system admin authentication and management
@@ -17,9 +39,11 @@ function createSystemAuthService() {
 
          logAuth('LOGIN_ATTEMPT', null, null, { username });
 
-         // Get system models
-         const { getSystemModels } = require('../models');
-         const { SystemUser } = await getSystemModels();
+         // Get system database and models
+         const { dbManager } = require('../models/database');
+         const { defineSystemUserModel } = require('../models/SystemUser');
+         const systemDB = await dbManager.getSystemDB();
+         const SystemUser = defineSystemUserModel(systemDB);
 
          // Find user by username
          const user = await SystemUser.findOne({
@@ -103,7 +127,7 @@ function createSystemAuthService() {
     */
    async function changePassword(userId, currentPassword, newPassword) {
       try {
-         const { getSystemModels } = require('../models');
+         // Get system models using helper function
          const { SystemUser } = await getSystemModels();
 
          const user = await SystemUser.findByPk(userId);
@@ -142,7 +166,7 @@ function createSystemAuthService() {
     */
    async function createSystemUser(userData, createdBy) {
       try {
-         const { getSystemModels } = require('../models');
+         // Get system models using helper function
          const { SystemUser } = await getSystemModels();
 
          // Check if username already exists
@@ -208,7 +232,7 @@ function createSystemAuthService() {
     */
    async function updateProfile(userId, updateData) {
       try {
-         const { getSystemModels } = require('../models');
+         // Get system models using helper function
          const { SystemUser } = await getSystemModels();
 
          const [updatedCount] = await SystemUser.update(updateData, {
@@ -250,7 +274,7 @@ function createTrustService() {
     */
    async function createTrust(trustData) {
       try {
-         const { getTrustModel } = require('../models');
+         // Get trust model using helper function
          const Trust = await getTrustModel();
 
          // Check if trust code already exists
@@ -305,7 +329,7 @@ function createTrustService() {
     */
    async function getTrust(identifier, field = 'id') {
       try {
-         const { getTrustModel } = require('../models');
+         // Get trust model using helper function
          const Trust = await getTrustModel();
 
          const whereClause = {};
@@ -331,7 +355,7 @@ function createTrustService() {
     */
    async function updateTrust(trustId, updateData, updatedBy) {
       try {
-         const { getTrustModel } = require('../models');
+         // Get trust model using helper function
          const Trust = await getTrustModel();
 
          const trust = await Trust.findByPk(trustId);
@@ -380,7 +404,7 @@ function createTrustService() {
     */
    async function listTrusts(query = {}) {
       try {
-         const { getTrustModel } = require('../models');
+         // Get trust model using helper function
          const Trust = await getTrustModel();
 
          const { page = 1, limit = 10, status, search } = query;
@@ -431,7 +455,7 @@ function createTrustService() {
     */
    async function completeSetup(trustId, completedBy) {
       try {
-         const { getTrustModel, initializeTenantModels } = require('../models');
+         // Get trust model using helper function
          const { dbManager } = require('../models/database');
          const Trust = await getTrustModel();
 
@@ -458,7 +482,8 @@ function createTrustService() {
             logSystem(`Initializing tenant models for: ${trust.trust_code}`, {
                trustId: trust.id,
             });
-            await initializeTenantModels(trust.trust_code);
+            // Initialize tenant models using helper function
+            await initializeTenantModelsHelper(trust.trust_code);
             logSystem(`Tenant models initialized successfully for: ${trust.trust_code}`, { trustId: trust.id });
          } catch (modelError) {
             logError(modelError, {
@@ -494,8 +519,8 @@ function createTrustService() {
     */
    async function getSystemStats() {
       try {
-         const { getTrustModel } = require('../models');
-         const { getSystemModels } = require('../models');
+         // Get trust model using helper function
+         // Get system models using helper function
          const { dbManager } = require('../models/database');
 
          const Trust = await getTrustModel();

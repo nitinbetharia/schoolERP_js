@@ -1,4 +1,4 @@
-const { models } = require('../models');
+const { dbManager } = require('../models/database');
 const logger = require('../utils/logger');
 
 /**
@@ -21,8 +21,8 @@ const tenant = async (req, res, next) => {
       }
 
       // Get the trust to verify it exists and get trust_code
-      const { getTrustModel } = require('../models');
-      const Trust = await getTrustModel();
+      const systemModels = await dbManager.getSystemModels();
+      const Trust = systemModels.Trust;
 
       const trust = await Trust.findByPk(trustId);
 
@@ -43,8 +43,7 @@ const tenant = async (req, res, next) => {
             success: false,
             error: {
                code: 'TRUST_SETUP_INCOMPLETE',
-               message:
-            'Trust setup must be completed before accessing tenant resources',
+               message: 'Trust setup must be completed before accessing tenant resources',
                timestamp: new Date().toISOString(),
             },
          });
@@ -56,7 +55,7 @@ const tenant = async (req, res, next) => {
 
       // Initialize or get tenant models
       try {
-         const tenantModels = await models.getTenantModels(trust.trust_code);
+         const tenantModels = await dbManager.getTenantModels(trust.trust_code);
          req.tenantModels = tenantModels;
 
          logger.info('Tenant context initialized', {
@@ -66,7 +65,7 @@ const tenant = async (req, res, next) => {
             trust_name: trust.trust_name,
          });
       } catch (modelError) {
-      // Try to initialize tenant models if they don't exist
+         // Try to initialize tenant models if they don't exist
          logger.warn('Tenant models not found, attempting to initialize', {
             middleware: 'tenant',
             trust_code: trust.trust_code,
@@ -74,9 +73,7 @@ const tenant = async (req, res, next) => {
          });
 
          try {
-            const tenantModels = await models.initializeTenantModels(
-               trust.trust_code,
-            );
+            const tenantModels = await dbManager.initializeTenantModels(trust.trust_code);
             req.tenantModels = tenantModels;
 
             logger.info('Tenant models initialized successfully', {

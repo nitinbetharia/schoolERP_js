@@ -1,4 +1,3 @@
-const { getTenantModels, initializeTenantModels } = require('../models');
 const { dbManager } = require('../models/database');
 const { logSystem, logError } = require('../utils/logger');
 const {
@@ -36,7 +35,7 @@ const tenantDetection = async (req, res, next) => {
          host: req.get('host'),
          extractedSubdomain: subdomain,
          tenantCode: tenantCode,
-         settingSystemAdmin: !tenantCode
+         settingSystemAdmin: !tenantCode,
       });
 
       // Skip tenant detection for system admin access (no subdomain)
@@ -47,10 +46,7 @@ const tenantDetection = async (req, res, next) => {
       }
 
       // Skip tenant database initialization for system admin routes
-      if (
-         req.path.startsWith('/api/v1/admin/system') ||
-      req.path.startsWith('/admin/system')
-      ) {
+      if (req.path.startsWith('/api/v1/admin/system') || req.path.startsWith('/admin/system')) {
          return next();
       }
 
@@ -81,11 +77,7 @@ const tenantDetection = async (req, res, next) => {
       }
 
       // Skip tenant initialization for dashboard if user is system admin
-      if (
-         req.path === '/dashboard' &&
-      req.session &&
-      req.session.userType === 'system'
-      ) {
+      if (req.path === '/dashboard' && req.session && req.session.userType === 'system') {
          return next();
       }
 
@@ -101,10 +93,10 @@ const tenantDetection = async (req, res, next) => {
 
       // Initialize tenant models if not already done
       try {
-         const tenantModels = getTenantModels(tenantCode);
+         const tenantModels = await dbManager.getTenantModels(tenantCode);
          req.tenantModels = tenantModels;
       } catch (error) {
-      // Models not initialized, try to initialize
+         // Models not initialized, try to initialize
          logSystem(`Initializing tenant models for: ${tenantCode}`);
 
          // Check if tenant database exists
@@ -122,7 +114,7 @@ const tenantDetection = async (req, res, next) => {
          }
 
          // Initialize tenant models
-         const tenantModels = await initializeTenantModels(tenantCode);
+         const tenantModels = await dbManager.initializeTenantModels(tenantCode);
          req.tenantModels = tenantModels;
       }
 
@@ -150,7 +142,9 @@ const tenantDetection = async (req, res, next) => {
  * Extract subdomain from host header
  */
 function extractSubdomain(host) {
-   if (!host) {return null;}
+   if (!host) {
+      return null;
+   }
 
    // Remove port if present
    const hostWithoutPort = host.split(':')[0];
@@ -159,10 +153,7 @@ function extractSubdomain(host) {
    const parts = hostWithoutPort.split('.');
 
    // If just localhost or IP address (no subdomain), return null
-   if (
-      (parts.length === 1 && parts[0] === 'localhost') ||
-      /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)
-   ) {
+   if ((parts.length === 1 && parts[0] === 'localhost') || /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)) {
       return null;
    }
 
@@ -186,7 +177,7 @@ const validateTenant = async (req, res, next) => {
          host: req.get('host'),
          isSystemAdmin: req.isSystemAdmin,
          tenantCode: req.tenantCode,
-         subdomain: req.subdomain
+         subdomain: req.subdomain,
       });
 
       // Skip for system admin access (no subdomain/tenant)
@@ -200,8 +191,8 @@ const validateTenant = async (req, res, next) => {
          return next();
       }
 
-      const { getTrustModel } = require('../models');
-      const Trust = await getTrustModel();
+      const systemModels = await dbManager.getSystemModels();
+      const Trust = systemModels.Trust;
 
       // Find trust by subdomain or tenant code
       const trust = await Trust.findOne({
@@ -238,11 +229,11 @@ const validateTenant = async (req, res, next) => {
       next();
    } catch (error) {
       logError(error, { context: 'validateTenant', tenantCode: req.tenantCode });
-      
+
       // Check if this is a web request (HTML) or API request (JSON)
       const acceptsHTML = req.headers.accept && req.headers.accept.includes('text/html');
       const isAPIRequest = req.path.startsWith('/api/');
-      
+
       if (acceptsHTML && !isAPIRequest) {
          // Return user-friendly error page for web requests
          req.flash('error', 'Unable to access this tenant. Please check your URL or contact support.');

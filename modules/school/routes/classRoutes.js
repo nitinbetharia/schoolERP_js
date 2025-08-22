@@ -2,7 +2,7 @@ const express = require('express');
 const ClassController = require('../controllers/ClassController');
 const { authenticate, requireTrustAdmin } = require('../../../middleware/auth');
 const { validateBody } = require('../../../utils/validation');
-const { classValidationSchemas } = require('../../../models');
+const { classValidationSchemas } = require('../models/Class');
 
 const router = express.Router();
 const classController = new ClassController();

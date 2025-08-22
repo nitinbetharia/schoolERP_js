@@ -1,4 +1,4 @@
-const { getTenantModels } = require('../../../models');
+const { dbManager } = require('../../../models/database');
 const { logger } = require('../../../utils/logger');
 const { getPaginationData } = require('../../../utils/validation');
 
@@ -12,13 +12,13 @@ const { getPaginationData } = require('../../../utils/validation');
  */
 async function createStudent(tenantCode, studentData) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student, User } = models;
 
       // Check if student with admission number already exists
       if (studentData.admission_number) {
          const existingStudent = await Student.findOne({
-            where: { admission_number: studentData.admission_number }
+            where: { admission_number: studentData.admission_number },
          });
 
          if (existingStudent) {
@@ -29,7 +29,7 @@ async function createStudent(tenantCode, studentData) {
       // If creating user account, check email uniqueness
       if (studentData.email && studentData.create_user_account) {
          const existingUser = await User.findOne({
-            where: { email: studentData.email }
+            where: { email: studentData.email },
          });
 
          if (existingUser) {
@@ -40,7 +40,7 @@ async function createStudent(tenantCode, studentData) {
       // Create student
       const student = await Student.create({
          ...studentData,
-         status: studentData.status || 'ACTIVE'
+         status: studentData.status || 'ACTIVE',
       });
 
       // Create user account if requested
@@ -55,17 +55,16 @@ async function createStudent(tenantCode, studentData) {
             email: studentData.email,
             password_hash: hashedPassword,
             role: 'student',
-            is_active: true
+            is_active: true,
          });
       }
 
       return student;
-
    } catch (error) {
-      logger.error('Error in createStudent service', { 
-         error: error.message, 
+      logger.error('Error in createStudent service', {
+         error: error.message,
          tenantCode,
-         admission_number: studentData.admission_number 
+         admission_number: studentData.admission_number,
       });
       throw error;
    }
@@ -76,7 +75,7 @@ async function createStudent(tenantCode, studentData) {
  */
 async function getStudentById(tenantCode, studentId) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student, User, Class, Section } = models;
 
       const student = await Student.findByPk(studentId, {
@@ -84,28 +83,27 @@ async function getStudentById(tenantCode, studentId) {
             {
                model: Class,
                as: 'class',
-               attributes: ['id', 'class_name']
+               attributes: ['id', 'class_name'],
             },
             {
                model: Section,
                as: 'section',
-               attributes: ['id', 'section_name']
+               attributes: ['id', 'section_name'],
             },
             {
                model: User,
                as: 'user',
-               attributes: ['id', 'username', 'email', 'is_active', 'last_login_at']
-            }
-         ]
+               attributes: ['id', 'username', 'email', 'is_active', 'last_login_at'],
+            },
+         ],
       });
 
       return student;
-
    } catch (error) {
-      logger.error('Error in getStudentById service', { 
-         error: error.message, 
+      logger.error('Error in getStudentById service', {
+         error: error.message,
          tenantCode,
-         studentId 
+         studentId,
       });
       throw error;
    }
@@ -116,7 +114,7 @@ async function getStudentById(tenantCode, studentId) {
  */
 async function updateStudent(tenantCode, studentId, updateData) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student } = models;
 
       // Find student first
@@ -128,10 +126,10 @@ async function updateStudent(tenantCode, studentId, updateData) {
       // Check admission number uniqueness if being updated
       if (updateData.admission_number && updateData.admission_number !== student.admission_number) {
          const existingStudent = await Student.findOne({
-            where: { 
+            where: {
                admission_number: updateData.admission_number,
-               id: { [require('sequelize').Op.ne]: studentId }
-            }
+               id: { [require('sequelize').Op.ne]: studentId },
+            },
          });
 
          if (existingStudent) {
@@ -142,12 +140,11 @@ async function updateStudent(tenantCode, studentId, updateData) {
       // Update student
       await student.update(updateData);
       return student;
-
    } catch (error) {
-      logger.error('Error in updateStudent service', { 
-         error: error.message, 
+      logger.error('Error in updateStudent service', {
+         error: error.message,
          tenantCode,
-         studentId 
+         studentId,
       });
       throw error;
    }
@@ -158,7 +155,7 @@ async function updateStudent(tenantCode, studentId, updateData) {
  */
 async function deleteStudent(tenantCode, studentId) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student, User } = models;
 
       // Find student first
@@ -171,20 +168,19 @@ async function deleteStudent(tenantCode, studentId) {
       await student.update({ status: 'INACTIVE' });
 
       // Also deactivate associated user account if exists
-      const user = await User.findOne({ 
-         where: { email: student.email } 
+      const user = await User.findOne({
+         where: { email: student.email },
       });
       if (user) {
          await user.update({ is_active: false });
       }
-    
-      return { message: 'Student deactivated successfully' };
 
+      return { message: 'Student deactivated successfully' };
    } catch (error) {
-      logger.error('Error in deleteStudent service', { 
-         error: error.message, 
+      logger.error('Error in deleteStudent service', {
+         error: error.message,
          tenantCode,
-         studentId 
+         studentId,
       });
       throw error;
    }
@@ -195,7 +191,7 @@ async function deleteStudent(tenantCode, studentId) {
  */
 async function listStudents(tenantCode, queryParams = {}) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student, Class, Section } = models;
 
       const {
@@ -206,16 +202,16 @@ async function listStudents(tenantCode, queryParams = {}) {
          status = 'ACTIVE',
          search,
          sortBy = 'created_at',
-         sortOrder = 'DESC'
+         sortOrder = 'DESC',
       } = queryParams;
 
       // Build where conditions
       const whereConditions = {};
-    
+
       if (classId) {
          whereConditions.class_id = classId;
       }
-    
+
       if (sectionId) {
          whereConditions.section_id = sectionId;
       }
@@ -231,7 +227,7 @@ async function listStudents(tenantCode, queryParams = {}) {
             { first_name: { [Op.like]: `%${search}%` } },
             { last_name: { [Op.like]: `%${search}%` } },
             { admission_number: { [Op.like]: `%${search}%` } },
-            { email: { [Op.like]: `%${search}%` } }
+            { email: { [Op.like]: `%${search}%` } },
          ];
       }
 
@@ -244,17 +240,17 @@ async function listStudents(tenantCode, queryParams = {}) {
             {
                model: Class,
                as: 'class',
-               attributes: ['id', 'class_name']
+               attributes: ['id', 'class_name'],
             },
             {
                model: Section,
                as: 'section',
-               attributes: ['id', 'section_name']
-            }
+               attributes: ['id', 'section_name'],
+            },
          ],
          order: [[sortBy, sortOrder.toUpperCase()]],
          limit: parseInt(limit),
-         offset: offset
+         offset: offset,
       });
 
       // Get pagination data
@@ -262,14 +258,13 @@ async function listStudents(tenantCode, queryParams = {}) {
 
       return {
          students,
-         pagination: paginationData.pagination
+         pagination: paginationData.pagination,
       };
-
    } catch (error) {
-      logger.error('Error in listStudents service', { 
-         error: error.message, 
+      logger.error('Error in listStudents service', {
+         error: error.message,
          tenantCode,
-         queryParams 
+         queryParams,
       });
       throw error;
    }
@@ -280,16 +275,16 @@ async function listStudents(tenantCode, queryParams = {}) {
  */
 async function getStudentsForExport(tenantCode, filters = {}) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student, Class, Section, School } = models;
 
       // Build where conditions
       const whereConditions = {};
-    
+
       if (filters.classId) {
          whereConditions.class_id = filters.classId;
       }
-    
+
       if (filters.sectionId) {
          whereConditions.section_id = filters.sectionId;
       }
@@ -307,24 +302,24 @@ async function getStudentsForExport(tenantCode, filters = {}) {
             {
                model: Class,
                as: 'class',
-               attributes: ['id', 'class_name']
+               attributes: ['id', 'class_name'],
             },
             {
                model: Section,
                as: 'section',
-               attributes: ['id', 'section_name']
-            }
+               attributes: ['id', 'section_name'],
+            },
          ],
-         order: [['first_name', 'ASC']]
+         order: [['first_name', 'ASC']],
       });
 
       // Get school data for headers
       const school = await School.findOne({
-         attributes: ['id', 'school_name', 'school_code']
+         attributes: ['id', 'school_name', 'school_code'],
       });
 
       // Format students for export
-      const formattedStudents = students.map(student => ({
+      const formattedStudents = students.map((student) => ({
          id: student.id,
          student_id: student.admission_number,
          name: `${student.first_name} ${student.last_name || ''}`.trim(),
@@ -339,7 +334,7 @@ async function getStudentsForExport(tenantCode, filters = {}) {
          status: student.status,
          admission_date: student.admission_date,
          father_name: student.father_name,
-         mother_name: student.mother_name
+         mother_name: student.mother_name,
       }));
 
       return {
@@ -347,15 +342,14 @@ async function getStudentsForExport(tenantCode, filters = {}) {
          schoolData: {
             id: school?.id,
             name: school?.school_name || 'School ERP System',
-            code: school?.school_code
-         }
+            code: school?.school_code,
+         },
       };
-
    } catch (error) {
-      logger.error('Error in getStudentsForExport service', { 
-         error: error.message, 
+      logger.error('Error in getStudentsForExport service', {
+         error: error.message,
          tenantCode,
-         filters 
+         filters,
       });
       throw error;
    }
@@ -366,32 +360,31 @@ async function getStudentsForExport(tenantCode, filters = {}) {
  */
 async function getStudentsByIds(tenantCode, studentIds) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student } = models;
 
       const students = await Student.findAll({
-         where: { 
+         where: {
             id: studentIds,
-            status: 'ACTIVE'
+            status: 'ACTIVE',
          },
-         attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+         attributes: ['id', 'first_name', 'last_name', 'email', 'phone'],
       });
 
       // Format for email operations
-      return students.map(student => ({
+      return students.map((student) => ({
          id: student.id,
          name: `${student.first_name} ${student.last_name || ''}`.trim(),
          first_name: student.first_name,
          last_name: student.last_name,
          email: student.email,
-         phone: student.phone
+         phone: student.phone,
       }));
-
    } catch (error) {
-      logger.error('Error in getStudentsByIds service', { 
-         error: error.message, 
+      logger.error('Error in getStudentsByIds service', {
+         error: error.message,
          tenantCode,
-         studentIds 
+         studentIds,
       });
       throw error;
    }
@@ -402,11 +395,11 @@ async function getStudentsByIds(tenantCode, studentIds) {
  */
 async function getSchoolData(tenantCode) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { School } = models;
 
       const school = await School.findOne({
-         attributes: ['id', 'school_name', 'school_code', 'email', 'phone', 'address']
+         attributes: ['id', 'school_name', 'school_code', 'email', 'phone', 'address'],
       });
 
       return {
@@ -415,19 +408,18 @@ async function getSchoolData(tenantCode) {
          code: school?.school_code,
          email: school?.email,
          phone: school?.phone,
-         address: school?.address
+         address: school?.address,
       };
-
    } catch (error) {
-      logger.error('Error in getSchoolData service', { 
-         error: error.message, 
-         tenantCode 
+      logger.error('Error in getSchoolData service', {
+         error: error.message,
+         tenantCode,
       });
       // Return default data if school not found
       return {
          name: 'School ERP System',
          email: process.env.SMTP_USER,
-         phone: 'Contact School Office'
+         phone: 'Contact School Office',
       };
    }
 }
@@ -437,25 +429,27 @@ async function getSchoolData(tenantCode) {
  */
 async function getStudentsByClass(tenantCode, classId) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { Student } = models;
 
       const students = await Student.findAll({
-         where: { 
+         where: {
             class_id: classId,
-            status: 'ACTIVE'
+            status: 'ACTIVE',
          },
          attributes: ['id', 'first_name', 'last_name', 'admission_number', 'roll_number', 'email'],
-         order: [['roll_number', 'ASC'], ['first_name', 'ASC']]
+         order: [
+            ['roll_number', 'ASC'],
+            ['first_name', 'ASC'],
+         ],
       });
 
       return students;
-
    } catch (error) {
-      logger.error('Error in getStudentsByClass service', { 
-         error: error.message, 
+      logger.error('Error in getStudentsByClass service', {
+         error: error.message,
          tenantCode,
-         classId 
+         classId,
       });
       throw error;
    }
@@ -471,5 +465,5 @@ module.exports = {
    getStudentsForExport,
    getStudentsByIds,
    getSchoolData,
-   getStudentsByClass
+   getStudentsByClass,
 };

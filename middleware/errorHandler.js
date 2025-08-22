@@ -1,31 +1,173 @@
 const { formatErrorResponse } = require('../utils/validation');
 const { logger } = require('../utils/logger');
+const { sendErrorAlert } = require('../utils/emailService');
+
+/**
+ * Error severity classification for better handling
+ */
+const ERROR_SEVERITY = {
+   LOW: 'low', // User input errors, validation failures
+   MEDIUM: 'medium', // Business logic errors, external service issues
+   HIGH: 'high', // System errors, database failures
+   CRITICAL: 'critical', // Application crashes, data corruption, security issues
+};
+
+/**
+ * Classify error severity based on error type and status code
+ */
+function classifyErrorSeverity(err, statusCode) {
+   // Critical errors
+   if (statusCode >= 500) {
+      if (err.name?.includes('Database') || err.name?.startsWith('Sequelize')) {
+         return ERROR_SEVERITY.CRITICAL;
+      }
+      if (err.message?.toLowerCase().includes('crash') || err.message?.toLowerCase().includes('corruption')) {
+         return ERROR_SEVERITY.CRITICAL;
+      }
+      return ERROR_SEVERITY.HIGH;
+   }
+
+   // Authentication/Authorization errors
+   if (statusCode === 401 || statusCode === 403) {
+      return ERROR_SEVERITY.MEDIUM;
+   }
+
+   // Client errors
+   if (statusCode >= 400 && statusCode < 500) {
+      if (err.name === 'ValidationError') {
+         return ERROR_SEVERITY.LOW;
+      }
+      return ERROR_SEVERITY.MEDIUM;
+   }
+
+   return ERROR_SEVERITY.LOW;
+}
+
+/**
+ * Extract user-friendly message from error object
+ */
+function extractUserMessage(err) {
+   // Try to get user-friendly message
+   if (err.userMessage) {
+      return err.userMessage;
+   }
+
+   // Handle common error types
+   if (err.name?.startsWith('Sequelize')) {
+      return 'A database error occurred. Please try again.';
+   }
+
+   if (err.name?.includes('JsonWebToken') || err.name === 'TokenExpiredError') {
+      return 'Your session has expired. Please log in again.';
+   }
+
+   if (err.name === 'ValidationError') {
+      if (err.details && Array.isArray(err.details)) {
+         return err.details.map((d) => d.message).join(', ');
+      }
+      return 'Please check your input and try again.';
+   }
+
+   // For API error objects, try to extract meaningful message
+   if (typeof err === 'object' && err.message) {
+      // Clean up technical messages for users
+      const message = err.message;
+
+      // Remove stack traces and technical details from user message
+      if (message.includes('at ') || message.includes('Error:')) {
+         return 'An unexpected error occurred. Please try again.';
+      }
+
+      return message;
+   }
+
+   return 'An unexpected error occurred. Please try again.';
+}
+
+/**
+ * Format error for flash message display
+ */
+function formatFlashError(err, userMessage) {
+   const isDevelopment = process.env.NODE_ENV === 'development';
+
+   if (isDevelopment && err.stack) {
+      // In development, provide more details but keep it readable
+      return {
+         message: userMessage,
+         details: err.stack.split('\n').slice(0, 5).join('\n'), // First 5 lines of stack
+         technical: true,
+      };
+   }
+
+   return {
+      message: userMessage,
+      technical: false,
+   };
+}
+
+/**
+ * Send error alert email in production for high/critical severity errors
+ */
+async function handleErrorAlert(err, req, severity) {
+   if (process.env.NODE_ENV !== 'production') {
+      return; // Only send alerts in production
+   }
+
+   if (severity !== ERROR_SEVERITY.HIGH && severity !== ERROR_SEVERITY.CRITICAL) {
+      return; // Only alert for high/critical errors
+   }
+
+   try {
+      await sendErrorAlert({
+         error: err,
+         request: {
+            method: req.method,
+            url: req.originalUrl,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            user: req.user,
+            tenant: req.tenant,
+            tenantCode: req.tenantCode,
+         },
+         severity,
+         timestamp: new Date().toISOString(),
+      });
+   } catch (emailError) {
+      logger.error('Failed to send error alert email', {
+         originalError: err.message,
+         emailError: emailError.message,
+      });
+   }
+}
 
 /**
  * Centralized Error Handler Middleware
- * Single point of error processing using http-errors
- * Handles all error types: operational, system, Sequelize, JWT, etc.
+ * Enhanced with smart error object processing and email alerts
  */
-function errorHandler(err, req, res, next) {
-   let error = err;
+function errorHandler(err, req, res, _next) {
+   const error = err;
    let statusCode = err.statusCode || err.status || 500;
-   let message = err.message || 'An unexpected error occurred';
 
-   // Handle specific error types
+   // Classify error severity
+   const severity = classifyErrorSeverity(err, statusCode);
+
+   // Extract user-friendly message
+   const userMessage = extractUserMessage(err);
+
+   // Handle specific error types for status code adjustment
    if (err.name?.startsWith('Sequelize')) {
       statusCode = 400;
-      message = 'Database error occurred';
    } else if (err.name?.includes('JsonWebToken') || err.name === 'TokenExpiredError') {
       statusCode = 401;
-      message = 'Authentication failed';
    } else if (err.name === 'ValidationError') {
       statusCode = 400;
-      message = 'Validation failed';
    }
 
-   // Log the error with context
+   // Log the error with enhanced context
    logger.error('Request Error', {
-      error: message,
+      error: userMessage,
+      severity: severity,
+      originalError: err.message,
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
       requestId: req.id,
       method: req.method,
@@ -37,14 +179,36 @@ function errorHandler(err, req, res, next) {
       tenantCode: req.tenantCode,
    });
 
-   // Format error response
-   const errorResponse = formatErrorResponse(error, message);
+   // Send error alert for production high/critical errors
+   handleErrorAlert(err, req, severity).catch((alertError) => {
+      logger.warn('Error alert handling failed', { error: alertError.message });
+   });
+
+   // Format error response for API
+   const errorResponse = formatErrorResponse(error, userMessage);
 
    // Check if this is a web request (HTML) or API request (JSON)
    const acceptsHTML = req.headers.accept && req.headers.accept.includes('text/html');
    const isWebRoute = !req.originalUrl.startsWith('/api/');
 
    if (acceptsHTML && isWebRoute) {
+      // Format error for flash message
+      const flashError = formatFlashError(err, userMessage);
+
+      // Store structured error in flash for better display
+      if (req.flash) {
+         if (flashError.technical && process.env.NODE_ENV === 'development') {
+            req.flash('error', {
+               message: flashError.message,
+               details: flashError.details,
+               technical: true,
+               severity: severity,
+            });
+         } else {
+            req.flash('error', flashError.message);
+         }
+      }
+
       // Determine which error template to use based on status code
       let errorTemplate = 'pages/errors/generic';
       if (statusCode === 404) {
@@ -59,27 +223,29 @@ function errorHandler(err, req, res, next) {
       return res.status(statusCode).render(errorTemplate, {
          layout: 'layout',
          title: `Error ${statusCode}`,
-         description: `Error ${statusCode} - ${error.message || 'An unexpected error occurred'}`,
+         description: `Error ${statusCode} - ${userMessage}`,
 
          // Individual variables for templates that expect them
          errorCode: statusCode.toString(),
-         errorMessage: error.userMessage || error.message || 'An unexpected error occurred',
-         errorDetails: process.env.NODE_ENV === 'development' ? error.stack : null,
+         errorMessage: userMessage,
+         errorDetails: process.env.NODE_ENV === 'development' ? err.stack : null,
          originalUrl: req.originalUrl,
+         severity: severity,
 
          // Error object for templates that expect it
          error: {
             statusCode: statusCode,
             status: statusCode,
-            message: error.userMessage || error.message || 'An unexpected error occurred',
-            stack: process.env.NODE_ENV === 'development' ? error.stack : null,
+            message: userMessage,
+            stack: process.env.NODE_ENV === 'development' ? err.stack : null,
+            severity: severity,
          },
 
          // User and tenant context
          user: req.user || null,
          tenant: req.tenant || null,
 
-         // Flash messages (if available)
+         // Flash messages (if available) - these will be processed by our enhanced system
          success: req.flash ? req.flash('success') : null,
          flashError: req.flash ? req.flash('error') : null,
          warning: req.flash ? req.flash('warning') : null,
@@ -179,14 +345,13 @@ function catchAsync(fn) {
  */
 async function healthCheck(req, res) {
    try {
-      const { dbManager } = require('../models/database');
-      const { modelRegistry } = require('../models');
+      const { dbManager, modelHealthCheck } = require('../models/database');
 
       // Check database health
       const dbHealth = await dbManager.healthCheck();
 
-      // Check model registry health
-      const modelHealth = await modelRegistry.healthCheck();
+      // Check model health
+      const modelHealth = await modelHealthCheck();
 
       const health = {
          status: 'healthy',

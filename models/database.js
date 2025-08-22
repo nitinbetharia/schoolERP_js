@@ -92,9 +92,9 @@ function createDatabaseManager() {
                   connectTimeout: appConfig.database.connection.connectTimeout,
                   ssl: appConfig.database.connection.ssl
                      ? {
-                        require: true,
-                        rejectUnauthorized: false,
-                     }
+                          require: true,
+                          rejectUnauthorized: false,
+                       }
                      : false,
                },
                pool: {
@@ -167,9 +167,9 @@ function createDatabaseManager() {
                connectTimeout: appConfig.database.connection.connectTimeout,
                ssl: appConfig.database.connection.ssl
                   ? {
-                     require: true,
-                     rejectUnauthorized: false,
-                  }
+                       require: true,
+                       rejectUnauthorized: false,
+                    }
                   : false,
             },
             pool: {
@@ -372,7 +372,71 @@ function createDatabaseManager() {
 // Create singleton instance
 const dbManager = createDatabaseManager();
 
+/**
+ * Initialize system models - moved from models/index.js
+ * This function initializes core system models needed for application startup
+ */
+async function initializeSystemModels() {
+   try {
+      logSystem('Initializing system models...');
+
+      // Get system database connection
+      const systemDB = await dbManager.getSystemDB();
+
+      // Import and initialize core system models
+      const { defineTrustModel } = require('./Trust');
+      const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
+
+      const Trust = defineTrustModel(systemDB);
+      const SystemUser = defineSystemUserModel(systemDB);
+      const SystemAuditLog = defineSystemAuditLogModel(systemDB);
+
+      // Set up basic associations
+      Trust.hasMany(SystemUser, { foreignKey: 'trust_id' });
+      SystemUser.belongsTo(Trust, { foreignKey: 'trust_id' });
+
+      logSystem('System models initialized successfully');
+      return {
+         Trust,
+         SystemUser,
+         SystemAuditLog,
+         success: true,
+      };
+   } catch (error) {
+      logError(error, { context: 'initializeSystemModels' });
+      throw error;
+   }
+}
+
+/**
+ * Model health check - moved from models/index.js
+ * Provides health information about model initialization status
+ */
+async function modelHealthCheck() {
+   try {
+      const dbHealth = await dbManager.healthCheck();
+
+      return {
+         database: dbHealth,
+         modelsInitialized: true, // Simplified - models are initialized on demand
+         systemConnection: dbHealth.systemDB,
+         tenantConnections: dbHealth.tenantConnections,
+      };
+   } catch (error) {
+      logError(error, { context: 'modelHealthCheck' });
+      return {
+         database: null,
+         modelsInitialized: false,
+         systemConnection: false,
+         tenantConnections: 0,
+         error: error.message,
+      };
+   }
+}
+
 module.exports = {
    DatabaseManager: createDatabaseManager,
    dbManager,
+   initializeSystemModels,
+   modelHealthCheck,
 };

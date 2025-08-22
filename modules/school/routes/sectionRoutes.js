@@ -2,7 +2,7 @@ const express = require('express');
 const SectionController = require('../controllers/SectionController');
 const { authenticate, requireTrustAdmin } = require('../../../middleware/auth');
 const { validateBody } = require('../../../utils/validation');
-const { sectionValidationSchemas } = require('../../../models');
+const { sectionValidationSchemas } = require('../models/Section');
 
 const router = express.Router();
 const sectionController = new SectionController();

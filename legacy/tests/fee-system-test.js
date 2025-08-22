@@ -287,7 +287,7 @@ function defineModels() {
 }
 
 // Import the service (after models are defined)
-const FeeManagementService = require('../services/FeeManagementService');
+const FeeManagementService = require('../../services/FeeManagementService');
 
 async function runFeeSystemTests() {
    console.log('🚀 Starting Comprehensive Fee Management System Tests...\n');

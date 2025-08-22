@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { getTenantModels } = require('../../../models');
+const { dbManager } = require('../../../models/database');
 const { logger } = require('../../../utils/logger');
 const { getPaginationData } = require('../../../utils/validation');
 
@@ -14,12 +14,12 @@ const { getPaginationData } = require('../../../utils/validation');
  */
 async function createUser(tenantCode, userData) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       // Check if user already exists
       const existingUser = await User.findOne({
-         where: { email: userData.email }
+         where: { email: userData.email },
       });
 
       if (existingUser) {
@@ -34,18 +34,17 @@ async function createUser(tenantCode, userData) {
       const user = await User.create({
          ...userData,
          password_hash: hashedPassword,
-         is_active: userData.is_active !== undefined ? userData.is_active : true
+         is_active: userData.is_active !== undefined ? userData.is_active : true,
       });
 
       // Return user without password
       const { password_hash, ...userWithoutPassword } = user.toJSON();
       return userWithoutPassword;
-
    } catch (error) {
-      logger.error('Error in createUser service', { 
-         error: error.message, 
+      logger.error('Error in createUser service', {
+         error: error.message,
          tenantCode,
-         email: userData.email 
+         email: userData.email,
       });
       throw error;
    }
@@ -56,20 +55,19 @@ async function createUser(tenantCode, userData) {
  */
 async function getUserById(tenantCode, userId) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       const user = await User.findByPk(userId, {
-         attributes: { exclude: ['password_hash'] }
+         attributes: { exclude: ['password_hash'] },
       });
 
       return user;
-
    } catch (error) {
-      logger.error('Error in getUserById service', { 
-         error: error.message, 
+      logger.error('Error in getUserById service', {
+         error: error.message,
          tenantCode,
-         userId 
+         userId,
       });
       throw error;
    }
@@ -80,7 +78,7 @@ async function getUserById(tenantCode, userId) {
  */
 async function updateUser(tenantCode, userId, updateData) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       // Find user first
@@ -98,16 +96,15 @@ async function updateUser(tenantCode, userId, updateData) {
 
       // Update user
       await user.update(updateData);
-    
+
       // Return updated user without password
       const { password_hash, ...userWithoutPassword } = user.toJSON();
       return userWithoutPassword;
-
    } catch (error) {
-      logger.error('Error in updateUser service', { 
-         error: error.message, 
+      logger.error('Error in updateUser service', {
+         error: error.message,
          tenantCode,
-         userId 
+         userId,
       });
       throw error;
    }
@@ -118,7 +115,7 @@ async function updateUser(tenantCode, userId, updateData) {
  */
 async function deleteUser(tenantCode, userId) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       // Find user first
@@ -129,14 +126,13 @@ async function deleteUser(tenantCode, userId) {
 
       // Soft delete by marking as inactive
       await user.update({ is_active: false });
-    
-      return { message: 'User deactivated successfully' };
 
+      return { message: 'User deactivated successfully' };
    } catch (error) {
-      logger.error('Error in deleteUser service', { 
-         error: error.message, 
+      logger.error('Error in deleteUser service', {
+         error: error.message,
          tenantCode,
-         userId 
+         userId,
       });
       throw error;
    }
@@ -147,26 +143,18 @@ async function deleteUser(tenantCode, userId) {
  */
 async function listUsers(tenantCode, queryParams = {}) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
-      const {
-         page = 1,
-         limit = 20,
-         role,
-         status,
-         search,
-         sortBy = 'created_at',
-         sortOrder = 'DESC'
-      } = queryParams;
+      const { page = 1, limit = 20, role, status, search, sortBy = 'created_at', sortOrder = 'DESC' } = queryParams;
 
       // Build where conditions
       const whereConditions = {};
-    
+
       if (role) {
          whereConditions.role = role;
       }
-    
+
       if (status) {
          whereConditions.is_active = status === 'ACTIVE';
       }
@@ -174,10 +162,7 @@ async function listUsers(tenantCode, queryParams = {}) {
       // Search functionality
       if (search) {
          const { Op } = require('sequelize');
-         whereConditions[Op.or] = [
-            { username: { [Op.like]: `%${search}%` } },
-            { email: { [Op.like]: `%${search}%` } }
-         ];
+         whereConditions[Op.or] = [{ username: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }];
       }
 
       const offset = (page - 1) * limit;
@@ -188,7 +173,7 @@ async function listUsers(tenantCode, queryParams = {}) {
          attributes: { exclude: ['password_hash'] },
          order: [[sortBy, sortOrder.toUpperCase()]],
          limit: parseInt(limit),
-         offset: offset
+         offset: offset,
       });
 
       // Get pagination data
@@ -196,14 +181,13 @@ async function listUsers(tenantCode, queryParams = {}) {
 
       return {
          users,
-         pagination: paginationData.pagination
+         pagination: paginationData.pagination,
       };
-
    } catch (error) {
-      logger.error('Error in listUsers service', { 
-         error: error.message, 
+      logger.error('Error in listUsers service', {
+         error: error.message,
          tenantCode,
-         queryParams 
+         queryParams,
       });
       throw error;
    }
@@ -214,17 +198,14 @@ async function listUsers(tenantCode, queryParams = {}) {
  */
 async function authenticateUser(tenantCode, username, password) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       // Find user by username or email
       const user = await User.findOne({
          where: {
-            [require('sequelize').Op.or]: [
-               { username: username },
-               { email: username }
-            ]
-         }
+            [require('sequelize').Op.or]: [{ username: username }, { email: username }],
+         },
       });
 
       if (!user) {
@@ -248,12 +229,11 @@ async function authenticateUser(tenantCode, username, password) {
       // Return user without password
       const { password_hash, ...userWithoutPassword } = user.toJSON();
       return userWithoutPassword;
-
    } catch (error) {
-      logger.error('Error in authenticateUser service', { 
-         error: error.message, 
+      logger.error('Error in authenticateUser service', {
+         error: error.message,
          tenantCode,
-         username 
+         username,
       });
       throw error;
    }
@@ -264,7 +244,7 @@ async function authenticateUser(tenantCode, username, password) {
  */
 async function changePassword(tenantCode, userId, newPassword) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       // Find user first
@@ -279,14 +259,13 @@ async function changePassword(tenantCode, userId, newPassword) {
 
       // Update password
       await user.update({ password_hash: hashedPassword });
-    
-      return { message: 'Password changed successfully' };
 
+      return { message: 'Password changed successfully' };
    } catch (error) {
-      logger.error('Error in changePassword service', { 
-         error: error.message, 
+      logger.error('Error in changePassword service', {
+         error: error.message,
          tenantCode,
-         userId 
+         userId,
       });
       throw error;
    }
@@ -302,11 +281,10 @@ async function getUserRoles() {
          { value: 'admin', label: 'Administrator' },
          { value: 'teacher', label: 'Teacher' },
          { value: 'student', label: 'Student' },
-         { value: 'parent', label: 'Parent' }
+         { value: 'parent', label: 'Parent' },
       ];
 
       return roles;
-
    } catch (error) {
       logger.error('Error in getUserRoles service', error);
       throw error;
@@ -318,25 +296,24 @@ async function getUserRoles() {
  */
 async function getUsersByRole(tenantCode, role) {
    try {
-      const models = await getTenantModels(tenantCode);
+      const models = await dbManager.getTenantModels(tenantCode);
       const { User } = models;
 
       const users = await User.findAll({
-         where: { 
+         where: {
             role: role,
-            is_active: true 
+            is_active: true,
          },
          attributes: ['id', 'username', 'email', 'role'],
-         order: [['username', 'ASC']]
+         order: [['username', 'ASC']],
       });
 
       return users;
-
    } catch (error) {
-      logger.error('Error in getUsersByRole service', { 
-         error: error.message, 
+      logger.error('Error in getUsersByRole service', {
+         error: error.message,
          tenantCode,
-         role 
+         role,
       });
       throw error;
    }
@@ -352,5 +329,5 @@ module.exports = {
    authenticateUser,
    changePassword,
    getUserRoles,
-   getUsersByRole
+   getUsersByRole,
 };

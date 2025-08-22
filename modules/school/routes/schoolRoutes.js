@@ -2,7 +2,7 @@ const express = require('express');
 const SchoolController = require('../controllers/SchoolController');
 const { requireTrustAdmin } = require('../../../middleware/auth');
 const { validateBody } = require('../../../utils/validation');
-const { schoolValidationSchemas } = require('../../../models');
+const { schoolValidationSchemas } = require('../models/School');
 
 const router = express.Router({ mergeParams: true });
 const schoolController = new SchoolController();

@@ -17,8 +17,8 @@
                 <h1 class="h5 mb-0 fw-semibold text-dark">
                     <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>
                 </h1>
-                <% if (subtitle || title !== 'Dashboard') { %>
-                <small class="text-muted"><%= subtitle || title %></small>
+                <% if ((typeof subtitle !== 'undefined' && subtitle) || (typeof title !== 'undefined' && title !== 'Dashboard')) { %>
+                <small class="text-muted"><%= (typeof subtitle !== 'undefined' ? subtitle : '') || (typeof title !== 'undefined' ? title : '') %></small>
                 <% } %>
             </div>
         </div>

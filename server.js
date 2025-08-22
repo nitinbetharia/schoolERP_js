@@ -38,7 +38,7 @@ const {
 const routes = require('./routes');
 
 // Initialize models
-const { initializeSystemModels } = require('./models');
+const { initializeSystemModels } = require('./models/database');
 
 class SchoolERPServer {
    constructor() {

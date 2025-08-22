@@ -5,7 +5,6 @@ const { logSystem, logError } = require('../utils/logger');
 const { systemAuthService } = require('../services/systemServices');
 const userService = require('../modules/users/services/userService');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
-const { userValidationSchemas } = require('../models');
 
 // Frontend test route (no auth required)
 router.get('/test-frontend', (req, res) => {
@@ -69,7 +68,7 @@ router.get('/login', async (req, res) => {
          host: req.get('host'),
          isSystemAdmin: req.isSystemAdmin,
          tenantCode: req.tenantCode,
-         hasFlash: typeof req.flash === 'function'
+         hasFlash: typeof req.flash === 'function',
       });
 
       // If user is already logged in, redirect to dashboard
@@ -103,7 +102,7 @@ router.get('/login', async (req, res) => {
             code: 'LOGIN_PAGE_ERROR',
             message: 'Unable to load login page: ' + error.message,
             timestamp: new Date().toISOString(),
-         }
+         },
       });
    }
 });
@@ -124,7 +123,7 @@ router.post('/login', async (req, res) => {
       if (isSystemLogin) {
          validationSchema = systemUserValidationSchemas.login;
       } else {
-         validationSchema = userValidationSchemas.login;
+         validationSchema = systemUserValidationSchemas.login; // Use system user validation for now
       }
 
       // Validate input using proper schema
@@ -487,6 +486,35 @@ router.get('/test-generic-error', (_req, _res) => {
    const error = new Error('This is a test generic error');
    error.statusCode = 418; // I'm a teapot
    throw error;
+});
+
+/**
+ * @route GET /test-long-message
+ * @desc Test flash message truncation with long messages
+ * @access Public
+ */
+router.get('/test-long-message', (req, res) => {
+   try {
+      // Test with a very long success message
+      const longSuccessMessage =
+         "This is an extremely long success message that should definitely exceed three lines of text when displayed in the flash message container. The purpose of this message is to test the automatic truncation functionality that we've implemented. When this message is displayed, it should be truncated to fit within approximately three lines, and a 'View Full Message' button should appear, allowing users to see the complete message in a modal dialog. This feature helps maintain a clean user interface while still providing access to complete information when needed. The truncation system uses CSS line-clamp and JavaScript calculations to determine when messages are too long and need to be truncated for better user experience.";
+
+      const longErrorMessage =
+         "This is a comprehensive error message that contains detailed information about what went wrong during the process. Error messages tend to be longer because they often need to provide specific details about the failure, including error codes, possible causes, and suggested solutions. This particular message is intentionally made very long to test our truncation system's ability to handle error messages appropriately. The system should detect that this message exceeds the three-line limit and provide a modal option for viewing the complete error details. This is especially important for developers and administrators who need to see full error information for debugging purposes, while regular users can see a concise summary in the toast notification.";
+
+      // Flash both messages
+      req.flash('success', longSuccessMessage);
+      req.flash('error', longErrorMessage);
+      req.flash('warning', 'This is a shorter warning message that should not be truncated.');
+      req.flash('info', 'Short info message.');
+
+      // Redirect to a page that will display the messages
+      res.redirect('/admin/system');
+   } catch (error) {
+      logError(error, { context: 'test-long-message' });
+      req.flash('error', 'Failed to test long messages');
+      res.redirect('/');
+   }
 });
 
 /**

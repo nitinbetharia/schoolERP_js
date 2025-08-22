@@ -7,25 +7,36 @@ const { logger, logSystem, logError } = require('../utils/logger');
 const { dbManager } = require('../models/database');
 
 // Import migration files
+const coreSysMigration = require('./000-create-core-system-tables');
 const systemMigration = require('./001-create-system-enhanced-tables');
-const tenantMigration = require('./002-create-tenant-enhanced-tables');
+const tenantCoreMigration = require('./002-create-core-tenant-tables');
+const tenantMigration = require('./003-create-tenant-enhanced-tables');
+const { createTenantDatabases } = require('./create-tenant-databases');
 
 /**
- * Run system database migration
+ * Run system database migrations (core + enhanced)
  */
 async function migrateSystemDatabase() {
    try {
-      logSystem('Starting system database migration...');
-      
+      logSystem('Starting system database migrations...');
+
       const systemDB = await dbManager.getSystemDB();
       const queryInterface = systemDB.getQueryInterface();
-      
-      // Run system migration
-      const result = await systemMigration.up(queryInterface, systemDB.Sequelize);
-      
-      logSystem('System database migration completed successfully');
-      return result;
-      
+
+      // Run core system migration first
+      logSystem('Running core system tables migration...');
+      const coreResult = await coreSysMigration.up(queryInterface, systemDB.Sequelize);
+
+      // Run enhanced system migration
+      logSystem('Running enhanced system tables migration...');
+      const enhancedResult = await systemMigration.up(queryInterface, systemDB.Sequelize);
+
+      logSystem('System database migrations completed successfully');
+      return {
+         core: coreResult,
+         enhanced: enhancedResult,
+         success: true,
+      };
    } catch (error) {
       logError(error, { context: 'migrateSystemDatabase' });
       throw error;
@@ -33,21 +44,29 @@ async function migrateSystemDatabase() {
 }
 
 /**
- * Run tenant database migration for a specific tenant
+ * Run tenant database migrations (core + enhanced) for a specific tenant
  */
 async function migrateTenantDatabase(tenantCode) {
    try {
-      logSystem(`Starting tenant database migration for: ${tenantCode}`);
-      
+      logSystem(`Starting tenant database migrations for: ${tenantCode}`);
+
       const tenantDB = await dbManager.getTenantDB(tenantCode);
       const queryInterface = tenantDB.getQueryInterface();
-      
-      // Run tenant migration
-      const result = await tenantMigration.up(queryInterface, tenantDB.Sequelize);
-      
-      logSystem(`Tenant database migration completed for: ${tenantCode}`);
-      return result;
-      
+
+      // Run core tenant migration first
+      logSystem(`Running core tenant tables migration for: ${tenantCode}`);
+      const coreResult = await tenantCoreMigration.up(queryInterface, tenantDB.Sequelize);
+
+      // Run enhanced tenant migration
+      logSystem(`Running enhanced tenant tables migration for: ${tenantCode}`);
+      const enhancedResult = await tenantMigration.up(queryInterface, tenantDB.Sequelize);
+
+      logSystem(`Tenant database migrations completed for: ${tenantCode}`);
+      return {
+         core: coreResult,
+         enhanced: enhancedResult,
+         success: true,
+      };
    } catch (error) {
       logError(error, { context: 'migrateTenantDatabase', tenantCode });
       throw error;
@@ -60,23 +79,37 @@ async function migrateTenantDatabase(tenantCode) {
 async function checkMigrationStatus() {
    try {
       const systemDB = await dbManager.getSystemDB();
-      
-      // Check if the new tables exist
-      const [tables] = await systemDB.query(`
+
+      // Check core system tables
+      const [coreTables] = await systemDB.query(`
+         SELECT TABLE_NAME 
+         FROM INFORMATION_SCHEMA.TABLES 
+         WHERE TABLE_SCHEMA = DATABASE() 
+         AND TABLE_NAME IN ('trusts', 'system_users', 'system_audit_logs')
+      `);
+
+      // Check enhanced system tables
+      const [enhancedTables] = await systemDB.query(`
          SELECT TABLE_NAME 
          FROM INFORMATION_SCHEMA.TABLES 
          WHERE TABLE_SCHEMA = DATABASE() 
          AND TABLE_NAME IN ('tenant_configurations', 'tenant_custom_fields', 'fee_configurations')
       `);
-      
+
       return {
-         systemMigrationNeeded: tables.length < 3,
-         existingSystemTables: tables.map(row => row.TABLE_NAME)
+         coreSystemMigrationNeeded: coreTables.length < 3,
+         enhancedSystemMigrationNeeded: enhancedTables.length < 3,
+         existingCoreTables: coreTables.map((row) => row.TABLE_NAME),
+         existingEnhancedTables: enhancedTables.map((row) => row.TABLE_NAME),
       };
-      
    } catch (error) {
       logError(error, { context: 'checkMigrationStatus' });
-      return { systemMigrationNeeded: true, existingSystemTables: [] };
+      return {
+         coreSystemMigrationNeeded: true,
+         enhancedSystemMigrationNeeded: true,
+         existingCoreTables: [],
+         existingEnhancedTables: [],
+      };
    }
 }
 
@@ -86,7 +119,7 @@ async function checkMigrationStatus() {
 async function getAvailableTenants() {
    try {
       const systemDB = await dbManager.getSystemDB();
-      
+
       // Get all trusts from system database
       const [trusts] = await systemDB.query(`
          SELECT id, trust_name as name, trust_code as code 
@@ -94,9 +127,8 @@ async function getAvailableTenants() {
          WHERE status = 'ACTIVE'
          ORDER BY trust_name
       `);
-      
+
       return trusts;
-      
    } catch (error) {
       logError(error, { context: 'getAvailableTenants' });
       return [];
@@ -110,16 +142,16 @@ async function runCompleteMigration() {
    const migrationResults = {
       systemMigration: null,
       tenantMigrations: [],
-      errors: []
+      errors: [],
    };
-   
+
    try {
       logSystem('🚀 Starting comprehensive database migration...');
-      
+
       // Check migration status
       const status = await checkMigrationStatus();
       logSystem(`Migration status check: ${JSON.stringify(status, null, 2)}`);
-      
+
       // Run system migration if needed
       if (status.systemMigrationNeeded) {
          logSystem('📊 Running system database migration...');
@@ -127,85 +159,95 @@ async function runCompleteMigration() {
          logSystem('✅ System database migration completed');
       } else {
          logSystem('⏭️  System database migration already completed');
-         migrationResults.systemMigration = { 
-            success: true, 
+         migrationResults.systemMigration = {
+            success: true,
             message: 'Already migrated',
-            existing_tables: status.existingSystemTables
+            existing_tables: status.existingSystemTables,
          };
       }
-      
+
       // Get available tenants
       const tenants = await getAvailableTenants();
-      logSystem(`Found ${tenants.length} tenants for migration: ${tenants.map(t => t.code).join(', ')}`);
-      
+      const tenantCodes = tenants.map((t) => t.code).join(', ');
+      logSystem(`Found ${tenants.length} tenants for migration: ${tenantCodes}`);
+
+      // Create tenant databases first (if needed)
+      if (tenants.length > 0) {
+         logSystem('🗄️  Creating tenant databases...');
+         const dbCreationResult = await createTenantDatabases();
+         if (!dbCreationResult.success) {
+            migrationResults.errors.push('Database creation failed');
+            logError('Database creation failed', { errors: dbCreationResult.errors });
+         }
+         logSystem('✅ Tenant database creation completed');
+      }
+
       // Run tenant migrations
       if (tenants.length > 0) {
          logSystem('🏢 Running tenant database migrations...');
-         
+
          for (const tenant of tenants) {
             try {
                logSystem(`Migrating tenant: ${tenant.name} (${tenant.code})`);
                const result = await migrateTenantDatabase(tenant.code);
-               
+
                migrationResults.tenantMigrations.push({
                   tenantCode: tenant.code,
                   tenantName: tenant.name,
                   success: true,
-                  result
+                  result,
                });
-               
+
                logSystem(`✅ Tenant migration completed: ${tenant.code}`);
-               
             } catch (error) {
-               logError(error, { 
-                  context: 'tenantMigration', 
+               logError(error, {
+                  context: 'tenantMigration',
                   tenantCode: tenant.code,
-                  tenantName: tenant.name
+                  tenantName: tenant.name,
                });
-               
+
                migrationResults.errors.push({
                   tenantCode: tenant.code,
                   tenantName: tenant.name,
                   error: error.message,
-                  stack: error.stack
+                  stack: error.stack,
                });
-               
+
                migrationResults.tenantMigrations.push({
                   tenantCode: tenant.code,
                   tenantName: tenant.name,
                   success: false,
-                  error: error.message
+                  error: error.message,
                });
             }
          }
       } else {
          logSystem('⚠️  No tenants found for migration');
       }
-      
+
       // Generate summary
-      const successfulMigrations = migrationResults.tenantMigrations.filter(t => t.success);
-      const failedMigrations = migrationResults.tenantMigrations.filter(t => !t.success);
-      
+      const successfulMigrations = migrationResults.tenantMigrations.filter((t) => t.success);
+      const failedMigrations = migrationResults.tenantMigrations.filter((t) => !t.success);
+
       logSystem('\n📈 Migration Summary:');
       logSystem(`✅ System migration: ${migrationResults.systemMigration?.success ? 'Success' : 'Failed'}`);
       logSystem(`✅ Successful tenant migrations: ${successfulMigrations.length}`);
       logSystem(`❌ Failed tenant migrations: ${failedMigrations.length}`);
-      
+
       if (failedMigrations.length > 0) {
          logSystem('Failed migrations:');
-         failedMigrations.forEach(fm => {
+         failedMigrations.forEach((fm) => {
             logSystem(`  - ${fm.tenantName} (${fm.tenantCode}): ${fm.error}`);
          });
       }
-      
+
       return migrationResults;
-      
    } catch (error) {
       logError(error, { context: 'runCompleteMigration' });
       migrationResults.errors.push({
          context: 'general',
          error: error.message,
-         stack: error.stack
+         stack: error.stack,
       });
       throw error;
    }
@@ -217,10 +259,10 @@ async function runCompleteMigration() {
 async function rollbackMigrations() {
    try {
       logSystem('🔄 Starting migration rollback...');
-      
+
       // Get available tenants first
       const tenants = await getAvailableTenants();
-      
+
       // Rollback tenant migrations
       for (const tenant of tenants) {
          try {
@@ -233,14 +275,13 @@ async function rollbackMigrations() {
             logError(error, { context: 'tenantRollback', tenantCode: tenant.code });
          }
       }
-      
+
       // Rollback system migration
       const systemDB = await dbManager.getSystemDB();
       const queryInterface = systemDB.getQueryInterface();
       await systemMigration.down(queryInterface, systemDB.Sequelize);
-      
+
       logSystem('✅ Migration rollback completed');
-      
    } catch (error) {
       logError(error, { context: 'rollbackMigrations' });
       throw error;
@@ -254,13 +295,13 @@ module.exports = {
    runCompleteMigration,
    rollbackMigrations,
    checkMigrationStatus,
-   getAvailableTenants
+   getAvailableTenants,
 };
 
 // Run migration if this file is executed directly
 if (require.main === module) {
    const command = process.argv[2];
-   
+
    if (command === 'rollback') {
       rollbackMigrations()
          .then(() => {
@@ -277,7 +318,7 @@ if (require.main === module) {
             console.log('\n✅ Database migration completed successfully!');
             console.log('\n📊 Final Results:');
             console.log(JSON.stringify(results, null, 2));
-            
+
             // Close database connections
             dbManager.closeAllConnections().then(() => {
                process.exit(results.errors.length > 0 ? 1 : 0);
@@ -285,7 +326,7 @@ if (require.main === module) {
          })
          .catch((error) => {
             console.error('\n❌ Database migration failed:', error.message);
-            
+
             // Close database connections
             dbManager.closeAllConnections().then(() => {
                process.exit(1);

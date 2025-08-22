@@ -16,11 +16,11 @@
    "security": {
       "bcryptRounds": 12,
       "maxLoginAttempts": 5,
-      "lockoutTime": "15m",
-      "sessionMaxAge": "1d",
-      "rememberMeMaxAge": "30d",
+      "lockoutTime": 900000,
+      "sessionMaxAge": 86400000,
+      "rememberMeMaxAge": 2592000000,
       "rateLimiting": {
-         "windowMs": "15m",
+         "windowMs": 900000,
          "maxRequests": 100,
          "globalMaxRequests": 100,
          "authMaxRequests": 5
@@ -34,8 +34,8 @@
       "connection": {
          "host": "140.238.167.36",
          "port": 3306,
-         "timezone": "+00:00",
-         "connectTimeout": "1m",
+         "timezone": "+05:30",
+         "connectTimeout": 60000,
          "ssl": false
       },
       "system": {
@@ -49,20 +49,20 @@
          "collation": "utf8mb4_unicode_ci"
       },
       "pool": {
-         "max": 2,
+         "max": 5,
          "min": 0,
-         "acquire": "30s",
-         "idle": "10s",
-         "evict": "5s",
+         "acquire": 60000,
+         "idle": 30000,
+         "evict": 5000,
          "handleDisconnects": true
       },
       "sessionStore": {
          "pool": {
-            "connectionLimit": 2,
-            "acquireTimeout": "30s",
-            "timeout": "30s",
+            "connectionLimit": 5,
+            "acquireTimeout": 30000,
+            "timeout": 30000,
             "reconnect": true,
-            "idleTimeout": "10s"
+            "idleTimeout": 10000
          }
       },
       "retry": {
