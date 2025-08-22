@@ -22,21 +22,20 @@ const securityMiddleware = () => {
             }
             return compression.filter(req, res);
          },
-      }),
+      })
    );
 
    // Helmet for security headers
    middlewares.push(
       helmet({
          contentSecurityPolicy: appConfig.security.helmet.contentSecurityPolicy,
-         crossOriginEmbedderPolicy:
-        appConfig.security.helmet.crossOriginEmbedderPolicy,
+         crossOriginEmbedderPolicy: appConfig.security.helmet.crossOriginEmbedderPolicy,
          hsts: {
             maxAge: 31536000,
             includeSubDomains: true,
             preload: true,
          },
-      }),
+      })
    );
 
    // CORS configuration
@@ -44,7 +43,9 @@ const securityMiddleware = () => {
       cors({
          origin: (origin, callback) => {
             // Allow requests with no origin or null origin (same-origin requests, form posts)
-            if (!origin || origin === 'null') {return callback(null, true);}
+            if (!origin || origin === 'null') {
+               return callback(null, true);
+            }
 
             // In development, allow all localhost origins
             if (process.env.NODE_ENV === 'development') {
@@ -56,9 +57,7 @@ const securityMiddleware = () => {
 
             // Allow subdomain-based origins
             const allowedDomains = appConfig.cors?.allowedDomains || [];
-            const isAllowed = allowedDomains.some((domain) =>
-               origin.endsWith(domain),
-            );
+            const isAllowed = allowedDomains.some((domain) => origin.endsWith(domain));
 
             if (isAllowed) {
                return callback(null, true);
@@ -71,7 +70,7 @@ const securityMiddleware = () => {
          credentials: true,
          methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
          allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-      }),
+      })
    );
 
    // Global rate limiting
@@ -89,7 +88,7 @@ const securityMiddleware = () => {
          },
          standardHeaders: true,
          legacyHeaders: false,
-      }),
+      })
    );
 
    logSystem('Security middleware configured');
@@ -188,11 +187,7 @@ const ipWhitelist = (allowedIPs = []) => {
 
       // In development, allow localhost
       if (process.env.NODE_ENV === 'development') {
-         if (
-            clientIP === '127.0.0.1' ||
-        clientIP === '::1' ||
-        clientIP.startsWith('192.168.')
-         ) {
+         if (clientIP === '127.0.0.1' || clientIP === '::1' || clientIP.startsWith('192.168.')) {
             return next();
          }
       }

@@ -92,9 +92,9 @@ function createDatabaseManager() {
                   connectTimeout: appConfig.database.connection.connectTimeout,
                   ssl: appConfig.database.connection.ssl
                      ? {
-                        require: true,
-                        rejectUnauthorized: false,
-                     }
+                          require: true,
+                          rejectUnauthorized: false,
+                       }
                      : false,
                },
                pool: {
@@ -167,9 +167,9 @@ function createDatabaseManager() {
                connectTimeout: appConfig.database.connection.connectTimeout,
                ssl: appConfig.database.connection.ssl
                   ? {
-                     require: true,
-                     rejectUnauthorized: false,
-                  }
+                       require: true,
+                       rejectUnauthorized: false,
+                    }
                   : false,
             },
             pool: {

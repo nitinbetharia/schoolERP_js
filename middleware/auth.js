@@ -20,9 +20,7 @@ const authenticate = (req, res, next) => {
    }
 
    // Check session expiry based on role
-   const sessionTimeout =
-    SYSTEM.SESSION_TIMEOUT[req.session.user.role] ||
-    SYSTEM.SESSION_TIMEOUT.ADMIN;
+   const sessionTimeout = SYSTEM.SESSION_TIMEOUT[req.session.user.role] || SYSTEM.SESSION_TIMEOUT.ADMIN;
    const sessionAge = Date.now() - new Date(req.session.user.lastActivity);
 
    if (sessionAge > sessionTimeout) {
@@ -100,19 +98,12 @@ const requireSystemAdmin = authorize(USER_ROLES.SYSTEM_ADMIN);
 /**
  * Trust admin or higher middleware
  */
-const requireTrustAdmin = authorize(
-   USER_ROLES.SYSTEM_ADMIN,
-   USER_ROLES.TRUST_ADMIN,
-);
+const requireTrustAdmin = authorize(USER_ROLES.SYSTEM_ADMIN, USER_ROLES.TRUST_ADMIN);
 
 /**
  * Principal or higher middleware
  */
-const requirePrincipal = authorize(
-   USER_ROLES.SYSTEM_ADMIN,
-   USER_ROLES.TRUST_ADMIN,
-   USER_ROLES.PRINCIPAL,
-);
+const requirePrincipal = authorize(USER_ROLES.SYSTEM_ADMIN, USER_ROLES.TRUST_ADMIN, USER_ROLES.PRINCIPAL);
 
 /**
  * Teacher or higher middleware
@@ -121,7 +112,7 @@ const requireTeacher = authorize(
    USER_ROLES.SYSTEM_ADMIN,
    USER_ROLES.TRUST_ADMIN,
    USER_ROLES.PRINCIPAL,
-   USER_ROLES.TEACHER,
+   USER_ROLES.TEACHER
 );
 
 /**
@@ -132,7 +123,7 @@ const requireStaff = authorize(
    USER_ROLES.TRUST_ADMIN,
    USER_ROLES.PRINCIPAL,
    USER_ROLES.TEACHER,
-   USER_ROLES.ACCOUNTANT,
+   USER_ROLES.ACCOUNTANT
 );
 
 /**
@@ -158,8 +149,8 @@ const loginRateLimit = rateLimit({
  */
 const passwordUtils = {
    /**
-   * Hash password using bcrypt
-   */
+    * Hash password using bcrypt
+    */
    async hashPassword(password) {
       try {
          const saltRounds = appConfig.security.bcryptRounds;
@@ -173,8 +164,8 @@ const passwordUtils = {
    },
 
    /**
-   * Verify password against hash
-   */
+    * Verify password against hash
+    */
    async verifyPassword(password, hash) {
       try {
          return await bcrypt.compare(password, hash);
@@ -187,8 +178,8 @@ const passwordUtils = {
    },
 
    /**
-   * Validate password strength
-   */
+    * Validate password strength
+    */
    validatePasswordStrength(password) {
       const minLength = 8;
       const hasUpperCase = /[A-Z]/.test(password);
@@ -261,10 +252,7 @@ const handleFailedLogin = async (user) => {
 
    logAuth('LOGIN_FAILED', user.id, null, {
       loginAttempts: user.login_attempts,
-      remainingAttempts: Math.max(
-         0,
-         appConfig.security.maxLoginAttempts - user.login_attempts,
-      ),
+      remainingAttempts: Math.max(0, appConfig.security.maxLoginAttempts - user.login_attempts),
    });
 };
 

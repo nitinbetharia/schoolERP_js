@@ -1,10 +1,6 @@
 const SchoolService = require('../services/SchoolService');
 const logger = require('../../../utils/logger');
-const {
-   formatErrorResponse,
-   getErrorStatusCode,
-   formatSuccessResponse,
-} = require('../../../utils/errors');
+const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/errors');
 
 /**
  * School Controller
@@ -16,28 +12,28 @@ class SchoolController {
    }
 
    /**
-   * Create a new school
-   */
+    * Create a new school
+    */
    async createSchool(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
          const schoolData = req.body;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          const school = await this.service.createSchool(trustId, schoolData);
 
-         res
-            .status(201)
-            .json(formatSuccessResponse(school, 'School created successfully'));
+         res.status(201).json(formatSuccessResponse(school, 'School created successfully'));
       } catch (error) {
          logger.error('School Controller createSchool Error', {
             controller: 'school-controller',
@@ -51,27 +47,27 @@ class SchoolController {
    }
 
    /**
-   * Get all schools for a trust
-   */
+    * Get all schools for a trust
+    */
    async getSchools(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          const schools = await this.service.getSchools(trustId, req.query);
 
-         res.json(
-            formatSuccessResponse(schools, 'Schools retrieved successfully'),
-         );
+         res.json(formatSuccessResponse(schools, 'Schools retrieved successfully'));
       } catch (error) {
          logger.error('School Controller getSchools Error', {
             controller: 'school-controller',
@@ -85,21 +81,23 @@ class SchoolController {
    }
 
    /**
-   * Get school by ID
-   */
+    * Get school by ID
+    */
    async getSchoolById(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
          const schoolId = req.params.id;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          const school = await this.service.getSchoolById(trustId, schoolId);
@@ -118,8 +116,8 @@ class SchoolController {
    }
 
    /**
-   * Update school
-   */
+    * Update school
+    */
    async updateSchool(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
@@ -127,20 +125,18 @@ class SchoolController {
          const updateData = req.body;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
-         const school = await this.service.updateSchool(
-            trustId,
-            schoolId,
-            updateData,
-         );
+         const school = await this.service.updateSchool(trustId, schoolId, updateData);
 
          res.json(formatSuccessResponse(school, 'School updated successfully'));
       } catch (error) {
@@ -156,8 +152,8 @@ class SchoolController {
    }
 
    /**
-   * Update school status
-   */
+    * Update school status
+    */
    async updateSchoolStatus(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
@@ -165,22 +161,22 @@ class SchoolController {
          const { status } = req.body;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          const school = await this.service.updateSchool(trustId, schoolId, {
             status,
          });
 
-         res.json(
-            formatSuccessResponse(school, 'School status updated successfully'),
-         );
+         res.json(formatSuccessResponse(school, 'School status updated successfully'));
       } catch (error) {
          logger.error('School Controller updateSchoolStatus Error', {
             controller: 'school-controller',
@@ -194,21 +190,23 @@ class SchoolController {
    }
 
    /**
-   * Delete school (soft delete)
-   */
+    * Delete school (soft delete)
+    */
    async deleteSchool(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
          const schoolId = req.params.id;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          await this.service.deleteSchool(trustId, schoolId);
@@ -227,8 +225,8 @@ class SchoolController {
    }
 
    /**
-   * Update school compliance
-   */
+    * Update school compliance
+    */
    async updateSchoolCompliance(req, res) {
       try {
          const trustId = req.params.trustId || req.trust?.id;
@@ -236,13 +234,15 @@ class SchoolController {
          const complianceData = req.body;
 
          if (!trustId) {
-            return res
-               .status(400)
-               .json(
-                  formatErrorResponse(
-                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
-                  ),
-               );
+            return res.status(400).json(
+               formatErrorResponse(
+                  (() => {
+                     const err = new Error('Trust ID is required');
+                     err.statusCode = 400;
+                     return err;
+                  })()
+               )
+            );
          }
 
          const school = await this.service.updateSchool(trustId, schoolId, {
@@ -250,9 +250,7 @@ class SchoolController {
             compliance_updated_at: new Date(),
          });
 
-         res.json(
-            formatSuccessResponse(school, 'School compliance updated successfully'),
-         );
+         res.json(formatSuccessResponse(school, 'School compliance updated successfully'));
       } catch (error) {
          logger.error('School Controller updateSchoolCompliance Error', {
             controller: 'school-controller',

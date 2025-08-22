@@ -64,9 +64,7 @@ function createSystemAuthService() {
                lockedUntil: user.locked_until,
                loginAttempts: user.login_attempts,
             });
-            const error = new Error(
-               'Account is temporarily locked due to multiple failed login attempts'
-            );
+            const error = new Error('Account is temporarily locked due to multiple failed login attempts');
             error.statusCode = 401;
             error.code = 'AUTH_ACCOUNT_LOCKED';
             error.userMessage = 'Account locked due to failed attempts. Try again later.';
@@ -140,7 +138,9 @@ function createSystemAuthService() {
 
          const user = await SystemUser.findByPk(userId);
          if (!user) {
-            const err = new Error('User not found'); err.statusCode = 404; throw err;
+            const err = new Error('User not found');
+            err.statusCode = 404;
+            throw err;
          }
 
          // Verify current password
@@ -346,7 +346,9 @@ function createTrustService() {
          const trust = await Trust.findOne({ where: whereClause });
 
          if (!trust) {
-            const err = new Error(`Trust not found with ${field}: ${identifier}`); err.statusCode = 404; throw err;
+            const err = new Error(`Trust not found with ${field}: ${identifier}`);
+            err.statusCode = 404;
+            throw err;
          }
 
          return trust;
@@ -368,7 +370,9 @@ function createTrustService() {
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            const err = new Error('Trust not found'); err.statusCode = 404; throw err;
+            const err = new Error('Trust not found');
+            err.statusCode = 404;
+            throw err;
          }
 
          // Check for conflicts if updating unique fields
@@ -469,7 +473,9 @@ function createTrustService() {
 
          const trust = await Trust.findByPk(trustId);
          if (!trust) {
-            const err = new Error('Trust not found'); err.statusCode = 404; throw err;
+            const err = new Error('Trust not found');
+            err.statusCode = 404;
+            throw err;
          }
 
          if (trust.isSetupComplete()) {
