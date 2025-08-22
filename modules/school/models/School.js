@@ -16,8 +16,7 @@ const defineSchool = (sequelize) => {
          trust_id: {
             type: DataTypes.INTEGER,
             allowNull: true, // Made nullable for tenant databases
-            comment:
-          'Reference to system trust table (not used in tenant databases)',
+            comment: 'Reference to system trust table (not used in tenant databases)',
          },
          name: {
             type: DataTypes.STRING(200),
@@ -30,13 +29,7 @@ const defineSchool = (sequelize) => {
             comment: 'Unique school code',
          },
          type: {
-            type: DataTypes.ENUM(
-               'PRIMARY',
-               'SECONDARY',
-               'HIGHER_SECONDARY',
-               'NURSERY',
-               'MIXED',
-            ),
+            type: DataTypes.ENUM('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED'),
             allowNull: false,
             defaultValue: 'MIXED',
          },
@@ -87,13 +80,7 @@ const defineSchool = (sequelize) => {
             allowNull: true,
          },
          affiliation_board: {
-            type: DataTypes.ENUM(
-               'CBSE',
-               'CISCE',
-               'STATE_BOARD',
-               'INTERNATIONAL',
-               'UNAFFILIATED',
-            ),
+            type: DataTypes.ENUM('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED'),
             allowNull: false,
             defaultValue: 'UNAFFILIATED',
             comment: 'Primary board affiliation',
@@ -101,8 +88,7 @@ const defineSchool = (sequelize) => {
          board_affiliation_details: {
             type: DataTypes.JSON,
             allowNull: true,
-            comment:
-          'Board-specific details like affiliation codes, registration numbers',
+            comment: 'Board-specific details like affiliation codes, registration numbers',
          },
          affiliation_number: {
             type: DataTypes.STRING(50),
@@ -176,8 +162,7 @@ const defineSchool = (sequelize) => {
                   last_updated: null,
                },
             },
-            comment:
-          'Additional flexible information including NEP adoption and UDISE compliance',
+            comment: 'Additional flexible information including NEP adoption and UDISE compliance',
          },
          created_by: {
             type: DataTypes.INTEGER,
@@ -227,8 +212,105 @@ const defineSchool = (sequelize) => {
                fields: ['is_active'],
             },
          ],
-      },
+      }
    );
+
+   // Instance Methods for Configuration Integration
+   School.prototype.getCustomFieldValues = async function () {
+      const CustomFieldValues = this.sequelize.models.CustomFieldValues;
+      if (!CustomFieldValues) {
+         return {};
+      }
+      return await CustomFieldValues.getEntityValues('school', this.id);
+   };
+
+   School.prototype.setCustomFieldValues = async function (fieldValues, transaction = null) {
+      const CustomFieldValues = this.sequelize.models.CustomFieldValues;
+      if (!CustomFieldValues) {
+         throw new Error('CustomFieldValues model not available');
+      }
+      return await CustomFieldValues.setEntityValues('school', this.id, fieldValues, transaction);
+   };
+
+   School.prototype.getCompleteProfile = async function () {
+      const customFields = await this.getCustomFieldValues();
+      return {
+         ...this.toJSON(),
+         custom_fields: customFields,
+      };
+   };
+
+   School.prototype.validateAgainstTenantConfig = async function (tenantConfig) {
+      const errors = [];
+      const schoolConfig = tenantConfig.getSchoolConfig();
+
+      // Validate school type is allowed
+      const allowedTypes = schoolConfig.school_types_allowed || [];
+      if (allowedTypes.length > 0 && !allowedTypes.includes(this.type)) {
+         errors.push(`School type '${this.type}' is not allowed as per trust configuration`);
+      }
+
+      // Validate board is supported
+      const supportedBoards = schoolConfig.boards_supported || [];
+      if (supportedBoards.length > 0 && !supportedBoards.includes(this.affiliation_board)) {
+         errors.push(`Board '${this.affiliation_board}' is not supported as per trust configuration`);
+      }
+
+      return errors;
+   };
+
+   School.prototype.getConfiguredFacilities = function (tenantConfig) {
+      const schoolConfig = tenantConfig.getSchoolConfig();
+      const masterFacilities = schoolConfig.facilities_master || [];
+      const schoolFacilities = this.facilities || [];
+
+      return masterFacilities.map((facility) => ({
+         name: facility,
+         available: schoolFacilities.includes(facility),
+         configured: true,
+      }));
+   };
+
+   // Class Methods for Configuration Integration
+   School.createWithConfiguration = async function (schoolData, tenantConfig, transaction = null) {
+      const customFieldData = schoolData.custom_fields || {};
+      delete schoolData.custom_fields;
+
+      const schoolConfig = tenantConfig.getSchoolConfig();
+
+      // Set default academic year format if not provided
+      if (!schoolData.academic_session_start_month) {
+         schoolData.academic_session_start_month = schoolConfig.session_start_month || 4;
+      }
+
+      // Set default working days if not provided
+      if (!schoolData.working_days) {
+         schoolData.working_days = schoolConfig.working_days_default || [1, 2, 3, 4, 5, 6];
+      }
+
+      // Create the school
+      const school = await this.create(schoolData, { transaction });
+
+      // Set custom field values if provided
+      if (Object.keys(customFieldData).length > 0) {
+         await school.setCustomFieldValues(customFieldData, transaction);
+      }
+
+      return school;
+   };
+
+   School.getConfigurableFields = function (tenantConfig) {
+      const schoolConfig = tenantConfig.getSchoolConfig();
+
+      return {
+         school_types_allowed: schoolConfig.school_types_allowed || [],
+         boards_supported: schoolConfig.boards_supported || [],
+         facilities_master: schoolConfig.facilities_master || [],
+         max_schools_allowed: schoolConfig.max_schools_allowed || 10,
+         session_start_month: schoolConfig.session_start_month || 4,
+         working_days_default: schoolConfig.working_days_default || [1, 2, 3, 4, 5, 6],
+      };
+   };
 
    return School;
 };
@@ -260,21 +342,16 @@ const schoolValidationSchemas = {
          'string.max': 'School code cannot exceed 20 characters',
       }),
 
-      type: Joi.string()
-         .valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED')
-         .required()
-         .messages({
-            'any.only':
-          'School type must be PRIMARY, SECONDARY, HIGHER_SECONDARY, NURSERY, or MIXED',
-            'any.required': 'School type is required',
-         }),
+      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').required().messages({
+         'any.only': 'School type must be PRIMARY, SECONDARY, HIGHER_SECONDARY, NURSERY, or MIXED',
+         'any.required': 'School type is required',
+      }),
 
       affiliation_board: Joi.string()
          .valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED')
          .required()
          .messages({
-            'any.only':
-          'Affiliation board must be CBSE, CISCE, STATE_BOARD, INTERNATIONAL, or UNAFFILIATED',
+            'any.only': 'Affiliation board must be CBSE, CISCE, STATE_BOARD, INTERNATIONAL, or UNAFFILIATED',
             'any.required': 'Affiliation board is required',
          }),
 
@@ -311,26 +388,14 @@ const schoolValidationSchemas = {
       principal_email: Joi.string().email().max(255).allow(null, '').optional(),
 
       // School details
-      established_year: Joi.number()
-         .integer()
-         .min(1800)
-         .max(new Date().getFullYear())
-         .allow(null)
-         .optional(),
+      established_year: Joi.number().integer().min(1800).max(new Date().getFullYear()).allow(null).optional(),
       affiliation_number: Joi.string().trim().max(50).allow(null, '').optional(),
       registration_number: Joi.string().trim().max(50).allow(null, '').optional(),
       capacity: Joi.number().integer().positive().allow(null).optional(),
 
       // Configuration
-      academic_session_start_month: Joi.number()
-         .integer()
-         .min(1)
-         .max(12)
-         .optional(),
-      working_days: Joi.array()
-         .items(Joi.number().integer().min(1).max(7))
-         .allow(null)
-         .optional(),
+      academic_session_start_month: Joi.number().integer().min(1).max(12).optional(),
+      working_days: Joi.array().items(Joi.number().integer().min(1).max(7)).allow(null).optional(),
 
       // JSON fields
       school_timings: Joi.object({
@@ -372,12 +437,8 @@ const schoolValidationSchemas = {
 
       // Allow updating other fields
       name: Joi.string().trim().min(2).max(200).optional(),
-      type: Joi.string()
-         .valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED')
-         .optional(),
-      affiliation_board: Joi.string()
-         .valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED')
-         .optional(),
+      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').optional(),
+      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').optional(),
 
       // Contact updates
       address: Joi.string().trim().max(1000).allow(null, '').optional(),
@@ -405,15 +466,8 @@ const schoolValidationSchemas = {
 
       // Configuration updates
       capacity: Joi.number().integer().positive().allow(null).optional(),
-      academic_session_start_month: Joi.number()
-         .integer()
-         .min(1)
-         .max(12)
-         .optional(),
-      working_days: Joi.array()
-         .items(Joi.number().integer().min(1).max(7))
-         .allow(null)
-         .optional(),
+      academic_session_start_month: Joi.number().integer().min(1).max(12).optional(),
+      working_days: Joi.array().items(Joi.number().integer().min(1).max(7)).allow(null).optional(),
 
       // Status updates
       is_active: Joi.boolean().optional(),
@@ -427,9 +481,7 @@ const schoolValidationSchemas = {
    }),
 
    compliance: Joi.object({
-      affiliation_board: Joi.string()
-         .valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED')
-         .required(),
+      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').required(),
       affiliation_number: Joi.string().trim().max(50).allow(null, '').optional(),
       registration_number: Joi.string().trim().max(50).allow(null, '').optional(),
       board_affiliation_details: Joi.object().allow(null).optional(),
@@ -438,10 +490,7 @@ const schoolValidationSchemas = {
       nep_adoption: Joi.object({
          enabled: Joi.boolean().allow(null).optional(),
          adoption_date: Joi.date().allow(null).optional(),
-         policy: Joi.string()
-            .valid('TRADITIONAL', 'NEP_2020', 'HYBRID')
-            .allow(null)
-            .optional(),
+         policy: Joi.string().valid('TRADITIONAL', 'NEP_2020', 'HYBRID').allow(null).optional(),
          academic_year_from: Joi.string()
             .pattern(/^\d{4}-\d{2}$/)
             .allow(null)
@@ -454,9 +503,7 @@ const schoolValidationSchemas = {
       // UDISE compliance
       udise_compliance: Joi.object({
          udise_code: Joi.string().trim().max(50).allow(null, '').optional(),
-         registration_status: Joi.string()
-            .valid('PENDING', 'REGISTERED', 'VERIFIED')
-            .optional(),
+         registration_status: Joi.string().valid('PENDING', 'REGISTERED', 'VERIFIED').optional(),
       })
          .allow(null)
          .optional(),

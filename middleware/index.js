@@ -1,10 +1,10 @@
-const { ErrorFactory, validators } = require('../utils/errors');
-
 // Re-export all middleware for easy importing
 const errorHandler = require('./errorHandler');
 const tenant = require('./tenant');
 const auth = require('./auth');
 const security = require('./security');
+const flash = require('./flash');
+const templateLocals = require('./templateLocals');
 
 module.exports = {
    // Error handling
@@ -19,7 +19,9 @@ module.exports = {
    // Security
    ...security,
 
-   // Validation helpers
-   validators,
-   ErrorFactory,
+   // Flash messages
+   ...flash,
+
+   // Template locals
+   ...templateLocals,
 };

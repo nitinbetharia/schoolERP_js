@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/errors');
+const { commonSchemas } = require('../utils/validation');
 const { TRUST_STATUS, VALIDATION } = require('../config/business-constants');
 
 /**
@@ -77,6 +77,7 @@ const defineTrustModel = (sequelize) => {
             type: DataTypes.JSON,
             allowNull: true,
             defaultValue: {
+               // Legacy config - will be migrated to TenantConfiguration table
                nep_2020_adoption: {
                   enabled: false,
                   adoption_date: null,
@@ -84,9 +85,10 @@ const defineTrustModel = (sequelize) => {
                   allow_school_override: true,
                   academic_year_from: null,
                },
+               // Deprecation notice
+               _deprecation_notice: 'This field is deprecated. Use TenantConfiguration table.',
             },
-            comment:
-          'Trust-specific configuration settings including NEP 2020 policy',
+            comment: 'Legacy trust configuration - use TenantConfiguration table for new config',
          },
 
          setup_completed_at: {
@@ -147,7 +149,7 @@ const defineTrustModel = (sequelize) => {
                }
             },
          },
-      },
+      }
    );
 
    // Instance methods
@@ -163,6 +165,47 @@ const defineTrustModel = (sequelize) => {
       this.setup_completed_at = new Date();
       this.status = TRUST_STATUS.ACTIVE;
       return this.save();
+   };
+
+   // New configuration-related methods
+   Trust.prototype.getConfiguration = async function () {
+      const TenantConfiguration = this.sequelize.models.TenantConfiguration;
+      let config = await TenantConfiguration.findOne({
+         where: { trust_id: this.id },
+      });
+
+      if (!config) {
+         // Create default configuration for this trust
+         config = await TenantConfiguration.create({
+            trust_id: this.id,
+            ...TenantConfiguration.getDefaultConfiguration(),
+         });
+      }
+
+      return config;
+   };
+
+   Trust.prototype.getCustomFields = async function (entityType) {
+      const TenantCustomFields = this.sequelize.models.TenantCustomFields;
+      return await TenantCustomFields.getFieldsForEntity(this.id, entityType);
+   };
+
+   Trust.prototype.updateConfiguration = async function (configUpdate, userId = null) {
+      const config = await this.getConfiguration();
+
+      // Merge the updates
+      Object.keys(configUpdate).forEach((key) => {
+         if (config[key] && typeof config[key] === 'object' && !Array.isArray(config[key])) {
+            config[key] = { ...config[key], ...configUpdate[key] };
+         } else {
+            config[key] = configUpdate[key];
+         }
+      });
+
+      config.last_modified_by = userId;
+      await config.incrementVersion();
+
+      return config;
    };
 
    return Trust;
@@ -193,8 +236,7 @@ const trustValidationSchemas = {
          .required()
          .messages({
             'string.empty': 'Trust code is required',
-            'string.pattern.base':
-          'Trust code can only contain lowercase letters, numbers, hyphens and underscores',
+            'string.pattern.base': 'Trust code can only contain lowercase letters, numbers, hyphens and underscores',
             'string.min': `Trust code must be at least ${VALIDATION.TRUST_CODE_MIN_LENGTH} characters`,
             'string.max': `Trust code cannot exceed ${VALIDATION.TRUST_CODE_MAX_LENGTH} characters`,
          }),
@@ -208,8 +250,7 @@ const trustValidationSchemas = {
          .required()
          .messages({
             'string.empty': 'Subdomain is required',
-            'string.pattern.base':
-          'Subdomain can only contain lowercase letters, numbers and hyphens',
+            'string.pattern.base': 'Subdomain can only contain lowercase letters, numbers and hyphens',
             'string.min': `Subdomain must be at least ${VALIDATION.SUBDOMAIN_MIN_LENGTH} characters`,
             'string.max': `Subdomain cannot exceed ${VALIDATION.SUBDOMAIN_MAX_LENGTH} characters`,
          }),
@@ -229,11 +270,7 @@ const trustValidationSchemas = {
    }),
 
    update: Joi.object({
-      trust_name: Joi.string()
-         .trim()
-         .min(VALIDATION.NAME_MIN_LENGTH)
-         .max(200)
-         .optional(),
+      trust_name: Joi.string().trim().min(VALIDATION.NAME_MIN_LENGTH).max(200).optional(),
 
       contact_email: Joi.string().email().max(255).optional(),
 

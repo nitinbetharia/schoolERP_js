@@ -49,6 +49,7 @@ class SchoolERPServer {
    constructor() {
       this.app = express();
       this.server = null;
+      console.log('🏗️ SchoolERPServer constructor called');
    }
 
    /**
@@ -101,6 +102,7 @@ class SchoolERPServer {
     * Setup Express middleware
     */
    setupMiddleware() {
+      console.log('🔧 Setting up middleware...');
       logSystem('Setting up middleware');
 
       // Security middleware (helmet, cors, compression, rate limiting)
@@ -112,8 +114,8 @@ class SchoolERPServer {
          res.setHeader(
             'Content-Security-Policy',
             "default-src 'self'; " +
-               "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com unpkg.com; " +
-               "style-src 'self' 'unsafe-inline' cdn.tailwindcss.com fonts.googleapis.com cdnjs.cloudflare.com; " +
+               "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; " +
+               "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com cdnjs.cloudflare.com; " +
                "font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; " +
                "img-src 'self' data: https:; " +
                "connect-src 'self'; " +
@@ -136,6 +138,18 @@ class SchoolERPServer {
 
       // Input sanitization
       this.app.use(sanitizeInput);
+
+      // Debug middleware - TEMPORARY
+      this.app.use((req, res, next) => {
+         console.log('\n🚀 REQUEST START:', {
+            method: req.method,
+            path: req.path,
+            url: req.url,
+            host: req.get('host'),
+            accept: req.headers.accept
+         });
+         next();
+      });
 
       // Request logging
       this.app.use(requestLogger);
@@ -194,14 +208,8 @@ class SchoolERPServer {
          expiration: appConfig.security.sessionMaxAge,
       });
 
-      // Handle session store errors to prevent app crashes
-      sessionStore.onReady(() => {
-         logSystem('Session store ready');
-      });
-
-      sessionStore.onError((error) => {
-         logError(error, { context: 'sessionStore' });
-      });
+      // Session store is ready when created - no onReady callback needed in v3+
+      logSystem('Session store initialized');
 
       this.app.use(
          session({
@@ -216,7 +224,8 @@ class SchoolERPServer {
                httpOnly: true,
                maxAge: appConfig.security.sessionMaxAge,
                sameSite: 'strict', // Enhanced: Changed from 'lax' to 'strict' for better security
-               domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined, // Add domain in production
+               // Add domain in production
+               domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined,
             },
             // Enhanced session security
             name: 'school_erp_session', // Hide default session name
@@ -235,6 +244,7 @@ class SchoolERPServer {
     * Setup application routes
     */
    setupRoutes() {
+      console.log('🛣️ Setting up routes...');
       logSystem('Setting up routes');
 
       // Connection pool monitoring middleware
@@ -246,6 +256,17 @@ class SchoolERPServer {
 
       // Tenant detection middleware (for all routes except system admin and trust-scoped routes)
       this.app.use((req, res, next) => {
+         console.log('🚀 TENANT DETECTION MIDDLEWARE:', {
+            path: req.path,
+            host: req.get('host'),
+            shouldSkip: req.path.startsWith('/api/v1/admin/system') ||
+                       req.path.startsWith('/api/v1/trust/') ||
+                       req.path === '/api/v1/health' ||
+                       req.path === '/api/v1/status' ||
+                       req.path === '/health' ||
+                       req.path === '/status'
+         });
+
          if (
             req.path.startsWith('/api/v1/admin/system') ||
             req.path.startsWith('/api/v1/trust/') ||
@@ -254,26 +275,57 @@ class SchoolERPServer {
             req.path === '/health' ||
             req.path === '/status'
          ) {
+            console.log('✅ Skipping tenant detection for system route');
             return next();
          }
+         console.log('🔍 Calling tenant detection');
          return tenantDetection(req, res, next);
       });
 
       // Tenant validation middleware (for tenant-specific routes except trust-scoped routes)
       this.app.use((req, res, next) => {
+         console.log('🏛️ TENANT VALIDATION MIDDLEWARE:', {
+            path: req.path,
+            tenantCode: req.tenantCode,
+            isSystemAdmin: req.isSystemAdmin,
+            shouldSkipPath: req.path.startsWith('/api/v1/admin/system') ||
+                           req.path.startsWith('/api/v1/trust/') ||
+                           req.path === '/api/v1/health' ||
+                           req.path === '/api/v1/status' ||
+                           req.path === '/health' ||
+                           req.path === '/status' ||
+                           req.path.startsWith('/auth/') ||
+                           req.path === '/login' ||
+                           req.path === '/logout'
+         });
+
          if (
             req.path.startsWith('/api/v1/admin/system') ||
             req.path.startsWith('/api/v1/trust/') ||
             req.path === '/api/v1/health' ||
             req.path === '/api/v1/status' ||
             req.path === '/health' ||
-            req.path === '/status'
+            req.path === '/status' ||
+            req.path.startsWith('/auth/') ||
+            req.path === '/login' ||
+            req.path === '/logout'
          ) {
+            console.log('✅ Skipping tenant validation for excluded path');
             return next();
          }
-         if (req.tenantCode && !req.path.startsWith('/api')) {
+
+         console.log('🔍 Checking tenant validation condition:', {
+            hasTenantCode: !!req.tenantCode,
+            isNotAPI: !req.path.startsWith('/api'),
+            isNotSystemAdmin: !req.isSystemAdmin,
+            willCallValidation: req.tenantCode && !req.path.startsWith('/api') && !req.isSystemAdmin
+         });
+
+         if (req.tenantCode && !req.path.startsWith('/api') && !req.isSystemAdmin) {
+            console.log('🚨 Calling validateTenant');
             return validateTenant(req, res, next);
          }
+         console.log('✅ Skipping tenant validation - conditions not met');
          return next();
       });
 

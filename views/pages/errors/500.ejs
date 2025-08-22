@@ -1,0 +1,172 @@
+<!-- 500 Internal Server Error Page -->
+<% 
+// Set layout variables for clean error page
+hideNav = true;
+hideFooter = true;
+%>
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="text-center">
+                    
+                    <!-- Error Illustration -->
+                    <div class="mb-5">
+                        <div class="display-1 text-danger mb-3" style="font-size: 8rem; font-weight: 700;">
+                            500
+                        </div>
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem; opacity: 0.7;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div class="mb-5">
+                        <h1 class="h3 text-dark fw-semibold mb-3">
+                            Internal Server Error
+                        </h1>
+                        <p class="text-muted lead mb-4">
+                            Something went wrong on our end. We're working to fix this issue.
+                        </p>
+                        <% if (typeof error !== 'undefined' && error && process.env.NODE_ENV === 'development') { %>
+                        <div class="alert alert-warning text-start">
+                            <h6 class="fw-semibold mb-2">Development Error Details:</h6>
+                            <pre class="mb-0 small text-wrap"><%= error.message %></pre>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-block mb-5">
+                        <button type="button" 
+                                class="btn btn-brand-primary px-4 py-2" 
+                                onclick="window.location.reload()">
+                            <i class="fas fa-redo me-2"></i>
+                            Try Again
+                        </button>
+                        <a href="/" class="btn btn-outline-secondary px-4 py-2 ms-md-2">
+                            <i class="fas fa-home me-2"></i>
+                            Go Home
+                        </a>
+                    </div>
+                    
+                    <!-- Status Information -->
+                    <div class="card border-0 bg-light mb-4">
+                        <div class="card-body">
+                            <div class="row text-center g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-clock text-muted me-2"></i>
+                                        <small class="text-muted">
+                                            <strong>Time:</strong> <%= new Date().toLocaleString() %>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-hashtag text-muted me-2"></i>
+                                        <small class="text-muted">
+                                            <strong>Error ID:</strong> <%= typeof errorId !== 'undefined' ? errorId : 'N/A' %>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Help Options -->
+                    <div class="row g-3 text-center">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-bug text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Report Issue</h6>
+                                    <small class="text-muted">Help us improve by reporting this error</small>
+                                    <div class="mt-3">
+                                        <a href="/support/report" class="btn btn-sm btn-outline-primary">
+                                            Report Bug
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-headset text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Contact Support</h6>
+                                    <small class="text-muted">Get immediate assistance from our team</small>
+                                    <div class="mt-3">
+                                        <a href="/support" class="btn btn-sm btn-outline-primary">
+                                            Get Help
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Automatic Retry Notice -->
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This page will automatically refresh in <span id="countdown">30</span> seconds.
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-2" id="cancelRefresh">
+                                Cancel
+                            </button>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer with minimal info -->
+<footer class="py-4 mt-auto">
+    <div class="container">
+        <div class="text-center text-muted small">
+            <p class="mb-0">
+                &copy; <%= new Date().getFullYear() %> 
+                <%= tenant && tenant.name ? tenant.name + ' - ' : '' %>School ERP System
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Auto-refresh functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let countdown = 30;
+        let refreshTimer;
+        const countdownElement = document.getElementById('countdown');
+        const cancelButton = document.getElementById('cancelRefresh');
+        
+        function updateCountdown() {
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                window.location.reload();
+                return;
+            }
+            
+            countdown--;
+            refreshTimer = setTimeout(updateCountdown, 1000);
+        }
+        
+        // Start countdown
+        updateCountdown();
+        
+        // Cancel refresh functionality
+        cancelButton.addEventListener('click', function() {
+            clearTimeout(refreshTimer);
+            this.parentElement.innerHTML = '<i class="fas fa-check me-1"></i>Auto-refresh cancelled.';
+        });
+        
+        // Clear timer when user leaves page
+        window.addEventListener('beforeunload', function() {
+            clearTimeout(refreshTimer);
+        });
+    });
+</script>

@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { logSystem, logAuth, logError } = require('../utils/logger');
-const { ErrorFactory } = require('../utils/errors');
+const { ErrorFactory } = require('../utils/validation');
 const appConfig = require('../config/app-config.json');
 
 /**
@@ -9,8 +9,8 @@ const appConfig = require('../config/app-config.json');
  */
 function createSystemAuthService() {
    /**
-   * Login system admin
-   */
+    * Login system admin
+    */
    async function login(credentials) {
       try {
          const { username, password } = credentials;
@@ -28,10 +28,9 @@ function createSystemAuthService() {
 
          if (!user) {
             logAuth('LOGIN_FAILED_USER_NOT_FOUND', null, null, { username });
-            throw ErrorFactory.authentication(
-               'Invalid username or password',
-               'AUTH_001',
-            );
+            const error = ErrorFactory.authentication('Invalid username or password', 'AUTH_001');
+            error.userMessage = 'Invalid username or password. Please check your credentials.';
+            throw error;
          }
 
          // Check if account is locked
@@ -40,17 +39,16 @@ function createSystemAuthService() {
                lockedUntil: user.locked_until,
                loginAttempts: user.login_attempts,
             });
-            throw ErrorFactory.authentication(
+            const error = ErrorFactory.authentication(
                'Account is temporarily locked due to multiple failed login attempts',
-               'AUTH_ACCOUNT_LOCKED',
+               'AUTH_ACCOUNT_LOCKED'
             );
+            error.userMessage = 'Account locked due to failed attempts. Try again later.';
+            throw error;
          }
 
          // Verify password
-         const isPasswordValid = await bcrypt.compare(
-            password,
-            user.password_hash,
-         );
+         const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
          if (!isPasswordValid) {
             // Handle failed login
@@ -67,10 +65,9 @@ function createSystemAuthService() {
             logAuth('LOGIN_FAILED_INVALID_PASSWORD', user.id, null, {
                loginAttempts: user.login_attempts,
             });
-            throw ErrorFactory.authentication(
-               'Invalid username or password',
-               'AUTH_001',
-            );
+            const error = ErrorFactory.authentication('Invalid username or password', 'AUTH_001');
+            error.userMessage = 'Invalid username or password. Please check your credentials.';
+            throw error;
          }
 
          // Successful login - reset attempts and update last login
@@ -97,17 +94,13 @@ function createSystemAuthService() {
             throw error;
          }
          logAuth('LOGIN_ERROR', null, null, { error: error.message });
-         throw ErrorFactory.internal(
-            'An error occurred during login',
-            'AUTH_ERROR',
-            { originalError: error.message },
-         );
+         throw ErrorFactory.internal('An error occurred during login', 'AUTH_ERROR', { originalError: error.message });
       }
    }
 
    /**
-   * Change system user password
-   */
+    * Change system user password
+    */
    async function changePassword(userId, currentPassword, newPassword) {
       try {
          const { getSystemModels } = require('../models');
@@ -119,10 +112,7 @@ function createSystemAuthService() {
          }
 
          // Verify current password
-         const isCurrentPasswordValid = await bcrypt.compare(
-            currentPassword,
-            user.password_hash,
-         );
+         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
          if (!isCurrentPasswordValid) {
             throw ErrorFactory.authentication('Current password is incorrect');
          }
@@ -141,19 +131,15 @@ function createSystemAuthService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to change password',
-            'PASSWORD_CHANGE_ERROR',
-            {
-               originalError: error.message,
-            },
-         );
+         throw ErrorFactory.internal('Failed to change password', 'PASSWORD_CHANGE_ERROR', {
+            originalError: error.message,
+         });
       }
    }
 
    /**
-   * Create system user
-   */
+    * Create system user
+    */
    async function createSystemUser(userData, createdBy) {
       try {
          const { getSystemModels } = require('../models');
@@ -211,13 +197,9 @@ function createSystemAuthService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to create system user',
-            'USER_CREATION_ERROR',
-            {
-               originalError: error.message,
-            },
-         );
+         throw ErrorFactory.internal('Failed to create system user', 'USER_CREATION_ERROR', {
+            originalError: error.message,
+         });
       }
    }
 
@@ -228,10 +210,10 @@ function createSystemAuthService() {
       try {
          const { getSystemModels } = require('../models');
          const { SystemUser } = await getSystemModels();
-         
+
          const [updatedCount] = await SystemUser.update(updateData, {
             where: { id: userId },
-            returning: true
+            returning: true,
          });
 
          if (updatedCount === 0) {
@@ -239,7 +221,7 @@ function createSystemAuthService() {
          }
 
          const updatedUser = await SystemUser.findByPk(userId, {
-            attributes: { exclude: ['password_hash'] }
+            attributes: { exclude: ['password_hash'] },
          });
 
          logSystem('PROFILE_UPDATED', userId, { updatedFields: Object.keys(updateData) });
@@ -264,8 +246,8 @@ function createSystemAuthService() {
  */
 function createTrustService() {
    /**
-   * Create new trust
-   */
+    * Create new trust
+    */
    async function createTrust(trustData) {
       try {
          const { getTrustModel } = require('../models');
@@ -312,19 +294,15 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to create trust',
-            'TRUST_CREATION_ERROR',
-            {
-               originalError: error.message,
-            },
-         );
+         throw ErrorFactory.internal('Failed to create trust', 'TRUST_CREATION_ERROR', {
+            originalError: error.message,
+         });
       }
    }
 
    /**
-   * Get trust by ID or code
-   */
+    * Get trust by ID or code
+    */
    async function getTrust(identifier, field = 'id') {
       try {
          const { getTrustModel } = require('../models');
@@ -336,9 +314,7 @@ function createTrustService() {
          const trust = await Trust.findOne({ where: whereClause });
 
          if (!trust) {
-            throw ErrorFactory.notFound(
-               `Trust not found with ${field}: ${identifier}`,
-            );
+            throw ErrorFactory.notFound(`Trust not found with ${field}: ${identifier}`);
          }
 
          return trust;
@@ -346,17 +322,13 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to get trust',
-            'TRUST_RETRIEVAL_ERROR',
-            { originalError: error.message },
-         );
+         throw ErrorFactory.internal('Failed to get trust', 'TRUST_RETRIEVAL_ERROR', { originalError: error.message });
       }
    }
 
    /**
-   * Update trust
-   */
+    * Update trust
+    */
    async function updateTrust(trustId, updateData, updatedBy) {
       try {
          const { getTrustModel } = require('../models');
@@ -399,17 +371,13 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to update trust',
-            'TRUST_UPDATE_ERROR',
-            { originalError: error.message },
-         );
+         throw ErrorFactory.internal('Failed to update trust', 'TRUST_UPDATE_ERROR', { originalError: error.message });
       }
    }
 
    /**
-   * List trusts with pagination and filtering
-   */
+    * List trusts with pagination and filtering
+    */
    async function listTrusts(query = {}) {
       try {
          const { getTrustModel } = require('../models');
@@ -459,8 +427,8 @@ function createTrustService() {
    }
 
    /**
-   * Complete trust setup
-   */
+    * Complete trust setup
+    */
    async function completeSetup(trustId, completedBy) {
       try {
          const { getTrustModel, initializeTenantModels } = require('../models');
@@ -491,10 +459,7 @@ function createTrustService() {
                trustId: trust.id,
             });
             await initializeTenantModels(trust.trust_code);
-            logSystem(
-               `Tenant models initialized successfully for: ${trust.trust_code}`,
-               { trustId: trust.id },
-            );
+            logSystem(`Tenant models initialized successfully for: ${trust.trust_code}`, { trustId: trust.id });
          } catch (modelError) {
             logError(modelError, {
                context: 'completeSetup',
@@ -518,25 +483,21 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal(
-            'Failed to complete trust setup',
-            'TRUST_SETUP_ERROR',
-            {
-               originalError: error.message,
-            },
-         );
+         throw ErrorFactory.internal('Failed to complete trust setup', 'TRUST_SETUP_ERROR', {
+            originalError: error.message,
+         });
       }
    }
 
    /**
-   * Get system statistics for dashboard
-   */
+    * Get system statistics for dashboard
+    */
    async function getSystemStats() {
       try {
          const { getTrustModel } = require('../models');
          const { getSystemModels } = require('../models');
          const { dbManager } = require('../models/database');
-         
+
          const Trust = await getTrustModel();
          const { SystemUser } = await getSystemModels();
 
@@ -551,7 +512,7 @@ function createTrustService() {
 
          // Get database health
          const dbHealth = await dbManager.healthCheck();
-         
+
          return {
             totalTrusts,
             activeTrusts,
@@ -560,11 +521,11 @@ function createTrustService() {
             activeUsers: activeSystemUsers,
             systemHealth: dbHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
             databaseStatus: dbHealth.database ? 'connected' : 'disconnected',
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
          };
       } catch (error) {
          logError(error, { context: 'getSystemStats' });
-         
+
          // Return safe defaults on error
          return {
             totalTrusts: 0,
@@ -575,7 +536,7 @@ function createTrustService() {
             systemHealth: 'unhealthy',
             databaseStatus: 'disconnected',
             lastUpdated: new Date().toISOString(),
-            error: 'Unable to retrieve system statistics'
+            error: 'Unable to retrieve system statistics',
          };
       }
    }

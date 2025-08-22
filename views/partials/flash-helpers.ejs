@@ -1,0 +1,198 @@
+<!-- Inline Flash Message Helper Functions -->
+<script>
+   // Flash message helper functions for dynamic use
+   window.FlashHelper = {
+      // Show server-side flash messages as toasts (convert existing alerts to toasts)
+      convertAlertsToToasts: function () {
+         const alerts = document.querySelectorAll('.flash-alert');
+         alerts.forEach((alert) => {
+            const type = alert.classList.contains('alert-success')
+               ? 'success'
+               : alert.classList.contains('alert-danger')
+                 ? 'error'
+                 : alert.classList.contains('alert-warning')
+                   ? 'warning'
+                   : 'info';
+
+            const message =
+               alert.querySelector('.flex-grow-1 span')?.textContent ||
+               alert.textContent
+                  .replace('Success!', '')
+                  .replace('Error!', '')
+                  .replace('Warning!', '')
+                  .replace('Info!', '')
+                  .trim();
+
+            if (message && window.ToastNotification) {
+               ToastNotification.show(message, type);
+               alert.style.display = 'none';
+            }
+         });
+      },
+
+      // Add flash message to next request (simulating server-side flash)
+      addToNextRequest: function (type, message) {
+         // Store in sessionStorage to be picked up on next page load
+         const flashData = JSON.parse(sessionStorage.getItem('pendingFlash') || '{}');
+         if (!flashData[type]) flashData[type] = [];
+         flashData[type].push(message);
+         sessionStorage.setItem('pendingFlash', JSON.stringify(flashData));
+      },
+
+      // Show pending flash messages from sessionStorage
+      showPendingFlash: function () {
+         const flashData = JSON.parse(sessionStorage.getItem('pendingFlash') || '{}');
+
+         Object.keys(flashData).forEach((type) => {
+            if (Array.isArray(flashData[type])) {
+               flashData[type].forEach((message) => {
+                  if (window.ToastNotification) {
+                     ToastNotification.show(message, type);
+                  }
+               });
+            }
+         });
+
+         // Clear pending flash messages
+         sessionStorage.removeItem('pendingFlash');
+      },
+
+      // Immediate flash (show right away)
+      showNow: function (message, type = 'info', duration = 5000) {
+         if (window.ToastNotification) {
+            return ToastNotification.show(message, type, duration);
+         }
+         // Fallback to browser alert if toast system not available
+         alert(type.toUpperCase() + ': ' + message);
+      },
+
+      // Convenience methods
+      success: function (message, duration = 5000) {
+         return this.showNow(message, 'success', duration);
+      },
+
+      error: function (message, duration = 8000) {
+         return this.showNow(message, 'error', duration);
+      },
+
+      warning: function (message, duration = 6000) {
+         return this.showNow(message, 'warning', duration);
+      },
+
+      info: function (message, duration = 5000) {
+         return this.showNow(message, 'info', duration);
+      },
+
+      // Form submission with flash
+      handleFormResponse: function (response, form = null) {
+         if (response && response.flash) {
+            Object.keys(response.flash).forEach((type) => {
+               const messages = Array.isArray(response.flash[type]) ? response.flash[type] : [response.flash[type]];
+               messages.forEach((message) => {
+                  this.showNow(message, type);
+               });
+            });
+         }
+
+         // Handle common response scenarios
+         if (response && response.success) {
+            this.success(response.message || 'Operation completed successfully');
+         } else if (response && response.error) {
+            this.error(response.message || 'An error occurred');
+         }
+
+         // Reset form if successful and form provided
+         if (response && response.success && form && typeof form.reset === 'function') {
+            form.reset();
+         }
+      },
+
+      // AJAX helper with flash support
+      ajaxWithFlash: function (url, options = {}) {
+         const defaultOptions = {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               'X-Requested-With': 'XMLHttpRequest',
+            },
+         };
+
+         const finalOptions = { ...defaultOptions, ...options };
+
+         return fetch(url, finalOptions)
+            .then((response) => response.json())
+            .then((data) => {
+               this.handleFormResponse(data);
+               return data;
+            })
+            .catch((error) => {
+               console.error('AJAX Error:', error);
+               this.error('Network error occurred. Please try again.');
+               throw error;
+            });
+      },
+   };
+
+   // Auto-initialize on DOM ready
+   document.addEventListener('DOMContentLoaded', function () {
+      // Show any pending flash messages from previous requests
+      FlashHelper.showPendingFlash();
+
+      // Optionally convert existing server-side alerts to toasts
+      // Uncomment the line below if you want to convert all existing alerts to toasts
+      // FlashHelper.convertAlertsToToasts();
+
+      // Add CSRF token to all AJAX requests if available
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (csrfToken) {
+         // Add CSRF token to default headers
+         const originalAjaxWithFlash = FlashHelper.ajaxWithFlash;
+         FlashHelper.ajaxWithFlash = function (url, options = {}) {
+            if (!options.headers) options.headers = {};
+            options.headers['X-CSRF-Token'] = csrfToken.content;
+            return originalAjaxWithFlash.call(this, url, options);
+         };
+      }
+   });
+
+   // Global error handler for AJAX requests
+   window.addEventListener('unhandledrejection', function (event) {
+      if (event.reason && event.reason.message && event.reason.message.includes('fetch')) {
+         FlashHelper.error('Network error occurred. Please check your connection.');
+      }
+   });
+</script>
+
+<!-- Form Helper Examples -->
+<script>
+   // Example usage in forms:
+   /*
+// Basic usage
+FlashHelper.success('Data saved successfully!');
+FlashHelper.error('Validation failed. Please check your input.');
+FlashHelper.warning('Session will expire soon.');
+FlashHelper.info('New updates available.');
+
+// Form submission example
+document.getElementById('myForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    FlashHelper.ajaxWithFlash('/api/submit', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.success) {
+            // Form was successful, flash message already shown
+            // Redirect or do other actions
+            window.location.reload();
+        }
+    });
+});
+
+// Add flash for next page load
+FlashHelper.addToNextRequest('success', 'Your profile has been updated!');
+window.location.href = '/profile';
+*/
+</script>

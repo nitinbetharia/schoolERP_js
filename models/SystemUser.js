@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/errors');
+const { commonSchemas } = require('../utils/validation');
 const {
    USER_ROLES,
    USER_STATUS,

@@ -1,0 +1,106 @@
+{
+  "timestamp": "2025-08-22T11:02:08.461Z",
+  "testSuite": "Comprehensive System Test - Backend & Frontend",
+  "backend": {
+    "tests": [
+      {
+        "name": "API Status",
+        "url": "http://localhost:3000/api/v1/status",
+        "status": 200,
+        "passed": true,
+        "error": null,
+        "response": {
+          "success": true,
+          "message": "School ERP API is running",
+          "version": "2.0.0",
+          "timestamp": "2025-08-22T11:02:10.850Z",
+          "environment": "development"
+        }
+      },
+      {
+        "name": "Health Check",
+        "url": "http://localhost:3000/api/v1/admin/system/health",
+        "status": 200,
+        "passed": true,
+        "error": null,
+        "response": {
+          "success": true,
+          "data": {
+            "status": "healthy",
+            "timestamp": "2025-08-22T11:02:11.571Z",
+            "uptime": 123.5138304,
+            "memory": {
+              "rss": 91058176,
+              "heapTotal": 44199936,
+              "heapUsed": 42072048,
+              "external": 3237810,
+              "arrayBuffers": 757354
+            },
+            "database": {
+              "systemDB": true,
+              "tenantConnections": 0,
+              "activeTenants": [],
+              "connectionPoolStatus": {
+                "system": {
+                  "pool": null,
+                  "used": 0
+                },
+                "tenants": []
+              }
+            },
+            "models": {
+              "system": {
+                "modelsLoaded": 3,
+                "modelNames": [
+                  "Trust",
+                  "SystemUser",
+                  "SystemAuditLog"
+                ]
+              },
+              "tenants": {
+                "tenantsLoaded": 0,
+                "tenantCodes": []
+              },
+              "initialized": true
+            },
+            "environment": "development"
+          }
+        }
+      }
+    ],
+    "passed": 2,
+    "failed": 0
+  },
+  "frontend": {
+    "loginTest": {
+      "name": "Login Page Load",
+      "passed": false,
+      "elements": {
+        "form": true,
+        "usernameField": false,
+        "passwordField": true,
+        "submitButton": true
+      },
+      "error": "Login form elements missing"
+    },
+    "navigationTests": [
+      {
+        "name": "Home Page",
+        "url": "http://localhost:3000/",
+        "status": 304,
+        "passed": false
+      },
+      {
+        "name": "Login Page",
+        "url": "http://localhost:3000/auth/login",
+        "status": 304,
+        "passed": false
+      }
+    ]
+  },
+  "summary": {
+    "passed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

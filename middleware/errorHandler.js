@@ -1,10 +1,4 @@
-const {
-   ErrorFactory,
-   formatErrorResponse,
-   getErrorStatusCode,
-   isOperationalError,
-   logError,
-} = require('../utils/errors');
+const { formatErrorResponse } = require('../utils/validation');
 const { logger } = require('../utils/logger');
 
 /**
@@ -14,28 +8,25 @@ const { logger } = require('../utils/logger');
  */
 function errorHandler(err, req, res, next) {
    let error = err;
+   let statusCode = err.statusCode || err.status || 500;
+   let message = err.message || 'An unexpected error occurred';
 
-   // Convert known errors to http-errors format
-   if (!isOperationalError(err)) {
-      // Handle Sequelize errors
-      if (err.name?.startsWith('Sequelize')) {
-         error = ErrorFactory.fromSequelize(err);
-      }
-      // Handle JWT errors
-      else if (
-         err.name?.includes('JsonWebToken') ||
-      err.name === 'TokenExpiredError'
-      ) {
-         error = ErrorFactory.fromJWT(err);
-      }
-      // Handle generic system errors
-      else {
-         error = ErrorFactory.internal('An unexpected error occurred', err);
-      }
+   // Handle specific error types
+   if (err.name?.startsWith('Sequelize')) {
+      statusCode = 400;
+      message = 'Database error occurred';
+   } else if (err.name?.includes('JsonWebToken') || err.name === 'TokenExpiredError') {
+      statusCode = 401;
+      message = 'Authentication failed';
+   } else if (err.name === 'ValidationError') {
+      statusCode = 400;
+      message = 'Validation failed';
    }
 
    // Log the error with context
-   logError(error, {
+   logger.error('Request Error', {
+      error: message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
       requestId: req.id,
       method: req.method,
       url: req.url,
@@ -46,26 +37,53 @@ function errorHandler(err, req, res, next) {
       tenantCode: req.tenantCode,
    });
 
-   // Get status code
-   const statusCode = getErrorStatusCode(error);
-
    // Format error response
-   const errorResponse = formatErrorResponse(error);
+   const errorResponse = formatErrorResponse(error, message);
 
    // Check if this is a web request (HTML) or API request (JSON)
-   const acceptsHTML =
-    req.headers.accept && req.headers.accept.includes('text/html');
+   const acceptsHTML = req.headers.accept && req.headers.accept.includes('text/html');
    const isWebRoute = !req.originalUrl.startsWith('/api/');
 
    if (acceptsHTML && isWebRoute) {
-      // Render user-friendly error page for web requests using error layout
-      return res.status(statusCode).render('pages/error', {
-         layout: 'layouts/error',
+      // Determine which error template to use based on status code
+      let errorTemplate = 'pages/errors/generic';
+      if (statusCode === 404) {
+         errorTemplate = 'pages/errors/404';
+      } else if (statusCode === 403) {
+         errorTemplate = 'pages/errors/403';
+      } else if (statusCode === 500 || statusCode >= 500) {
+         errorTemplate = 'pages/errors/500';
+      }
+
+      // Render user-friendly error page for web requests using main layout
+      return res.status(statusCode).render(errorTemplate, {
+         layout: 'layout',
          title: `Error ${statusCode}`,
          description: `Error ${statusCode} - ${error.message || 'An unexpected error occurred'}`,
+
+         // Individual variables for templates that expect them
          errorCode: statusCode.toString(),
-         errorMessage: error.message || 'An unexpected error occurred',
+         errorMessage: error.userMessage || error.message || 'An unexpected error occurred',
          errorDetails: process.env.NODE_ENV === 'development' ? error.stack : null,
+         originalUrl: req.originalUrl,
+
+         // Error object for templates that expect it
+         error: {
+            statusCode: statusCode,
+            status: statusCode,
+            message: error.userMessage || error.message || 'An unexpected error occurred',
+            stack: process.env.NODE_ENV === 'development' ? error.stack : null,
+         },
+
+         // User and tenant context
+         user: req.user || null,
+         tenant: req.tenant || null,
+
+         // Flash messages (if available)
+         success: req.flash ? req.flash('success') : null,
+         flashError: req.flash ? req.flash('error') : null,
+         warning: req.flash ? req.flash('warning') : null,
+         info: req.flash ? req.flash('info') : null,
       });
    }
 
@@ -78,7 +96,18 @@ function errorHandler(err, req, res, next) {
  * Creates standardized 404 responses
  */
 function notFoundHandler(req, res, next) {
-   const error = ErrorFactory.notFound(`Route ${req.method} ${req.originalUrl}`);
+   // Create a more user-friendly 404 message
+   const isAPI = req.originalUrl.startsWith('/api/');
+   const message = isAPI
+      ? `API endpoint ${req.method} ${req.originalUrl} not found`
+      : `Page not found: ${req.originalUrl}`;
+
+   const error = new Error(message);
+   error.statusCode = 404;
+   error.userMessage = isAPI
+      ? 'The requested API endpoint does not exist'
+      : 'The page you are looking for could not be found';
+
    next(error);
 }
 
@@ -132,8 +161,9 @@ function asyncHandler(fn) {
 function catchAsync(fn) {
    return (req, res, next) => {
       Promise.resolve(fn(req, res, next)).catch((err) => {
-      // Log async handler error
-         logError(err, {
+         // Log async handler error
+         logger.error('Async handler error', {
+            error: err.message,
             handler: 'asyncHandler',
             method: req.method,
             url: req.url,
@@ -173,7 +203,7 @@ async function healthCheck(req, res) {
          data: health,
       });
    } catch (error) {
-      logError(error, { context: 'healthCheck' });
+      logger.error('Health check failed', { error: error.message, context: 'healthCheck' });
 
       res.status(503).json({
          success: false,
@@ -193,7 +223,9 @@ async function healthCheck(req, res) {
 function setupProcessErrorHandlers() {
    // Handle uncaught exceptions
    process.on('uncaughtException', (err) => {
-      logError(err, {
+      logger.error('Uncaught exception', {
+         error: err.message,
+         stack: err.stack,
          type: 'uncaughtException',
          fatal: true,
       });
@@ -207,7 +239,9 @@ function setupProcessErrorHandlers() {
    // Handle unhandled promise rejections
    process.on('unhandledRejection', (reason, promise) => {
       const err = reason instanceof Error ? reason : new Error(reason);
-      logError(err, {
+      logger.error('Unhandled promise rejection', {
+         error: err.message,
+         stack: err.stack,
          type: 'unhandledRejection',
          promise: promise.toString(),
       });

@@ -1,0 +1,143 @@
+<!-- Default Dashboard -->
+<% currentPath = '/dashboard'; %>
+
+<div class="row justify-content-center">
+   <div class="col-lg-8">
+      <div class="text-center mb-5">
+         <div
+            class="bg-brand-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+            style="width: 80px; height: 80px; font-size: 2rem">
+            <i class="fas fa-graduation-cap"></i>
+         </div>
+         <h1 class="h2 text-dark mb-3">Welcome to School ERP System</h1>
+         <p class="text-muted lead mb-4">
+            Your comprehensive educational management platform is ready to help you streamline school operations, manage
+            students, and enhance educational outcomes.
+         </p>
+      </div>
+
+      <!-- Getting Started Cards -->
+      <div class="row g-4 mb-5">
+         <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+               <div class="card-body text-center p-4">
+                  <div
+                     class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem">
+                     <i class="fas fa-user-graduate"></i>
+                  </div>
+                  <h5 class="card-title">Student Management</h5>
+                  <p class="text-muted small mb-3">
+                     Manage student enrollment, records, and academic progress with our comprehensive student management
+                     system.
+                  </p>
+                  <a href="/students" class="btn btn-outline-primary btn-sm">
+                     <i class="fas fa-arrow-right me-1"></i>Explore Students
+                  </a>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+               <div class="card-body text-center p-4">
+                  <div
+                     class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem">
+                     <i class="fas fa-chalkboard-teacher"></i>
+                  </div>
+                  <h5 class="card-title">Staff Management</h5>
+                  <p class="text-muted small mb-3">
+                     Efficiently manage teaching and non-teaching staff, their schedules, and performance tracking.
+                  </p>
+                  <a href="/staff" class="btn btn-outline-success btn-sm">
+                     <i class="fas fa-arrow-right me-1"></i>Explore Staff
+                  </a>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+               <div class="card-body text-center p-4">
+                  <div
+                     class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem">
+                     <i class="fas fa-money-bill-wave"></i>
+                  </div>
+                  <h5 class="card-title">Fee Management</h5>
+                  <p class="text-muted small mb-3">
+                     Streamline fee collection, generate invoices, and track payments with automated reminders.
+                  </p>
+                  <a href="/fees" class="btn btn-outline-info btn-sm">
+                     <i class="fas fa-arrow-right me-1"></i>Explore Fees
+                  </a>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+               <div class="card-body text-center p-4">
+                  <div
+                     class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 60px; height: 60px; font-size: 1.5rem">
+                     <i class="fas fa-chart-bar"></i>
+                  </div>
+                  <h5 class="card-title">Reports & Analytics</h5>
+                  <p class="text-muted small mb-3">
+                     Generate comprehensive reports and gain insights with powerful analytics and data visualization.
+                  </p>
+                  <a href="/reports" class="btn btn-outline-warning btn-sm">
+                     <i class="fas fa-arrow-right me-1"></i>Explore Reports
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- System Status -->
+      <div class="card border-0 bg-light">
+         <div class="card-body text-center py-4">
+            <div class="row align-items-center">
+               <div class="col-md-8 text-md-start">
+                  <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                     <div
+                        class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                        style="width: 40px; height: 40px">
+                        <i class="fas fa-check"></i>
+                     </div>
+                     <div>
+                        <h6 class="mb-1 fw-semibold">System is running smoothly</h6>
+                        <small class="text-muted">All services are operational and performing well</small>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                  <a href="/help" class="btn btn-outline-secondary btn-sm me-2">
+                     <i class="fas fa-question-circle me-1"></i>Get Help
+                  </a>
+                  <a href="/support" class="btn btn-brand-primary btn-sm">
+                     <i class="fas fa-headset me-1"></i>Support
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Footer Information -->
+<div class="row mt-5">
+   <div class="col-12">
+      <div class="text-center">
+         <p class="text-muted small mb-2">
+            <i class="fas fa-info-circle me-1"></i>
+            School ERP System - Comprehensive Educational Management Platform
+         </p>
+         <div class="d-flex justify-content-center gap-4 small">
+            <a href="/features" class="text-decoration-none"> <i class="fas fa-star me-1"></i>Features </a>
+            <a href="/pricing" class="text-decoration-none"> <i class="fas fa-tag me-1"></i>Pricing </a>
+            <a href="/documentation" class="text-decoration-none"> <i class="fas fa-book me-1"></i>Documentation </a>
+            <a href="/contact" class="text-decoration-none"> <i class="fas fa-envelope me-1"></i>Contact </a>
+         </div>
+      </div>
+   </div>
+</div>

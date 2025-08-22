@@ -13,11 +13,13 @@ const {
 } = require('../middleware/auth');
 const { sensitiveRateLimit } = require('../middleware/security');
 const {
-   ErrorFactory,
-   validators,
    formatSuccessResponse,
+   formatErrorResponse,
    commonSchemas,
-} = require('../utils/errors');
+   validateQuery,
+   validateBody,
+   validateParams,
+} = require('../utils/validation');
 const { trustValidationSchemas } = require('../models/Trust');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
 
@@ -31,7 +33,7 @@ router.get('/health', healthCheck);
 router.post(
    '/auth/login',
    loginRateLimit,
-   validators.validateBody(systemUserValidationSchemas.login),
+   validateBody(systemUserValidationSchemas.login),
    asyncHandler(async (req, res) => {
       const userData = await systemAuthService.login(req.body);
 
@@ -59,7 +61,7 @@ router.post(
    '/auth/change-password',
    authenticate,
    sensitiveRateLimit,
-   validators.validateBody(systemUserValidationSchemas.changePassword),
+   validateBody(systemUserValidationSchemas.changePassword),
    asyncHandler(async (req, res) => {
       const { currentPassword, newPassword } = req.body;
 
@@ -81,7 +83,7 @@ router.post(
    '/trusts',
    authenticate,
    requireSystemAdmin,
-   validators.validateBody(trustValidationSchemas.create),
+   validateBody(trustValidationSchemas.create),
    asyncHandler(async (req, res) => {
       const trust = await trustService.createTrust(req.body);
 
@@ -96,7 +98,7 @@ router.get(
    '/trusts/:id',
    authenticate,
    requireSystemAdmin,
-   validators.validateParams(Joi.object({ id: commonSchemas.id })),
+   validateParams(Joi.object({ id: commonSchemas.id })),
    asyncHandler(async (req, res) => {
       const trust = await trustService.getTrust(req.params.id, 'id');
 
@@ -109,8 +111,8 @@ router.put(
    '/trusts/:id',
    authenticate,
    requireSystemAdmin,
-   validators.validateParams(Joi.object({ id: commonSchemas.id })),
-   validators.validateBody(trustValidationSchemas.update),
+   validateParams(Joi.object({ id: commonSchemas.id })),
+   validateBody(trustValidationSchemas.update),
    asyncHandler(async (req, res) => {
       const trust = await trustService.updateTrust(
          req.params.id,
@@ -127,10 +129,10 @@ router.get(
    '/trusts',
    authenticate,
    requireSystemAdmin,
-   validators.validateQuery(
+   validateQuery(
       Joi.object({
-         page: require('../utils/errors').commonSchemas.pagination.page,
-         limit: require('../utils/errors').commonSchemas.pagination.limit,
+         page: require('../utils/validation').commonSchemas.pagination.page,
+         limit: require('../utils/validation').commonSchemas.pagination.limit,
          status: Joi.string()
             .valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'SETUP_PENDING')
             .optional(),
@@ -153,7 +155,7 @@ router.post(
    '/trusts/:id/complete-setup',
    authenticate,
    requireSystemAdmin,
-   validators.validateParams(Joi.object({ id: commonSchemas.id })),
+   validateParams(Joi.object({ id: commonSchemas.id })),
    asyncHandler(async (req, res) => {
       const trust = await trustService.completeSetup(req.params.id, req.user.id);
 
@@ -186,7 +188,7 @@ router.post(
    '/users',
    authenticate,
    requireSystemAdmin,
-   validators.validateBody(systemUserValidationSchemas.create),
+   validateBody(systemUserValidationSchemas.create),
    asyncHandler(async (req, res) => {
       const user = await systemAuthService.createSystemUser(
          req.body,
@@ -213,7 +215,7 @@ router.put(
    '/profile',
    authenticate,
    requireSystemAdmin,
-   validators.validateBody(Joi.object({
+   validateBody(Joi.object({
       username: Joi.string().min(3).max(50).optional(),
       email: Joi.string().email().optional(),
       fullName: Joi.string().max(100).optional(),

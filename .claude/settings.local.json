@@ -24,7 +24,10 @@
       "Bash(NODE_ENV=development npm start)",
       "Bash(set NODE_ENV=development)",
       "Bash(timeout:*)",
-      "Bash(start \"d:\\Users\\Nitin Betharia\\Documents\\Projects\\schoolERP_js\\static-login.html\")"
+      "Bash(start \"d:\\Users\\Nitin Betharia\\Documents\\Projects\\schoolERP_js\\static-login.html\")",
+      "Bash(tasklist)",
+      "Bash(Ctrl+C)",
+      "Bash(npx jest:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,247 +1,288 @@
-<!-- Login Page - Enhanced with Font Awesome & Consistent Styling -->
-<div x-data="loginForm()" class="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 space-y-6">
-   
-   <!-- Header -->
-   <div class="text-center">
-      <div class="h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-         <i class="fas fa-shield-alt text-white text-2xl"></i>
-      </div>
-      <h2 class="text-2xl font-bold text-gray-900">Sign in to your account</h2>
-      <p class="mt-2 text-sm text-gray-600">Enter your credentials to access the system</p>
-   </div>
+<!-- Login Page -->
+<% 
+// Set layout variables to hide header navigation for clean login page
+hideNav = true;
+hideFooter = false;
+%>
 
-   <!-- Login Form -->
-   <form @submit.prevent="handleLogin" class="space-y-6">
-      
-      <!-- Email/Username Field -->
-      <div>
-         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-user mr-2 text-gray-400"></i>Email Address or Username
-         </label>
-         <div class="relative">
-            <input
-               id="email"
-               name="email"
-               type="text"
-               x-model="formData.email"
-               required
-               autocomplete="email"
-               class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-               :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.email }"
-               placeholder="Enter email or username">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-               <i class="fas fa-envelope text-gray-400"></i>
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <!-- Login Card -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        
+                        <!-- Logo & Title -->
+                        <div class="text-center mb-5">
+                            <% if (tenant && tenant.branding && tenant.branding.logo) { %>
+                            <img src="<%= tenant.branding.logo %>" alt="<%= tenant.name %>" class="mb-4" style="height: 60px;">
+                            <% } else { %>
+                            <div class="bg-brand-primary text-white rounded d-inline-flex align-items-center justify-content-center mb-4" 
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <% } %>
+                            
+                            <h2 class="h4 text-dark fw-semibold mb-2">
+                                Welcome Back
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Sign in to <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>
+                            </p>
+                        </div>
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm" method="POST" action="/login" class="needs-validation" novalidate>
+                            
+                            <!-- Email/Username Field -->
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-medium">
+                                    Email Address / Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control border-start-0 ps-0" 
+                                           id="email" 
+                                           name="email" 
+                                           placeholder="Enter your email address or username"
+                                           required 
+                                           autocomplete="username"
+                                           value="">
+                                    <div class="invalid-feedback">
+                                        Please enter a valid email address or username.
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    System will automatically detect your account type
+                                </small>
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-medium">
+                                    Password
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" 
+                                           class="form-control border-start-0 border-end-0 ps-0" 
+                                           id="password" 
+                                           name="password" 
+                                           placeholder="Enter your password"
+                                           required 
+                                           autocomplete="current-password">
+                                    <button class="btn btn-outline-secondary border-start-0" 
+                                            type="button" 
+                                            id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="invalid-feedback">
+                                        Please enter your password.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <a href="/forgot-password" class="text-decoration-none small">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-brand-primary w-100 py-2 fw-medium" id="loginButton">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Sign In
+                            </button>
+                            
+                        </form>
+                        
+                        <!-- Additional Options -->
+                        <% if (typeof showRegister === 'undefined' || showRegister !== false) { %>
+                        <div class="text-center mt-4">
+                            <p class="text-muted small mb-0">
+                                New to the platform? 
+                                <a href="/register" class="text-brand-primary text-decoration-none fw-medium">
+                                    Request Access
+                                </a>
+                            </p>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Login Status Indicator -->
+                    <div class="card-footer bg-light text-center py-3">
+                        <div id="loginStatus" class="small text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Secure login powered by School ERP System
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Help Card -->
+                <div class="card border-0 bg-transparent mt-4">
+                    <div class="card-body text-center p-3">
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-question-circle me-1"></i>
+                            Need help signing in?
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="/help/login" class="text-decoration-none small">
+                                <i class="fas fa-book me-1"></i>Login Guide
+                            </a>
+                            <a href="/support" class="text-decoration-none small">
+                                <i class="fas fa-headset me-1"></i>Contact Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-         </div>
-         <p x-show="errors.email" x-text="errors.email" class="mt-1 text-sm text-red-600"></p>
-      </div>
-
-      <!-- Password Field -->
-      <div>
-         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-            <i class="fas fa-lock mr-2 text-gray-400"></i>Password
-         </label>
-         <div class="relative">
-            <input
-               id="password"
-               name="password"
-               :type="showPassword ? 'text' : 'password'"
-               x-model="formData.password"
-               required
-               autocomplete="current-password"
-               class="w-full px-4 py-3 pl-12 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-               :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.password }"
-               placeholder="Enter your password">
-            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-               <i class="fas fa-key text-gray-400"></i>
-            </div>
-            <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
-               <button
-                  type="button"
-                  @click="showPassword = !showPassword"
-                  class="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200">
-                  <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-               </button>
-            </div>
-         </div>
-         <p x-show="errors.password" x-text="errors.password" class="mt-1 text-sm text-red-600"></p>
-      </div>
-
-      <!-- Remember Me & Forgot Password -->
-      <div class="flex items-center justify-between">
-         <div class="flex items-center">
-            <input
-               id="remember-me"
-               name="remember"
-               type="checkbox"
-               x-model="formData.remember"
-               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
-         </div>
-
-         <div class="text-sm">
-            <a
-               href="#"
-               @click.prevent="showForgotPassword = true"
-               class="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
-               Forgot your password?
-            </a>
-         </div>
-      </div>
-
-      <!-- Submit Button -->
-      <div>
-         <button
-            type="submit"
-            :disabled="loading"
-            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
-            <span x-show="!loading" class="flex items-center">
-               <i class="fas fa-sign-in-alt mr-2"></i>Sign in
-            </span>
-            <span x-show="loading" class="flex items-center">
-               <i class="fas fa-spinner fa-spin mr-2"></i>Signing in...
-            </span>
-         </button>
-      </div>
-
-      <!-- Error Message -->
-      <div x-show="generalError" 
-           x-transition:enter="ease-out duration-300"
-           x-transition:enter-start="opacity-0 transform scale-95"
-           x-transition:enter-end="opacity-100 transform scale-100"
-           class="rounded-lg bg-red-50 border border-red-200 p-4">
-         <div class="flex">
-            <div class="flex-shrink-0">
-               <i class="fas fa-exclamation-circle text-red-400"></i>
-            </div>
-            <div class="ml-3">
-               <h3 class="text-sm font-medium text-red-800">Login Failed</h3>
-               <div class="mt-1 text-sm text-red-700">
-                  <p x-text="generalError"></p>
-               </div>
-            </div>
-         </div>
-      </div>
-   </form>
-
-   <!-- Links -->
-   <div class="text-center space-y-3">
-      <p class="text-sm text-gray-600">
-         Don't have an account?
-         <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
-            Contact your administrator
-         </a>
-      </p>
-      <div class="flex items-center justify-center space-x-4 text-xs text-gray-500">
-         <a href="/" class="hover:text-gray-700 flex items-center transition-colors duration-200">
-            <i class="fas fa-arrow-left mr-1"></i>Back to home
-         </a>
-         <span class="text-gray-300">•</span>
-         <a href="#" class="hover:text-gray-700 flex items-center transition-colors duration-200">
-            <i class="fas fa-question-circle mr-1"></i>Need help?
-         </a>
-      </div>
-   </div>
-
-   <!-- System Info -->
-   <div class="text-center pt-4 border-t border-gray-200">
-      <p class="text-xs text-gray-500">
-         <i class="fas fa-shield-check mr-1 text-green-500"></i>
-         Secure School ERP System v2.0.0
-      </p>
-   </div>
+        </div>
+    </div>
 </div>
 
-<!-- Alpine.js Login Component -->
+<!-- Custom JavaScript for Login Page -->
 <script>
-   function loginForm() {
-      return {
-         formData: {
-            email: '',
-            password: '',
-            remember: false,
-         },
-         errors: {},
-         generalError: '',
-         loading: false,
-         showPassword: false,
-         showForgotPassword: false,
-
-         async handleLogin() {
-            this.clearErrors();
-
-            if (!this.validateForm()) {
-               return;
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const loginButton = document.getElementById('loginButton');
+        const loginStatus = document.getElementById('loginStatus');
+        
+        // Password visibility toggle
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+        
+        // Auto-detect login type based on email format
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            let accountType = 'School Portal';
+            
+            // System admin detection logic (matches backend)
+            if (!email.includes('@') || email.includes('admin') || email.endsWith('@system.local')) {
+                accountType = 'System Admin';
             }
-
-            this.loading = true;
-
-            try {
-               const response = await fetch('/auth/login', {
-                  method: 'POST',
-                  headers: {
-                     'Content-Type': 'application/json',
-                     'X-Requested-With': 'XMLHttpRequest',
-                  },
-                  body: JSON.stringify({
-                     username: this.formData.email, // Q59 COMPLIANT: Use backend expected field name
-                     password: this.formData.password
-                  }),
-               });
-
-               const data = await response.json();
-
-               if (data.success) {
-                  // Show success notification if available
-                  if (window.notify) {
-                     window.notify('success', data.message || 'Login successful!');
-                  }
-
-                  // Redirect after a brief delay for better UX
-                  setTimeout(() => {
-                     window.location.href = data.redirect || '/dashboard';
-                  }, 1000);
-               } else {
-                  if (data.errors) {
-                     this.errors = data.errors;
-                  }
-                  this.generalError = data.error || 'Invalid credentials. Please check your username and password.';
-               }
-            } catch (error) {
-               console.error('Login error:', error);
-               this.generalError = 'Connection error. Please check your internet connection and try again.';
-            } finally {
-               this.loading = false;
+            
+            // Update status indicator to show detected account type
+            loginStatus.innerHTML = `<i class="fas fa-${accountType === 'System Admin' ? 'cogs' : 'school'} me-1"></i>${accountType} Access`;
+        });
+        
+        // Form validation and submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
             }
-         },
-
-         validateForm() {
-            this.clearErrors();
-            let isValid = true;
-
-            if (!this.formData.email.trim()) {
-               this.errors.email = 'Email or username is required';
-               isValid = false;
-            } else if (this.formData.email.length < 3) {
-               this.errors.email = 'Email or username must be at least 3 characters';
-               isValid = false;
+            
+            // Show loading state
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+            
+            // Get form data
+            const formData = new FormData(this);
+            const loginData = Object.fromEntries(formData.entries());
+            
+            // Auto-detect login type (matches backend logic)
+            const email = loginData.email.trim();
+            const isSystemLogin = !email.includes('@') || email.includes('admin') || email.endsWith('@system.local');
+            
+            // Submit to backend (backend will auto-detect based on email format)
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(loginData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success feedback
+                    loginStatus.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i>Login successful! Redirecting...';
+                    
+                    // Redirect after short delay (backend determines redirect based on user type)
+                    setTimeout(() => {
+                        window.location.href = data.redirect || (isSystemLogin ? '/admin/system' : '/dashboard');
+                    }, 1000);
+                } else {
+                    // Error handling
+                    throw new Error(data.error || 'Login failed');
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                
+                // Show error message
+                window.showNotification(error.message || 'Login failed. Please check your credentials and try again.', 'error');
+                
+                // Reset form state
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+                
+                loginStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-1"></i>Login failed. Please try again.';
+                
+                // Clear password field for security
+                passwordInput.value = '';
+                passwordInput.focus();
+            });
+        });
+        
+        // Auto-focus email field
+        emailInput.focus();
+        
+        // Handle browser autofill detection
+        function checkAutofill() {
+            if (emailInput.value || passwordInput.value) {
+                loginForm.classList.add('was-validated');
             }
-
-            if (!this.formData.password) {
-               this.errors.password = 'Password is required';
-               isValid = false;
-            } else if (this.formData.password.length < 6) {
-               this.errors.password = 'Password must be at least 6 characters';
-               isValid = false;
-            }
-
-            return isValid;
-         },
-
-         clearErrors() {
-            this.errors = {};
-            this.generalError = '';
-         },
-      };
-   }
+        }
+        
+        // Check for autofill after page load
+        setTimeout(checkAutofill, 100);
+        
+        // Real-time validation feedback
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    });
 </script>

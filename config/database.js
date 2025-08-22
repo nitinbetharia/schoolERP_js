@@ -17,7 +17,7 @@ class DatabaseManager {
    }
 
    async initialize() {
-      if (this.initialized) return this.sequelize;
+      if (this.initialized) {return this.sequelize;}
 
       console.log('🔧 Initializing database connection with enhanced retry logic...');
 

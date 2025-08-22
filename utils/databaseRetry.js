@@ -45,7 +45,7 @@ const RETRYABLE_ERRORS = [
  * Check if an error is retryable
  */
 function isRetryableError(error) {
-   if (!error) return false;
+   if (!error) {return false;}
 
    // Check error code
    if (error.code && RETRYABLE_ERRORS.includes(error.code)) {
@@ -113,7 +113,7 @@ async function withRetry(operation, context = {}, options = {}) {
 
          // Log successful operation (only if it was retried)
          if (attempt > 1) {
-            logSystem(`Database operation succeeded after retry`, {
+            logSystem('Database operation succeeded after retry', {
                operationId,
                operation: operationName,
                attempt,

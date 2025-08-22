@@ -6,7 +6,7 @@ const {
    // Legacy classes for backward compatibility
    AuthenticationError,
    AuthorizationError,
-} = require('../utils/errors');
+} = require('../utils/validation');
 const { USER_ROLES, SYSTEM } = require('../config/business-constants');
 const appConfig = require('../config/app-config.json');
 

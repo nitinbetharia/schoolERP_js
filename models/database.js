@@ -1,7 +1,14 @@
 const { Sequelize } = require('sequelize');
 const { logger, logDB, logError, logSystem } = require('../utils/logger');
 const appConfig = require('../config/app-config.json');
-const { DatabaseError } = require('../utils/errors');
+// Simple database error class
+class DatabaseError extends Error {
+   constructor(message, originalError = null) {
+      super(message);
+      this.name = 'DatabaseError';
+      this.originalError = originalError;
+   }
+}
 const { withCriticalRetry, withSequelizeRetry, healthCheckWithRetry } = require('../utils/databaseRetry');
 require('dotenv').config();
 
@@ -85,9 +92,9 @@ function createDatabaseManager() {
                   connectTimeout: appConfig.database.connection.connectTimeout,
                   ssl: appConfig.database.connection.ssl
                      ? {
-                          require: true,
-                          rejectUnauthorized: false,
-                       }
+                        require: true,
+                        rejectUnauthorized: false,
+                     }
                      : false,
                },
                pool: {
@@ -160,9 +167,9 @@ function createDatabaseManager() {
                connectTimeout: appConfig.database.connection.connectTimeout,
                ssl: appConfig.database.connection.ssl
                   ? {
-                       require: true,
-                       rejectUnauthorized: false,
-                    }
+                     require: true,
+                     rejectUnauthorized: false,
+                  }
                   : false,
             },
             pool: {

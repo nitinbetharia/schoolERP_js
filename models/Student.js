@@ -24,8 +24,7 @@ const defineStudent = (sequelize) => {
             },
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
-            comment:
-          'Reference to users table for login credentials and basic info',
+            comment: 'Reference to users table for login credentials and basic info',
          },
          admission_number: {
             type: DataTypes.STRING(50),
@@ -347,25 +346,12 @@ const defineStudent = (sequelize) => {
 
          // Status and Lifecycle
          admission_status: {
-            type: DataTypes.ENUM(
-               'APPLIED',
-               'APPROVED',
-               'ENROLLED',
-               'REJECTED',
-               'WAITLISTED',
-            ),
+            type: DataTypes.ENUM('APPLIED', 'APPROVED', 'ENROLLED', 'REJECTED', 'WAITLISTED'),
             defaultValue: 'APPLIED',
             comment: 'Admission process status',
          },
          student_status: {
-            type: DataTypes.ENUM(
-               'ACTIVE',
-               'INACTIVE',
-               'SUSPENDED',
-               'TRANSFERRED',
-               'GRADUATED',
-               'DROPPED',
-            ),
+            type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED'),
             defaultValue: 'ACTIVE',
             comment: 'Current student status in school',
          },
@@ -482,8 +468,208 @@ const defineStudent = (sequelize) => {
                }
             },
          },
-      },
+      }
    );
+
+   // Instance Methods for Configuration Integration
+   Student.prototype.getCustomFieldValues = async function () {
+      const CustomFieldValues = this.sequelize.models.CustomFieldValues;
+      if (!CustomFieldValues) {
+         return {};
+      }
+      return await CustomFieldValues.getEntityValues('student', this.id);
+   };
+
+   Student.prototype.setCustomFieldValues = async function (fieldValues, transaction = null) {
+      const CustomFieldValues = this.sequelize.models.CustomFieldValues;
+      if (!CustomFieldValues) {
+         throw new Error('CustomFieldValues model not available');
+      }
+      return await CustomFieldValues.setEntityValues('student', this.id, fieldValues, transaction);
+   };
+
+   Student.prototype.getCompleteProfile = async function () {
+      const customFields = await this.getCustomFieldValues();
+      return {
+         ...this.toJSON(),
+         custom_fields: customFields,
+      };
+   };
+
+   Student.prototype.validateAgainstTenantConfig = async function (tenantConfig) {
+      const errors = [];
+      const studentConfig = tenantConfig.getStudentConfig();
+
+      // Validate parent information requirements
+      const parentReqs = studentConfig.parent_info_requirements || {};
+
+      if (parentReqs.father_mandatory && !this.father_name) {
+         errors.push('Father information is mandatory as per trust configuration');
+      }
+
+      if (parentReqs.mother_mandatory && !this.mother_name) {
+         errors.push('Mother information is mandatory as per trust configuration');
+      }
+
+      if (parentReqs.income_details_required) {
+         if (!this.father_annual_income && !this.mother_annual_income) {
+            errors.push('Income details are required as per trust configuration');
+         }
+      }
+
+      if (parentReqs.occupation_mandatory) {
+         if (!this.father_occupation && !this.mother_occupation) {
+            errors.push('Occupation details are required as per trust configuration');
+         }
+      }
+
+      // Validate medical information requirements
+      const medicalReqs = studentConfig.medical_info_requirements || {};
+
+      if (medicalReqs.blood_group_mandatory && !this.blood_group) {
+         errors.push('Blood group is mandatory as per trust configuration');
+      }
+
+      // Validate age limits
+      const validationRules = tenantConfig.validation_rules?.student_validation || {};
+      if (validationRules.age_limits && this.date_of_birth) {
+         const age = this.calculateAge();
+         const { min_age_years, max_age_years } = validationRules.age_limits;
+
+         if (min_age_years && age < min_age_years) {
+            errors.push(`Student age (${age}) is below minimum required age (${min_age_years})`);
+         }
+
+         if (max_age_years && age > max_age_years) {
+            errors.push(`Student age (${age}) is above maximum allowed age (${max_age_years})`);
+         }
+      }
+
+      return errors;
+   };
+
+   Student.prototype.calculateAge = function () {
+      if (!this.date_of_birth) {
+         return null;
+      }
+      const today = new Date();
+      const birthDate = new Date(this.date_of_birth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+         age--;
+      }
+
+      return age;
+   };
+
+   // Class Methods for Configuration Integration
+   Student.generateAdmissionNumber = async function (schoolId, tenantConfig, academicYear) {
+      const studentConfig = tenantConfig.getStudentConfig();
+      const format = studentConfig.admission_number_format || 'YYYY/NNNN';
+
+      // Get the current year
+      const year = new Date().getFullYear();
+      const shortYear = year.toString().substr(-2);
+
+      // Count existing students for this academic year to generate sequence
+      const count = await this.count({
+         where: {
+            school_id: schoolId,
+            academic_year: academicYear,
+         },
+      });
+
+      const sequence = count + 1;
+
+      // Apply format
+      let admissionNumber = format
+         .replace('YYYY', year.toString())
+         .replace('YY', shortYear)
+         .replace('NNNN', sequence.toString().padStart(4, '0'))
+         .replace('NNN', sequence.toString().padStart(3, '0'))
+         .replace('NN', sequence.toString().padStart(2, '0'))
+         .replace('N', sequence.toString());
+
+      // Add school code if available
+      const School = this.sequelize.models.School;
+      if (School) {
+         const school = await School.findByPk(schoolId, { attributes: ['code'] });
+         if (school && school.code) {
+            admissionNumber = admissionNumber.replace('SCHOOL', school.code);
+         }
+      }
+
+      return admissionNumber.toUpperCase();
+   };
+
+   Student.generateRollNumber = async function (classId, sectionId, tenantConfig) {
+      const studentConfig = tenantConfig.getStudentConfig();
+      const format = studentConfig.roll_number_format || 'NN';
+
+      // Count existing students in this class/section
+      const whereClause = { class_id: classId };
+      if (sectionId) {
+         whereClause.section_id = sectionId;
+      }
+
+      const count = await this.count({ where: whereClause });
+      const sequence = count + 1;
+
+      // Apply format
+      let rollNumber = format.replace('NN', sequence.toString().padStart(2, '0')).replace('N', sequence.toString());
+
+      // Add class name if available
+      const Class = this.sequelize.models.Class;
+      if (Class) {
+         const classInfo = await Class.findByPk(classId, { attributes: ['name'] });
+         if (classInfo && classInfo.name) {
+            rollNumber = rollNumber.replace('CLASS', classInfo.name);
+         }
+      }
+
+      return rollNumber.toUpperCase();
+   };
+
+   Student.getRequiredCustomFields = async function (trustId) {
+      // This would typically fetch from system database
+      // For now, return empty array - will be implemented when system integration is complete
+      return [];
+   };
+
+   Student.createWithConfiguration = async function (studentData, tenantConfig, transaction = null) {
+      const customFieldData = studentData.custom_fields || {};
+      delete studentData.custom_fields;
+
+      // Generate admission number if not provided
+      if (!studentData.admission_number) {
+         studentData.admission_number = await this.generateAdmissionNumber(
+            studentData.school_id,
+            tenantConfig,
+            studentData.academic_year
+         );
+      }
+
+      // Generate roll number if not provided
+      if (!studentData.roll_number && studentData.class_id) {
+         studentData.roll_number = await this.generateRollNumber(
+            studentData.class_id,
+            studentData.section_id,
+            tenantConfig
+         );
+      }
+
+      // Create the student
+      const student = await this.create(studentData, { transaction });
+
+      // Set custom field values if provided
+      if (Object.keys(customFieldData).length > 0) {
+         await student.setCustomFieldValues(customFieldData, transaction);
+      }
+
+      return student;
+   };
 
    return Student;
 };
@@ -493,7 +679,7 @@ const defineStudent = (sequelize) => {
  * Following Q59-ENFORCED pattern - reusable across API and web routes
  */
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/errors');
+const { commonSchemas } = require('../utils/validation');
 
 const studentValidationSchemas = {
    create: Joi.object({
@@ -505,17 +691,11 @@ const studentValidationSchemas = {
       }),
 
       // Basic identification (required)
-      admission_number: Joi.string()
-         .trim()
-         .uppercase()
-         .min(3)
-         .max(50)
-         .required()
-         .messages({
-            'string.empty': 'Admission number is required',
-            'string.min': 'Admission number must be at least 3 characters',
-            'string.max': 'Admission number cannot exceed 50 characters',
-         }),
+      admission_number: Joi.string().trim().uppercase().min(3).max(50).required().messages({
+         'string.empty': 'Admission number is required',
+         'string.min': 'Admission number must be at least 3 characters',
+         'string.max': 'Admission number cannot exceed 50 characters',
+      }),
 
       school_id: Joi.number().integer().positive().required().messages({
          'any.required': 'School ID is required',
@@ -529,8 +709,7 @@ const studentValidationSchemas = {
          .pattern(/^\d{4}-\d{2}$/)
          .required()
          .messages({
-            'string.pattern.base':
-          'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
             'any.required': 'Academic year is required',
          }),
 
@@ -552,10 +731,7 @@ const studentValidationSchemas = {
 
       // Optional personal information
       blood_group: Joi.string().trim().max(10).allow(null, '').optional(),
-      category: Joi.string()
-         .valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER')
-         .allow(null)
-         .optional(),
+      category: Joi.string().valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER').allow(null).optional(),
       religion: Joi.string().trim().max(50).allow(null, '').optional(),
       nationality: Joi.string().trim().max(50).allow(null, '').optional(),
       mother_tongue: Joi.string().trim().max(50).allow(null, '').optional(),
@@ -610,41 +786,20 @@ const studentValidationSchemas = {
          .optional(),
       guardian_email: Joi.string().email().max(255).allow(null, '').optional(),
       guardian_relation: Joi.string().trim().max(50).allow(null, '').optional(),
-      guardian_occupation: Joi.string()
-         .trim()
-         .max(100)
-         .allow(null, '')
-         .optional(),
+      guardian_occupation: Joi.string().trim().max(100).allow(null, '').optional(),
 
       // Emergency contact
-      emergency_contact_name: Joi.string()
-         .trim()
-         .max(100)
-         .allow(null, '')
-         .optional(),
+      emergency_contact_name: Joi.string().trim().max(100).allow(null, '').optional(),
       emergency_contact_phone: Joi.string()
          .pattern(/^\d{10,15}$/)
          .allow(null, '')
          .optional(),
-      emergency_contact_relation: Joi.string()
-         .trim()
-         .max(50)
-         .allow(null, '')
-         .optional(),
+      emergency_contact_relation: Joi.string().trim().max(50).allow(null, '').optional(),
 
       // Status fields
-      admission_status: Joi.string()
-         .valid('APPLIED', 'APPROVED', 'ENROLLED', 'REJECTED', 'WAITLISTED')
-         .optional(),
+      admission_status: Joi.string().valid('APPLIED', 'APPROVED', 'ENROLLED', 'REJECTED', 'WAITLISTED').optional(),
       student_status: Joi.string()
-         .valid(
-            'ACTIVE',
-            'INACTIVE',
-            'SUSPENDED',
-            'TRANSFERRED',
-            'GRADUATED',
-            'DROPPED',
-         )
+         .valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED')
          .optional(),
 
       // Transport and hostel
@@ -672,10 +827,7 @@ const studentValidationSchemas = {
       // Personal information updates
       gender: Joi.string().valid('MALE', 'FEMALE', 'OTHER').optional(),
       blood_group: Joi.string().trim().max(10).allow(null, '').optional(),
-      category: Joi.string()
-         .valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER')
-         .allow(null)
-         .optional(),
+      category: Joi.string().valid('GENERAL', 'SC', 'ST', 'OBC', 'EWS', 'OTHER').allow(null).optional(),
       religion: Joi.string().trim().max(50).allow(null, '').optional(),
 
       // Contact and address updates
@@ -709,14 +861,7 @@ const studentValidationSchemas = {
 
       // Status updates
       student_status: Joi.string()
-         .valid(
-            'ACTIVE',
-            'INACTIVE',
-            'SUSPENDED',
-            'TRANSFERRED',
-            'GRADUATED',
-            'DROPPED',
-         )
+         .valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED')
          .optional(),
       transport_required: Joi.boolean().optional(),
       hostel_required: Joi.boolean().optional(),
@@ -747,14 +892,7 @@ const studentValidationSchemas = {
 
    statusUpdate: Joi.object({
       student_status: Joi.string()
-         .valid(
-            'ACTIVE',
-            'INACTIVE',
-            'SUSPENDED',
-            'TRANSFERRED',
-            'GRADUATED',
-            'DROPPED',
-         )
+         .valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'TRANSFERRED', 'GRADUATED', 'DROPPED')
          .required(),
       status_reason: Joi.string().trim().min(5).max(200).optional(),
    }),

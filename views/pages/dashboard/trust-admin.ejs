@@ -1,423 +1,290 @@
 <!-- Trust Admin Dashboard -->
-<div class="min-h-screen bg-gray-50" x-data="trustAdminDashboard()" x-init="initDashboard()">
-    <!-- Header Section -->
-    <div class="bg-white border-b border-gray-200 shadow-sm">
-        <div class="px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Trust Dashboard</h1>
-                    <p class="mt-1 text-sm text-gray-500" x-text="'Welcome to ' + trustInfo.name + ' administration'"></p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right">
-                        <div class="text-sm font-medium text-gray-900" x-text="trustInfo.name"></div>
-                        <div class="text-sm text-gray-500" x-text="'Code: ' + trustInfo.code"></div>
-                    </div>
-                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <span class="text-indigo-600 font-semibold text-sm" x-text="trustInfo.name.charAt(0)"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<% currentPath = '/dashboard'; %>
 
-    <!-- Stats Cards -->
-    <div class="px-4 sm:px-6 lg:px-8 py-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Total Schools -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-2 bg-blue-100 rounded-lg">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Schools</p>
-                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalSchools"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Students -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-2 bg-green-100 rounded-lg">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-3.5a6 6 0 00-11.99-1.82"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Students</p>
-                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalStudents"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Teachers -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-2 bg-yellow-100 rounded-lg">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Total Teachers</p>
-                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalTeachers"></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Active Classes -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center">
-                    <div class="p-2 bg-purple-100 rounded-lg">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-500">Active Classes</p>
-                        <p class="text-2xl font-semibold text-gray-900" x-text="stats.totalClasses"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Content Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Quick Actions -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-6">Quick Actions</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- School Management -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/school/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-blue-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Manage Schools</h4>
-                                        <p class="text-sm text-gray-500">Add, edit, and configure schools</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Student Management -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/student/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-green-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-3.5a6 6 0 00-11.99-1.82"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Student Records</h4>
-                                        <p class="text-sm text-gray-500">Manage student information</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Teacher Management -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/teacher/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-yellow-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Teacher Records</h4>
-                                        <p class="text-sm text-gray-500">Manage teaching staff</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fee Management -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/fee/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-purple-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Fee Management</h4>
-                                        <p class="text-sm text-gray-500">Configure fees and collections</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Attendance -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/attendance/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-indigo-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Attendance</h4>
-                                        <p class="text-sm text-gray-500">Track daily attendance</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Reports -->
-                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
-                                 @click="navigateTo('/reports/dashboard')">
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-red-100 rounded-lg">
-                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-gray-900">Reports</h4>
-                                        <p class="text-sm text-gray-500">Generate and view reports</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity & System Status -->
-            <div class="space-y-6">
-                <!-- Recent Activity -->
-                <div class="bg-white rounded-lg shadow">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-                        <div class="space-y-4" x-show="recentActivity.length > 0">
-                            <template x-for="activity in recentActivity" :key="activity.id">
-                                <div class="flex items-start space-x-3">
-                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900" x-text="activity.action"></p>
-                                        <p class="text-sm text-gray-500" x-text="activity.details"></p>
-                                        <p class="text-xs text-gray-400 mt-1" x-text="activity.timestamp"></p>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                        <div x-show="recentActivity.length === 0" class="text-center py-6">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                            </svg>
-                            <p class="mt-2 text-sm text-gray-500">No recent activity</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Trust Information -->
-                <div class="bg-white rounded-lg shadow">
-                    <div class="p-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Trust Information</h3>
-                        <dl class="space-y-3">
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Trust Code</dt>
-                                <dd class="text-sm text-gray-900" x-text="trustInfo.code"></dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Registration Number</dt>
-                                <dd class="text-sm text-gray-900" x-text="trustInfo.registration_number || 'Not set'"></dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Status</dt>
-                                <dd class="text-sm">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                          :class="trustInfo.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                          x-text="trustInfo.status || 'Unknown'"></span>
-                                </dd>
-                            </div>
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500">Created</dt>
-                                <dd class="text-sm text-gray-900" x-text="formatDate(trustInfo.created_at)"></dd>
-                            </div>
-                        </dl>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div x-show="loading" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
-            <svg class="animate-spin h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="text-gray-900">Loading dashboard data...</span>
-        </div>
-    </div>
+<div class="row">
+   <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+         <div>
+            <h1 class="h3 mb-1">Trust Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening in your schools today.</p>
+         </div>
+         <div class="d-flex gap-2">
+            <button
+               type="button"
+               class="btn btn-outline-secondary"
+               data-bs-toggle="modal"
+               data-bs-target="#addSchoolModal">
+               <i class="fas fa-school me-1"></i>Add School
+            </button>
+            <button
+               type="button"
+               class="btn btn-brand-primary"
+               data-bs-toggle="modal"
+               data-bs-target="#addStudentModal">
+               <i class="fas fa-user-plus me-1"></i>Add Student
+            </button>
+         </div>
+      </div>
+   </div>
 </div>
 
-<script>
-function trustAdminDashboard() {
-    return {
-        loading: true,
-        trustInfo: {
-            name: '',
-            code: '',
-            registration_number: '',
-            status: '',
-            created_at: null
-        },
-        stats: {
-            totalSchools: 0,
-            totalStudents: 0,
-            totalTeachers: 0,
-            totalClasses: 0
-        },
-        recentActivity: [],
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Schools</h6>
+                  <h2 class="mb-0 fw-bold">8</h2>
+                  <small class="opacity-75">+2 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-school fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Students</h6>
+                  <h2 class="mb-0 fw-bold">2,847</h2>
+                  <small class="opacity-75">+127 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-user-graduate fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Teachers</h6>
+                  <h2 class="mb-0 fw-bold">145</h2>
+                  <small class="opacity-75">+8 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-chalkboard-teacher fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Revenue</h6>
+                  <h2 class="mb-0 fw-bold">₹2.4M</h2>
+                  <small class="opacity-75">+12% this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-rupee-sign fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
 
-        async initDashboard() {
-            try {
-                await this.loadTrustInfo();
-                await this.loadStats();
-                await this.loadRecentActivity();
-            } catch (error) {
-                console.error('Error initializing dashboard:', error);
-                this.showNotification('Failed to load dashboard data', 'error');
-            } finally {
-                this.loading = false;
-            }
-        },
+<!-- Main Dashboard Content -->
+<div class="row g-4">
+   <!-- Schools Overview -->
+   <div class="col-lg-8">
+      <div class="card h-100">
+         <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Schools Overview</h5>
+            <a href="/schools" class="text-decoration-none">View All</a>
+         </div>
+         <div class="card-body">
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead class="table-light">
+                     <tr>
+                        <th>School</th>
+                        <th>Students</th>
+                        <th>Teachers</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 AB
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">ABC Public School</div>
+                                 <small class="text-muted">Sector 15, Noida</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">456</span>
+                           <br /><small class="text-success">+12 this week</small>
+                        </td>
+                        <td>24</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                           <a href="/schools/1" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 XY
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">XYZ International</div>
+                                 <small class="text-muted">Greater Noida</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">789</span>
+                           <br /><small class="text-success">+23 this week</small>
+                        </td>
+                        <td>38</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                           <a href="/schools/2" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 GL
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">Global Academy</div>
+                                 <small class="text-muted">Ghaziabad</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">623</span>
+                           <br /><small class="text-success">+8 this week</small>
+                        </td>
+                        <td>32</td>
+                        <td><span class="badge bg-warning">Maintenance</span></td>
+                        <td>
+                           <a href="/schools/3" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
 
-        async loadTrustInfo() {
-            try {
-                const response = await fetch('/api/v1/trust/demo/info', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+   <!-- Quick Actions & Notifications -->
+   <div class="col-lg-4">
+      <!-- Quick Actions -->
+      <div class="card mb-3">
+         <div class="card-header">
+            <h6 class="card-title mb-0">Quick Actions</h6>
+         </div>
+         <div class="card-body">
+            <div class="d-grid gap-2">
+               <a href="/students/bulk-import" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-file-import me-2"></i>Bulk Import Students
+               </a>
+               <a href="/fees/generate-invoices" class="btn btn-outline-success btn-sm">
+                  <i class="fas fa-file-invoice me-2"></i>Generate Fee Invoices
+               </a>
+               <a href="/reports/attendance" class="btn btn-outline-info btn-sm">
+                  <i class="fas fa-chart-bar me-2"></i>Attendance Reports
+               </a>
+               <a href="/backup" class="btn btn-outline-warning btn-sm">
+                  <i class="fas fa-download me-2"></i>Download Backup
+               </a>
+            </div>
+         </div>
+      </div>
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch trust information');
-                }
-
-                const data = await response.json();
-                this.trustInfo = data.trust || this.trustInfo;
-            } catch (error) {
-                console.error('Error loading trust info:', error);
-                // Use fallback data from session or default
-                this.trustInfo = {
-                    name: 'Demo Trust',
-                    code: 'demo',
-                    registration_number: 'REG/2024/001',
-                    status: 'active',
-                    created_at: new Date().toISOString()
-                };
-            }
-        },
-
-        async loadStats() {
-            try {
-                const response = await fetch('/api/v1/trust/demo/stats', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch dashboard stats');
-                }
-
-                const data = await response.json();
-                this.stats = data.stats || this.stats;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-                // Use mock data for now
-                this.stats = {
-                    totalSchools: 5,
-                    totalStudents: 1250,
-                    totalTeachers: 85,
-                    totalClasses: 45
-                };
-            }
-        },
-
-        async loadRecentActivity() {
-            try {
-                const response = await fetch('/api/v1/trust/demo/activity', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch recent activity');
-                }
-
-                const data = await response.json();
-                this.recentActivity = data.activities || [];
-            } catch (error) {
-                console.error('Error loading recent activity:', error);
-                // Use mock data for demonstration
-                this.recentActivity = [
-                    {
-                        id: 1,
-                        action: 'New Student Admission',
-                        details: 'John Doe admitted to Class 9-A',
-                        timestamp: '2 hours ago'
-                    },
-                    {
-                        id: 2,
-                        action: 'Fee Collection Updated',
-                        details: 'Monthly fee structure updated for Class 10',
-                        timestamp: '4 hours ago'
-                    },
-                    {
-                        id: 3,
-                        action: 'Teacher Registration',
-                        details: 'Sarah Wilson joined as Math teacher',
-                        timestamp: '1 day ago'
-                    }
-                ];
-            }
-        },
-
-        navigateTo(path) {
-            window.location.href = path;
-        },
-
-        formatDate(dateString) {
-            if (!dateString) return 'Not available';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        },
-
-        showNotification(message, type = 'info') {
-            // Global notification system integration
-            if (window.showNotification) {
-                window.showNotification(message, type);
-            } else {
-                alert(message);
-            }
-        }
-    };
-}
-</script>
+      <!-- Recent Notifications -->
+      <div class="card">
+         <div class="card-header">
+            <h6 class="card-title mb-0">Recent Updates</h6>
+         </div>
+         <div class="card-body">
+            <div class="list-group list-group-flush">
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-check"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">Fee Collection Update</p>
+                        <p class="mb-1 small text-muted">ABC School collected ₹2.3L today</p>
+                        <small class="text-muted">2 hours ago</small>
+                     </div>
+                  </div>
+               </div>
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-user"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">New Teacher Joined</p>
+                        <p class="mb-1 small text-muted">Ms. Sarah joined XYZ International</p>
+                        <small class="text-muted">5 hours ago</small>
+                     </div>
+                  </div>
+               </div>
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-exclamation"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">System Maintenance</p>
+                        <p class="mb-1 small text-muted">Scheduled for tonight 11 PM</p>
+                        <small class="text-muted">1 day ago</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

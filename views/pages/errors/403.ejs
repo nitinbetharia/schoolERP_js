@@ -1,0 +1,151 @@
+<!-- 403 Forbidden Error Page -->
+<% 
+// Set layout variables for clean error page
+hideNav = true;
+hideFooter = true;
+%>
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="text-center">
+                    
+                    <!-- Error Illustration -->
+                    <div class="mb-5">
+                        <div class="display-1 text-warning mb-3" style="font-size: 8rem; font-weight: 700;">
+                            403
+                        </div>
+                        <div class="mb-4">
+                            <i class="fas fa-lock text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div class="mb-5">
+                        <h1 class="h3 text-dark fw-semibold mb-3">
+                            Access Forbidden
+                        </h1>
+                        <p class="text-muted lead mb-4">
+                            You don't have permission to access this resource.
+                        </p>
+                        <% if (user) { %>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            You are signed in as <strong><%= user.name %></strong> 
+                            (<%= user.role.replace('-', ' ').split(' ').map(word => 
+                                word.charAt(0).toUpperCase() + word.slice(1)).join(' ') %>).
+                            This role doesn't have access to the requested resource.
+                        </div>
+                        <% } else { %>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            You need to sign in to access this resource.
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-block mb-5">
+                        <% if (user) { %>
+                        <a href="/" class="btn btn-brand-primary px-4 py-2">
+                            <i class="fas fa-home me-2"></i>
+                            Go to Dashboard
+                        </a>
+                        <button type="button" 
+                                class="btn btn-outline-secondary px-4 py-2 ms-md-2" 
+                                onclick="history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Go Back
+                        </button>
+                        <% } else { %>
+                        <a href="/login" class="btn btn-brand-primary px-4 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Sign In
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary px-4 py-2 ms-md-2">
+                            <i class="fas fa-home me-2"></i>
+                            Go Home
+                        </a>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="row g-3 text-center">
+                        <% if (user) { %>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-user-shield text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Request Access</h6>
+                                    <small class="text-muted">Contact admin for additional permissions</small>
+                                    <div class="mt-3">
+                                        <a href="/request-access" class="btn btn-sm btn-outline-primary">
+                                            Request Access
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-exchange-alt text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Switch Account</h6>
+                                    <small class="text-muted">Sign in with a different account</small>
+                                    <div class="mt-3">
+                                        <a href="/logout" class="btn btn-sm btn-outline-primary">
+                                            Switch Account
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% } else { %>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-question-circle text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Need Help?</h6>
+                                    <small class="text-muted">Get assistance with access</small>
+                                    <div class="mt-3">
+                                        <a href="/help" class="btn btn-sm btn-outline-primary">
+                                            Get Help
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body py-4">
+                                    <i class="fas fa-headset text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
+                                    <h6 class="fw-semibold">Contact Support</h6>
+                                    <small class="text-muted">Reach out for assistance</small>
+                                    <div class="mt-3">
+                                        <a href="/support" class="btn btn-sm btn-outline-primary">
+                                            Contact Support
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer with minimal info -->
+<footer class="py-4 mt-auto">
+    <div class="container">
+        <div class="text-center text-muted small">
+            <p class="mb-0">
+                &copy; <%= new Date().getFullYear() %> 
+                <%= tenant && tenant.name ? tenant.name + ' - ' : '' %>School ERP System
+            </p>
+        </div>
+    </div>
+</footer>

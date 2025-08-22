@@ -3,7 +3,7 @@ const path = require('path');
 const router = express.Router();
 const { logSystem, logError } = require('../utils/logger');
 const { systemAuthService } = require('../services/systemServices');
-const createUserService = require('../modules/user/services/UserService');
+const userService = require('../modules/users/services/userService');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
 const { userValidationSchemas } = require('../models');
 
@@ -12,7 +12,7 @@ router.get('/test-frontend', (req, res) => {
    try {
       res.render('pages/test-frontend', {
          title: 'Frontend Test',
-         subtitle: 'Testing Tailwind CSS, Font Awesome, and Alpine.js',
+         subtitle: 'Testing Bootstrap 5, Font Awesome, and Vanilla JavaScript',
          user: null, // No user for this test
          tenant: null,
       });
@@ -50,12 +50,11 @@ const requireAuth = (req, res, next) => {
  */
 
 /**
- * @route GET /test-ui
- * @desc Test Tailwind CSS and Font Awesome implementation
- * @access Public
+ * @route GET /test-frontend
+ * @desc Test Bootstrap 5 and Font Awesome implementation
  */
-router.get('/test-ui', (req, res) => {
-   res.sendFile(path.join(__dirname, '../public/test-tailwind.html'));
+router.get('/test-frontend', (req, res) => {
+   res.sendFile(path.join(__dirname, '../public/test-bootstrap.html'));
 });
 
 /**
@@ -65,6 +64,14 @@ router.get('/test-ui', (req, res) => {
  */
 router.get('/login', async (req, res) => {
    try {
+      console.log('🔍 LOGIN ROUTE DEBUG:', {
+         path: req.path,
+         host: req.get('host'),
+         isSystemAdmin: req.isSystemAdmin,
+         tenantCode: req.tenantCode,
+         hasFlash: typeof req.flash === 'function'
+      });
+
       // If user is already logged in, redirect to dashboard
       if (req.session && req.session.user) {
          return res.redirect('/dashboard');
@@ -75,25 +82,28 @@ router.get('/login', async (req, res) => {
          description: 'Sign in to your School ERP account',
          subtitle: 'Access your educational management system',
          tenant: req.tenant || null,
-         success: req.flash('success'),
-         error: req.flash('error'),
-         warning: req.flash('warning'),
-         info: req.flash('info'),
+         user: req.user || null, // Always pass user variable
+         success: req.flash ? req.flash('success') : [],
+         error: req.flash ? req.flash('error') : [],
+         warning: req.flash ? req.flash('warning') : [],
+         info: req.flash ? req.flash('info') : [],
       };
 
-      res.render('layouts/base', {
+      console.log('✅ Rendering login page successfully');
+      res.render('pages/auth/login', {
          ...renderData,
-         layout: 'auth', // Use minimal auth layout
-         body: 'pages/auth/login',
+         layout: 'layout', // Use main layout
       });
    } catch (error) {
+      console.error('❌ LOGIN ROUTE ERROR:', error);
       logError(error, { context: 'auth/login GET' });
-      res.status(500).render('layouts/base', {
-         title: 'Error',
-         tenant: req.tenant || null,
-         error: 'Unable to load login page',
-         layout: 'auth',
-         body: '<div class="text-center"><h3>Service Unavailable</h3><p>Please try again later.</p></div>',
+      res.status(500).json({
+         success: false,
+         error: {
+            code: 'LOGIN_PAGE_ERROR',
+            message: 'Unable to load login page: ' + error.message,
+            timestamp: new Date().toISOString(),
+         }
       });
    }
 });
@@ -167,16 +177,18 @@ router.post('/login', async (req, res) => {
             logError(error, { context: 'SystemLogin', username: email });
 
             if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-               return res.json({ success: false, error: errorMsg });
+               return res.json({
+                  success: false,
+                  error: error.userMessage || errorMsg,
+                  flash: { error: [error.userMessage || errorMsg] },
+               });
             }
-            req.flash('error', errorMsg);
+            req.flash('error', error.userMessage || errorMsg);
             return res.redirect('/auth/login');
          }
       } else {
          // Use existing tenant user authentication
          const tenantCode = req.tenantCode || 'demo';
-         const createUserService = require('../modules/user/services/UserService');
-         const userService = createUserService();
 
          try {
             authResult = await userService.authenticateUser(tenantCode, email, password);
@@ -194,9 +206,13 @@ router.post('/login', async (req, res) => {
             });
 
             if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-               return res.json({ success: false, error: errorMsg });
+               return res.json({
+                  success: false,
+                  error: error.userMessage || errorMsg,
+                  flash: { error: [error.userMessage || errorMsg] },
+               });
             }
-            req.flash('error', errorMsg);
+            req.flash('error', error.userMessage || errorMsg);
             return res.redirect('/auth/login');
          }
       }
@@ -219,19 +235,25 @@ router.post('/login', async (req, res) => {
             success: true,
             message: 'Login successful',
             redirect: isSystemLogin ? '/admin/system' : '/dashboard',
+            flash: { success: ['Welcome! You have successfully logged in.'] },
          });
       }
 
       // Redirect based on user type
       const redirectUrl = isSystemLogin ? '/admin/system' : '/dashboard';
-      req.flash('success', 'Welcome! You have successfully logged in.');
+      const welcomeName = authResult.name || authResult.username || 'User';
+      req.flash('success', `Welcome back, ${welcomeName}! You are now logged in.`);
       return res.redirect(redirectUrl);
    } catch (error) {
       logError(error, { context: 'WebLoginError' });
 
       const errorMsg = 'An error occurred during login. Please try again.';
       if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
-         return res.status(500).json({ success: false, error: errorMsg });
+         return res.status(500).json({
+            success: false,
+            error: errorMsg,
+            flash: { error: [errorMsg] },
+         });
       }
 
       req.flash('error', errorMsg);
@@ -256,14 +278,12 @@ router.get('/dashboard', requireAuth, (req, res) => {
       }
 
       // Render trust admin dashboard for tenant users
-      res.render('layouts/base', {
+      res.render('pages/dashboard/trust-admin', {
          title: 'Trust Dashboard',
          description: 'Trust administration dashboard for managing schools, students, and staff',
          user: req.session.user,
          tenant: req.session.tenant || req.tenant,
          userType: userType,
-         layout: 'default', // Use default content layout
-         body: 'pages/dashboard/trust-admin',
          currentPath: '/dashboard',
       });
    } catch (error) {
@@ -288,14 +308,12 @@ router.get('/admin/system', requireAuth, (req, res) => {
          return res.redirect('/dashboard');
       }
 
-      res.render('layouts/base', {
+      res.render('pages/dashboard/system-admin', {
          title: 'System Administration',
-         description: 'System administration dashboard for managing trusts and system configuration',
+         description: 'System admin dashboard for managing trusts and configuration',
          user: req.session.user,
          tenant: null,
          userType: userType,
-         layout: 'default', // Use default content layout
-         body: 'pages/dashboard/system-admin',
          currentPath: '/admin/system',
       });
    } catch (error) {
@@ -331,9 +349,12 @@ router.post('/logout', (req, res) => {
                success: true,
                message: 'Logged out successfully',
                redirect: '/auth/login',
+               flash: { success: ['You have been logged out successfully.'] },
             });
          }
 
+         // Add flash message for next page load
+         req.flash('success', 'You have been logged out successfully.');
          res.redirect('/auth/login');
       });
    } catch (error) {
@@ -349,22 +370,11 @@ router.post('/logout', (req, res) => {
  */
 router.get('/logout', (req, res) => {
    // Redirect GET to POST for security
-   res.render('layouts/base', {
+   res.render('pages/auth/logout', {
       title: 'Logout',
       description: 'Logging out of School ERP System',
       tenant: req.tenant || null,
-      layout: 'auth',
-      body: `
-            <div class="text-center space-y-4">
-                <h3 class="text-lg font-semibold">Logging out...</h3>
-                <form method="POST" action="/auth/logout" class="hidden" id="logoutForm">
-                    <button type="submit">Logout</button>
-                </form>
-                <script>
-                    document.getElementById('logoutForm').submit();
-                </script>
-            </div>
-        `,
+      layout: 'layout',
    });
 });
 
@@ -383,14 +393,12 @@ router.get('/admin/system/profile', requireAuth, (req, res) => {
          return res.redirect('/dashboard');
       }
 
-      res.render('layouts/base', {
+      res.render('pages/profile/system-admin', {
          title: 'Profile Settings',
          description: 'System administrator profile settings and account management',
          user: req.session.user,
          tenant: null,
          userType: userType,
-         layout: 'default', // Use default content layout
-         body: 'pages/profile/system-admin',
          currentPath: '/admin/system/profile',
       });
    } catch (error) {
@@ -411,32 +419,74 @@ router.get('/system/health', requireAuth, (req, res) => {
 
       // Only allow system admins
       if (userType !== 'system') {
-         return res.status(403).render('pages/error', {
+         return res.status(403).render('pages/errors/403', {
+            layout: 'layout',
             title: 'Access Denied',
+            description: 'Access denied - System admin privileges required',
             errorCode: '403',
             errorMessage: 'System admin privileges required to view health status',
             errorDetails: null,
+            user: req.session.user,
+            tenant: null,
          });
       }
 
-      res.render('layouts/main', {
+      res.render('pages/system/health', {
          title: 'System Health',
          description: 'Real-time system health monitoring and status',
          user: req.session.user,
          tenant: null,
          userType: userType,
-         body: 'pages/system/health',
          currentPath: '/system/health',
       });
    } catch (error) {
       logError(error, { context: 'system/health GET' });
-      res.status(500).render('pages/error', {
+      res.status(500).render('pages/errors/500', {
+         layout: 'layout',
          title: 'Server Error',
+         description: 'Server error - Unable to load system health page',
          errorCode: '500',
          errorMessage: 'Unable to load system health page',
          errorDetails: process.env.NODE_ENV === 'development' ? error.stack : null,
+         user: req.session.user,
+         tenant: null,
       });
    }
+});
+
+/**
+ * @route GET /test/error-handler
+ * @desc Error handler test page
+ * @access Public
+ */
+router.get('/test/error-handler', (req, res) => {
+   res.render('pages/test/error-handler', {
+      title: 'Error Handler Test',
+      description: 'Test page for error handling functionality',
+      user: req.session?.user || null,
+      tenant: req.tenant || null,
+   });
+});
+
+/**
+ * @route GET /test-500-error
+ * @desc Trigger a 500 error for testing
+ * @access Public
+ */
+router.get('/test-500-error', (_req, _res) => {
+   // Intentionally throw an error
+   throw new Error('This is a test 500 error');
+});
+
+/**
+ * @route GET /test-generic-error
+ * @desc Trigger a generic error for testing
+ * @access Public
+ */
+router.get('/test-generic-error', (_req, _res) => {
+   const error = new Error('This is a test generic error');
+   error.statusCode = 418; // I'm a teapot
+   throw error;
 });
 
 /**

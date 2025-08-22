@@ -5,7 +5,7 @@ const {
    ErrorFactory,
    // Legacy classes for backward compatibility
    AuthenticationError,
-} = require('../utils/errors');
+} = require('../utils/validation');
 const appConfig = require('../config/app-config.json');
 
 /**
@@ -23,13 +23,28 @@ const tenantDetection = async (req, res, next) => {
       if (subdomain && subdomain !== 'www') {
          tenantCode = subdomain;
       } else {
-      // Fallback to default tenant for development
-         tenantCode = appConfig.multiTenant.defaultTrustCode;
+         // No subdomain means system admin access
+         tenantCode = null;
       }
 
       // Set tenant context
       req.tenantCode = tenantCode;
       req.subdomain = subdomain;
+
+      console.log('🔍 TENANT DETECTION DEBUG:', {
+         path: req.path,
+         host: req.get('host'),
+         extractedSubdomain: subdomain,
+         tenantCode: tenantCode,
+         settingSystemAdmin: !tenantCode
+      });
+
+      // Skip tenant detection for system admin access (no subdomain)
+      if (!tenantCode) {
+         req.isSystemAdmin = true;
+         console.log('✅ Set isSystemAdmin = true for no subdomain');
+         return next();
+      }
 
       // Skip tenant database initialization for system admin routes
       if (
@@ -143,15 +158,15 @@ function extractSubdomain(host) {
    // Split by dots
    const parts = hostWithoutPort.split('.');
 
-   // If localhost or IP address, no subdomain
+   // If just localhost or IP address (no subdomain), return null
    if (
-      parts[0] === 'localhost' ||
-    /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)
+      (parts.length === 1 && parts[0] === 'localhost') ||
+      /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)
    ) {
       return null;
    }
 
-   // If only domain.com, no subdomain
+   // If only domain.com (2 parts), no subdomain
    if (parts.length <= 2) {
       return null;
    }
@@ -166,6 +181,20 @@ function extractSubdomain(host) {
  */
 const validateTenant = async (req, res, next) => {
    try {
+      console.log('🏛️ VALIDATE TENANT DEBUG:', {
+         path: req.path,
+         host: req.get('host'),
+         isSystemAdmin: req.isSystemAdmin,
+         tenantCode: req.tenantCode,
+         subdomain: req.subdomain
+      });
+
+      // Skip for system admin access (no subdomain/tenant)
+      if (req.isSystemAdmin || !req.tenantCode) {
+         console.log('✅ Skipping tenant validation - system admin or no tenant');
+         return next();
+      }
+
       // Skip for system admin routes
       if (req.path.startsWith('/admin/system')) {
          return next();
@@ -209,14 +238,26 @@ const validateTenant = async (req, res, next) => {
       next();
    } catch (error) {
       logError(error, { context: 'validateTenant', tenantCode: req.tenantCode });
-      return res.status(500).json({
-         success: false,
-         error: {
-            code: 'TENANT_VALIDATION_FAILED',
-            message: 'Failed to validate tenant',
-            timestamp: new Date().toISOString(),
-         },
-      });
+      
+      // Check if this is a web request (HTML) or API request (JSON)
+      const acceptsHTML = req.headers.accept && req.headers.accept.includes('text/html');
+      const isAPIRequest = req.path.startsWith('/api/');
+      
+      if (acceptsHTML && !isAPIRequest) {
+         // Return user-friendly error page for web requests
+         req.flash('error', 'Unable to access this tenant. Please check your URL or contact support.');
+         return res.redirect('/auth/login');
+      } else {
+         // Return JSON for API requests
+         return res.status(500).json({
+            success: false,
+            error: {
+               code: 'TENANT_VALIDATION_FAILED',
+               message: 'Failed to validate tenant',
+               timestamp: new Date().toISOString(),
+            },
+         });
+      }
    }
 };
 
