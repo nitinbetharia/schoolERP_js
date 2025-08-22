@@ -21,8 +21,7 @@ async function up(queryInterface, _Sequelize) {
          },
          entity_type: {
             type: DataTypes.ENUM(
-               'student', 'teacher', 'staff', 'school', 'class', 'section',
-               'parent', 'guardian', 'fee', 'exam', 'other'
+               'student', 'school', 'teacher', 'parent', 'class', 'fee_structure'
             ),
             allowNull: false,
             comment: 'Type of entity this value belongs to'
@@ -30,30 +29,25 @@ async function up(queryInterface, _Sequelize) {
          entity_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            comment: 'ID of the entity this value belongs to'
-         },
-         field_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            comment: 'Reference to tenant_custom_fields table in system DB'
+            comment: 'ID of the specific entity (student_id, school_id, etc.)'
          },
          field_name: {
             type: DataTypes.STRING(100),
             allowNull: false,
-            comment: 'Field name for quick access'
+            comment: 'Custom field name (from system TenantCustomFields table)'
          },
          field_value: {
             type: DataTypes.TEXT,
             allowNull: true,
-            comment: 'Stored value as text (parsed based on field type)'
+            comment: 'Actual field value stored as text (JSON for complex types)'
          },
-         created_by: {
-            type: DataTypes.INTEGER,
-            allowNull: false
-         },
-         last_updated_by: {
-            type: DataTypes.INTEGER,
-            allowNull: false
+         field_type: {
+            type: DataTypes.ENUM(
+               'text', 'number', 'date', 'datetime', 'dropdown', 'checkbox', 
+               'textarea', 'email', 'phone', 'url', 'file'
+            ),
+            allowNull: false,
+            comment: 'Field type for proper value parsing'
          },
          created_at: {
             type: DataTypes.DATE,

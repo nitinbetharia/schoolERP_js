@@ -1,6 +1,11 @@
 /**
+ * LEGACY FILE - Moved to legacy folder as it's not currently used
  * Template Locals Middleware
  * Ensures all templates have access to required variables
+ *
+ * This middleware was part of the original design but is not actively used
+ * in the current implementation. Routes handle template variables manually.
+ * Moved here for historical reference.
  */
 
 /**

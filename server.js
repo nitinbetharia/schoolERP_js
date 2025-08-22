@@ -22,15 +22,10 @@ const appConfig = require('./config/app-config.json');
 const { logger, logSystem, logError } = require('./utils/logger');
 
 // Import middleware
-const {
-   securityMiddleware,
-   tenantDetection,
-   validateTenant,
-   errorHandler,
-   notFoundHandler,
-   requestLogger,
-   sanitizeInput,
-} = require('./middleware');
+// Import middleware directly from their specific files
+const { securityMiddleware, sanitizeInput } = require('./middleware/security');
+const { tenantDetection, validateTenant } = require('./middleware/tenant');
+const { errorHandler, notFoundHandler, requestLogger } = require('./middleware/errorHandler');
 
 // Import connection pool monitoring
 const {
@@ -146,7 +141,7 @@ class SchoolERPServer {
             path: req.path,
             url: req.url,
             host: req.get('host'),
-            accept: req.headers.accept
+            accept: req.headers.accept,
          });
          next();
       });
@@ -259,12 +254,13 @@ class SchoolERPServer {
          console.log('🚀 TENANT DETECTION MIDDLEWARE:', {
             path: req.path,
             host: req.get('host'),
-            shouldSkip: req.path.startsWith('/api/v1/admin/system') ||
-                       req.path.startsWith('/api/v1/trust/') ||
-                       req.path === '/api/v1/health' ||
-                       req.path === '/api/v1/status' ||
-                       req.path === '/health' ||
-                       req.path === '/status'
+            shouldSkip:
+               req.path.startsWith('/api/v1/admin/system') ||
+               req.path.startsWith('/api/v1/trust/') ||
+               req.path === '/api/v1/health' ||
+               req.path === '/api/v1/status' ||
+               req.path === '/health' ||
+               req.path === '/status',
          });
 
          if (
@@ -288,15 +284,16 @@ class SchoolERPServer {
             path: req.path,
             tenantCode: req.tenantCode,
             isSystemAdmin: req.isSystemAdmin,
-            shouldSkipPath: req.path.startsWith('/api/v1/admin/system') ||
-                           req.path.startsWith('/api/v1/trust/') ||
-                           req.path === '/api/v1/health' ||
-                           req.path === '/api/v1/status' ||
-                           req.path === '/health' ||
-                           req.path === '/status' ||
-                           req.path.startsWith('/auth/') ||
-                           req.path === '/login' ||
-                           req.path === '/logout'
+            shouldSkipPath:
+               req.path.startsWith('/api/v1/admin/system') ||
+               req.path.startsWith('/api/v1/trust/') ||
+               req.path === '/api/v1/health' ||
+               req.path === '/api/v1/status' ||
+               req.path === '/health' ||
+               req.path === '/status' ||
+               req.path.startsWith('/auth/') ||
+               req.path === '/login' ||
+               req.path === '/logout',
          });
 
          if (
@@ -318,7 +315,7 @@ class SchoolERPServer {
             hasTenantCode: !!req.tenantCode,
             isNotAPI: !req.path.startsWith('/api'),
             isNotSystemAdmin: !req.isSystemAdmin,
-            willCallValidation: req.tenantCode && !req.path.startsWith('/api') && !req.isSystemAdmin
+            willCallValidation: req.tenantCode && !req.path.startsWith('/api') && !req.isSystemAdmin,
          });
 
          if (req.tenantCode && !req.path.startsWith('/api') && !req.isSystemAdmin) {

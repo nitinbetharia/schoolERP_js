@@ -1,8 +1,9 @@
 {
    "app": {
-      "name": "School ERP System",
-      "version": "1.0.0",
-      "description": "Bulletproof Simple School ERP",
+      "name": "Tvarita School ERP",
+      "version": "2.0.0",
+      "description": "Tvarita School ERP",
+      "author": "Nitin Betharia",
       "environment": "development",
       "port": 3000,
       "baseUrl": "http://localhost:3000",
@@ -15,11 +16,11 @@
    "security": {
       "bcryptRounds": 12,
       "maxLoginAttempts": 5,
-      "lockoutTimeMs": 900000,
-      "sessionMaxAge": 86400000,
-      "rememberMeMaxAge": 2592000000,
+      "lockoutTime": "15m",
+      "sessionMaxAge": "1d",
+      "rememberMeMaxAge": "30d",
       "rateLimiting": {
-         "windowMs": 900000,
+         "windowMs": "15m",
          "maxRequests": 100,
          "globalMaxRequests": 100,
          "authMaxRequests": 5
@@ -34,7 +35,7 @@
          "host": "140.238.167.36",
          "port": 3306,
          "timezone": "+00:00",
-         "connectTimeout": 60000,
+         "connectTimeout": "1m",
          "ssl": false
       },
       "system": {
@@ -50,18 +51,18 @@
       "pool": {
          "max": 2,
          "min": 0,
-         "acquire": 30000,
-         "idle": 10000,
-         "evict": 5000,
+         "acquire": "30s",
+         "idle": "10s",
+         "evict": "5s",
          "handleDisconnects": true
       },
       "sessionStore": {
          "pool": {
             "connectionLimit": 2,
-            "acquireTimeout": 30000,
-            "timeout": 30000,
+            "acquireTimeout": "30s",
+            "timeout": "30s",
             "reconnect": true,
-            "idleTimeout": 10000
+            "idleTimeout": "10s"
          }
       },
       "retry": {

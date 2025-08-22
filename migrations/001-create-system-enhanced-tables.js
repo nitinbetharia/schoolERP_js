@@ -59,21 +59,20 @@ async function up(queryInterface, _Sequelize) {
             allowNull: false,
             defaultValue: {}
          },
-         version: {
-            type: DataTypes.INTEGER,
-            defaultValue: 1
-         },
          is_active: {
             type: DataTypes.BOOLEAN,
-            defaultValue: true
+            defaultValue: true,
+            comment: 'Whether this configuration is active'
          },
-         created_by: {
+         version: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            defaultValue: 1,
+            comment: 'Configuration version for change tracking'
          },
-         last_updated_by: {
+         last_modified_by: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: true,
+            comment: 'User ID who last modified this configuration'
          },
          created_at: {
             type: DataTypes.DATE,
@@ -111,10 +110,10 @@ async function up(queryInterface, _Sequelize) {
          },
          entity_type: {
             type: DataTypes.ENUM(
-               'student', 'teacher', 'staff', 'school', 'class', 'section',
-               'parent', 'guardian', 'fee', 'exam', 'other'
+               'student', 'school', 'teacher', 'parent', 'class', 'fee_structure'
             ),
-            allowNull: false
+            allowNull: false,
+            comment: 'Entity this custom field applies to'
          },
          field_name: {
             type: DataTypes.STRING(100),
@@ -122,10 +121,11 @@ async function up(queryInterface, _Sequelize) {
          },
          field_type: {
             type: DataTypes.ENUM(
-               'text', 'number', 'email', 'phone', 'date', 'datetime',
-               'boolean', 'dropdown', 'multi_select', 'textarea', 'file'
+               'text', 'number', 'date', 'datetime', 'dropdown', 'checkbox', 
+               'textarea', 'email', 'phone', 'url', 'file'
             ),
-            allowNull: false
+            allowNull: false,
+            comment: 'Data type of the field'
          },
          field_label: {
             type: DataTypes.STRING(200),

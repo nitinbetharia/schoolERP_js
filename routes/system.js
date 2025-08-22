@@ -1,16 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Joi = require('joi');
-const { asyncHandler, healthCheck } = require('../middleware');
-const {
-   trustService,
-   systemAuthService,
-} = require('../services/systemServices');
-const {
-   requireSystemAdmin,
-   loginRateLimit,
-   authenticate,
-} = require('../middleware/auth');
+const { asyncHandler, healthCheck } = require('../middleware/errorHandler');
+const { trustService, systemAuthService } = require('../services/systemServices');
+const { requireSystemAdmin, loginRateLimit, authenticate } = require('../middleware/auth');
 const { sensitiveRateLimit } = require('../middleware/security');
 const {
    formatSuccessResponse,
@@ -42,7 +35,7 @@ router.post(
       req.session.userType = 'system';
 
       res.json(formatSuccessResponse(userData, 'Login successful'));
-   }),
+   })
 );
 
 // System admin logout
@@ -53,7 +46,7 @@ router.post(
          req.session.destroy();
       }
       res.json(formatSuccessResponse(null, 'Logout successful'));
-   }),
+   })
 );
 
 // Change password
@@ -65,14 +58,10 @@ router.post(
    asyncHandler(async (req, res) => {
       const { currentPassword, newPassword } = req.body;
 
-      const result = await systemAuthService.changePassword(
-         req.user.id,
-         currentPassword,
-         newPassword,
-      );
+      const result = await systemAuthService.changePassword(req.user.id, currentPassword, newPassword);
 
       res.json(formatSuccessResponse(result, 'Password changed successfully'));
-   }),
+   })
 );
 
 /**
@@ -87,10 +76,8 @@ router.post(
    asyncHandler(async (req, res) => {
       const trust = await trustService.createTrust(req.body);
 
-      res
-         .status(201)
-         .json(formatSuccessResponse(trust, 'Trust created successfully'));
-   }),
+      res.status(201).json(formatSuccessResponse(trust, 'Trust created successfully'));
+   })
 );
 
 // Get trust by ID
@@ -103,7 +90,7 @@ router.get(
       const trust = await trustService.getTrust(req.params.id, 'id');
 
       res.json(formatSuccessResponse(trust));
-   }),
+   })
 );
 
 // Update trust
@@ -114,14 +101,10 @@ router.put(
    validateParams(Joi.object({ id: commonSchemas.id })),
    validateBody(trustValidationSchemas.update),
    asyncHandler(async (req, res) => {
-      const trust = await trustService.updateTrust(
-         req.params.id,
-         req.body,
-         req.user.id,
-      );
+      const trust = await trustService.updateTrust(req.params.id, req.body, req.user.id);
 
       res.json(formatSuccessResponse(trust, 'Trust updated successfully'));
-   }),
+   })
 );
 
 // List all trusts
@@ -133,11 +116,9 @@ router.get(
       Joi.object({
          page: require('../utils/validation').commonSchemas.pagination.page,
          limit: require('../utils/validation').commonSchemas.pagination.limit,
-         status: Joi.string()
-            .valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'SETUP_PENDING')
-            .optional(),
+         status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED', 'SETUP_PENDING').optional(),
          search: Joi.string().min(2).optional(),
-      }),
+      })
    ),
    asyncHandler(async (req, res) => {
       const result = await trustService.listTrusts(req.query);
@@ -145,9 +126,9 @@ router.get(
       res.json(
          formatSuccessResponse(result.trusts, 'Trusts retrieved successfully', {
             pagination: result.pagination,
-         }),
+         })
       );
-   }),
+   })
 );
 
 // Complete trust setup
@@ -159,10 +140,8 @@ router.post(
    asyncHandler(async (req, res) => {
       const trust = await trustService.completeSetup(req.params.id, req.user.id);
 
-      res.json(
-         formatSuccessResponse(trust, 'Trust setup completed successfully'),
-      );
-   }),
+      res.json(formatSuccessResponse(trust, 'Trust setup completed successfully'));
+   })
 );
 
 /**
@@ -175,9 +154,9 @@ router.get(
    requireSystemAdmin,
    asyncHandler(async (req, res) => {
       const stats = await trustService.getSystemStats();
-      
+
       res.json(formatSuccessResponse(stats, 'System stats retrieved successfully'));
-   }),
+   })
 );
 
 /**
@@ -190,15 +169,10 @@ router.post(
    requireSystemAdmin,
    validateBody(systemUserValidationSchemas.create),
    asyncHandler(async (req, res) => {
-      const user = await systemAuthService.createSystemUser(
-         req.body,
-         req.user.id,
-      );
+      const user = await systemAuthService.createSystemUser(req.body, req.user.id);
 
-      res
-         .status(201)
-         .json(formatSuccessResponse(user, 'System user created successfully'));
-   }),
+      res.status(201).json(formatSuccessResponse(user, 'System user created successfully'));
+   })
 );
 
 // Get current user profile
@@ -207,7 +181,7 @@ router.get(
    authenticate,
    asyncHandler(async (req, res) => {
       res.json(formatSuccessResponse(req.user));
-   }),
+   })
 );
 
 // Update current user profile
@@ -215,19 +189,18 @@ router.put(
    '/profile',
    authenticate,
    requireSystemAdmin,
-   validateBody(Joi.object({
-      username: Joi.string().min(3).max(50).optional(),
-      email: Joi.string().email().optional(),
-      fullName: Joi.string().max(100).optional(),
-   })),
+   validateBody(
+      Joi.object({
+         username: Joi.string().min(3).max(50).optional(),
+         email: Joi.string().email().optional(),
+         fullName: Joi.string().max(100).optional(),
+      })
+   ),
    asyncHandler(async (req, res) => {
-      const updatedUser = await systemAuthService.updateProfile(
-         req.user.id,
-         req.body
-      );
+      const updatedUser = await systemAuthService.updateProfile(req.user.id, req.body);
 
       res.json(formatSuccessResponse(updatedUser, 'Profile updated successfully'));
-   }),
+   })
 );
 
 module.exports = router;

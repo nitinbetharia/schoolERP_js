@@ -1,7 +1,7 @@
 const express = require('express');
 const SchoolController = require('../controllers/SchoolController');
 const { requireTrustAdmin } = require('../../../middleware/auth');
-const { validators } = require('../../../utils/errors');
+const { validateBody } = require('../../../utils/validation');
 const { schoolValidationSchemas } = require('../../../models');
 
 const router = express.Router({ mergeParams: true });
@@ -10,7 +10,7 @@ const schoolController = new SchoolController();
 /**
  * School Routes
  * Handles school management endpoints within a tenant
- * Q59-ENFORCED: All routes use validators.validateBody() with schemas
+ * Q59-ENFORCED: All routes use validateBody() with schemas
  */
 
 // Apply authentication to all school routes (if not already applied)
@@ -31,14 +31,9 @@ router.get('/', (req, res) => {
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED
  */
-router.post(
-   '/',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.create),
-   (req, res) => {
-      schoolController.createSchool(req, res);
-   },
-);
+router.post('/', requireTrustAdmin, validateBody(schoolValidationSchemas.create), (req, res) => {
+   schoolController.createSchool(req, res);
+});
 
 /**
  * @route GET /api/v1/trust/:trustId/schools/:id
@@ -55,14 +50,9 @@ router.get('/:id', (req, res) => {
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED
  */
-router.put(
-   '/:id',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.update),
-   (req, res) => {
-      schoolController.updateSchool(req, res);
-   },
-);
+router.put('/:id', requireTrustAdmin, validateBody(schoolValidationSchemas.update), (req, res) => {
+   schoolController.updateSchool(req, res);
+});
 
 /**
  * @route PATCH /api/v1/trust/:trustId/schools/:id/status
@@ -70,14 +60,9 @@ router.put(
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED - Status update validation
  */
-router.patch(
-   '/:id/status',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.statusUpdate),
-   (req, res) => {
-      schoolController.updateSchoolStatus(req, res);
-   },
-);
+router.patch('/:id/status', requireTrustAdmin, validateBody(schoolValidationSchemas.statusUpdate), (req, res) => {
+   schoolController.updateSchoolStatus(req, res);
+});
 
 /**
  * @route DELETE /api/v1/trust/:trustId/schools/:id
@@ -94,14 +79,9 @@ router.delete('/:id', requireTrustAdmin, (req, res) => {
  * @access Admin/Trust Admin
  * @validation Q59-ENFORCED
  */
-router.patch(
-   '/:id/compliance',
-   requireTrustAdmin,
-   validators.validateBody(schoolValidationSchemas.compliance),
-   (req, res) => {
-      schoolController.updateSchoolCompliance(req, res);
-   },
-);
+router.patch('/:id/compliance', requireTrustAdmin, validateBody(schoolValidationSchemas.compliance), (req, res) => {
+   schoolController.updateSchoolCompliance(req, res);
+});
 
 module.exports = router;
 
