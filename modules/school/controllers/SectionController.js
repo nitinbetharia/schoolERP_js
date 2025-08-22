@@ -1,7 +1,6 @@
 const SectionService = require('../services/SectionService');
 const logger = require('../../../utils/logger');
 const {
-   ErrorFactory,
    formatErrorResponse,
    getErrorStatusCode,
    formatSuccessResponse,

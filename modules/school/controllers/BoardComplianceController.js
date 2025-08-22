@@ -1,7 +1,6 @@
 const BoardComplianceService = require('../services/BoardComplianceService');
 const logger = require('../../../utils/logger');
 const {
-   ErrorFactory,
    formatErrorResponse,
    getErrorStatusCode,
    formatSuccessResponse,

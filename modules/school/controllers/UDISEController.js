@@ -1,7 +1,6 @@
 const UDISEService = require('../services/UDISEService');
 const logger = require('../../../utils/logger');
 const {
-   ErrorFactory,
    formatErrorResponse,
    getErrorStatusCode,
    formatSuccessResponse,

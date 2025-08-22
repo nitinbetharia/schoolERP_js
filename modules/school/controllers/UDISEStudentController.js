@@ -1,6 +1,5 @@
 const UDISEStudentService = require('../services/UDISEStudentService');
 const {
-   ErrorFactory,
    // Legacy classes for backward compatibility
    ValidationError,
    NotFoundError,
@@ -27,7 +26,7 @@ function createUDISEStudentController() {
          const createdBy = req.user ? req.user.id : null;
 
          if (!student_id) {
-            throw ErrorFactory.validation('Student ID is required');
+            throw (() => { const err = new Error('Student ID is required'); err.statusCode = 400; return err; })();
          }
 
          const result = await UDISEStudentService.registerStudentWithUDISE(
@@ -128,7 +127,7 @@ function createUDISEStudentController() {
          const udiseStudentId = req.params.udiseStudentId;
 
          if (!udiseStudentId) {
-            throw ErrorFactory.validation('UDISE+ student ID is required');
+            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
          }
 
          const student = await UDISEStudentService.getUDISEStudentById(
@@ -235,7 +234,7 @@ function createUDISEStudentController() {
          const updatedBy = req.user ? req.user.id : null;
 
          if (!udiseStudentId) {
-            throw ErrorFactory.validation('UDISE+ student ID is required');
+            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
          }
 
          const updatedStudent = await UDISEStudentService.updateUDISEStudent(
@@ -325,7 +324,7 @@ function createUDISEStudentController() {
          };
 
          if (!udiseSchoolId || isNaN(udiseSchoolId)) {
-            throw ErrorFactory.validation('Valid UDISE+ school ID is required');
+            throw (() => { const err = new Error('Valid UDISE+ school ID is required'); err.statusCode = 400; return err; })();
          }
 
          const result = await UDISEStudentService.getUDISEStudentsBySchool(
@@ -414,7 +413,7 @@ function createUDISEStudentController() {
          const udiseStudentId = req.params.udiseStudentId;
 
          if (!udiseStudentId) {
-            throw ErrorFactory.validation('UDISE+ student ID is required');
+            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
          }
 
          const validationResult =
@@ -490,11 +489,11 @@ function createUDISEStudentController() {
          const censusYear = req.params.censusYear;
 
          if (!udiseSchoolId || isNaN(udiseSchoolId)) {
-            throw ErrorFactory.validation('Valid UDISE+ school ID is required');
+            throw (() => { const err = new Error('Valid UDISE+ school ID is required'); err.statusCode = 400; return err; })();
          }
 
          if (!censusYear) {
-            throw ErrorFactory.validation('Census year is required');
+            throw (() => { const err = new Error('Census year is required'); err.statusCode = 400; return err; })();
          }
 
          const censusData = await UDISEStudentService.generateStudentCensusData(

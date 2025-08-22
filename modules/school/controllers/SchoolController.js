@@ -1,7 +1,6 @@
 const SchoolService = require('../services/SchoolService');
 const logger = require('../../../utils/logger');
 const {
-   ErrorFactory,
    formatErrorResponse,
    getErrorStatusCode,
    formatSuccessResponse,
@@ -29,7 +28,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -63,7 +62,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -98,7 +97,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -132,7 +131,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -170,7 +169,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -207,7 +206,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }
@@ -241,7 +240,7 @@ class SchoolController {
                .status(400)
                .json(
                   formatErrorResponse(
-                     ErrorFactory.createClientError('Trust ID is required'),
+                     (() => { const err = new Error('Trust ID is required'); err.statusCode = 400; return err; })(),
                   ),
                );
          }

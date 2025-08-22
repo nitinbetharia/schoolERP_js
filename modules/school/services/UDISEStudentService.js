@@ -1,7 +1,6 @@
 const { getTenantModels } = require('../../../models');
 const { logger } = require('../../../utils/logger');
 const {
-   ErrorFactory,
    // Legacy classes for backward compatibility
    ValidationError,
    NotFoundError,
@@ -54,7 +53,7 @@ function createUDISEStudentService() {
          });
 
          if (!student) {
-            throw ErrorFactory.notFound(`Student with ID ${studentId} not found`);
+            throw (() => { const err = new Error('Student with ID ${studentId} not found'); err.statusCode = 404; return err; })();
          }
 
          if (!student.school || !student.school.udiseRegistration) {

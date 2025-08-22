@@ -1,6 +1,4 @@
-const { dbManager } = require('../../../models/database');
 const logger = require('../../../utils/logger');
-const { ErrorFactory } = require('../../../utils/errors');
 const models = require('../../../models/database');
 
 /**
@@ -27,7 +25,9 @@ class SchoolService {
          // Get tenant models for the trust
          const tenantModels = await models.getTenantModels(trustId);
          if (!tenantModels || !tenantModels.School) {
-            throw ErrorFactory.createClientError('Tenant models not initialized');
+            const err = new Error('Tenant models not initialized');
+            err.statusCode = 500;
+            throw err;
          }
 
          const school = await tenantModels.School.create({
@@ -60,7 +60,7 @@ class SchoolService {
 
          const tenantModels = await models.getTenantModels(trustId);
          if (!tenantModels || !tenantModels.School) {
-            throw ErrorFactory.createClientError('Tenant models not initialized');
+            const err = new Error('Tenant models not initialized'); err.statusCode = 400; throw err;
          }
 
          const schools = await tenantModels.School.findAll({
@@ -92,7 +92,7 @@ class SchoolService {
 
          const tenantModels = await models.getTenantModels(trustId);
          if (!tenantModels || !tenantModels.School) {
-            throw ErrorFactory.createClientError('Tenant models not initialized');
+            const err = new Error('Tenant models not initialized'); err.statusCode = 400; throw err;
          }
 
          const school = await tenantModels.School.findOne({
@@ -103,7 +103,7 @@ class SchoolService {
          });
 
          if (!school) {
-            throw ErrorFactory.createClientError('School not found');
+            const err = new Error('School not found'); err.statusCode = 400; throw err;
          }
 
          return school;
@@ -131,7 +131,7 @@ class SchoolService {
 
          const tenantModels = await models.getTenantModels(trustId);
          if (!tenantModels || !tenantModels.School) {
-            throw ErrorFactory.createClientError('Tenant models not initialized');
+            const err = new Error('Tenant models not initialized'); err.statusCode = 400; throw err;
          }
 
          const [updatedRowsCount] = await tenantModels.School.update(
@@ -145,7 +145,9 @@ class SchoolService {
          );
 
          if (updatedRowsCount === 0) {
-            throw ErrorFactory.createClientError('School not found or no changes made');
+            const err = new Error('School not found or no changes made');
+            err.statusCode = 400;
+            throw err;
          }
 
          return await this.getSchoolById(trustId, schoolId);
@@ -173,7 +175,7 @@ class SchoolService {
 
          const tenantModels = await models.getTenantModels(trustId);
          if (!tenantModels || !tenantModels.School) {
-            throw ErrorFactory.createClientError('Tenant models not initialized');
+            const err = new Error('Tenant models not initialized'); err.statusCode = 400; throw err;
          }
 
          const [updatedRowsCount] = await tenantModels.School.update(
@@ -191,7 +193,7 @@ class SchoolService {
          );
 
          if (updatedRowsCount === 0) {
-            throw ErrorFactory.createClientError('School not found');
+            const err = new Error('School not found'); err.statusCode = 400; throw err;
          }
 
          return { success: true };

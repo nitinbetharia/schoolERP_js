@@ -1,9 +1,6 @@
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { logAuth, logError } = require('../utils/logger');
-const {
-   ErrorFactory,
-} = require('../utils/validation');
 const { USER_ROLES, SYSTEM } = require('../config/business-constants');
 const appConfig = require('../config/app-config.json');
 
@@ -169,7 +166,9 @@ const passwordUtils = {
          return await bcrypt.hash(password, saltRounds);
       } catch (error) {
          logError(error, { context: 'hashPassword' });
-         throw ErrorFactory.internal('Failed to hash password');
+         const err = new Error('Failed to hash password');
+         err.statusCode = 500;
+         throw err;
       }
    },
 
@@ -181,7 +180,9 @@ const passwordUtils = {
          return await bcrypt.compare(password, hash);
       } catch (error) {
          logError(error, { context: 'verifyPassword' });
-         throw ErrorFactory.internal('Failed to verify password');
+         const err = new Error('Failed to verify password');
+         err.statusCode = 500;
+         throw err;
       }
    },
 
@@ -234,10 +235,11 @@ const checkAccountLock = async (user) => {
          loginAttempts: user.login_attempts,
       });
 
-      throw ErrorFactory.authentication(
-         'Account is temporarily locked due to multiple failed login attempts',
-         'AUTH_ACCOUNT_LOCKED',
-      );
+      const err = new Error('Account is temporarily locked due to multiple failed login attempts');
+      err.statusCode = 401;
+      err.code = 'AUTH_ACCOUNT_LOCKED';
+      err.userMessage = 'Account locked due to failed attempts. Try again later.';
+      throw err;
    }
 };
 
