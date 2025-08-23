@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { logSystem, logAuth, logError } = require('../utils/logger');
 const appConfig = require('../config/app-config.json');
+const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../utils/errorHelpers');
 
 async function initializeTenantModelsHelper(trustCode) {
    const { dbManager } = require('../models/database');
@@ -146,7 +147,7 @@ function createSystemAuthService() {
          // Verify current password
          const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
          if (!isCurrentPasswordValid) {
-            throw ErrorFactory.authentication('Current password is incorrect');
+            throw createAuthenticationError('Current password is incorrect');
          }
 
          // Hash new password
@@ -163,7 +164,7 @@ function createSystemAuthService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to change password', 'PASSWORD_CHANGE_ERROR', {
+         throw createInternalError('Failed to change password', 'PASSWORD_CHANGE_ERROR', {
             originalError: error.message,
          });
       }
@@ -183,7 +184,7 @@ function createSystemAuthService() {
          });
 
          if (existingUser) {
-            throw ErrorFactory.conflict('Username already exists');
+            throw createConflictError('Username already exists');
          }
 
          // Check if email already exists
@@ -192,7 +193,7 @@ function createSystemAuthService() {
          });
 
          if (existingEmail) {
-            throw ErrorFactory.conflict('Email already exists');
+            throw createConflictError('Email already exists');
          }
 
          // Hash password
@@ -229,7 +230,7 @@ function createSystemAuthService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to create system user', 'USER_CREATION_ERROR', {
+         throw createInternalError('Failed to create system user', 'USER_CREATION_ERROR', {
             originalError: error.message,
          });
       }
@@ -249,7 +250,7 @@ function createSystemAuthService() {
          });
 
          if (updatedCount === 0) {
-            throw ErrorFactory.unauthorized('User not found or unauthorized');
+            throw createAuthorizationError('User not found or unauthorized');
          }
 
          const updatedUser = await SystemUser.findByPk(userId, {
@@ -291,7 +292,7 @@ function createTrustService() {
          });
 
          if (existingTrustCode) {
-            throw ErrorFactory.conflict('Trust code already exists');
+            throw createConflictError('Trust code already exists');
          }
 
          // Check if subdomain already exists
@@ -300,7 +301,7 @@ function createTrustService() {
          });
 
          if (existingSubdomain) {
-            throw ErrorFactory.conflict('Subdomain already exists');
+            throw createConflictError('Subdomain already exists');
          }
 
          // Create trust
@@ -326,7 +327,7 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to create trust', 'TRUST_CREATION_ERROR', {
+         throw createInternalError('Failed to create trust', 'TRUST_CREATION_ERROR', {
             originalError: error.message,
          });
       }
@@ -356,7 +357,7 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to get trust', 'TRUST_RETRIEVAL_ERROR', { originalError: error.message });
+         throw createInternalError('Failed to get trust', 'TRUST_RETRIEVAL_ERROR', { originalError: error.message });
       }
    }
 
@@ -381,7 +382,7 @@ function createTrustService() {
                where: { trust_code: updateData.trust_code.toLowerCase() },
             });
             if (existingTrustCode && existingTrustCode.id !== trustId) {
-               throw ErrorFactory.conflict('Trust code already exists');
+               throw createConflictError('Trust code already exists');
             }
          }
 
@@ -390,7 +391,7 @@ function createTrustService() {
                where: { subdomain: updateData.subdomain.toLowerCase() },
             });
             if (existingSubdomain && existingSubdomain.id !== trustId) {
-               throw ErrorFactory.conflict('Subdomain already exists');
+               throw createConflictError('Subdomain already exists');
             }
          }
 
@@ -407,7 +408,7 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to update trust', 'TRUST_UPDATE_ERROR', { originalError: error.message });
+         throw createInternalError('Failed to update trust', 'TRUST_UPDATE_ERROR', { originalError: error.message });
       }
    }
 
@@ -456,7 +457,7 @@ function createTrustService() {
             },
          };
       } catch (error) {
-         throw ErrorFactory.internal('Failed to list trusts', 'TRUST_LIST_ERROR', {
+         throw createInternalError('Failed to list trusts', 'TRUST_LIST_ERROR', {
             originalError: error.message,
          });
       }
@@ -479,7 +480,7 @@ function createTrustService() {
          }
 
          if (trust.isSetupComplete()) {
-            throw ErrorFactory.conflict('Trust setup is already complete');
+            throw createConflictError('Trust setup is already complete');
          }
 
          // Ensure tenant database exists
@@ -522,7 +523,7 @@ function createTrustService() {
          if (error.isOperational) {
             throw error;
          }
-         throw ErrorFactory.internal('Failed to complete trust setup', 'TRUST_SETUP_ERROR', {
+         throw createInternalError('Failed to complete trust setup', 'TRUST_SETUP_ERROR', {
             originalError: error.message,
          });
       }

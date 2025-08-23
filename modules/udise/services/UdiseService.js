@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { logger, logDB, logError, logSystem } = require('../../../utils/logger');
-const { ErrorFactory } = require('../../../utils/errors');
+const { createValidationError, createNotFoundError, createDatabaseError } = require('../../../utils/errorHelpers');
 const { dbManager } = require('../../../models/database');
 
 /**
@@ -25,7 +25,7 @@ function createUdiseService() {
          };
       } catch (error) {
          logError(error, { context: 'UdiseService.getModels', tenantCode });
-         throw ErrorFactory.createDatabaseError(
+         throw createDatabaseError(
             'Failed to get UDISE models',
             error,
          );
@@ -59,7 +59,7 @@ function createUdiseService() {
           });
 
             if (existingRegistration) {
-               throw ErrorFactory.createValidationError(
+               throw createValidationError(
                   'UDISE registration already exists for this school',
                );
             }
@@ -78,7 +78,7 @@ function createUdiseService() {
             ];
             for (const field of requiredFields) {
                if (!registrationData[field]) {
-                  throw ErrorFactory.createValidationError(
+                  throw createValidationError(
                      `${field} is required for UDISE registration`,
                   );
                }
@@ -141,7 +141,7 @@ function createUdiseService() {
             const registration =
           await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw ErrorFactory.createNotFoundError(
+               throw createNotFoundError(
                   'UDISE registration not found',
                );
             }
@@ -151,7 +151,7 @@ function createUdiseService() {
                registration.registration_status === 'approved' &&
           updateData.udise_code
             ) {
-               throw ErrorFactory.createValidationError(
+               throw createValidationError(
                   'Cannot modify UDISE code for approved registration',
                );
             }
@@ -185,13 +185,13 @@ function createUdiseService() {
             const registration =
           await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw ErrorFactory.createNotFoundError(
+               throw createNotFoundError(
                   'UDISE registration not found',
                );
             }
 
             if (registration.registration_status !== 'draft') {
-               throw ErrorFactory.createValidationError(
+               throw createValidationError(
                   'Only draft registrations can be submitted',
                );
             }
@@ -202,7 +202,7 @@ function createUdiseService() {
                registrationId,
             );
             if (!validationResult.isValid) {
-               throw ErrorFactory.createValidationError(
+               throw createValidationError(
                   'Registration validation failed',
                   validationResult.errors,
                );
@@ -296,7 +296,7 @@ function createUdiseService() {
             const registration =
           await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw ErrorFactory.createNotFoundError(
+               throw createNotFoundError(
                   'UDISE registration not found',
                );
             }
@@ -386,7 +386,7 @@ function createUdiseService() {
             });
 
             if (existingCensus) {
-               throw ErrorFactory.createValidationError(
+               throw createValidationError(
                   'Census data already exists for this period',
                );
             }
@@ -418,7 +418,7 @@ function createUdiseService() {
 
             const census = await models.UdiseCensusData.findByPk(censusId);
             if (!census) {
-               throw ErrorFactory.createNotFoundError('Census data not found');
+               throw createNotFoundError('Census data not found');
             }
 
             // Calculate totals
@@ -655,7 +655,7 @@ function createUdiseService() {
                return await this.generateIntegrationReport(tenantCode, filters);
 
             default:
-               throw ErrorFactory.createValidationError('Invalid report type');
+               throw createValidationError('Invalid report type');
          }
       } catch (error) {
          logError(error, {

@@ -147,7 +147,7 @@ const logHelpers = {
       });
    },
 
-   // Log errors with context - legacy function, use ErrorFactory.logError for new code
+   // Log errors with context - use centralized error handling
    logError: (error, context = {}) => {
       logger.error('Application Error', {
          category: 'ERROR',

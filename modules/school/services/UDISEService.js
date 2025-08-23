@@ -1,6 +1,6 @@
 const { dbManager } = require('../../../models/database');
 const logger = require('../../../utils/logger');
-const { ErrorFactory } = require('../../../utils/errors');
+// Using standard Error objects with centralized error handling
 
 /**
  * UDISEService

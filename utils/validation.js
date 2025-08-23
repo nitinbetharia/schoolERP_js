@@ -3,7 +3,7 @@ const { logger } = require('./logger');
 
 /**
  * Simple Validation Utility
- * Replaces complex ErrorFactory with straightforward validation functions
+ * Uses standard Error objects with centralized error handling
  */
 
 /**

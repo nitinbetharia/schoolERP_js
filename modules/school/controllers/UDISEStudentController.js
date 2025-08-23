@@ -1,4 +1,5 @@
 const UDISEStudentService = require('../services/UDISEStudentService');
+const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../../../utils/errorHelpers');
 const {
    // Legacy classes for backward compatibility
    ValidationError,
@@ -562,13 +563,13 @@ function createUDISEStudentController() {
          const createdBy = req.user ? req.user.id : null;
 
          if (!Array.isArray(registrations) || registrations.length === 0) {
-            throw ErrorFactory.validation(
+            throw createValidationError(
                'Registrations array is required and cannot be empty',
             );
          }
 
          if (registrations.length > 500) {
-            throw ErrorFactory.validation(
+            throw createValidationError(
                'Maximum 500 students can be registered in one batch',
             );
          }

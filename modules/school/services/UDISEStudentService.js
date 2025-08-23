@@ -1,5 +1,6 @@
 const { getTenantModels } = require('../../../models');
 const { logger } = require('../../../utils/logger');
+const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../utils/errorHelpers');
 const {
    // Legacy classes for backward compatibility
    ValidationError,
@@ -57,7 +58,7 @@ function createUDISEStudentService() {
          }
 
          if (!student.school || !student.school.udiseRegistration) {
-            throw ErrorFactory.validation(
+            throw createValidationError(
                'Student school must have UDISE+ registration before student can be registered',
             );
          }
@@ -68,7 +69,7 @@ function createUDISEStudentService() {
          });
 
          if (existingRegistration) {
-            throw ErrorFactory.conflict(
+            throw createConflictError(
                'Student already has UDISE+ registration already exists',
             );
          }
@@ -99,7 +100,7 @@ function createUDISEStudentService() {
             udiseData.aadhaar_number &&
         !UDISEStudent.validateAadhaarNumber(udiseData.aadhaar_number)
          ) {
-            throw ErrorFactory.validation(
+            throw createValidationError(
                'Invalid Aadhaar number format or checksum',
             );
          }
@@ -198,7 +199,7 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw ErrorFactory.notFound(
+            throw createNotFoundError(
                `UDISE+ student with ID ${udiseStudentId} not found`,
             );
          }
@@ -208,7 +209,7 @@ function createUDISEStudentService() {
             updateData.aadhaar_number &&
         !UDISEStudent.validateAadhaarNumber(updateData.aadhaar_number)
          ) {
-            throw ErrorFactory.validation(
+            throw createValidationError(
                'Invalid Aadhaar number format or checksum',
             );
          }
@@ -293,7 +294,7 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw ErrorFactory.notFound(
+            throw createNotFoundError(
                `UDISE+ student with ID ${udiseStudentId} not found`,
             );
          }
@@ -413,7 +414,7 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw ErrorFactory.notFound(
+            throw createNotFoundError(
                `UDISE+ student with ID ${udiseStudentId} not found`,
             );
          }
