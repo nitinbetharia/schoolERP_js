@@ -1,0 +1,245 @@
+<!-- System Users Management Page -->
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-people"></i> System Users
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="bi bi-plus-circle"></i> Add System User
+            </button>
+        </div>
+    </div>
+
+                <!-- Users List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">System Administrators</h5>
+                            </div>
+                            <div class="card-body">
+                                <% if (users && users.length > 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>User</th>
+                                                    <th>Username</th>
+                                                    <th>Email</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th>Last Login</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% users.forEach(user => { %>
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                                    <%= (user.name || user.username || user.email).charAt(0).toUpperCase() %>
+                                                                </div>
+                                                                <div>
+                                                                    <div class="fw-semibold"><%= user.name || user.username %></div>
+                                                                    <div class="text-muted small">ID: <%= user.id %></div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td><code><%= user.username %></code></td>
+                                                        <td><%= user.email %></td>
+                                                        <td>
+                                                            <span class="user-role">
+                                                                <i class="bi bi-shield-check"></i>
+                                                                <%= user.role.replace('_', ' ') %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge <%= user.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary' %> user-status">
+                                                                <%= user.status %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <% if (user.last_login) { %>
+                                                                <%= new Date(user.last_login).toLocaleDateString() %>
+                                                            <% } else { %>
+                                                                <span class="text-muted">Never</span>
+                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="editUser('<%= user.id %>')">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <% if (user.id !== currentUser?.id) { %>
+                                                                <% if (user.status === 'ACTIVE') { %>
+                                                                    <button class="btn btn-sm btn-outline-warning" onclick="suspendUser('<%= user.id %>')">
+                                                                        <i class="bi bi-pause-circle"></i>
+                                                                    </button>
+                                                                <% } else { %>
+                                                                    <button class="btn btn-sm btn-outline-success" onclick="activateUser('<%= user.id %>')">
+                                                                        <i class="bi bi-play-circle"></i>
+                                                                    </button>
+                                                                <% } %>
+                                                            <% } %>
+                                                        </td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <% } else { %>
+                                    <div class="text-center py-5">
+                                        <i class="bi bi-people display-1 text-muted mb-3"></i>
+                                        <h4>No System Users Found</h4>
+                                        <p class="text-muted">There are no system administrators configured.</p>
+                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                            <i class="bi bi-plus-circle"></i> Add First System User
+                                        </button>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current User Info -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="bi bi-person-badge"></i> Current Session
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Username:</strong> <%= user.username || 'N/A' %></p>
+                                        <p><strong>Email:</strong> <%= user.email || 'N/A' %></p>
+                                        <p><strong>Role:</strong> <span class="user-role"><%= user.role.replace('_', ' ') %></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>User ID:</strong> <%= user.id %></p>
+                                        <p><strong>Status:</strong> 
+                                            <span class="badge bg-success">ACTIVE</span>
+                                        </p>
+                                        <p><strong>Session:</strong> System Admin</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add System User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addUserForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="SYSTEM_ADMIN">System Administrator</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page-specific CSS -->
+<style>
+    .user-card {
+        transition: transform 0.2s ease-in-out;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .user-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .user-status {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .user-role {
+        background: #e3f2fd;
+        color: #1565c0;
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .avatar-sm {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+</style>
+
+<!-- Page-specific JavaScript -->
+<script>
+    function editUser(userId) {
+        alert('Edit user functionality would be implemented here');
+    }
+    
+    function suspendUser(userId) {
+        if (confirm('Are you sure you want to suspend this user?')) {
+            alert('Suspend user functionality would be implemented here');
+        }
+    }
+    
+    function activateUser(userId) {
+        if (confirm('Are you sure you want to activate this user?')) {
+            alert('Activate user functionality would be implemented here');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('addUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            alert('Add user functionality would be implemented here');
+        });
+    });
+</script>

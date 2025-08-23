@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title><%= title %> | School ERP System</title>
+      <meta name="description" content="<%= description %>" />
+
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+      <style>
+         .form-card {
+             border: none;
+             border-radius: 12px;
+             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+         }
+         .form-step {
+             display: none;
+         }
+         .form-step.active {
+             display: block;
+         }
+         .step-indicator {
+             display: flex;
+             justify-content: center;
+             margin-bottom: 2rem;
+         }
+         .step {
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+             background-color: #e9ecef;
+             display: flex;
+             align-items: center;
+             justify-content-center;
+             margin: 0 1rem;
+             color: #6c757d;
+             font-weight: 600;
+         }
+         .step.active {
+             background-color: #0d6efd;
+             color: white;
+         }
+         .step.completed {
+             background-color: #198754;
+             color: white;
+         }
+         .step-line {
+             height: 2px;
+             width: 60px;
+             background-color: #e9ecef;
+             margin-top: 19px;
+         }
+         .step-line.completed {
+             background-color: #198754;
+         }
+         .subdomain-preview {
+             background-color: #f8f9fa;
+             border: 1px solid #dee2e6;
+             border-radius: 8px;
+             padding: 1rem;
+             margin-top: 1rem;
+         }
+      </style>
+   </head>
+   <body class="bg-light">
+      <%- include('../../partials/header/authenticated') %>
+
+      <div class="container-fluid">
+         <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/nav/system-admin') %>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+               <div
+                  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                  <h1 class="h2"><i class="bi bi-plus-circle"></i> Create New Trust</h1>
+                  <div class="btn-toolbar mb-2 mb-md-0">
+                     <a href="/system/trusts" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Trusts
+                     </a>
+                  </div>
+               </div>
+
+               <!-- Flash Messages -->
+               <%- include('../../partials/flash') %>
+
+               <div class="row justify-content-center">
+                  <div class="col-lg-8">
+                     <div class="card form-card">
+                        <div class="card-body p-4">
+                           <!-- Step Indicator -->
+                           <div class="step-indicator">
+                              <div class="step active" id="step1">1</div>
+                              <div class="step-line" id="line1"></div>
+                              <div class="step" id="step2">2</div>
+                              <div class="step-line" id="line2"></div>
+                              <div class="step" id="step3">3</div>
+                           </div>
+
+                           <form id="createTrustForm" action="/system/trusts" method="POST">
+                              <!-- Step 1: Basic Information -->
+                              <div class="form-step active" id="form-step-1">
+                                 <h4 class="mb-4"><i class="bi bi-info-circle"></i> Basic Information</h4>
+
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="trust_name" class="form-label"
+                                             >Trust Name <span class="text-danger">*</span></label
+                                          >
+                                          <input
+                                             type="text"
+                                             class="form-control"
+                                             id="trust_name"
+                                             name="trust_name"
+                                             required />
+                                          <div class="form-text">Full legal name of the educational trust</div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="trust_code" class="form-label"
+                                             >Trust Code <span class="text-danger">*</span></label
+                                          >
+                                          <input
+                                             type="text"
+                                             class="form-control"
+                                             id="trust_code"
+                                             name="trust_code"
+                                             pattern="[a-z0-9_]+"
+                                             maxlength="20"
+                                             required />
+                                          <div class="form-text">
+                                             Unique identifier (lowercase, numbers, underscores only)
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="subdomain" class="form-label"
+                                             >Subdomain <span class="text-danger">*</span></label
+                                          >
+                                          <input
+                                             type="text"
+                                             class="form-control"
+                                             id="subdomain"
+                                             name="subdomain"
+                                             pattern="[a-z0-9-]+"
+                                             maxlength="20"
+                                             required />
+                                          <div class="form-text">
+                                             Subdomain for trust access (lowercase, numbers, hyphens only)
+                                          </div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="subdomain-preview">
+                                          <strong>Access URL:</strong><br />
+                                          <code id="subdomain-preview">http://[subdomain].localhost:3000</code>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                       Next: Contact Details <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                 </div>
+                              </div>
+
+                              <!-- Step 2: Contact Information -->
+                              <div class="form-step" id="form-step-2">
+                                 <h4 class="mb-4"><i class="bi bi-person-lines-fill"></i> Contact Information</h4>
+
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="contact_email" class="form-label"
+                                             >Contact Email <span class="text-danger">*</span></label
+                                          >
+                                          <input
+                                             type="email"
+                                             class="form-control"
+                                             id="contact_email"
+                                             name="contact_email"
+                                             required />
+                                          <div class="form-text">Primary contact email for administrative purposes</div>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="contact_phone" class="form-label"
+                                             >Contact Phone <span class="text-danger">*</span></label
+                                          >
+                                          <input
+                                             type="tel"
+                                             class="form-control"
+                                             id="contact_phone"
+                                             name="contact_phone"
+                                             required />
+                                          <div class="form-text">Primary contact phone number</div>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                                    <div class="form-text">Complete address of the trust/organization</div>
+                                 </div>
+
+                                 <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">
+                                       <i class="bi bi-arrow-left"></i> Previous
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                       Next: Configuration <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                 </div>
+                              </div>
+
+                              <!-- Step 3: Configuration -->
+                              <div class="form-step" id="form-step-3">
+                                 <h4 class="mb-4"><i class="bi bi-gear"></i> Configuration</h4>
+
+                                 <div class="row">
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="timezone" class="form-label">Timezone</label>
+                                          <select class="form-select" id="timezone" name="timezone">
+                                             <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
+                                             <option value="UTC">UTC</option>
+                                             <option value="America/New_York">America/New_York</option>
+                                             <option value="Europe/London">Europe/London</option>
+                                          </select>
+                                       </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <div class="mb-3">
+                                          <label for="currency" class="form-label">Default Currency</label>
+                                          <select class="form-select" id="currency" name="currency">
+                                             <option value="INR" selected>INR - Indian Rupee</option>
+                                             <option value="USD">USD - US Dollar</option>
+                                             <option value="EUR">EUR - Euro</option>
+                                             <option value="GBP">GBP - British Pound</option>
+                                          </select>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="mb-3">
+                                    <label class="form-label">Features</label>
+                                    <div class="row">
+                                       <div class="col-md-6">
+                                          <div class="form-check">
+                                             <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="fee_management"
+                                                name="features"
+                                                value="fee_management"
+                                                checked />
+                                             <label class="form-check-label" for="fee_management">
+                                                Fee Management
+                                             </label>
+                                          </div>
+                                          <div class="form-check">
+                                             <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="student_portal"
+                                                name="features"
+                                                value="student_portal"
+                                                checked />
+                                             <label class="form-check-label" for="student_portal">
+                                                Student Portal
+                                             </label>
+                                          </div>
+                                       </div>
+                                       <div class="col-md-6">
+                                          <div class="form-check">
+                                             <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="reporting"
+                                                name="features"
+                                                value="reporting"
+                                                checked />
+                                             <label class="form-check-label" for="reporting">
+                                                Reporting & Analytics
+                                             </label>
+                                          </div>
+                                          <div class="form-check">
+                                             <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="notifications"
+                                                name="features"
+                                                value="notifications"
+                                                checked />
+                                             <label class="form-check-label" for="notifications">
+                                                Email Notifications
+                                             </label>
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div class="alert alert-info">
+                                    <h6><i class="bi bi-info-circle"></i> What happens next?</h6>
+                                    <ul class="mb-0">
+                                       <li>Trust will be created with "Setup Pending" status</li>
+                                       <li>Database will be automatically configured</li>
+                                       <li>Default admin user will be created</li>
+                                       <li>Trust will be accessible via the subdomain</li>
+                                    </ul>
+                                 </div>
+
+                                 <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">
+                                       <i class="bi bi-arrow-left"></i> Previous
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                       <i class="bi bi-check-circle"></i> Create Trust
+                                    </button>
+                                 </div>
+                              </div>
+                           </form>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </main>
+         </div>
+      </div>
+
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+      <script>
+         let currentStep = 1;
+
+         function nextStep(step) {
+            if (validateStep(currentStep)) {
+               document.getElementById('form-step-' + currentStep).classList.remove('active');
+               document.getElementById('step' + currentStep).classList.add('completed');
+               document.getElementById('line' + currentStep).classList.add('completed');
+
+               currentStep = step;
+               document.getElementById('form-step-' + step).classList.add('active');
+               document.getElementById('step' + step).classList.add('active');
+            }
+         }
+
+         function prevStep(step) {
+            document.getElementById('form-step-' + currentStep).classList.remove('active');
+            document.getElementById('step' + currentStep).classList.remove('active');
+            if (currentStep > 1) {
+               document.getElementById('step' + (currentStep - 1)).classList.remove('completed');
+               document.getElementById('line' + (currentStep - 1)).classList.remove('completed');
+            }
+
+            currentStep = step;
+            document.getElementById('form-step-' + step).classList.add('active');
+            document.getElementById('step' + step).classList.add('active');
+         }
+
+         function validateStep(step) {
+            const formStep = document.getElementById('form-step-' + step);
+            const requiredInputs = formStep.querySelectorAll('input[required]');
+            let valid = true;
+
+            requiredInputs.forEach((input) => {
+               if (!input.value.trim()) {
+                  input.classList.add('is-invalid');
+                  valid = false;
+               } else {
+                  input.classList.remove('is-invalid');
+               }
+            });
+
+            return valid;
+         }
+
+         // Update subdomain preview
+         document.getElementById('subdomain').addEventListener('input', function () {
+            const subdomain = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            this.value = subdomain;
+            document.getElementById('subdomain-preview').textContent = subdomain
+               ? `http://${subdomain}.localhost:3000`
+               : 'http://[subdomain].localhost:3000';
+         });
+
+         // Auto-generate trust code from name
+         document.getElementById('trust_name').addEventListener('input', function () {
+            const trustCode = this.value
+               .toLowerCase()
+               .replace(/[^a-z0-9\s]/g, '')
+               .replace(/\s+/g, '_')
+               .substring(0, 20);
+            document.getElementById('trust_code').value = trustCode;
+         });
+
+         // Form submission
+         document.getElementById('createTrustForm').addEventListener('submit', function (e) {
+            if (!validateStep(3)) {
+               e.preventDefault();
+               alert('Please fill in all required fields');
+               return;
+            }
+
+            // Show loading state
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.innerHTML =
+               '<span class="spinner-border spinner-border-sm" role="status"></span> Creating Trust...';
+            submitBtn.disabled = true;
+         });
+      </script>
+   </body>
+</html>

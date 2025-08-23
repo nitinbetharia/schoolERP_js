@@ -56,9 +56,9 @@ hideFooter = true;
                                         <option value="<%= school.id %>"><%= school.name %></option>
                                         <% }); %>
                                     </select>
-                                    <div class="invalid-feedback">
-                                        Please select a school.
-                                    </div>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please select a school.
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
@@ -84,9 +84,9 @@ hideFooter = true;
                                            required 
                                            autocomplete="username"
                                            value="">
-                                    <div class="invalid-feedback">
-                                        Please enter a valid email address or username.
-                                    </div>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please enter a valid email address or username.
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
@@ -115,9 +115,9 @@ hideFooter = true;
                                             id="togglePassword">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <div class="invalid-feedback">
-                                        Please enter your password.
-                                    </div>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please enter your password.
                                 </div>
                             </div>
                             
@@ -234,6 +234,47 @@ hideFooter = true;
     .input-group .input-group-text,
     .input-group .btn {
         flex-shrink: 0;
+    }
+    
+    /* Fix validation feedback for input groups */
+    .input-group + .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    
+    /* Show validation feedback when form is validated */
+    .was-validated .input-group + .invalid-feedback {
+        display: block;
+    }
+    
+    /* Hide default invalid feedback inside input groups */
+    .input-group .invalid-feedback {
+        display: none;
+    }
+    
+    /* Style for invalid input groups */
+    .was-validated .input-group .form-control:invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .was-validated .input-group .form-control:invalid ~ .input-group-text,
+    .was-validated .input-group .form-control:invalid ~ .btn {
+        border-color: #dc3545;
+    }
+    
+    /* Style for valid input groups */
+    .was-validated .input-group .form-control:valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .was-validated .input-group .form-control:valid ~ .input-group-text,
+    .was-validated .input-group .form-control:valid ~ .btn {
+        border-color: #198754;
     }
     
     /* Ensure buttons don't cause overflow */

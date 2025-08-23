@@ -27,7 +27,8 @@
       "Bash(start \"d:\\Users\\Nitin Betharia\\Documents\\Projects\\schoolERP_js\\static-login.html\")",
       "Bash(tasklist)",
       "Bash(Ctrl+C)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []

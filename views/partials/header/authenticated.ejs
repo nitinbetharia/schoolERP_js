@@ -114,10 +114,13 @@
                             </span>
                         </div>
                         <div class="text-start d-none d-md-block">
-                            <div class="fw-semibold text-dark small"><%= user.name %></div>
+                            <div class="fw-semibold text-dark small">
+                                <%= user.full_name || user.username || user.email || 'User' %>
+                            </div>
                             <div class="text-muted" style="font-size: 0.75rem;">
-                                <%= user.role.replace('-', ' ').split(' ').map(word => 
-                                    word.charAt(0).toUpperCase() + word.slice(1)).join(' ') %>
+                                <%= user.role.replace('-', ' ').replace('_', ' ').split(' ')
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                                    .join(' ') %>
                             </div>
                         </div>
                         <i class="fas fa-chevron-down text-muted ms-2" style="font-size: 0.75rem;"></i>

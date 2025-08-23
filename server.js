@@ -357,22 +357,34 @@ class SchoolERPServer {
 
          const port = process.env.PORT || appConfig.app.port;
 
-         this.server = this.app.listen(port, () => {
-            logSystem(`Server started successfully on port ${port}`, {
-               port,
-               environment: process.env.NODE_ENV,
-               version: '2.0.0',
+         this.server = this.app
+            .listen(port, () => {
+               logSystem(`Server started successfully on port ${port}`, {
+                  port,
+                  environment: process.env.NODE_ENV,
+                  version: '2.0.0',
+               });
+
+               console.log('\n🚀 School ERP Server is running!');
+               console.log(`📍 URL: http://localhost:${port}`);
+               console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
+               console.log(`📊 Health Check: http://localhost:${port}/api/v1/admin/system/health`);
+               console.log(`📚 API Status: http://localhost:${port}/api/v1/status\n`);
+
+               // Start connection pool monitoring
+               startConnectionPoolMonitoring();
+            })
+            .on('error', (err) => {
+               if (err.code === 'EADDRINUSE') {
+                  console.error(`\n❌ ERROR: Port ${port} is already in use!`);
+                  console.error('💡 Please stop the other server or use a different port.');
+                  console.error(`🔍 Check running processes: netstat -ano | findstr :${port}`);
+               } else {
+                  console.error('\n❌ Server error:', err.message);
+               }
+               logError(err, { context: 'server listen', port });
+               process.exit(1);
             });
-
-            console.log('\n🚀 School ERP Server is running!');
-            console.log(`📍 URL: http://localhost:${port}`);
-            console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-            console.log(`📊 Health Check: http://localhost:${port}/api/v1/admin/system/health`);
-            console.log(`📚 API Status: http://localhost:${port}/api/v1/status\n`);
-
-            // Start connection pool monitoring
-            startConnectionPoolMonitoring();
-         });
 
          // Handle server shutdown gracefully
          this.setupGracefulShutdown();

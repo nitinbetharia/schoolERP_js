@@ -1,4 +1,6 @@
 const { DataTypes } = require('sequelize');
+const Joi = require('joi');
+const { commonSchemas } = require('../utils/validation');
 
 /**
  * Tenant User Model
@@ -152,6 +154,94 @@ const defineTenantUserModel = (sequelize) => {
    return User;
 };
 
+/**
+ * Tenant User Validation Schemas
+ * Following Q59-ENFORCED pattern - reusable across API and web routes
+ */
+const tenantUserValidationSchemas = {
+   login: Joi.object({
+      username: Joi.string().trim().required().messages({
+         'string.empty': 'Username/Email is required',
+         'any.required': 'Username/Email is required',
+      }),
+      password: Joi.string().required().messages({
+         'string.empty': 'Password is required',
+         'any.required': 'Password is required',
+      }),
+   }),
+
+   create: Joi.object({
+      username: Joi.string().trim().min(3).max(100).optional().allow(null).messages({
+         'string.min': 'Username must be at least 3 characters',
+         'string.max': 'Username cannot exceed 100 characters',
+      }),
+
+      email: commonSchemas.email,
+
+      password: commonSchemas.password,
+
+      first_name: Joi.string().trim().min(2).max(100).optional().allow(null).messages({
+         'string.min': 'First name must be at least 2 characters',
+         'string.max': 'First name cannot exceed 100 characters',
+      }),
+
+      last_name: Joi.string().trim().min(2).max(100).optional().allow(null).messages({
+         'string.min': 'Last name must be at least 2 characters',
+         'string.max': 'Last name cannot exceed 100 characters',
+      }),
+
+      full_name: Joi.string().trim().min(2).max(200).optional().allow(null).messages({
+         'string.min': 'Full name must be at least 2 characters',
+         'string.max': 'Full name cannot exceed 200 characters',
+      }),
+
+      role: Joi.string().trim().max(50).required().messages({
+         'string.empty': 'Role is required',
+         'any.required': 'Role is required',
+      }),
+
+      user_type: Joi.string().valid('ADMIN', 'TEACHER', 'STUDENT', 'PARENT', 'STAFF').optional(),
+
+      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED').default('ACTIVE').optional(),
+
+      phone: Joi.string()
+         .pattern(/^\d{10,15}$/)
+         .optional()
+         .allow(null)
+         .messages({
+            'string.pattern.base': 'Phone number must be 10-15 digits',
+         }),
+   }),
+
+   update: Joi.object({
+      username: Joi.string().trim().min(3).max(100).optional(),
+
+      email: Joi.string().email().max(255).optional(),
+
+      first_name: Joi.string().trim().min(2).max(100).optional().allow(null),
+
+      last_name: Joi.string().trim().min(2).max(100).optional().allow(null),
+
+      full_name: Joi.string().trim().min(2).max(200).optional().allow(null),
+
+      status: Joi.string().valid('ACTIVE', 'INACTIVE', 'SUSPENDED').optional(),
+
+      phone: Joi.string()
+         .pattern(/^\d{10,15}$/)
+         .optional()
+         .allow(null),
+   }),
+
+   changePassword: Joi.object({
+      currentPassword: Joi.string().required(),
+      newPassword: commonSchemas.password,
+      confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+         'any.only': 'Password confirmation does not match',
+      }),
+   }),
+};
+
 module.exports = {
    defineTenantUserModel,
+   tenantUserValidationSchemas,
 };

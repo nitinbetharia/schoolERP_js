@@ -5,6 +5,7 @@ const { logSystem, logError } = require('../utils/logger');
 const { systemAuthService } = require('../services/systemServices');
 const userService = require('../modules/users/services/userService');
 const { systemUserValidationSchemas } = require('../models/SystemUser');
+const { tenantUserValidationSchemas } = require('../models/TenantUser');
 
 // Frontend test route (no auth required)
 router.get('/test-frontend', (req, res) => {
@@ -114,24 +115,29 @@ router.get('/login', async (req, res) => {
  */
 router.post('/login', async (req, res) => {
    try {
-      const { email, password, remember } = req.body;
+      const { username, email, password, remember } = req.body;
+
+      // Use username if provided, otherwise fall back to email
+      const userIdentifier = username || email;
 
       // Debug logging
       console.log('🔍 LOGIN POST DEBUG:', {
+         username,
          email,
+         userIdentifier,
          host: req.get('host'),
          tenantCode: req.tenantCode,
          path: req.path,
          originalUrl: req.originalUrl,
       });
 
-      // Determine login type based on email pattern and tenant context
-      const isSystemUserEmail = email === 'sysadmin' || email === 'admin';
-      const isSystemPattern = email.includes('admin') && !email.includes('@');
+      // Determine login type based on user identifier pattern and tenant context
+      const isSystemUserEmail = userIdentifier === 'sysadmin' || userIdentifier === 'admin';
+      const isSystemPattern = userIdentifier && userIdentifier.includes('admin') && !userIdentifier.includes('@');
       const isPureSystemAdmin = isSystemUserEmail || isSystemPattern;
 
-      const isTrustAdminEmail = email.includes('trustadmin@');
-      const isDemoAdminEmail = email.includes('@demo.') && email.includes('admin');
+      const isTrustAdminEmail = userIdentifier && userIdentifier.includes('trustadmin@');
+      const isDemoAdminEmail = userIdentifier && userIdentifier.includes('@demo.') && userIdentifier.includes('admin');
       const isTrustAdmin = isTrustAdminEmail || isDemoAdminEmail;
 
       // SECURITY FIX: Only pure system admins should use system authentication
@@ -188,13 +194,13 @@ router.post('/login', async (req, res) => {
       if (isSystemLogin) {
          validationSchema = systemUserValidationSchemas.login;
       } else {
-         validationSchema = systemUserValidationSchemas.login; // Use system user validation for now
+         validationSchema = tenantUserValidationSchemas.login;
       }
 
       // Validate input using proper schema
       const { error } = validationSchema.validate(
          {
-            username: email,
+            username: userIdentifier,
             password,
          },
          {
@@ -208,7 +214,7 @@ router.post('/login', async (req, res) => {
          const validationErrors = {};
          error.details.forEach((detail) => {
             const key = detail.path[0];
-            validationErrors[key === 'username' ? 'email' : key] = detail.message;
+            validationErrors[key === 'username' ? 'userIdentifier' : key] = detail.message;
          });
 
          if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
@@ -229,7 +235,7 @@ router.post('/login', async (req, res) => {
 
          try {
             authResult = await systemAuthService.login({
-               username: email,
+               username: userIdentifier,
                password: password,
             });
 
@@ -238,7 +244,7 @@ router.post('/login', async (req, res) => {
             req.session.userType = 'system';
          } catch (error) {
             const errorMsg = 'Invalid system credentials';
-            logError(error, { context: 'SystemLogin', username: email });
+            logError(error, { context: 'SystemLogin', username: userIdentifier });
 
             if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
                return res.json({
@@ -255,7 +261,7 @@ router.post('/login', async (req, res) => {
          const tenantCode = req.tenantCode || 'demo';
 
          try {
-            authResult = await userService.authenticateUser(tenantCode, email, password);
+            authResult = await userService.authenticateUser(tenantCode, userIdentifier, password);
 
             // Set tenant user session
             req.session.user = authResult;
@@ -265,7 +271,7 @@ router.post('/login', async (req, res) => {
             const errorMsg = 'Invalid tenant credentials';
             logError(error, {
                context: 'TenantLogin',
-               username: email,
+               username: userIdentifier,
                tenantCode,
             });
 
@@ -362,7 +368,7 @@ router.get('/dashboard', requireAuth, (req, res) => {
  * @desc System Admin Dashboard page
  * @access Private (System Admin only)
  */
-router.get('/admin/system', requireAuth, (req, res) => {
+router.get('/admin/system', requireAuth, async (req, res) => {
    try {
       const userType = req.session.userType;
 
@@ -372,6 +378,28 @@ router.get('/admin/system', requireAuth, (req, res) => {
          return res.redirect('/dashboard');
       }
 
+      // Fetch real system statistics
+      const { trustService } = require('../services/systemServices');
+      let stats = null;
+
+      try {
+         stats = await trustService.getSystemStats();
+      } catch (statsError) {
+         logError(statsError, { context: 'admin/system stats fetch' });
+         // Provide fallback stats if service fails
+         stats = {
+            totalTrusts: 0,
+            activeTrusts: 0,
+            pendingTrusts: 0,
+            totalSystemUsers: 0,
+            activeUsers: 0,
+            systemHealth: 'unknown',
+            databaseStatus: 'unknown',
+            lastUpdated: new Date().toISOString(),
+            error: 'Unable to retrieve current statistics',
+         };
+      }
+
       res.render('pages/dashboard/system-admin', {
          title: 'System Administration',
          description: 'System admin dashboard for managing trusts and configuration',
@@ -379,11 +407,172 @@ router.get('/admin/system', requireAuth, (req, res) => {
          tenant: null,
          userType: userType,
          currentPath: '/admin/system',
+         stats: stats,
       });
    } catch (error) {
       logError(error, { context: 'admin/system GET' });
       req.flash('error', 'Unable to load system dashboard');
       res.redirect('/auth/login');
+   }
+});
+
+/**
+ * System Admin Functional Routes
+ */
+
+/**
+ * @route GET /system/trusts
+ * @desc List all trusts
+ * @access Private (System Admin only)
+ */
+router.get('/system/trusts', requireAuth, async (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      const { trustService } = require('../services/systemServices');
+      const { page = 1, limit = 20, status, search } = req.query;
+
+      let trusts = [];
+      let pagination = null;
+
+      try {
+         const result = await trustService.listTrusts({ page, limit, status, search });
+         trusts = result.trusts;
+         pagination = result.pagination;
+      } catch (error) {
+         logError(error, { context: 'system/trusts list' });
+         req.flash('error', 'Unable to load trusts');
+      }
+
+      res.render('pages/system/trusts/index', {
+         title: 'Manage Trusts',
+         description: 'View and manage all educational trusts in the system',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/trusts',
+         trusts: trusts,
+         pagination: pagination,
+         filters: { status, search },
+      });
+   } catch (error) {
+      logError(error, { context: 'system/trusts GET' });
+      req.flash('error', 'Unable to load trusts page');
+      res.redirect('/admin/system');
+   }
+});
+
+/**
+ * @route GET /system/trusts/new
+ * @desc Show create trust form
+ * @access Private (System Admin only)
+ */
+router.get('/system/trusts/new', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/trusts/create', {
+         title: 'Create New Trust',
+         description: 'Add a new educational trust to the system',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/trusts/new',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/trusts/new GET' });
+      req.flash('error', 'Unable to load create trust page');
+      res.redirect('/system/trusts');
+   }
+});
+
+/**
+ * @route GET /system/users
+ * @desc List all system users
+ * @access Private (System Admin only)
+ */
+router.get('/system/users', requireAuth, async (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      // For now, render placeholder page - would need systemUserService implementation
+      res.render('pages/system/users/index', {
+         title: 'System Users',
+         description: 'Manage system administrator accounts',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/users',
+         users: [], // Placeholder - would fetch from systemUserService
+      });
+   } catch (error) {
+      logError(error, { context: 'system/users GET' });
+      req.flash('error', 'Unable to load users page');
+      res.redirect('/admin/system');
+   }
+});
+
+/**
+ * @route GET /system/health
+ * @desc System health and monitoring page
+ * @access Private (System Admin only)
+ */
+router.get('/system/health', requireAuth, async (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      const { trustService } = require('../services/systemServices');
+      let stats = null;
+      let healthData = {};
+
+      try {
+         stats = await trustService.getSystemStats();
+         healthData = {
+            database: stats.databaseStatus === 'connected',
+            trusts: stats.activeTrusts,
+            users: stats.activeUsers,
+            uptime: process.uptime(),
+            memory: process.memoryUsage(),
+            version: process.version,
+         };
+      } catch (error) {
+         logError(error, { context: 'system/health data fetch' });
+         healthData = {
+            database: false,
+            error: 'Unable to fetch health data',
+         };
+      }
+
+      res.render('pages/system/monitoring/health', {
+         title: 'System Health',
+         description: 'Monitor system performance and status',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/health',
+         stats: stats,
+         health: healthData,
+      });
+   } catch (error) {
+      logError(error, { context: 'system/health GET' });
+      req.flash('error', 'Unable to load health monitoring');
+      res.redirect('/admin/system');
    }
 });
 
@@ -442,6 +631,41 @@ router.get('/logout', (req, res) => {
       tenant: req.tenant || null,
       layout: 'layout',
    });
+});
+
+/**
+ * @route GET /coming-soon
+ * @desc Generic coming soon page for unimplemented features
+ * @access Private
+ */
+router.get('/coming-soon', requireAuth, (req, res) => {
+   try {
+      const { title, description, icon, eta, features } = req.query;
+
+      res.render('pages/coming-soon', {
+         title: title || 'Feature Coming Soon',
+         description:
+            description || 'This feature is currently under development and will be available in a future update.',
+         icon: icon || 'fas fa-tools',
+         eta: eta || null,
+         features: features ? JSON.parse(features) : [],
+         user: req.session.user,
+         tenant: req.tenant,
+         layout: 'layout',
+      });
+   } catch (error) {
+      logError(error, { context: 'coming-soon GET' });
+      res.render('pages/coming-soon', {
+         title: 'Feature Coming Soon',
+         description: 'This feature is currently under development.',
+         icon: 'fas fa-tools',
+         eta: null,
+         features: [],
+         user: req.session.user,
+         tenant: req.tenant,
+         layout: 'layout',
+      });
+   }
 });
 
 /**
@@ -597,6 +821,665 @@ router.get('/test-long-message', (req, res) => {
       logError(error, { context: 'test-long-message' });
       req.flash('error', 'Failed to test long messages');
       res.redirect('/');
+   }
+});
+
+/**
+ * Additional System Admin Routes for Navigation Menu Items
+ */
+
+// Schools Management Routes
+router.get('/system/schools', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/schools/index', {
+         title: 'School Management',
+         description: 'Manage schools across all trusts',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/schools',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/schools GET' });
+      req.flash('error', 'Unable to load schools page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/schools/performance', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'School Performance',
+         description: 'Monitor and analyze school performance metrics',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/schools/performance',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/schools/performance GET' });
+      req.flash('error', 'Unable to load performance page');
+      res.redirect('/system/schools');
+   }
+});
+
+router.get('/system/schools/compliance', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'School Compliance',
+         description: 'Monitor school compliance and regulatory requirements',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/schools/compliance',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/schools/compliance GET' });
+      req.flash('error', 'Unable to load compliance page');
+      res.redirect('/system/schools');
+   }
+});
+
+// Trust Management Sub-routes
+router.get('/system/trusts/analytics', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Trust Analytics',
+         description: 'Comprehensive analytics for trust performance and growth',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/trusts/analytics',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/trusts/analytics GET' });
+      req.flash('error', 'Unable to load analytics page');
+      res.redirect('/system/trusts');
+   }
+});
+
+router.get('/system/trusts/setup', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Trust Setup',
+         description: 'Configure trust settings and initialization parameters',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/trusts/setup',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/trusts/setup GET' });
+      req.flash('error', 'Unable to load setup page');
+      res.redirect('/system/trusts');
+   }
+});
+
+// User Management Sub-routes
+router.get('/system/users/new', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Add System User',
+         description: 'Create new system administrator account',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/users/new',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/users/new GET' });
+      req.flash('error', 'Unable to load add user page');
+      res.redirect('/system/users');
+   }
+});
+
+router.get('/system/users/roles', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Role Management',
+         description: 'Manage system roles and access permissions',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/users/roles',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/users/roles GET' });
+      req.flash('error', 'Unable to load roles page');
+      res.redirect('/system/users');
+   }
+});
+
+router.get('/system/users/permissions', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Permission Management',
+         description: 'Configure detailed access permissions',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/users/permissions',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/users/permissions GET' });
+      req.flash('error', 'Unable to load permissions page');
+      res.redirect('/system/users');
+   }
+});
+
+// Session Management
+router.get('/system/sessions', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Active Sessions',
+         description: 'Monitor and manage active user sessions',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/sessions',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/sessions GET' });
+      req.flash('error', 'Unable to load sessions page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Audit Logs
+router.get('/system/audit', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/audit', {
+         title: 'Audit Logs',
+         description: 'System audit trails and security monitoring',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/audit',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/audit GET' });
+      req.flash('error', 'Unable to load audit page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Monitoring Sub-routes
+router.get('/system/performance', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Performance Monitoring',
+         description: 'Real-time system performance metrics and optimization',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/performance',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/performance GET' });
+      req.flash('error', 'Unable to load performance page');
+      res.redirect('/system/health');
+   }
+});
+
+router.get('/system/analytics', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'System Analytics',
+         description: 'Comprehensive system usage and performance analytics',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/analytics',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/analytics GET' });
+      req.flash('error', 'Unable to load analytics page');
+      res.redirect('/system/health');
+   }
+});
+
+router.get('/system/logs', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'System Logs',
+         description: 'View and analyze system logs and events',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/logs',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/logs GET' });
+      req.flash('error', 'Unable to load logs page');
+      res.redirect('/system/health');
+   }
+});
+
+// Data Management Routes
+router.get('/system/backups', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/data/backups', {
+         title: 'Backup Management',
+         description: 'System backup and restore operations',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/backups',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/backups GET' });
+      req.flash('error', 'Unable to load backups page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/migrations', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Database Migrations',
+         description: 'Manage database migrations and schema updates',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/migrations',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/migrations GET' });
+      req.flash('error', 'Unable to load migrations page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/imports', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Data Import',
+         description: 'Import data from external sources and files',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/imports',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/imports GET' });
+      req.flash('error', 'Unable to load imports page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/exports', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Data Export',
+         description: 'Export system data for backup and analysis',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/exports',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/exports GET' });
+      req.flash('error', 'Unable to load exports page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Configuration Routes
+router.get('/system/config/general', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/config/index', {
+         title: 'General Settings',
+         description: 'Configure general system settings and preferences',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/config/general',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/config/general GET' });
+      req.flash('error', 'Unable to load general settings page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/config/security', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Security Settings',
+         description: 'Configure system security policies and authentication',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/config/security',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/config/security GET' });
+      req.flash('error', 'Unable to load security settings page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/config/email', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Email Settings',
+         description: 'Configure email server and notification settings',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/config/email',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/config/email GET' });
+      req.flash('error', 'Unable to load email settings page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/config/integrations', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Integration Settings',
+         description: 'Configure external system integrations and APIs',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/config/integrations',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/config/integrations GET' });
+      req.flash('error', 'Unable to load integration settings page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Maintenance
+router.get('/system/maintenance', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'System Maintenance',
+         description: 'System maintenance tools and utilities',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/maintenance',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/maintenance GET' });
+      req.flash('error', 'Unable to load maintenance page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Reports Routes
+router.get('/system/reports/system', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/reports/index', {
+         title: 'System Reports',
+         description: 'Comprehensive system performance and usage reports',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/reports/system',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/reports/system GET' });
+      req.flash('error', 'Unable to load system reports page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/reports/usage', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Usage Statistics',
+         description: 'Detailed usage statistics and user activity reports',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/reports/usage',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/reports/usage GET' });
+      req.flash('error', 'Unable to load usage reports page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/reports/financial', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Financial Reports',
+         description: 'Financial analysis and revenue reports across all trusts',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/reports/financial',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/reports/financial GET' });
+      req.flash('error', 'Unable to load financial reports page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/reports/custom', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Custom Reports',
+         description: 'Create and manage custom reports and dashboards',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/reports/custom',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/reports/custom GET' });
+      req.flash('error', 'Unable to load custom reports page');
+      res.redirect('/admin/system');
+   }
+});
+
+// Support Routes
+router.get('/system/support', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Support Center',
+         description: 'Access support resources and contact information',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/support',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/support GET' });
+      req.flash('error', 'Unable to load support page');
+      res.redirect('/admin/system');
+   }
+});
+
+router.get('/system/documentation', requireAuth, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      if (userType !== 'system') {
+         req.flash('error', 'Access denied. System admin privileges required.');
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/system/_placeholder', {
+         title: 'Documentation',
+         description: 'System documentation and user guides',
+         user: req.session.user,
+         tenant: null,
+         userType: userType,
+         currentPath: '/system/documentation',
+      });
+   } catch (error) {
+      logError(error, { context: 'system/documentation GET' });
+      req.flash('error', 'Unable to load documentation page');
+      res.redirect('/admin/system');
    }
 });
 

@@ -197,6 +197,67 @@
             .print-break-before { page-break-before: always; }
             .print-break-after { page-break-after: always; }
         }
+        
+        /* Sidebar Layout Styles */
+        .sidebar {
+            position: fixed;
+            top: var(--app-header-height);
+            left: 0;
+            height: calc(100vh - var(--app-header-height));
+            overflow-y: auto;
+            z-index: 1020;
+        }
+        
+        .sidebar-layout-main {
+            margin-left: 0;
+            padding-top: var(--app-header-height);
+            min-height: calc(100vh - var(--app-header-height));
+        }
+        
+        /* Responsive sidebar adjustments */
+        @media (min-width: 768px) {
+            .sidebar-layout-main.col-md-9 {
+                margin-left: 25%;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .sidebar-layout-main.col-lg-10 {
+                margin-left: 16.666667%;
+            }
+        }
+        
+        /* Sidebar navigation styles */
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin: 0.125rem 0.5rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            color: var(--tenant-primary);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: var(--tenant-primary);
+            color: white;
+        }
+        
+        .sidebar .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar .sidebar-heading {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.5rem 1rem;
+            margin-bottom: 0.5rem;
+        }
     </style>
     
     <!-- Page-specific CSS -->
@@ -236,9 +297,10 @@
         <% } %>
         
         <!-- Navigation Section -->
-        <% if (user && !hideNav) { %>
-        <nav class="no-print">
-            <% 
+        <% 
+        // Determine layout type early
+        let isSidebarLayout = false;
+        if (user && !hideNav) {
             // Dynamic navigation mapping - easily configurable
             const navMap = {
                 'SYSTEM_ADMIN': 'system-admin',
@@ -253,11 +315,86 @@
             
             // Get navigation template name, fallback to default
             const navTemplate = navMap[user.role] || 'default';
-            %>
+            isSidebarLayout = navTemplate === 'system-admin';
+        }
+        %>
+        
+        <% if (user && !hideNav) { %>
+        <% if (isSidebarLayout) { %>
+        <!-- Sidebar Layout for System Admin -->
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar Navigation -->
+                <nav class="no-print">
+                    <%- include('../partials/nav/system-admin') %>
+                </nav>
+                
+                <!-- Main Content with Sidebar -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content" role="main">
+                    <!-- Flash Messages -->
+                    <% if (typeof flash !== 'undefined') { %>
+                    <div class="flash-messages">
+                        <% ['success', 'error', 'warning', 'info'].forEach(type => { %>
+                            <% if (flash[type] && flash[type].length > 0) { %>
+                            <div class="alert alert-<%= type === 'error' ? 'danger' : type %> alert-dismissible fade show mx-3 mt-3" role="alert">
+                                <i class="fas fa-<%= type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle' %> me-2"></i>
+                                <%= Array.isArray(flash[type]) ? flash[type].join(', ') : flash[type] %>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <% } %>
+                        <% }) %>
+                    </div>
+                    <% } %>
+                    
+                    <div class="py-4">
+                        <%- body %>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <% } else { %>
+        <!-- Regular Layout for other roles -->
+        <% 
+        const navMap = {
+            'SYSTEM_ADMIN': 'system-admin',
+            'system-admin': 'system-admin',
+            'TRUST_ADMIN': 'trust-admin',
+            'trust-admin': 'trust-admin',
+            'TEACHER': 'teacher',
+            'teacher': 'teacher',
+            'STAFF': 'default',
+            'staff': 'default'
+        };
+        const navTemplate = navMap[user.role] || 'default';
+        %>
+        <nav class="no-print">
             <%- include('../partials/nav/' + navTemplate) %>
         </nav>
+        
+        <!-- Flash Messages for regular navigation layouts -->
+        <% if (typeof flash !== 'undefined') { %>
+        <div class="flash-messages">
+            <% ['success', 'error', 'warning', 'info'].forEach(type => { %>
+                <% if (flash[type] && flash[type].length > 0) { %>
+                <div class="alert alert-<%= type === 'error' ? 'danger' : type %> alert-dismissible fade show mx-3 mt-3" role="alert">
+                    <i class="fas fa-<%= type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle' %> me-2"></i>
+                    <%= Array.isArray(flash[type]) ? flash[type].join(', ') : flash[type] %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% } %>
+            <% }) %>
+        </div>
         <% } %>
         
+        <!-- Main Content Area for regular navigation layouts -->
+        <main class="flex-grow-1 main-content" role="main">
+            <div class="container-fluid py-4">
+                <%- body %>
+            </div>
+        </main>
+        <% } %>
+        <% } else { %>
+        <!-- Layout for pages without user or with hidden navigation -->
         <!-- Flash Messages -->
         <% if (typeof flash !== 'undefined') { %>
         <div class="flash-messages">
@@ -273,12 +410,13 @@
         </div>
         <% } %>
         
-        <!-- Main Content Area -->
+        <!-- Main Content Area for pages without navigation -->
         <main class="flex-grow-1 main-content" role="main">
             <div class="container-fluid py-4">
                 <%- body %>
             </div>
         </main>
+        <% } %>
         
         <!-- Footer -->
         <% if (!hideFooter) { %>

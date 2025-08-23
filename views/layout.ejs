@@ -129,11 +129,11 @@
         <!-- Navigation Section -->
         <% if (typeof user !== 'undefined' && user && (typeof hideNav === 'undefined' || !hideNav)) { %>
         <nav class="no-print">
-            <% if (user.role === 'system-admin') { %>
+            <% if (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin') { %>
                 <%- include('./partials/nav/system-admin') %>
-            <% } else if (user.role === 'trust-admin') { %>
+            <% } else if (user.role === 'TRUST_ADMIN' || user.role === 'trust-admin') { %>
                 <%- include('./partials/nav/trust-admin') %>
-            <% } else if (user.role === 'teacher') { %>
+            <% } else if (user.role === 'TEACHER' || user.role === 'teacher') { %>
                 <%- include('./partials/nav/teacher') %>
             <% } else { %>
                 <%- include('./partials/nav/default') %>

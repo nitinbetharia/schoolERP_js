@@ -97,7 +97,7 @@ const tenantDetection = async (req, res, next) => {
 
             const trust = await Trust.findOne({
                where: { trust_code: tenantCode },
-               attributes: ['id', 'trust_name', 'trust_code', 'subdomain', 'contact_email', 'address'],
+               attributes: ['id', 'trust_name', 'trust_code', 'subdomain', 'contact_email', 'address', 'tenant_config'],
             });
 
             if (trust) {
@@ -110,6 +110,21 @@ const tenantDetection = async (req, res, next) => {
                   contact_email: trust.contact_email,
                   address: trust.address,
                };
+
+               // Parse tenant config for branding
+               if (trust.tenant_config) {
+                  try {
+                     // Handle both JSON string and direct object
+                     const config =
+                        typeof trust.tenant_config === 'string' ? JSON.parse(trust.tenant_config) : trust.tenant_config;
+                     req.tenant.branding = config.theme || null;
+                     console.log('🎨 Loaded tenant branding:', req.tenant.branding);
+                  } catch (e) {
+                     console.log('Error parsing tenant_config:', e.message);
+                  }
+               } else {
+                  console.log('⚠️ No tenant_config found for tenant:', tenantCode);
+               }
 
                // For tenant logins, also fetch schools if available
                // TODO: Query schools from appropriate database once schema is clarified

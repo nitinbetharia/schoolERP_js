@@ -1,0 +1,221 @@
+<!-- Trust Management Page -->
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="bi bi-building"></i> Manage Trusts
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="/system/trusts/new" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add New Trust
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="search-filters">
+                    <form method="GET" action="/system/trusts" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Trusts</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   placeholder="Search by name, code, or email..." value="<%= filters.search || '' %>">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="ACTIVE" <%= filters.status === 'ACTIVE' ? 'selected' : '' %>>Active</option>
+                                <option value="SETUP_PENDING" <%= filters.status === 'SETUP_PENDING' ? 'selected' : '' %>>Setup Pending</option>
+                                <option value="SUSPENDED" <%= filters.status === 'SUSPENDED' ? 'selected' : '' %>>Suspended</option>
+                                <option value="INACTIVE" <%= filters.status === 'INACTIVE' ? 'selected' : '' %>>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-2">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                            <a href="/system/trusts" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Trusts Grid -->
+                <div class="row">
+                    <% if (trusts && trusts.length > 0) { %>
+                        <% trusts.forEach(trust => { %>
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card trust-card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5 class="card-title mb-0"><%= trust.trust_name %></h5>
+                                        <span class="badge <%= trust.status === 'ACTIVE' ? 'bg-success' : trust.status === 'SETUP_PENDING' ? 'bg-warning' : 'bg-secondary' %> trust-status">
+                                            <%= trust.status.replace('_', ' ') %>
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <strong>Code:</strong> <code><%= trust.trust_code %></code>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Subdomain:</strong> 
+                                            <a href="http://<%= trust.subdomain %>.localhost:3000" target="_blank" class="text-decoration-none">
+                                                <%= trust.subdomain %>.localhost:3000
+                                                <i class="bi bi-box-arrow-up-right small"></i>
+                                            </a>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Contact:</strong> <%= trust.contact_email %>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Phone:</strong> <%= trust.contact_phone %>
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Database:</strong> <code><%= trust.database_name %></code>
+                                        </div>
+                                        <% if (trust.address) { %>
+                                            <div class="mb-2">
+                                                <strong>Address:</strong> <%= trust.address %>
+                                            </div>
+                                        <% } %>
+                                        <div class="text-muted small">
+                                            Created: <%= new Date(trust.created_at).toLocaleDateString() %>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer bg-transparent trust-actions">
+                                        <a href="/system/trusts/<%= trust.id %>/edit" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <% if (trust.status === 'ACTIVE') { %>
+                                            <button class="btn btn-sm btn-outline-warning" onclick="suspendTrust('<%= trust.id %>')">
+                                                <i class="bi bi-pause-circle"></i> Suspend
+                                            </button>
+                                        <% } else if (trust.status === 'SUSPENDED') { %>
+                                            <button class="btn btn-sm btn-outline-success" onclick="activateTrust('<%= trust.id %>')">
+                                                <i class="bi bi-play-circle"></i> Activate
+                                            </button>
+                                        <% } %>
+                                        <a href="/system/trusts/<%= trust.id %>/details" class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body text-center py-5">
+                                    <i class="bi bi-building display-1 text-muted mb-3"></i>
+                                    <h4>No Trusts Found</h4>
+                                    <p class="text-muted">No educational trusts match your current filters.</p>
+                                    <a href="/system/trusts/new" class="btn btn-primary">
+                                        <i class="bi bi-plus-circle"></i> Create First Trust
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Pagination -->
+                <% if (pagination && pagination.totalPages > 1) { %>
+                    <nav aria-label="Trusts pagination">
+                        <ul class="pagination justify-content-center">
+                            <% if (pagination.currentPage > 1) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&search=<%= filters.search || '' %>&status=<%= filters.status || '' %>">Previous</a>
+                                </li>
+                            <% } %>
+                            
+                            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                                <li class="page-item <%= pagination.currentPage == i ? 'active' : '' %>">
+                                    <a class="page-link" href="?page=<%= i %>&search=<%= filters.search || '' %>&status=<%= filters.status || '' %>"><%= i %></a>
+                                </li>
+                            <% } %>
+                            
+                            <% if (pagination.currentPage < pagination.totalPages) { %>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&search=<%= filters.search || '' %>&status=<%= filters.status || '' %>">Next</a>
+                                </li>
+                            <% } %>
+                        </ul>
+                    </nav>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Page-specific CSS -->
+<style>
+    .search-filters {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .trust-card {
+        transition: transform 0.2s ease-in-out;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .trust-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .trust-status {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .trust-actions .btn {
+        margin: 0.25rem;
+    }
+</style>
+
+<!-- Page-specific JavaScript -->
+<script>
+    function suspendTrust(trustId) {
+        if (confirm('Are you sure you want to suspend this trust? This will disable access for all users.')) {
+            fetch(`/system/trusts/${trustId}/suspend`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error suspending trust');
+                }
+            })
+            .catch(error => {
+                alert('Error suspending trust');
+            });
+        }
+    }
+    
+    function activateTrust(trustId) {
+        if (confirm('Are you sure you want to activate this trust?')) {
+            fetch(`/system/trusts/${trustId}/activate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error activating trust');
+                }
+            })
+            .catch(error => {
+                alert('Error activating trust');
+            });
+        }
+    }
+</script>

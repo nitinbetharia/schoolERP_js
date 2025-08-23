@@ -1,0 +1,67 @@
+<!-- Coming Soon Page -->
+<% currentPath = '/coming-soon'; %>
+
+<div class="min-vh-75 d-flex align-items-center justify-content-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <div class="mb-4">
+                            <i class="<%= icon || 'fas fa-tools' %> display-1 text-primary opacity-50"></i>
+                        </div>
+                        <h2 class="h3 text-primary mb-3">
+                            <%= title || 'Feature Coming Soon' %>
+                        </h2>
+                        <p class="text-muted mb-4 lead">
+                            <%= description || 'This feature is currently under development and will be available in a future update.' %>
+                        </p>
+                        
+                        <!-- Feature Preview -->
+                        <% if (typeof features !== 'undefined' && features && features.length > 0) { %>
+                            <div class="row g-3 mb-4">
+                                <% features.forEach(feature => { %>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center justify-content-start text-start p-3 bg-light rounded">
+                                            <i class="<%= feature.icon %> text-primary me-3 fs-4"></i>
+                                            <div>
+                                                <h6 class="mb-1"><%= feature.name %></h6>
+                                                <small class="text-muted"><%= feature.description %></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+
+                        <div class="alert alert-info border-0 bg-light">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Development Status:</strong> This feature is currently under active development.
+                            <% if (typeof eta !== 'undefined' && eta) { %>
+                                <br>Expected completion: <strong><%= eta %></strong>
+                            <% } %>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-outline-primary" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-1"></i> Go Back
+                            </button>
+                            <% if (user && (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin')) { %>
+                            <a href="mailto:support@schoolerp.com?subject=Feature Request" class="btn btn-primary">
+                                <i class="fas fa-lightbulb me-1"></i> Request Priority
+                            </a>
+                            <% } %>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                We're working hard to bring you the best school management experience.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
