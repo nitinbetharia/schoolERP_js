@@ -251,6 +251,28 @@ function createDatabaseManager() {
    }
 
    /**
+    * Get tenant models for a specific tenant
+    */
+   async function getTenantModels(tenantCode) {
+      try {
+         const tenantDB = await getTenantDB(tenantCode);
+
+         // Import and initialize tenant models
+         const { defineTenantUserModel } = require('./TenantUser');
+
+         const User = defineTenantUserModel(tenantDB);
+
+         return {
+            User,
+            sequelize: tenantDB,
+         };
+      } catch (error) {
+         logError(error, { context: 'getTenantModels', tenantCode });
+         throw new DatabaseError(`Failed to initialize tenant models: ${tenantCode}`, error);
+      }
+   }
+
+   /**
     * Check if tenant database exists
     */
    async function tenantDatabaseExists(tenantCode) {
@@ -361,6 +383,7 @@ function createDatabaseManager() {
       getTenantDB,
       createTenantDatabase,
       getSystemDB,
+      getTenantModels,
       tenantDatabaseExists,
       closeAllConnections,
       healthCheck,

@@ -347,7 +347,7 @@ async function up(queryInterface, _Sequelize) {
          name: 'idx_custom_values_entity',
       });
 
-      await queryInterface.addIndex('custom_field_values', ['field_id', 'entity_id'], {
+      await queryInterface.addIndex('custom_field_values', ['field_name', 'entity_id'], {
          transaction,
          name: 'idx_custom_values_field',
       });

@@ -171,6 +171,7 @@
       "cors": {
          "enabled": true,
          "origins": ["http://localhost:3000"],
+         "allowedDomains": ["localhost:3000"],
          "credentials": true
       }
    },

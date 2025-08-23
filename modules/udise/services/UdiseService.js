@@ -10,8 +10,8 @@ const { dbManager } = require('../../../models/database');
  */
 function createUdiseService() {
    /**
-   * Get UDISE models for a specific tenant
-   */
+    * Get UDISE models for a specific tenant
+    */
    async function getModels(tenantCode) {
       try {
          const tenantDB = await dbManager.getTenantDB(tenantCode);
@@ -25,26 +25,18 @@ function createUdiseService() {
          };
       } catch (error) {
          logError(error, { context: 'UdiseService.getModels', tenantCode });
-         throw createDatabaseError(
-            'Failed to get UDISE models',
-            error,
-         );
+         throw createDatabaseError('Failed to get UDISE models', error);
       }
    }
 
    /**
-   * UDISE School Registration Operations
-   */
+    * UDISE School Registration Operations
+    */
    const registrationService = {
       /**
-     * Create new UDISE school registration
-     */
-      async createRegistration(
-         tenantCode,
-         schoolId,
-         registrationData,
-         createdBy,
-      ) {
+       * Create new UDISE school registration
+       */
+      async createRegistration(tenantCode, schoolId, registrationData, createdBy) {
          try {
             logSystem(`Creating UDISE registration for school: ${schoolId}`, {
                tenantCode,
@@ -53,15 +45,12 @@ function createUdiseService() {
             const models = await getModels(tenantCode);
 
             // Check if registration already exists
-            const existingRegistration =
-          await models.UdiseSchoolRegistration.findOne({
-             where: { school_id: schoolId },
-          });
+            const existingRegistration = await models.UdiseSchoolRegistration.findOne({
+               where: { school_id: schoolId },
+            });
 
             if (existingRegistration) {
-               throw createValidationError(
-                  'UDISE registration already exists for this school',
-               );
+               throw createValidationError('UDISE registration already exists for this school');
             }
 
             // Validate required fields
@@ -78,9 +67,7 @@ function createUdiseService() {
             ];
             for (const field of requiredFields) {
                if (!registrationData[field]) {
-                  throw createValidationError(
-                     `${field} is required for UDISE registration`,
-                  );
+                  throw createValidationError(`${field} is required for UDISE registration`);
                }
             }
 
@@ -101,10 +88,7 @@ function createUdiseService() {
                user_id: createdBy,
             });
 
-            logSystem(
-               `UDISE registration created successfully: ${registration.id}`,
-               { tenantCode, schoolId },
-            );
+            logSystem(`UDISE registration created successfully: ${registration.id}`, { tenantCode, schoolId });
             return registration;
          } catch (error) {
             logError(error, {
@@ -127,33 +111,20 @@ function createUdiseService() {
       },
 
       /**
-     * Update UDISE registration
-     */
-      async updateRegistration(
-         tenantCode,
-         registrationId,
-         updateData,
-         updatedBy,
-      ) {
+       * Update UDISE registration
+       */
+      async updateRegistration(tenantCode, registrationId, updateData, updatedBy) {
          try {
             const models = await getModels(tenantCode);
 
-            const registration =
-          await models.UdiseSchoolRegistration.findByPk(registrationId);
+            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw createNotFoundError(
-                  'UDISE registration not found',
-               );
+               throw createNotFoundError('UDISE registration not found');
             }
 
             // Prevent updating certain fields if already approved
-            if (
-               registration.registration_status === 'approved' &&
-          updateData.udise_code
-            ) {
-               throw createValidationError(
-                  'Cannot modify UDISE code for approved registration',
-               );
+            if (registration.registration_status === 'approved' && updateData.udise_code) {
+               throw createValidationError('Cannot modify UDISE code for approved registration');
             }
 
             await registration.update({
@@ -176,36 +147,25 @@ function createUdiseService() {
       },
 
       /**
-     * Submit registration for approval
-     */
+       * Submit registration for approval
+       */
       async submitRegistration(tenantCode, registrationId, submittedBy) {
          try {
             const models = await getModels(tenantCode);
 
-            const registration =
-          await models.UdiseSchoolRegistration.findByPk(registrationId);
+            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw createNotFoundError(
-                  'UDISE registration not found',
-               );
+               throw createNotFoundError('UDISE registration not found');
             }
 
             if (registration.registration_status !== 'draft') {
-               throw createValidationError(
-                  'Only draft registrations can be submitted',
-               );
+               throw createValidationError('Only draft registrations can be submitted');
             }
 
             // Validate completeness before submission
-            const validationResult = await this.validateRegistration(
-               tenantCode,
-               registrationId,
-            );
+            const validationResult = await this.validateRegistration(tenantCode, registrationId);
             if (!validationResult.isValid) {
-               throw createValidationError(
-                  'Registration validation failed',
-                  validationResult.errors,
-               );
+               throw createValidationError('Registration validation failed', validationResult.errors);
             }
 
             await registration.update({
@@ -240,22 +200,29 @@ function createUdiseService() {
       },
 
       /**
-     * Get school registrations with filters
-     */
+       * Get school registrations with filters
+       */
       async getRegistrations(tenantCode, filters = {}) {
          try {
             const models = await getModels(tenantCode);
 
             const whereClause = {};
 
-            if (filters.school_id) {whereClause.school_id = filters.school_id;}
-            if (filters.registration_status)
-            {whereClause.registration_status = filters.registration_status;}
-            if (filters.state_code) {whereClause.state_code = filters.state_code;}
-            if (filters.district_code)
-            {whereClause.district_code = filters.district_code;}
-            if (filters.academic_year)
-            {whereClause.academic_year = filters.academic_year;}
+            if (filters.school_id) {
+               whereClause.school_id = filters.school_id;
+            }
+            if (filters.registration_status) {
+               whereClause.registration_status = filters.registration_status;
+            }
+            if (filters.state_code) {
+               whereClause.state_code = filters.state_code;
+            }
+            if (filters.district_code) {
+               whereClause.district_code = filters.district_code;
+            }
+            if (filters.academic_year) {
+               whereClause.academic_year = filters.academic_year;
+            }
 
             const registrations = await models.UdiseSchoolRegistration.findAll({
                where: whereClause,
@@ -287,18 +254,15 @@ function createUdiseService() {
       },
 
       /**
-     * Validate registration completeness
-     */
+       * Validate registration completeness
+       */
       async validateRegistration(tenantCode, registrationId) {
          try {
             const models = await getModels(tenantCode);
 
-            const registration =
-          await models.UdiseSchoolRegistration.findByPk(registrationId);
+            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
             if (!registration) {
-               throw createNotFoundError(
-                  'UDISE registration not found',
-               );
+               throw createNotFoundError('UDISE registration not found');
             }
 
             const errors = [];
@@ -325,10 +289,7 @@ function createUdiseService() {
             }
 
             // Business rule validation
-            if (
-               registration.school_management === 'private_unaided' &&
-          !registration.affiliation_board
-            ) {
+            if (registration.school_management === 'private_unaided' && !registration.affiliation_board) {
                errors.push('Private unaided schools must specify affiliation board');
             }
 
@@ -361,18 +322,13 @@ function createUdiseService() {
    };
 
    /**
-   * UDISE Census Data Operations
-   */
+    * UDISE Census Data Operations
+    */
    const censusService = {
       /**
-     * Create census data record
-     */
-      async createCensusData(
-         tenantCode,
-         udiseRegistrationId,
-         censusData,
-         createdBy,
-      ) {
+       * Create census data record
+       */
+      async createCensusData(tenantCode, udiseRegistrationId, censusData, createdBy) {
          try {
             const models = await getModels(tenantCode);
 
@@ -386,9 +342,7 @@ function createUdiseService() {
             });
 
             if (existingCensus) {
-               throw createValidationError(
-                  'Census data already exists for this period',
-               );
+               throw createValidationError('Census data already exists for this period');
             }
 
             const census = await models.UdiseCensusData.create({
@@ -410,8 +364,8 @@ function createUdiseService() {
       },
 
       /**
-     * Calculate enrollment statistics
-     */
+       * Calculate enrollment statistics
+       */
       async calculateEnrollmentStats(tenantCode, censusId) {
          try {
             const models = await getModels(tenantCode);
@@ -455,24 +409,15 @@ function createUdiseService() {
             const totalEnrollment = totalBoys + totalGirls;
 
             // Calculate special categories
-            const totalSC =
-          (census.sc_students_boys || 0) + (census.sc_students_girls || 0);
-            const totalST =
-          (census.st_students_boys || 0) + (census.st_students_girls || 0);
-            const totalOBC =
-          (census.obc_students_boys || 0) + (census.obc_students_girls || 0);
-            const totalMinority =
-          (census.minority_students_boys || 0) +
-          (census.minority_students_girls || 0);
-            const totalCWSN =
-          (census.cwsn_students_boys || 0) + (census.cwsn_students_girls || 0);
+            const totalSC = (census.sc_students_boys || 0) + (census.sc_students_girls || 0);
+            const totalST = (census.st_students_boys || 0) + (census.st_students_girls || 0);
+            const totalOBC = (census.obc_students_boys || 0) + (census.obc_students_girls || 0);
+            const totalMinority = (census.minority_students_boys || 0) + (census.minority_students_girls || 0);
+            const totalCWSN = (census.cwsn_students_boys || 0) + (census.cwsn_students_girls || 0);
 
             // Calculate ratios
             const genderRatio = totalBoys > 0 ? (totalGirls / totalBoys) * 100 : 0;
-            const ptrRatio =
-          census.total_teachers > 0
-             ? totalEnrollment / census.total_teachers
-             : 0;
+            const ptrRatio = census.total_teachers > 0 ? totalEnrollment / census.total_teachers : 0;
 
             return {
                total_enrollment: totalEnrollment,
@@ -499,18 +444,13 @@ function createUdiseService() {
    };
 
    /**
-   * UDISE Compliance Operations
-   */
+    * UDISE Compliance Operations
+    */
    const complianceService = {
       /**
-     * Create compliance record
-     */
-      async createComplianceRecord(
-         tenantCode,
-         udiseRegistrationId,
-         complianceData,
-         createdBy,
-      ) {
+       * Create compliance record
+       */
+      async createComplianceRecord(tenantCode, udiseRegistrationId, complianceData, createdBy) {
          try {
             const models = await getModels(tenantCode);
 
@@ -540,8 +480,8 @@ function createUdiseService() {
       },
 
       /**
-     * Calculate compliance score
-     */
+       * Calculate compliance score
+       */
       calculateComplianceScore(complianceData) {
          const criteriaWeights = {
             // RTE Compliance (30%)
@@ -590,14 +530,23 @@ function createUdiseService() {
          const percentage = (totalScore / maxScore) * 100;
 
          let grade;
-         if (percentage >= 90) {grade = 'A+';}
-         else if (percentage >= 85) {grade = 'A';}
-         else if (percentage >= 80) {grade = 'B+';}
-         else if (percentage >= 75) {grade = 'B';}
-         else if (percentage >= 70) {grade = 'C+';}
-         else if (percentage >= 60) {grade = 'C';}
-         else if (percentage >= 50) {grade = 'D';}
-         else {grade = 'F';}
+         if (percentage >= 90) {
+            grade = 'A+';
+         } else if (percentage >= 85) {
+            grade = 'A';
+         } else if (percentage >= 80) {
+            grade = 'B+';
+         } else if (percentage >= 75) {
+            grade = 'B';
+         } else if (percentage >= 70) {
+            grade = 'C+';
+         } else if (percentage >= 60) {
+            grade = 'C';
+         } else if (percentage >= 50) {
+            grade = 'D';
+         } else {
+            grade = 'F';
+         }
 
          return {
             score: Math.round(percentage * 100) / 100,
@@ -607,8 +556,8 @@ function createUdiseService() {
    };
 
    /**
-   * Integration Logging
-   */
+    * Integration Logging
+    */
    async function logIntegration(tenantCode, schoolId, logData) {
       try {
          const models = await getModels(tenantCode);
@@ -630,13 +579,13 @@ function createUdiseService() {
             tenantCode,
             schoolId,
          });
-      // Don't throw here to prevent breaking main operations
+         // Don't throw here to prevent breaking main operations
       }
    }
 
    /**
-   * Generate UDISE Reports
-   */
+    * Generate UDISE Reports
+    */
    async function generateReports(tenantCode, reportType, filters = {}) {
       try {
          const models = await getModels(tenantCode);

@@ -14,7 +14,7 @@ function createValidationError(message) {
 }
 
 /**
- * Create a not found error (404) 
+ * Create a not found error (404)
  */
 function createNotFoundError(message) {
    const error = new Error(message);

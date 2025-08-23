@@ -13,11 +13,6 @@ const defineSchool = (sequelize) => {
             primaryKey: true,
             autoIncrement: true,
          },
-         trust_id: {
-            type: DataTypes.INTEGER,
-            allowNull: true, // Made nullable for tenant databases
-            comment: 'Reference to system trust table (not used in tenant databases)',
-         },
          name: {
             type: DataTypes.STRING(200),
             allowNull: false,
@@ -28,7 +23,7 @@ const defineSchool = (sequelize) => {
             unique: true,
             comment: 'Unique school code',
          },
-         type: {
+         school_type: {
             type: DataTypes.ENUM('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED'),
             allowNull: false,
             defaultValue: 'MIXED',
@@ -79,10 +74,9 @@ const defineSchool = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: true,
          },
-         affiliation_board: {
-            type: DataTypes.ENUM('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED'),
+         board_affiliation: {
+            type: DataTypes.ENUM('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL'),
             allowNull: false,
-            defaultValue: 'UNAFFILIATED',
             comment: 'Primary board affiliation',
          },
          board_affiliation_details: {
@@ -252,8 +246,8 @@ const defineSchool = (sequelize) => {
 
       // Validate board is supported
       const supportedBoards = schoolConfig.boards_supported || [];
-      if (supportedBoards.length > 0 && !supportedBoards.includes(this.affiliation_board)) {
-         errors.push(`Board '${this.affiliation_board}' is not supported as per trust configuration`);
+      if (supportedBoards.length > 0 && !supportedBoards.includes(this.board_affiliation)) {
+         errors.push(`Board '${this.board_affiliation}' is not supported as per trust configuration`);
       }
 
       return errors;
@@ -324,12 +318,6 @@ const Joi = require('joi');
 const schoolValidationSchemas = {
    create: Joi.object({
       // Required fields
-      trust_id: Joi.number().integer().positive().required().messages({
-         'number.base': 'Trust ID must be a number',
-         'number.positive': 'Trust ID must be positive',
-         'any.required': 'Trust ID is required',
-      }),
-
       name: Joi.string().trim().min(2).max(200).required().messages({
          'string.empty': 'School name is required',
          'string.min': 'School name must be at least 2 characters',
@@ -342,18 +330,18 @@ const schoolValidationSchemas = {
          'string.max': 'School code cannot exceed 20 characters',
       }),
 
-      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').required().messages({
-         'any.only': 'School type must be PRIMARY, SECONDARY, HIGHER_SECONDARY, NURSERY, or MIXED',
-         'any.required': 'School type is required',
-      }),
-
-      affiliation_board: Joi.string()
-         .valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED')
+      school_type: Joi.string()
+         .valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED')
          .required()
          .messages({
-            'any.only': 'Affiliation board must be CBSE, CISCE, STATE_BOARD, INTERNATIONAL, or UNAFFILIATED',
-            'any.required': 'Affiliation board is required',
+            'any.only': 'School type must be PRIMARY, SECONDARY, HIGHER_SECONDARY, NURSERY, or MIXED',
+            'any.required': 'School type is required',
          }),
+
+      board_affiliation: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL').required().messages({
+         'any.only': 'Board affiliation must be CBSE, CISCE, STATE_BOARD, or INTERNATIONAL',
+         'any.required': 'Board affiliation is required',
+      }),
 
       // Optional contact information
       address: Joi.string().trim().max(1000).allow(null, '').optional(),
@@ -428,17 +416,14 @@ const schoolValidationSchemas = {
       id: Joi.forbidden().messages({
          'any.unknown': 'School ID cannot be updated',
       }),
-      trust_id: Joi.forbidden().messages({
-         'any.unknown': 'Trust ID cannot be updated',
-      }),
       code: Joi.forbidden().messages({
          'any.unknown': 'School code cannot be updated after creation',
       }),
 
       // Allow updating other fields
       name: Joi.string().trim().min(2).max(200).optional(),
-      type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').optional(),
-      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').optional(),
+      school_type: Joi.string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'NURSERY', 'MIXED').optional(),
+      board_affiliation: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL').optional(),
 
       // Contact updates
       address: Joi.string().trim().max(1000).allow(null, '').optional(),
@@ -481,7 +466,7 @@ const schoolValidationSchemas = {
    }),
 
    compliance: Joi.object({
-      affiliation_board: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL', 'UNAFFILIATED').required(),
+      board_affiliation: Joi.string().valid('CBSE', 'CISCE', 'STATE_BOARD', 'INTERNATIONAL').required(),
       affiliation_number: Joi.string().trim().max(50).allow(null, '').optional(),
       registration_number: Joi.string().trim().max(50).allow(null, '').optional(),
       board_affiliation_details: Joi.object().allow(null).optional(),

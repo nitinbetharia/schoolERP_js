@@ -34,23 +34,19 @@ const defineClass = (sequelize) => {
             comment: 'Class code like "C1", "NUR", "PKG", etc.',
          },
          level: {
+            type: DataTypes.ENUM('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY'),
+            allowNull: false,
+            comment: 'Education level category',
+         },
+         class_order: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            comment: 'Numeric level for ordering (1, 2, 3, etc.)',
+            comment: 'Numeric order for sorting classes (1, 2, 3, etc.)',
          },
-         category: {
-            type: DataTypes.ENUM(
-               'NURSERY',
-               'PRIMARY',
-               'SECONDARY',
-               'HIGHER_SECONDARY',
-            ),
-            allowNull: false,
-            defaultValue: 'PRIMARY',
-         },
-         capacity: {
+         max_students: {
             type: DataTypes.INTEGER,
             allowNull: true,
+            defaultValue: 40,
             comment: 'Maximum students per class',
          },
          current_strength: {
@@ -129,7 +125,7 @@ const defineClass = (sequelize) => {
                fields: ['school_id', 'level'],
             },
          ],
-      },
+      }
    );
 
    return Class;
@@ -169,48 +165,30 @@ const classValidationSchemas = {
          'any.required': 'Level is required',
       }),
 
-      category: Joi.string()
-         .valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY')
-         .required()
-         .messages({
-            'any.only':
-          'Category must be NURSERY, PRIMARY, SECONDARY, or HIGHER_SECONDARY',
-            'any.required': 'Category is required',
-         }),
+      category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').required().messages({
+         'any.only': 'Category must be NURSERY, PRIMARY, SECONDARY, or HIGHER_SECONDARY',
+         'any.required': 'Category is required',
+      }),
 
       academic_year: Joi.string()
          .trim()
          .pattern(/^\d{4}-\d{2}$/)
          .required()
          .messages({
-            'string.pattern.base':
-          'Academic year must be in format YYYY-YY (e.g., 2024-25)',
+            'string.pattern.base': 'Academic year must be in format YYYY-YY (e.g., 2024-25)',
             'any.required': 'Academic year is required',
          }),
 
       // Optional fields
-      capacity: Joi.number()
-         .integer()
-         .positive()
-         .allow(null)
-         .optional()
-         .messages({
-            'number.positive': 'Capacity must be positive',
-         }),
+      capacity: Joi.number().integer().positive().allow(null).optional().messages({
+         'number.positive': 'Capacity must be positive',
+      }),
 
-      subjects: Joi.array()
-         .items(Joi.string().trim().min(1).max(100))
-         .allow(null)
-         .optional(),
+      subjects: Joi.array().items(Joi.string().trim().min(1).max(100)).allow(null).optional(),
 
-      class_teacher_id: Joi.number()
-         .integer()
-         .positive()
-         .allow(null)
-         .optional()
-         .messages({
-            'number.positive': 'Class teacher ID must be positive',
-         }),
+      class_teacher_id: Joi.number().integer().positive().allow(null).optional().messages({
+         'number.positive': 'Class teacher ID must be positive',
+      }),
 
       room_number: Joi.string().trim().max(50).allow(null, '').optional(),
       description: Joi.string().trim().max(1000).allow(null, '').optional(),
@@ -233,19 +211,14 @@ const classValidationSchemas = {
       // Allow updating other fields
       name: Joi.string().trim().min(1).max(50).optional(),
       level: Joi.number().integer().min(0).max(20).optional(),
-      category: Joi.string()
-         .valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY')
-         .optional(),
+      category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').optional(),
       academic_year: Joi.string()
          .trim()
          .pattern(/^\d{4}-\d{2}$/)
          .optional(),
 
       capacity: Joi.number().integer().positive().allow(null).optional(),
-      subjects: Joi.array()
-         .items(Joi.string().trim().min(1).max(100))
-         .allow(null)
-         .optional(),
+      subjects: Joi.array().items(Joi.string().trim().min(1).max(100)).allow(null).optional(),
       class_teacher_id: Joi.number().integer().positive().allow(null).optional(),
       room_number: Joi.string().trim().max(50).allow(null, '').optional(),
       description: Joi.string().trim().max(1000).allow(null, '').optional(),
@@ -266,17 +239,12 @@ const classValidationSchemas = {
                name: Joi.string().trim().min(1).max(50).required(),
                code: Joi.string().trim().uppercase().min(1).max(20).required(),
                level: Joi.number().integer().min(0).max(20).required(),
-               category: Joi.string()
-                  .valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY')
-                  .required(),
+               category: Joi.string().valid('NURSERY', 'PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY').required(),
                capacity: Joi.number().integer().positive().allow(null).optional(),
-               subjects: Joi.array()
-                  .items(Joi.string().trim())
-                  .allow(null)
-                  .optional(),
+               subjects: Joi.array().items(Joi.string().trim()).allow(null).optional(),
                room_number: Joi.string().trim().max(50).allow(null, '').optional(),
                description: Joi.string().trim().max(1000).allow(null, '').optional(),
-            }),
+            })
          )
          .min(1)
          .max(50)

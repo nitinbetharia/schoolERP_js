@@ -37,6 +37,36 @@ hideFooter = true;
                         <!-- Login Form -->
                         <form id="loginForm" method="POST" action="/login" class="needs-validation" novalidate>
                             
+                            <!-- School Selection (Tenant Only) -->
+                            <% if (tenant && tenant.schools && tenant.schools.length > 0) { %>
+                            <div class="mb-4">
+                                <label for="school" class="form-label fw-medium">
+                                    Select School
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-school text-muted"></i>
+                                    </span>
+                                    <select class="form-select border-start-0 ps-0" 
+                                            id="school" 
+                                            name="school_id" 
+                                            required>
+                                        <option value="">Choose your school...</option>
+                                        <% tenant.schools.forEach(school => { %>
+                                        <option value="<%= school.id %>"><%= school.name %></option>
+                                        <% }); %>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a school.
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Select the school you are affiliated with
+                                </small>
+                            </div>
+                            <% } %>
+                            
                             <!-- Email/Username Field -->
                             <div class="mb-4">
                                 <label for="email" class="form-label fw-medium">

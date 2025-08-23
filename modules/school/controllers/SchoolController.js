@@ -1,6 +1,6 @@
 const SchoolService = require('../services/SchoolService');
 const logger = require('../../../utils/logger');
-const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/errors');
+const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/validation');
 
 /**
  * School Controller

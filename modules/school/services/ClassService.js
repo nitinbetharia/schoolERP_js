@@ -12,11 +12,11 @@ class ClassService {
    }
 
    /**
-   * Placeholder method - needs implementation
-   */
+    * Placeholder method - needs implementation
+    */
    async handleOperation(tenantCode, data) {
       try {
-      // TODO: Implement actual business logic
+         // TODO: Implement actual business logic
          logger.info('ClassService operation', {
             service: 'classservice',
             tenant_code: tenantCode,

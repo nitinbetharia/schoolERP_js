@@ -27,7 +27,7 @@ const logFormat = winston.format.combine(
       }
 
       return JSON.stringify(log);
-   }),
+   })
 );
 
 // Create daily rotate file transport for general logs
@@ -64,11 +64,9 @@ const consoleTransport = new winston.transports.Console({
       winston.format.colorize(),
       winston.format.simple(),
       winston.format.printf(({ timestamp, level, message, ...meta }) => {
-         const metaStr = Object.keys(meta).length
-            ? JSON.stringify(meta, null, 2)
-            : '';
+         const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
          return `${timestamp} [${level}]: ${message} ${metaStr}`;
-      }),
+      })
    ),
 });
 
@@ -175,11 +173,7 @@ const logHelpers = {
          category: 'DATABASE',
          operation,
          query:
-        query && typeof query === 'string'
-           ? query.substring(0, 500)
-           : query
-              ? String(query).substring(0, 500)
-              : '', // Handle both string and object queries
+            query && typeof query === 'string' ? query.substring(0, 500) : query ? String(query).substring(0, 500) : '', // Handle both string and object queries
          executionTime,
          timestamp: new Date().toISOString(),
          ...meta,

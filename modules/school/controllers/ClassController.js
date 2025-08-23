@@ -1,10 +1,6 @@
 const ClassService = require('../services/ClassService');
 const logger = require('../../../utils/logger');
-const {
-   formatErrorResponse,
-   getErrorStatusCode,
-   formatSuccessResponse,
-} = require('../../../utils/errors');
+const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/validation');
 
 /**
  * Class Controller
@@ -16,14 +12,11 @@ class ClassController {
    }
 
    /**
-   * Handle basic class operations
-   */
+    * Handle basic class operations
+    */
    async handleRequest(req, res) {
       try {
-         const result = await this.service.handleOperation(
-            req.params.trustId,
-            req.body,
-         );
+         const result = await this.service.handleOperation(req.params.trustId, req.body);
          res.json(formatSuccessResponse(result, 'Class operation completed'));
       } catch (error) {
          logger.error('Class Controller Error', {
@@ -37,8 +30,8 @@ class ClassController {
    }
 
    /**
-   * Get classes for a school
-   */
+    * Get classes for a school
+    */
    async getClasses(req, res) {
       try {
          const result = await this.service.handleOperation(req.params.trustId, {

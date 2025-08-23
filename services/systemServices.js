@@ -1,7 +1,15 @@
 const bcrypt = require('bcryptjs');
 const { logSystem, logAuth, logError } = require('../utils/logger');
 const appConfig = require('../config/app-config.json');
-const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../utils/errorHelpers');
+const {
+   createValidationError,
+   createNotFoundError,
+   createConflictError,
+   createAuthenticationError,
+   createAuthorizationError,
+   createInternalError,
+   createDatabaseError,
+} = require('../utils/errorHelpers');
 
 async function initializeTenantModelsHelper(trustCode) {
    const { dbManager } = require('../models/database');

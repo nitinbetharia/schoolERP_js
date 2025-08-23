@@ -1,12 +1,20 @@
 const { getTenantModels } = require('../../../models');
 const { logger } = require('../../../utils/logger');
-const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../utils/errorHelpers');
+const {
+   createValidationError,
+   createNotFoundError,
+   createConflictError,
+   createAuthenticationError,
+   createAuthorizationError,
+   createInternalError,
+   createDatabaseError,
+} = require('../utils/errorHelpers');
 const {
    // Legacy classes for backward compatibility
    ValidationError,
    NotFoundError,
    DuplicateError,
-} = require('../../../utils/errors');
+} = require('../../../utils/validation');
 
 /**
  * UDISE+ Student Service
@@ -17,21 +25,16 @@ const {
  */
 function createUDISEStudentService() {
    /**
-   * Register a student with UDISE+ system
-   * Generates 12-digit UDISE+ student ID automatically
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {number} studentId - Internal student ID
-   * @param {Object} udiseData - UDISE+ specific data
-   * @param {number} createdBy - User ID who created the record
-   * @returns {Promise<Object>} Created UDISE+ student registration
-   */
-   async function registerStudentWithUDISE(
-      tenantCode,
-      studentId,
-      udiseData,
-      createdBy,
-   ) {
+    * Register a student with UDISE+ system
+    * Generates 12-digit UDISE+ student ID automatically
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {number} studentId - Internal student ID
+    * @param {Object} udiseData - UDISE+ specific data
+    * @param {number} createdBy - User ID who created the record
+    * @returns {Promise<Object>} Created UDISE+ student registration
+    */
+   async function registerStudentWithUDISE(tenantCode, studentId, udiseData, createdBy) {
       try {
          const models = getTenantModels(tenantCode);
          const { UDISEStudent, UDISESchool, Student } = models;
@@ -54,12 +57,16 @@ function createUDISEStudentService() {
          });
 
          if (!student) {
-            throw (() => { const err = new Error('Student with ID ${studentId} not found'); err.statusCode = 404; return err; })();
+            throw (() => {
+               const err = new Error('Student with ID ${studentId} not found');
+               err.statusCode = 404;
+               return err;
+            })();
          }
 
          if (!student.school || !student.school.udiseRegistration) {
             throw createValidationError(
-               'Student school must have UDISE+ registration before student can be registered',
+               'Student school must have UDISE+ registration before student can be registered'
             );
          }
 
@@ -69,9 +76,7 @@ function createUDISEStudentService() {
          });
 
          if (existingRegistration) {
-            throw createConflictError(
-               'Student already has UDISE+ registration already exists',
-            );
+            throw createConflictError('Student already has UDISE+ registration already exists');
          }
 
          const udiseSchool = student.school.udiseRegistration;
@@ -90,19 +95,11 @@ function createUDISEStudentService() {
          }
 
          // Generate 12-digit UDISE+ student ID
-         const udiseStudentId = UDISEStudent.generateUDISEStudentId(
-            schoolUdiseCode,
-            sequenceNumber,
-         );
+         const udiseStudentId = UDISEStudent.generateUDISEStudentId(schoolUdiseCode, sequenceNumber);
 
          // Validate Aadhaar number if provided
-         if (
-            udiseData.aadhaar_number &&
-        !UDISEStudent.validateAadhaarNumber(udiseData.aadhaar_number)
-         ) {
-            throw createValidationError(
-               'Invalid Aadhaar number format or checksum',
-            );
+         if (udiseData.aadhaar_number && !UDISEStudent.validateAadhaarNumber(udiseData.aadhaar_number)) {
+            throw createValidationError('Invalid Aadhaar number format or checksum');
          }
 
          // Create UDISE+ student registration
@@ -112,8 +109,7 @@ function createUDISEStudentService() {
             udise_student_id: udiseStudentId,
             enrollment_date: udiseData.enrollment_date || student.admission_date,
             academic_session: udiseData.academic_session || student.academic_year,
-            census_year:
-          udiseData.census_year || new Date().getFullYear().toString(),
+            census_year: udiseData.census_year || new Date().getFullYear().toString(),
             enrollment_type: udiseData.enrollment_type || 'FRESH',
             data_validation_status: 'INCOMPLETE',
             is_active: true,
@@ -165,20 +161,15 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Update UDISE+ student information
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {string} udiseStudentId - UDISE+ student ID
-   * @param {Object} updateData - Data to update
-   * @param {number} updatedBy - User ID who updated
-   * @returns {Promise<Object>} Updated UDISE+ student
-   */
-   async function updateUDISEStudent(
-      tenantCode,
-      udiseStudentId,
-      updateData,
-      updatedBy,
-   ) {
+    * Update UDISE+ student information
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {string} udiseStudentId - UDISE+ student ID
+    * @param {Object} updateData - Data to update
+    * @param {number} updatedBy - User ID who updated
+    * @returns {Promise<Object>} Updated UDISE+ student
+    */
+   async function updateUDISEStudent(tenantCode, udiseStudentId, updateData, updatedBy) {
       try {
          const models = getTenantModels(tenantCode);
          const { UDISEStudent, Student, UDISESchool } = models;
@@ -199,19 +190,12 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw createNotFoundError(
-               `UDISE+ student with ID ${udiseStudentId} not found`,
-            );
+            throw createNotFoundError(`UDISE+ student with ID ${udiseStudentId} not found`);
          }
 
          // Validate Aadhaar number if being updated
-         if (
-            updateData.aadhaar_number &&
-        !UDISEStudent.validateAadhaarNumber(updateData.aadhaar_number)
-         ) {
-            throw createValidationError(
-               'Invalid Aadhaar number format or checksum',
-            );
+         if (updateData.aadhaar_number && !UDISEStudent.validateAadhaarNumber(updateData.aadhaar_number)) {
+            throw createValidationError('Invalid Aadhaar number format or checksum');
          }
 
          // Update the record
@@ -262,12 +246,12 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Get UDISE+ student by UDISE+ ID
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {string} udiseStudentId - UDISE+ student ID
-   * @returns {Promise<Object>} UDISE+ student record
-   */
+    * Get UDISE+ student by UDISE+ ID
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {string} udiseStudentId - UDISE+ student ID
+    * @returns {Promise<Object>} UDISE+ student record
+    */
    async function getUDISEStudentById(tenantCode, udiseStudentId) {
       try {
          const models = getTenantModels(tenantCode);
@@ -294,9 +278,7 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw createNotFoundError(
-               `UDISE+ student with ID ${udiseStudentId} not found`,
-            );
+            throw createNotFoundError(`UDISE+ student with ID ${udiseStudentId} not found`);
          }
 
          return udiseStudent;
@@ -313,18 +295,14 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Get UDISE+ students by school
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {number} udiseSchoolId - UDISE+ school ID
-   * @param {Object} options - Query options (pagination, filters)
-   * @returns {Promise<Object>} List of UDISE+ students
-   */
-   async function getUDISEStudentsBySchool(
-      tenantCode,
-      udiseSchoolId,
-      options = {},
-   ) {
+    * Get UDISE+ students by school
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {number} udiseSchoolId - UDISE+ school ID
+    * @param {Object} options - Query options (pagination, filters)
+    * @returns {Promise<Object>} List of UDISE+ students
+    */
+   async function getUDISEStudentsBySchool(tenantCode, udiseSchoolId, options = {}) {
       try {
          const models = getTenantModels(tenantCode);
          const { UDISEStudent, Student, UDISESchool } = models;
@@ -398,12 +376,12 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Validate student data for government submission
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {string} udiseStudentId - UDISE+ student ID
-   * @returns {Promise<Object>} Validation result
-   */
+    * Validate student data for government submission
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {string} udiseStudentId - UDISE+ student ID
+    * @returns {Promise<Object>} Validation result
+    */
    async function validateStudentForSubmission(tenantCode, udiseStudentId) {
       try {
          const models = getTenantModels(tenantCode);
@@ -414,9 +392,7 @@ function createUDISEStudentService() {
          });
 
          if (!udiseStudent) {
-            throw createNotFoundError(
-               `UDISE+ student with ID ${udiseStudentId} not found`,
-            );
+            throw createNotFoundError(`UDISE+ student with ID ${udiseStudentId} not found`);
          }
 
          const validationResult = udiseStudent.validateForSubmission();
@@ -424,9 +400,7 @@ function createUDISEStudentService() {
          // Update validation status
          await udiseStudent.update({
             data_validation_status: validationResult.isValid ? 'VALID' : 'INVALID',
-            validation_errors: validationResult.isValid
-               ? null
-               : validationResult.errors,
+            validation_errors: validationResult.isValid ? null : validationResult.errors,
             last_validated_at: new Date(),
          });
 
@@ -453,18 +427,14 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Generate student census data for government submission
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {number} udiseSchoolId - UDISE+ school ID
-   * @param {string} censusYear - Census year
-   * @returns {Promise<Object>} Census data
-   */
-   async function generateStudentCensusData(
-      tenantCode,
-      udiseSchoolId,
-      censusYear,
-   ) {
+    * Generate student census data for government submission
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {number} udiseSchoolId - UDISE+ school ID
+    * @param {string} censusYear - Census year
+    * @returns {Promise<Object>} Census data
+    */
+   async function generateStudentCensusData(tenantCode, udiseSchoolId, censusYear) {
       try {
          const models = getTenantModels(tenantCode);
          const { UDISEStudent, Student, UDISESchool } = models;
@@ -504,8 +474,7 @@ function createUDISEStudentService() {
                other: students.filter((s) => s.student.gender === 'OTHER').length,
             },
             by_category: {
-               general: students.filter((s) => s.student.category === 'GENERAL')
-                  .length,
+               general: students.filter((s) => s.student.category === 'GENERAL').length,
                sc: students.filter((s) => s.student.category === 'SC').length,
                st: students.filter((s) => s.student.category === 'ST').length,
                obc: students.filter((s) => s.student.category === 'OBC').length,
@@ -517,11 +486,8 @@ function createUDISEStudentService() {
             },
             enrollment_types: {
                fresh: students.filter((s) => s.enrollment_type === 'FRESH').length,
-               transfer: students.filter((s) => s.enrollment_type === 'TRANSFER')
-                  .length,
-               readmission: students.filter(
-                  (s) => s.enrollment_type === 'READMISSION',
-               ).length,
+               transfer: students.filter((s) => s.enrollment_type === 'TRANSFER').length,
+               readmission: students.filter((s) => s.enrollment_type === 'READMISSION').length,
             },
          };
 
@@ -535,31 +501,24 @@ function createUDISEStudentService() {
          });
 
          return {
-            school_udise_id:
-          students.length > 0 ? students[0].udiseSchool.udise_code : null,
+            school_udise_id: students.length > 0 ? students[0].udiseSchool.udise_code : null,
             census_year: censusYear,
             generation_date: new Date(),
             statistics: stats,
             students: students.map((student) => ({
                udise_student_id: student.udise_student_id,
                pen_number: student.pen_number,
-               student_name: student.student.user
-                  ? student.student.user.full_name
-                  : '',
+               student_name: student.student.user ? student.student.user.full_name : '',
                gender: student.student.gender,
                date_of_birth: student.student.date_of_birth,
                category: student.student.category,
                admission_number: student.student.admission_number,
                class: student.student.class ? student.student.class.class_name : '',
-               section: student.student.section
-                  ? student.student.section.section_name
-                  : '',
+               section: student.student.section ? student.student.section.section_name : '',
                enrollment_date: student.enrollment_date,
                enrollment_type: student.enrollment_type,
                mother_tongue: student.mother_tongue,
-               aadhaar_number: student.aadhaar_number
-                  ? '**********' + student.aadhaar_number.slice(-2)
-                  : null, // Masked for privacy
+               aadhaar_number: student.aadhaar_number ? '**********' + student.aadhaar_number.slice(-2) : null, // Masked for privacy
                rte_beneficiary: student.rte_beneficiary,
                cwsn_status: student.cwsn_status,
                cwsn_disability_type: student.cwsn_disability_type,
@@ -579,18 +538,14 @@ function createUDISEStudentService() {
    }
 
    /**
-   * Bulk register students with UDISE+
-   *
-   * @param {string} tenantCode - Tenant identifier
-   * @param {Array} studentRegistrations - Array of student registration data
-   * @param {number} createdBy - User ID who created
-   * @returns {Promise<Object>} Bulk registration results
-   */
-   async function bulkRegisterStudentsWithUDISE(
-      tenantCode,
-      studentRegistrations,
-      createdBy,
-   ) {
+    * Bulk register students with UDISE+
+    *
+    * @param {string} tenantCode - Tenant identifier
+    * @param {Array} studentRegistrations - Array of student registration data
+    * @param {number} createdBy - User ID who created
+    * @returns {Promise<Object>} Bulk registration results
+    */
+   async function bulkRegisterStudentsWithUDISE(tenantCode, studentRegistrations, createdBy) {
       try {
          const results = {
             successful: [],
@@ -604,7 +559,7 @@ function createUDISEStudentService() {
                   tenantCode,
                   registration.student_id,
                   registration.udise_data,
-                  createdBy,
+                  createdBy
                );
                results.successful.push({
                   student_id: registration.student_id,

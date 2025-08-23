@@ -116,8 +116,73 @@ router.post('/login', async (req, res) => {
    try {
       const { email, password, remember } = req.body;
 
-      // Determine validation schema based on login type
-      const isSystemLogin = !email.includes('@') || email.includes('admin');
+      // Debug logging
+      console.log('🔍 LOGIN POST DEBUG:', {
+         email,
+         host: req.get('host'),
+         tenantCode: req.tenantCode,
+         path: req.path,
+         originalUrl: req.originalUrl,
+      });
+
+      // Determine login type based on email pattern and tenant context
+      const isSystemUserEmail = email === 'sysadmin' || email === 'admin';
+      const isSystemPattern = email.includes('admin') && !email.includes('@');
+      const isPureSystemAdmin = isSystemUserEmail || isSystemPattern;
+
+      const isTrustAdminEmail = email.includes('trustadmin@');
+      const isDemoAdminEmail = email.includes('@demo.') && email.includes('admin');
+      const isTrustAdmin = isTrustAdminEmail || isDemoAdminEmail;
+
+      // SECURITY FIX: Only pure system admins should use system authentication
+      // Trust admins should ALWAYS use tenant authentication for security
+      const isSystemLogin = isPureSystemAdmin && !isTrustAdmin;
+
+      console.log('🔍 LOGIN TYPE DEBUG:', {
+         email,
+         isPureSystemAdmin,
+         isTrustAdmin,
+         isSystemLogin,
+         hasTenantCode: !!req.tenantCode,
+         tenantCode: req.tenantCode,
+      });
+
+      // Security check: Pure system admins should only login from main domain
+      // Trust admins should only login from their tenant domain
+      if (isPureSystemAdmin && req.tenantCode) {
+         console.log('❌ BLOCKING: Pure system admin from tenant domain');
+         const errorMsg =
+            'System administrator login is only allowed from the main domain. ' + 'Please visit the main login page.';
+
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({
+               success: false,
+               error: errorMsg,
+               redirect: 'http://localhost:3000/auth/login',
+               flash: { error: [errorMsg] },
+            });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect('http://localhost:3000/auth/login');
+      }
+
+      // Trust admins must login from their tenant domain
+      if (isTrustAdmin && !req.tenantCode) {
+         console.log('❌ BLOCKING: Trust admin from main domain');
+         const errorMsg =
+            'Trust administrator must login from the tenant domain. ' + 'Please visit the tenant login page.';
+
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({
+               success: false,
+               error: errorMsg,
+               redirect: 'http://demo.localhost:3000/auth/login',
+               flash: { error: [errorMsg] },
+            });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect('http://demo.localhost:3000/auth/login');
+      }
 
       let validationSchema;
       if (isSystemLogin) {

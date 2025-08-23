@@ -1,11 +1,19 @@
 const UDISEStudentService = require('../services/UDISEStudentService');
-const { createValidationError, createNotFoundError, createConflictError, createAuthenticationError, createAuthorizationError, createInternalError, createDatabaseError } = require('../../../utils/errorHelpers');
+const {
+   createValidationError,
+   createNotFoundError,
+   createConflictError,
+   createAuthenticationError,
+   createAuthorizationError,
+   createInternalError,
+   createDatabaseError,
+} = require('../../../utils/errorHelpers');
 const {
    // Legacy classes for backward compatibility
    ValidationError,
    NotFoundError,
    DuplicateError,
-} = require('../../../utils/errors');
+} = require('../../../utils/validation');
 const { logger } = require('../../../utils/logger');
 
 /**
@@ -17,9 +25,9 @@ const { logger } = require('../../../utils/logger');
  */
 function createUDISEStudentController() {
    /**
-   * Register student with UDISE+ system
-   * POST /api/v1/school/:tenantId/udise/students/register
-   */
+    * Register student with UDISE+ system
+    * POST /api/v1/school/:tenantId/udise/students/register
+    */
    async function registerStudent(req, res) {
       try {
          const tenantCode = req.params.tenantId;
@@ -27,14 +35,18 @@ function createUDISEStudentController() {
          const createdBy = req.user ? req.user.id : null;
 
          if (!student_id) {
-            throw (() => { const err = new Error('Student ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('Student ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
          const result = await UDISEStudentService.registerStudentWithUDISE(
             tenantCode,
             student_id,
             udiseData,
-            createdBy,
+            createdBy
          );
 
          logger.info('UDISE+ student registration API success', {
@@ -110,8 +122,7 @@ function createUDISEStudentController() {
             success: false,
             error: {
                code: 'INTERNAL_SERVER_ERROR',
-               message:
-            'An unexpected error occurred during UDISE+ student registration',
+               message: 'An unexpected error occurred during UDISE+ student registration',
                timestamp: new Date().toISOString(),
             },
          });
@@ -119,22 +130,23 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Get UDISE+ student by UDISE+ student ID
-   * GET /api/v1/school/:tenantId/udise/students/:udiseStudentId
-   */
+    * Get UDISE+ student by UDISE+ student ID
+    * GET /api/v1/school/:tenantId/udise/students/:udiseStudentId
+    */
    async function getStudentById(req, res) {
       try {
          const tenantCode = req.params.tenantId;
          const udiseStudentId = req.params.udiseStudentId;
 
          if (!udiseStudentId) {
-            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('UDISE+ student ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
-         const student = await UDISEStudentService.getUDISEStudentById(
-            tenantCode,
-            udiseStudentId,
-         );
+         const student = await UDISEStudentService.getUDISEStudentById(tenantCode, udiseStudentId);
 
          logger.info('UDISE+ student retrieval API success', {
             controller: 'udise-student-controller',
@@ -215,8 +227,7 @@ function createUDISEStudentController() {
             success: false,
             error: {
                code: 'INTERNAL_SERVER_ERROR',
-               message:
-            'An unexpected error occurred while retrieving UDISE+ student',
+               message: 'An unexpected error occurred while retrieving UDISE+ student',
                timestamp: new Date().toISOString(),
             },
          });
@@ -224,9 +235,9 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Update UDISE+ student information
-   * PUT /api/v1/school/:tenantId/udise/students/:udiseStudentId
-   */
+    * Update UDISE+ student information
+    * PUT /api/v1/school/:tenantId/udise/students/:udiseStudentId
+    */
    async function updateStudent(req, res) {
       try {
          const tenantCode = req.params.tenantId;
@@ -235,14 +246,18 @@ function createUDISEStudentController() {
          const updatedBy = req.user ? req.user.id : null;
 
          if (!udiseStudentId) {
-            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('UDISE+ student ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
          const updatedStudent = await UDISEStudentService.updateUDISEStudent(
             tenantCode,
             udiseStudentId,
             updateData,
-            updatedBy,
+            updatedBy
          );
 
          logger.info('UDISE+ student update API success', {
@@ -308,9 +323,9 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Get UDISE+ students by school
-   * GET /api/v1/school/:tenantId/udise/schools/:udiseSchoolId/students
-   */
+    * Get UDISE+ students by school
+    * GET /api/v1/school/:tenantId/udise/schools/:udiseSchoolId/students
+    */
    async function getStudentsBySchool(req, res) {
       try {
          const tenantCode = req.params.tenantId;
@@ -325,14 +340,14 @@ function createUDISEStudentController() {
          };
 
          if (!udiseSchoolId || isNaN(udiseSchoolId)) {
-            throw (() => { const err = new Error('Valid UDISE+ school ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('Valid UDISE+ school ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
-         const result = await UDISEStudentService.getUDISEStudentsBySchool(
-            tenantCode,
-            udiseSchoolId,
-            options,
-         );
+         const result = await UDISEStudentService.getUDISEStudentsBySchool(tenantCode, udiseSchoolId, options);
 
          logger.info('UDISE+ students by school retrieval API success', {
             controller: 'udise-student-controller',
@@ -396,8 +411,7 @@ function createUDISEStudentController() {
             success: false,
             error: {
                code: 'INTERNAL_SERVER_ERROR',
-               message:
-            'An unexpected error occurred while retrieving UDISE+ students',
+               message: 'An unexpected error occurred while retrieving UDISE+ students',
                timestamp: new Date().toISOString(),
             },
          });
@@ -405,23 +419,23 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Validate student data for government submission
-   * POST /api/v1/school/:tenantId/udise/students/:udiseStudentId/validate
-   */
+    * Validate student data for government submission
+    * POST /api/v1/school/:tenantId/udise/students/:udiseStudentId/validate
+    */
    async function validateStudent(req, res) {
       try {
          const tenantCode = req.params.tenantId;
          const udiseStudentId = req.params.udiseStudentId;
 
          if (!udiseStudentId) {
-            throw (() => { const err = new Error('UDISE+ student ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('UDISE+ student ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
-         const validationResult =
-        await UDISEStudentService.validateStudentForSubmission(
-           tenantCode,
-           udiseStudentId,
-        );
+         const validationResult = await UDISEStudentService.validateStudentForSubmission(tenantCode, udiseStudentId);
 
          logger.info('UDISE+ student validation API success', {
             controller: 'udise-student-controller',
@@ -480,9 +494,9 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Generate student census data for government submission
-   * GET /api/v1/school/:tenantId/udise/schools/:udiseSchoolId/census/:censusYear
-   */
+    * Generate student census data for government submission
+    * GET /api/v1/school/:tenantId/udise/schools/:udiseSchoolId/census/:censusYear
+    */
    async function generateCensusData(req, res) {
       try {
          const tenantCode = req.params.tenantId;
@@ -490,18 +504,22 @@ function createUDISEStudentController() {
          const censusYear = req.params.censusYear;
 
          if (!udiseSchoolId || isNaN(udiseSchoolId)) {
-            throw (() => { const err = new Error('Valid UDISE+ school ID is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('Valid UDISE+ school ID is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
          if (!censusYear) {
-            throw (() => { const err = new Error('Census year is required'); err.statusCode = 400; return err; })();
+            throw (() => {
+               const err = new Error('Census year is required');
+               err.statusCode = 400;
+               return err;
+            })();
          }
 
-         const censusData = await UDISEStudentService.generateStudentCensusData(
-            tenantCode,
-            udiseSchoolId,
-            censusYear,
-         );
+         const censusData = await UDISEStudentService.generateStudentCensusData(tenantCode, udiseSchoolId, censusYear);
 
          logger.info('UDISE+ census generation API success', {
             controller: 'udise-student-controller',
@@ -553,9 +571,9 @@ function createUDISEStudentController() {
    }
 
    /**
-   * Bulk register students with UDISE+
-   * POST /api/v1/school/:tenantId/udise/students/bulk-register
-   */
+    * Bulk register students with UDISE+
+    * POST /api/v1/school/:tenantId/udise/students/bulk-register
+    */
    async function bulkRegisterStudents(req, res) {
       try {
          const tenantCode = req.params.tenantId;
@@ -563,22 +581,14 @@ function createUDISEStudentController() {
          const createdBy = req.user ? req.user.id : null;
 
          if (!Array.isArray(registrations) || registrations.length === 0) {
-            throw createValidationError(
-               'Registrations array is required and cannot be empty',
-            );
+            throw createValidationError('Registrations array is required and cannot be empty');
          }
 
          if (registrations.length > 500) {
-            throw createValidationError(
-               'Maximum 500 students can be registered in one batch',
-            );
+            throw createValidationError('Maximum 500 students can be registered in one batch');
          }
 
-         const results = await UDISEStudentService.bulkRegisterStudentsWithUDISE(
-            tenantCode,
-            registrations,
-            createdBy,
-         );
+         const results = await UDISEStudentService.bulkRegisterStudentsWithUDISE(tenantCode, registrations, createdBy);
 
          logger.info('UDISE+ bulk registration API success', {
             controller: 'udise-student-controller',
@@ -598,9 +608,7 @@ function createUDISEStudentController() {
                   total_attempted: results.total,
                   successful_count: results.successful.length,
                   failed_count: results.failed.length,
-                  success_rate:
-              ((results.successful.length / results.total) * 100).toFixed(2) +
-              '%',
+                  success_rate: ((results.successful.length / results.total) * 100).toFixed(2) + '%',
                },
                successful_registrations: results.successful,
                failed_registrations: results.failed,

@@ -1,5 +1,5 @@
-const FeeManagementService = require('../../services/FeeManagementService');
-const { logger } = require('../../utils/logger');
+const FeeManagementService = require('../../../services/FeeManagementService');
+const { logger } = require('../../../utils/logger');
 
 /**
  * Student Fee Controller

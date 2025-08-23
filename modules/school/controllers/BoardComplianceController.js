@@ -1,10 +1,6 @@
 const BoardComplianceService = require('../services/BoardComplianceService');
 const logger = require('../../../utils/logger');
-const {
-   formatErrorResponse,
-   getErrorStatusCode,
-   formatSuccessResponse,
-} = require('../../../utils/errors');
+const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/validation');
 
 /**
  * BoardCompliance Controller
@@ -18,7 +14,7 @@ function createBoardComplianceController() {
 
    async function handleRequest(req, res, next) {
       try {
-      // Placeholder implementation
+         // Placeholder implementation
          res.json(formatSuccessResponse(null, 'Method not implemented'));
       } catch (error) {
          logger.error('BoardCompliance Controller Error', {

@@ -55,7 +55,8 @@ const tenantDetection = async (req, res, next) => {
       }
 
       // Skip for auth routes to allow login without tenant initialization
-      if (req.path === '/auth/login' || req.path.startsWith('/auth/')) {
+      // BUT still fetch tenant info for login pages
+      if (req.path.startsWith('/auth/') && req.path !== '/auth/login') {
          req.tenantCode = tenantCode; // Set tenant code but don't initialize models
          return next();
       }
@@ -85,31 +86,42 @@ const tenantDetection = async (req, res, next) => {
          return next();
       }
 
-      // Initialize tenant models if not already done
-      try {
-         const tenantModels = await dbManager.getTenantModels(tenantCode);
-         req.tenantModels = tenantModels;
-      } catch (_error) {
-         // Models not initialized, try to initialize
-         logSystem(`Initializing tenant models for: ${tenantCode}`);
+      // For login pages, fetch tenant info but don't initialize models
+      if (req.path === '/login' || req.path === '/auth/login') {
+         console.log('🔍 Fetching tenant info for login page:', req.path, 'tenantCode:', tenantCode);
+         try {
+            const { dbManager } = require('../models/database');
+            const { defineTrustModel } = require('../models/Trust');
+            const systemDB = await dbManager.getSystemDB();
+            const Trust = defineTrustModel(systemDB);
 
-         // Check if tenant database exists
-         const dbExists = await dbManager.tenantDatabaseExists(tenantCode);
-
-         if (!dbExists) {
-            return res.status(404).json({
-               success: false,
-               error: {
-                  code: 'TENANT_NOT_FOUND',
-                  message: `Tenant '${tenantCode}' not found`,
-                  timestamp: new Date().toISOString(),
-               },
+            const trust = await Trust.findOne({
+               where: { trust_code: tenantCode },
+               attributes: ['id', 'trust_name', 'trust_code', 'subdomain', 'contact_email', 'address'],
             });
-         }
 
-         // Initialize tenant models
-         const tenantModels = await dbManager.initializeTenantModels(tenantCode);
-         req.tenantModels = tenantModels;
+            if (trust) {
+               // Convert Sequelize model to plain object and set tenant
+               req.tenant = {
+                  id: trust.id,
+                  name: trust.trust_name,
+                  trust_code: trust.trust_code,
+                  subdomain: trust.subdomain,
+                  contact_email: trust.contact_email,
+                  address: trust.address,
+               };
+
+               // For tenant logins, also fetch schools if available
+               // TODO: Query schools from appropriate database once schema is clarified
+               req.tenant.schools = [];
+               console.log('✅ Set tenant info for login:', req.tenant.name);
+            } else {
+               console.log('⚠️ Trust not found for tenant code:', tenantCode);
+            }
+         } catch (error) {
+            console.error('❌ Error fetching tenant info:', error.message);
+         }
+         return next();
       }
 
       logSystem(`Request routed to tenant: ${tenantCode}`, {
@@ -146,18 +158,34 @@ function extractSubdomain(host) {
    // Split by dots
    const parts = hostWithoutPort.split('.');
 
-   // If just localhost or IP address (no subdomain), return null
-   if ((parts.length === 1 && parts[0] === 'localhost') || /^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)) {
+   // Handle localhost development
+   if (hostWithoutPort.includes('localhost')) {
+      // For patterns like demo.localhost, app.localhost, etc.
+      if (parts.length === 2 && parts[1] === 'localhost') {
+         return parts[0]; // Return 'demo' from 'demo.localhost'
+      }
+      // For just localhost (no subdomain)
+      if (parts.length === 1 && parts[0] === 'localhost') {
+         return null;
+      }
+   }
+
+   // Handle IP addresses (no subdomain possible)
+   if (/^\d+\.\d+\.\d+\.\d+$/.test(hostWithoutPort)) {
       return null;
    }
 
-   // If only domain.com (2 parts), no subdomain
+   // For production domains like demo.example.com
+   if (parts.length >= 3) {
+      return parts[0]; // Return first part as subdomain
+   }
+
+   // For domain.com (2 parts), no subdomain
    if (parts.length <= 2) {
       return null;
    }
 
-   // Return first part as subdomain
-   return parts[0];
+   return null;
 }
 
 /**

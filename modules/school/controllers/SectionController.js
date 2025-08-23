@@ -1,10 +1,6 @@
 const SectionService = require('../services/SectionService');
 const logger = require('../../../utils/logger');
-const {
-   formatErrorResponse,
-   getErrorStatusCode,
-   formatSuccessResponse,
-} = require('../../../utils/errors');
+const { formatErrorResponse, getErrorStatusCode, formatSuccessResponse } = require('../../../utils/validation');
 
 /**
  * Section Controller
@@ -18,7 +14,7 @@ function createSectionController() {
 
    async function handleRequest(req, res, next) {
       try {
-      // Placeholder implementation
+         // Placeholder implementation
          res.json(formatSuccessResponse(null, 'Method not implemented'));
       } catch (error) {
          logger.error('Section Controller Error', {

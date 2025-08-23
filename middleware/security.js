@@ -47,10 +47,14 @@ const securityMiddleware = () => {
                return callback(null, true);
             }
 
-            // In development, allow all localhost origins
+            // In development, allow all localhost origins including subdomains
             if (process.env.NODE_ENV === 'development') {
-               // Allow localhost with any port
-               if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
+               // Allow localhost with any port and any subdomain
+               if (origin.match(/^https?:\/\/([a-zA-Z0-9-]+\.)?localhost(:\d+)?$/)) {
+                  return callback(null, true);
+               }
+               // Also allow 127.0.0.1
+               if (origin.match(/^https?:\/\/127\.0\.0\.1(:\d+)?$/)) {
                   return callback(null, true);
                }
             }
