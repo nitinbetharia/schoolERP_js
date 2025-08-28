@@ -1,0 +1,40 @@
+name: Publish GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag to release (e.g., v2.0.0)'
+        required: true
+        default: 'v2.0.0'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read release notes
+        id: notes
+        run: |
+          TAG_INPUT="${{ github.event.inputs.tag }}"
+          # Map tag to docs/release file path if exists
+          FILE="docs/releases/${TAG_INPUT}.md"
+          if [ -f "$FILE" ]; then
+            echo "file_path=$FILE" >> $GITHUB_OUTPUT
+          else
+            # Fallback to generic template
+            echo "file_path=docs/releases/${TAG_INPUT}.md" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: ${{ github.event.inputs.tag }}
+          body_path: ${{ steps.notes.outputs.file_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
