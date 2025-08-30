@@ -319,6 +319,163 @@ async function getUsersByRole(tenantCode, role) {
    }
 }
 
+/**
+ * Find user by email for password reset
+ */
+async function findUserByEmail(email, tenantId) {
+   try {
+      const models = await dbManager.getTenantModelsById(tenantId);
+      const { User } = models;
+      
+      const user = await User.findOne({
+         where: { email: email.toLowerCase() },
+      });
+
+      return user;
+   } catch (error) {
+      logger.error('Error in findUserByEmail service', {
+         error: error.message,
+         email,
+         tenantId,
+      });
+      throw error;
+   }
+}
+
+/**
+ * Generate password reset token for tenant user
+ */
+async function generatePasswordResetToken(userId, tenantId) {
+   try {
+      const models = await dbManager.getTenantModelsById(tenantId);
+      const { User } = models;
+      
+      const user = await User.findByPk(userId);
+      if (!user) {
+         throw new Error('User not found');
+      }
+
+      // Generate token (random string)
+      const crypto = require('crypto');
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      
+      // Set expiration (30 minutes from now)
+      const resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+      // Update user with reset token
+      await user.update({
+         reset_token: resetToken,
+         reset_token_expires: resetTokenExpires,
+      });
+
+      logger.info('Password reset token generated for tenant user', {
+         userId,
+         tenantId,
+         tokenExpires: resetTokenExpires,
+      });
+
+      return resetToken;
+   } catch (error) {
+      logger.error('Error in generatePasswordResetToken service', {
+         error: error.message,
+         userId,
+         tenantId,
+      });
+      throw error;
+   }
+}
+
+/**
+ * Validate password reset token for tenant user
+ */
+async function validatePasswordResetToken(token, tenantId) {
+   try {
+      const models = await dbManager.getTenantModelsById(tenantId);
+      const { User } = models;
+      
+      const user = await User.findOne({
+         where: {
+            reset_token: token,
+            reset_token_expires: {
+               [require('sequelize').Op.gt]: new Date(),
+            },
+         },
+      });
+
+      if (!user) {
+         return null; // Invalid or expired token
+      }
+
+      return { user, token };
+   } catch (error) {
+      logger.error('Error in validatePasswordResetToken service', {
+         error: error.message,
+         token: token?.substring(0, 10),
+         tenantId,
+      });
+      throw error;
+   }
+}
+
+/**
+ * Reset password using token for tenant user
+ */
+async function resetPassword(token, newPassword, tenantId) {
+   try {
+      const models = await dbManager.getTenantModelsById(tenantId);
+      const { User } = models;
+      
+      // Validate token first
+      const resetData = await validatePasswordResetToken(token, tenantId);
+      if (!resetData) {
+         throw new Error('Invalid or expired password reset token');
+      }
+
+      const { user } = resetData;
+
+      // Hash new password
+      const saltRounds = 12;
+      const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update password and clear reset token
+      await user.update({
+         password_hash: newPasswordHash,
+         reset_token: null,
+         reset_token_expires: null,
+         // Reset login attempts on successful password reset (if these fields exist)
+         login_attempts: 0,
+      });
+
+      logger.info('Password reset completed for tenant user', {
+         userId: user.id,
+         email: user.email,
+         tenantId,
+      });
+
+      // Send success email
+      const emailService = require('../../../services/emailService');
+      const { dbManager: dbMgr } = require('../../../models/database');
+      const tenant = await dbMgr.getTenantById(tenantId);
+      await emailService.sendPasswordResetSuccessEmail(user, tenant);
+
+      return {
+         success: true,
+         user: {
+            id: user.id,
+            email: user.email,
+            name: user.name || user.full_name,
+         },
+      };
+   } catch (error) {
+      logger.error('Error in resetPassword service', {
+         error: error.message,
+         token: token?.substring(0, 10),
+         tenantId,
+      });
+      throw error;
+   }
+}
+
 // Direct function exports (no factory pattern)
 module.exports = {
    createUser,
@@ -330,4 +487,8 @@ module.exports = {
    changePassword,
    getUserRoles,
    getUsersByRole,
+   findUserByEmail,
+   generatePasswordResetToken,
+   validatePasswordResetToken,
+   resetPassword,
 };

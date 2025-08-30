@@ -634,6 +634,324 @@ router.get('/logout', (req, res) => {
 });
 
 /**
+ * @route GET /forgot-password
+ * @desc Render forgot password page
+ * @access Public
+ */
+router.get('/forgot-password', (req, res) => {
+   try {
+      // If user is already logged in, redirect to dashboard
+      if (req.session && req.session.user) {
+         return res.redirect('/dashboard');
+      }
+
+      res.render('pages/auth/forgot-password', {
+         title: 'Forgot Password',
+         description: 'Reset your password for School ERP System',
+         tenant: req.tenant || null,
+         layout: 'layout',
+      });
+   } catch (error) {
+      logError(error, { context: 'ForgotPasswordPage' });
+      req.flash('error', 'Unable to load password reset page. Please try again.');
+      res.redirect('/login');
+   }
+});
+
+/**
+ * @route POST /forgot-password
+ * @desc Process forgot password request
+ * @access Public
+ */
+router.post('/forgot-password', async (req, res) => {
+   try {
+      const { email } = req.body;
+
+      // Validate email
+      if (!email) {
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({
+               success: false,
+               error: 'Email address is required',
+            });
+         }
+         req.flash('error', 'Email address is required');
+         return res.redirect('/forgot-password');
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({
+               success: false,
+               error: 'Please enter a valid email address',
+            });
+         }
+         req.flash('error', 'Please enter a valid email address');
+         return res.redirect('/forgot-password');
+      }
+
+      // Check if email exists in system (system users) or tenant (tenant users)
+      let user = null;
+      let userType = null;
+
+      // For security, we don't reveal if email exists or not
+      // Always return success message regardless of whether email is found
+      try {
+         // First check system users
+         const systemUser = await systemAuthService.findUserByEmail(email);
+         if (systemUser) {
+            user = systemUser;
+            userType = 'system';
+         } else if (req.tenant) {
+            // Check tenant users if on a tenant subdomain
+            const tenantUser = await userService.findUserByEmail(email, req.tenant.id);
+            if (tenantUser) {
+               user = tenantUser;
+               userType = 'tenant';
+            }
+         }
+
+         // Generate password reset token if user exists
+         if (user) {
+            const resetToken = await (userType === 'system' 
+               ? systemAuthService.generatePasswordResetToken(user.id)
+               : userService.generatePasswordResetToken(user.id, req.tenant.id)
+            );
+
+            // Send password reset email
+            const emailService = require('../services/emailService');
+            await emailService.sendPasswordResetEmail(user, resetToken, req.tenant);
+
+            logSystem('Password reset requested', {
+               userId: user.id,
+               email: user.email,
+               userType,
+               tenantId: req.tenant?.id,
+               ip: req.ip,
+            });
+         }
+      } catch (error) {
+         logError(error, { 
+            context: 'ForgotPasswordProcess', 
+            email: email,
+            tenantId: req.tenant?.id 
+         });
+         // Continue to success message for security
+      }
+
+      // Always return success message for security
+      const successMessage = 'If an account with this email exists, you will receive password reset instructions shortly.';
+      
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+         return res.json({
+            success: true,
+            message: successMessage,
+         });
+      }
+
+      req.flash('success', successMessage);
+      res.redirect('/forgot-password');
+
+   } catch (error) {
+      logError(error, { context: 'ForgotPasswordError' });
+
+      const errorMsg = 'Unable to process password reset request. Please try again.';
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+         return res.status(500).json({
+            success: false,
+            error: errorMsg,
+         });
+      }
+
+      req.flash('error', errorMsg);
+      res.redirect('/forgot-password');
+   }
+});
+
+/**
+ * @route GET /reset-password/:token
+ * @desc Render password reset page with token validation
+ * @access Public
+ */
+router.get('/reset-password/:token', async (req, res) => {
+   try {
+      const { token } = req.params;
+
+      // If user is already logged in, redirect to dashboard
+      if (req.session && req.session.user) {
+         return res.redirect('/dashboard');
+      }
+
+      if (!token) {
+         req.flash('error', 'Invalid password reset link');
+         return res.redirect('/forgot-password');
+      }
+
+      // Validate token
+      let tokenValid = false;
+      let user = null;
+
+      try {
+         // Check system users first
+         const systemReset = await systemAuthService.validatePasswordResetToken(token);
+         if (systemReset) {
+            tokenValid = true;
+            user = systemReset.user;
+         } else if (req.tenant) {
+            // Check tenant users
+            const tenantReset = await userService.validatePasswordResetToken(token, req.tenant.id);
+            if (tenantReset) {
+               tokenValid = true;
+               user = tenantReset.user;
+            }
+         }
+      } catch (error) {
+         logError(error, { 
+            context: 'ResetTokenValidation', 
+            token: token.substring(0, 10) + '...', // Log partial token for security
+            tenantId: req.tenant?.id 
+         });
+      }
+
+      res.render('pages/auth/reset-password', {
+         title: 'Reset Password',
+         description: 'Create a new password for your account',
+         tenant: req.tenant || null,
+         layout: 'layout',
+         token,
+         tokenValid,
+         user: user ? { name: user.name, email: user.email } : null,
+      });
+
+   } catch (error) {
+      logError(error, { context: 'ResetPasswordPage' });
+      req.flash('error', 'Unable to load password reset page. Please try again.');
+      res.redirect('/forgot-password');
+   }
+});
+
+/**
+ * @route POST /reset-password/:token
+ * @desc Process password reset with new password
+ * @access Public
+ */
+router.post('/reset-password/:token', async (req, res) => {
+   try {
+      const { token } = req.params;
+      const { password, confirmPassword } = req.body;
+
+      // Validate input
+      if (!token) {
+         const errorMsg = 'Invalid password reset link';
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({ success: false, error: errorMsg });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect('/forgot-password');
+      }
+
+      if (!password || !confirmPassword) {
+         const errorMsg = 'Both password fields are required';
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({ success: false, error: errorMsg });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect(`/reset-password/${token}`);
+      }
+
+      if (password !== confirmPassword) {
+         const errorMsg = 'Passwords do not match';
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({ success: false, error: errorMsg });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect(`/reset-password/${token}`);
+      }
+
+      // Validate password strength
+      if (password.length < 8) {
+         const errorMsg = 'Password must be at least 8 characters long';
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({ success: false, error: errorMsg });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect(`/reset-password/${token}`);
+      }
+
+      // Attempt to reset password
+      let resetResult = null;
+      let userType = null;
+
+      try {
+         // Try system users first
+         resetResult = await systemAuthService.resetPassword(token, password);
+         if (resetResult) {
+            userType = 'system';
+         } else if (req.tenant) {
+            // Try tenant users
+            resetResult = await userService.resetPassword(token, password, req.tenant.id);
+            if (resetResult) {
+               userType = 'tenant';
+            }
+         }
+      } catch (error) {
+         logError(error, { 
+            context: 'PasswordResetProcess', 
+            token: token.substring(0, 10) + '...',
+            tenantId: req.tenant?.id 
+         });
+      }
+
+      if (!resetResult) {
+         const errorMsg = 'Password reset link is invalid or has expired. Please request a new one.';
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.json({ success: false, error: errorMsg });
+         }
+         req.flash('error', errorMsg);
+         return res.redirect('/forgot-password');
+      }
+
+      // Log successful password reset
+      logSystem('Password reset completed', {
+         userId: resetResult.user.id,
+         email: resetResult.user.email,
+         userType,
+         tenantId: req.tenant?.id,
+         ip: req.ip,
+      });
+
+      // Success response
+      const successMessage = 'Your password has been successfully reset. You can now login with your new password.';
+      
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+         return res.json({
+            success: true,
+            message: successMessage,
+         });
+      }
+
+      req.flash('success', successMessage);
+      res.redirect('/login');
+
+   } catch (error) {
+      logError(error, { context: 'ResetPasswordError' });
+
+      const errorMsg = 'Unable to reset password. Please try again.';
+      if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+         return res.status(500).json({
+            success: false,
+            error: errorMsg,
+         });
+      }
+
+      req.flash('error', errorMsg);
+      res.redirect(`/reset-password/${req.params.token}`);
+   }
+});
+
+/**
  * @route GET /coming-soon
  * @desc Generic coming soon page for unimplemented features
  * @access Private
@@ -1482,6 +1800,901 @@ router.get('/system/documentation', requireAuth, (req, res) => {
       res.redirect('/admin/system');
    }
 });
+
+/**
+ * Admin User Registration Routes
+ * Role-based access control for user creation
+ */
+
+/**
+ * Role-based access middleware
+ * Checks if user has permission to create other users
+ */
+const requireUserCreationAccess = (req, res, next) => {
+   try {
+      if (!req.session || !req.session.user) {
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.status(401).json({
+               success: false,
+               error: 'Authentication required',
+               redirect: '/login',
+            });
+         }
+         req.flash('error', 'Please log in to access this page');
+         return res.redirect('/login');
+      }
+
+      const user = req.session.user;
+      const userType = req.session.userType;
+      const userRole = user.role;
+
+      // Define role hierarchy and permissions
+      const rolePermissions = {
+         'SYSTEM_ADMIN': {
+            canCreate: ['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'],
+            description: 'System Administrator - Can create all user types'
+         },
+         'TRUST_ADMIN': {
+            canCreate: ['SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'],
+            description: 'Trust Administrator - Can create school-level users'
+         },
+         'SCHOOL_ADMIN': {
+            canCreate: ['TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'],
+            description: 'School Administrator - Can create school users'
+         },
+         'TEACHER': {
+            canCreate: ['STUDENT'],
+            description: 'Teacher - Can create student accounts'
+         },
+         'ACCOUNTANT': {
+            canCreate: [],
+            description: 'Accountant - View only access'
+         },
+         'PARENT': {
+            canCreate: [],
+            description: 'Parent - View only access'
+         },
+         'STUDENT': {
+            canCreate: [],
+            description: 'Student - View only access'
+         }
+      };
+
+      const userPermissions = rolePermissions[userRole];
+      if (!userPermissions || userPermissions.canCreate.length === 0) {
+         if (req.xhr || req.headers.accept?.indexOf('json') > -1) {
+            return res.status(403).json({
+               success: false,
+               error: 'Access denied. You do not have permission to create users.',
+            });
+         }
+         req.flash('error', 'Access denied. You do not have permission to create users.');
+         return res.redirect('/dashboard');
+      }
+
+      // Attach permissions to request for use in routes
+      req.userPermissions = userPermissions;
+      next();
+   } catch (error) {
+      logError(error, { context: 'RequireUserCreationAccess' });
+      res.status(500).json({
+         success: false,
+         error: 'Internal server error',
+      });
+   }
+};
+
+/**
+ * @route GET /admin/users/register
+ * @desc Show user registration management page
+ * @access Private (Admin roles only)
+ */
+router.get('/admin/users/register', requireUserCreationAccess, (req, res) => {
+   try {
+      const userType = req.session.userType;
+      const userRole = req.session.user.role;
+
+      res.render('pages/admin/user-registration', {
+         title: 'User Registration',
+         description: 'Create and manage user accounts',
+         user: req.session.user,
+         tenant: req.tenant || null,
+         userType: userType,
+         userRole: userRole,
+         permissions: req.userPermissions,
+         currentPath: '/admin/users/register',
+         layout: 'layout',
+      });
+   } catch (error) {
+      logError(error, { context: 'admin/users/register GET' });
+      req.flash('error', 'Unable to load user registration page');
+      res.redirect('/dashboard');
+   }
+});
+
+/**
+ * @route GET /api/admin/users/permissions
+ * @desc Get user creation permissions for current user
+ * @access Private (Admin roles only)
+ */
+router.get('/api/admin/users/permissions', requireUserCreationAccess, (req, res) => {
+   try {
+      const userRole = req.session.user.role;
+      const permissions = req.userPermissions;
+
+      // Define user types with their metadata
+      const userTypeMetadata = {
+         'SYSTEM_ADMIN': {
+            type: 'SYSTEM_ADMIN',
+            name: 'System Administrator',
+            description: 'Full system access and management',
+            icon: 'fas fa-crown',
+            roles: ['SYSTEM_ADMIN'],
+            category: 'system'
+         },
+         'TRUST_ADMIN': {
+            type: 'TRUST_ADMIN',
+            name: 'Trust Administrator',
+            description: 'Manage multiple schools within trust',
+            icon: 'fas fa-building',
+            roles: ['TRUST_ADMIN'],
+            category: 'trust'
+         },
+         'SCHOOL_ADMIN': {
+            type: 'SCHOOL_ADMIN',
+            name: 'School Administrator',
+            description: 'Manage single school operations',
+            icon: 'fas fa-school',
+            roles: ['SCHOOL_ADMIN'],
+            category: 'school'
+         },
+         'TEACHER': {
+            type: 'TEACHER',
+            name: 'Teacher',
+            description: 'Classroom management and student records',
+            icon: 'fas fa-chalkboard-teacher',
+            roles: ['TEACHER'],
+            category: 'academic'
+         },
+         'ACCOUNTANT': {
+            type: 'ACCOUNTANT',
+            name: 'Accountant',
+            description: 'Financial management and fee collection',
+            icon: 'fas fa-calculator',
+            roles: ['ACCOUNTANT'],
+            category: 'finance'
+         },
+         'PARENT': {
+            type: 'PARENT',
+            name: 'Parent',
+            description: 'View child progress and school information',
+            icon: 'fas fa-users',
+            roles: ['PARENT'],
+            category: 'stakeholder'
+         },
+         'STUDENT': {
+            type: 'STUDENT',
+            name: 'Student',
+            description: 'Access learning materials and assignments',
+            icon: 'fas fa-graduation-cap',
+            roles: ['STUDENT'],
+            category: 'academic'
+         }
+      };
+
+      // Filter user types based on permissions
+      const canCreateUserTypes = permissions.canCreate
+         .map(roleType => userTypeMetadata[roleType])
+         .filter(metadata => metadata); // Remove any undefined entries
+
+      res.json({
+         success: true,
+         userRole: userRole,
+         canCreateUserTypes: canCreateUserTypes,
+         permissions: permissions,
+      });
+   } catch (error) {
+      logError(error, { context: 'api/admin/users/permissions GET' });
+      res.status(500).json({
+         success: false,
+         error: 'Failed to retrieve user permissions',
+      });
+   }
+});
+
+/**
+ * @route GET /api/admin/users/stats
+ * @desc Get user statistics for dashboard
+ * @access Private (Admin roles only)
+ */
+router.get('/api/admin/users/stats', requireUserCreationAccess, async (req, res) => {
+   try {
+      const userType = req.session.userType;
+      const userRole = req.session.user.role;
+
+      let stats = {};
+
+      if (userType === 'system') {
+         // System admin - get global stats
+         try {
+            const { trustService } = require('../services/systemServices');
+            const systemStats = await trustService.getSystemStats();
+            
+            stats = {
+               total: systemStats.totalSystemUsers + systemStats.totalTenantUsers || 0,
+               active: systemStats.activeUsers || 0,
+               pending: systemStats.pendingUsers || 0,
+               monthly: systemStats.monthlyNewUsers || 0,
+            };
+         } catch (error) {
+            logError(error, { context: 'SystemUserStats' });
+            stats = { total: 0, active: 0, pending: 0, monthly: 0 };
+         }
+      } else {
+         // Tenant admin - get tenant-specific stats
+         try {
+            const tenantCode = req.session.tenantCode || req.tenant?.trust_code;
+            const userStats = await userService.getUserStats(tenantCode);
+            
+            stats = {
+               total: userStats.total || 0,
+               active: userStats.active || 0,
+               pending: userStats.pending || 0,
+               monthly: userStats.monthly || 0,
+            };
+         } catch (error) {
+            logError(error, { context: 'TenantUserStats', tenantCode: req.tenant?.trust_code });
+            stats = { total: 0, active: 0, pending: 0, monthly: 0 };
+         }
+      }
+
+      res.json(stats);
+   } catch (error) {
+      logError(error, { context: 'api/admin/users/stats GET' });
+      res.status(500).json({
+         success: false,
+         error: 'Failed to retrieve user statistics',
+         stats: { total: 0, active: 0, pending: 0, monthly: 0 },
+      });
+   }
+});
+
+/**
+ * @route POST /api/admin/users/create
+ * @desc Create a new user account
+ * @access Private (Admin roles only)
+ */
+router.post('/api/admin/users/create', requireUserCreationAccess, async (req, res) => {
+   try {
+      const {
+         firstName,
+         lastName,
+         email,
+         phone,
+         dateOfBirth,
+         gender,
+         role,
+         status,
+         userType,
+         passwordOption,
+         password,
+         sendWelcomeEmail
+      } = req.body;
+
+      const currentUser = req.session.user;
+      const currentUserType = req.session.userType;
+
+      // Validate required fields
+      if (!firstName || !lastName || !email || !role || !userType) {
+         return res.status(400).json({
+            success: false,
+            error: 'Required fields missing: firstName, lastName, email, role, userType',
+         });
+      }
+
+      // Check if user can create this role type
+      if (!req.userPermissions.canCreate.includes(role)) {
+         return res.status(403).json({
+            success: false,
+            error: `You do not have permission to create users with role: ${role}`,
+         });
+      }
+
+      // Generate password if not provided
+      let userPassword = password;
+      if (passwordOption === 'generate' || !userPassword) {
+         userPassword = generateSecurePassword();
+      }
+
+      // Prepare user data
+      const userData = {
+         firstName,
+         lastName,
+         full_name: `${firstName} ${lastName}`,
+         email: email.toLowerCase(),
+         phone,
+         date_of_birth: dateOfBirth ? new Date(dateOfBirth) : null,
+         gender,
+         role,
+         user_type: userType,
+         status: status || 'ACTIVE',
+         password: userPassword,
+         created_by: currentUser.id,
+         is_active: status !== 'INACTIVE',
+      };
+
+      let newUser = null;
+
+      // Create user based on context
+      if (currentUserType === 'system' && ['SYSTEM_ADMIN'].includes(role)) {
+         // Create system user
+         try {
+            newUser = await systemAuthService.createSystemUser(userData, currentUser.id);
+         } catch (error) {
+            logError(error, { context: 'CreateSystemUser', userData: { email, role } });
+            return res.status(400).json({
+               success: false,
+               error: error.message || 'Failed to create system user',
+            });
+         }
+      } else {
+         // Create tenant user
+         try {
+            const tenantCode = req.session.tenantCode || req.tenant?.trust_code;
+            if (!tenantCode) {
+               return res.status(400).json({
+                  success: false,
+                  error: 'Tenant context required for user creation',
+               });
+            }
+            
+            newUser = await userService.createUser(tenantCode, userData);
+         } catch (error) {
+            logError(error, { context: 'CreateTenantUser', userData: { email, role } });
+            return res.status(400).json({
+               success: false,
+               error: error.message || 'Failed to create tenant user',
+            });
+         }
+      }
+
+      // Send welcome email if requested
+      if (sendWelcomeEmail && newUser) {
+         try {
+            const emailService = require('../services/emailService');
+            await emailService.sendWelcomeEmail(newUser, userPassword, req.tenant);
+         } catch (emailError) {
+            logError(emailError, { context: 'SendWelcomeEmail', userId: newUser.id });
+            // Don't fail the user creation if email fails
+         }
+      }
+
+      // Log user creation
+      logSystem('New user created via admin interface', {
+         newUserId: newUser.id,
+         newUserEmail: newUser.email,
+         newUserRole: newUser.role,
+         createdBy: currentUser.id,
+         createdByRole: currentUser.role,
+         tenantCode: req.session.tenantCode || req.tenant?.trust_code,
+      });
+
+      res.json({
+         success: true,
+         message: 'User created successfully',
+         user: {
+            id: newUser.id,
+            name: newUser.full_name || `${newUser.firstName} ${newUser.lastName}`,
+            email: newUser.email,
+            role: newUser.role,
+            status: newUser.status,
+         },
+         passwordGenerated: passwordOption === 'generate',
+      });
+
+   } catch (error) {
+      logError(error, { context: 'api/admin/users/create POST' });
+      res.status(500).json({
+         success: false,
+         error: 'Internal server error during user creation',
+      });
+   }
+});
+
+/**
+ * @route GET /api/admin/users/registration-requests
+ * @desc Get pending registration requests
+ * @access Private (Admin roles only)
+ */
+router.get('/api/admin/users/registration-requests', requireUserCreationAccess, async (req, res) => {
+   try {
+      const userType = req.session.userType;
+      const { status = 'all', limit = 50 } = req.query;
+
+      let requests = [];
+
+      if (userType === 'system') {
+         // System admin - get all registration requests
+         // This would need a system-level registration request service
+         requests = []; // Placeholder - implement systemRegistrationService
+      } else {
+         // Tenant admin - get tenant-specific requests
+         try {
+            const tenantCode = req.session.tenantCode || req.tenant?.trust_code;
+            // This would need a tenant-level registration request service
+            requests = []; // Placeholder - implement tenant registration requests
+         } catch (error) {
+            logError(error, { context: 'TenantRegistrationRequests' });
+         }
+      }
+
+      res.json(requests);
+   } catch (error) {
+      logError(error, { context: 'api/admin/users/registration-requests GET' });
+      res.status(500).json({
+         success: false,
+         error: 'Failed to retrieve registration requests',
+         requests: [],
+      });
+   }
+});
+
+// ================================
+// ENHANCED FEATURES (Option C)
+// ================================
+
+/**
+ * @route GET /admin/bulk-user-import
+ * @desc Bulk user import interface
+ * @access Private (Admin only with bulk permissions)
+ */
+router.get('/admin/bulk-user-import', requireUserCreationAccess, async (req, res) => {
+   try {
+      const user = req.session.user;
+      const userType = req.session.userType;
+      const userRole = user.role;
+
+      // Check if bulk import is allowed for this user level
+      const canBulkImport = ['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'].includes(userRole);
+      if (!canBulkImport) {
+         req.flash('error', 'Access denied. Bulk import privileges required.');
+         return res.redirect('/admin/users/register');
+      }
+
+      res.render('pages/admin/bulk-user-import', {
+         title: 'Bulk User Import',
+         description: 'Import multiple users from CSV file',
+         user: user,
+         tenant: req.tenant || null,
+         userType: userType,
+         userRole: userRole,
+         permissions: req.userPermissions,
+         currentPath: '/admin/bulk-user-import',
+         layout: 'layout'
+      });
+   } catch (error) {
+      logError(error, { 
+         context: 'admin/bulk-user-import GET',
+         userId: req.session?.user?.id
+      });
+      req.flash('error', 'Unable to load bulk import page');
+      res.redirect('/admin/users/register');
+   }
+});
+
+/**
+ * @route GET /admin/user-management
+ * @desc User management interface with search and filtering
+ * @access Private (Admin only)
+ */
+router.get('/admin/user-management', requireUserCreationAccess, async (req, res) => {
+   try {
+      const user = req.session.user;
+      const userType = req.session.userType;
+      const userRole = user.role;
+
+      const { page = 1, limit = 20, search, role, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
+
+      // Fetch users with pagination and filtering (placeholder implementation)
+      const users = {
+         data: [],
+         pagination: {
+            current: parseInt(page),
+            total: 0,
+            limit: parseInt(limit)
+         }
+      };
+
+      res.render('pages/admin/user-management', {
+         title: 'User Management',
+         description: 'Manage user accounts, roles, and permissions',
+         user: user,
+         tenant: req.tenant || null,
+         userType: userType,
+         userRole: userRole,
+         permissions: req.userPermissions,
+         currentPath: '/admin/user-management',
+         users: users.data,
+         pagination: users.pagination,
+         filters: { search, role, status, sortBy, sortOrder },
+         layout: 'layout'
+      });
+   } catch (error) {
+      logError(error, { 
+         context: 'admin/user-management GET',
+         userId: req.session?.user?.id
+      });
+      req.flash('error', 'Unable to load user management page');
+      res.redirect('/dashboard');
+   }
+});
+
+/**
+ * @route POST /api/admin/users/bulk/validate
+ * @desc Validate bulk user data from CSV
+ * @access Private (Admin only with bulk permissions)
+ */
+router.post('/api/admin/users/bulk/validate', requireUserCreationAccess, async (req, res) => {
+   try {
+      const user = req.session.user;
+      const userRole = user.role;
+      const { data } = req.body;
+
+      // Check bulk import permission
+      const canBulkImport = ['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'].includes(userRole);
+      if (!canBulkImport) {
+         return res.status(403).json({
+            error: 'You don\'t have permission for bulk imports'
+         });
+      }
+
+      if (!data || !Array.isArray(data)) {
+         return res.status(400).json({
+            error: 'Invalid data format. Expected array of user objects.'
+         });
+      }
+
+      if (data.length === 0) {
+         return res.status(400).json({
+            error: 'No data provided for validation.'
+         });
+      }
+
+      if (data.length > 1000) {
+         return res.status(400).json({
+            error: 'Maximum 1000 records allowed per import.'
+         });
+      }
+
+      // Get allowed user types for this admin
+      const permissions = req.userPermissions;
+      const allowedTypes = permissions.allowedUserTypes || [];
+
+      const validationResults = await validateBulkUserData(data, allowedTypes);
+
+      res.json(validationResults);
+   } catch (error) {
+      logError(error, { 
+         context: 'POST /api/admin/users/bulk/validate',
+         userId: req.session?.user?.id 
+      });
+      res.status(500).json({ 
+         error: 'Failed to validate bulk data' 
+      });
+   }
+});
+
+/**
+ * @route POST /api/admin/users/bulk/import
+ * @desc Import bulk users from validated CSV data
+ * @access Private (Admin only with bulk permissions)
+ */
+router.post('/api/admin/users/bulk/import', requireUserCreationAccess, async (req, res) => {
+   try {
+      const user = req.session.user;
+      const userType = req.session.userType;
+      const userRole = user.role;
+      const tenantCode = req.session.tenantCode;
+      const { data, validationResults } = req.body;
+
+      // Check bulk import permission
+      const canBulkImport = ['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN'].includes(userRole);
+      if (!canBulkImport) {
+         return res.status(403).json({
+            error: 'You don\'t have permission for bulk imports'
+         });
+      }
+
+      // Set up streaming response
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Transfer-Encoding', 'chunked');
+
+      // Process bulk import with streaming progress updates
+      await processBulkUserImport(
+         data, 
+         validationResults, 
+         {
+            user,
+            userType,
+            userRole,
+            tenantCode,
+            permissions: req.userPermissions,
+            progressCallback: (progress) => {
+               res.write(JSON.stringify(progress) + '\n');
+            }
+         }
+      );
+
+      res.end();
+   } catch (error) {
+      logError(error, { 
+         context: 'POST /api/admin/users/bulk/import',
+         userId: req.session?.user?.id 
+      });
+      
+      if (!res.headersSent) {
+         res.status(500).json({ 
+            error: 'Failed to import bulk users' 
+         });
+      }
+   }
+});
+
+/**
+ * Validate bulk user data
+ */
+async function validateBulkUserData(data, allowedUserTypes) {
+   const valid = [];
+   const invalid = [];
+   const duplicateEmails = new Set();
+   const seenEmails = new Set();
+
+   // Required fields
+   const requiredFields = ['email', 'fullName', 'userType'];
+   
+   // Valid user types
+   const validUserTypes = ['SYSTEM_ADMIN', 'TRUST_ADMIN', 'SCHOOL_ADMIN', 'TEACHER', 'ACCOUNTANT', 'PARENT', 'STUDENT'];
+   
+   // Valid genders
+   const validGenders = ['MALE', 'FEMALE', 'OTHER'];
+
+   data.forEach((row, index) => {
+      const rowNumber = index + 2; // Account for header row
+      const errors = [];
+
+      // Check required fields
+      requiredFields.forEach(field => {
+         if (!row[field] || row[field].trim() === '') {
+            errors.push(`${field} is required`);
+         }
+      });
+
+      // Validate email format
+      if (row.email) {
+         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+         if (!emailRegex.test(row.email)) {
+            errors.push('Invalid email format');
+         }
+
+         // Check for duplicates within the dataset
+         if (seenEmails.has(row.email.toLowerCase())) {
+            duplicateEmails.add(row.email.toLowerCase());
+            errors.push('Duplicate email in dataset');
+         } else {
+            seenEmails.add(row.email.toLowerCase());
+         }
+      }
+
+      // Validate user type
+      if (row.userType && !validUserTypes.includes(row.userType.toUpperCase())) {
+         errors.push(`Invalid user type: ${row.userType}. Valid types: ${validUserTypes.join(', ')}`);
+      }
+
+      // Check permission to create this user type
+      if (row.userType && !allowedUserTypes.includes(row.userType.toUpperCase())) {
+         errors.push(`You don't have permission to create users of type: ${row.userType}`);
+      }
+
+      // Validate phone number format if provided
+      if (row.phoneNumber && !/^\+?[\d\s\-\(\)]+$/.test(row.phoneNumber)) {
+         errors.push('Invalid phone number format');
+      }
+
+      // Validate date format if provided
+      if (row.dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(row.dateOfBirth)) {
+         errors.push('Invalid date format. Use YYYY-MM-DD');
+      }
+
+      // Validate gender if provided
+      if (row.gender && !validGenders.includes(row.gender.toUpperCase())) {
+         errors.push(`Invalid gender. Valid values: ${validGenders.join(', ')}`);
+      }
+
+      const rowData = {
+         row: rowNumber,
+         email: row.email,
+         fullName: row.fullName,
+         userType: row.userType,
+         phoneNumber: row.phoneNumber,
+         dateOfBirth: row.dateOfBirth,
+         gender: row.gender,
+         address: row.address
+      };
+
+      if (errors.length === 0) {
+         valid.push(rowData);
+      } else {
+         invalid.push({
+            ...rowData,
+            errors: errors
+         });
+      }
+   });
+
+   // Create preview (first 10 rows)
+   const preview = data.slice(0, 10).map((row, index) => ({
+      row: index + 2,
+      email: row.email || '',
+      fullName: row.fullName || '',
+      userType: row.userType || ''
+   }));
+
+   return {
+      valid,
+      invalid,
+      summary: {
+         totalCount: data.length,
+         validCount: valid.length,
+         invalidCount: invalid.length,
+         duplicateCount: duplicateEmails.size
+      },
+      preview
+   };
+}
+
+/**
+ * Process bulk user import with streaming progress
+ */
+async function processBulkUserImport(data, validationResults, options) {
+   const { user, userType, userRole, tenantCode, permissions, progressCallback } = options;
+   const PasswordGenerator = require('../utils/passwordGenerator');
+   const emailService = require('../services/emailService');
+   
+   let current = 0;
+   let successful = 0;
+   let failed = 0;
+   const errors = [];
+
+   // Only process valid records
+   const validRecords = validationResults.valid;
+
+   for (const record of validRecords) {
+      current++;
+      
+      try {
+         // Generate password
+         const password = PasswordGenerator.generateTemporaryPassword();
+         
+         // Prepare user data
+         const userData = {
+            email: record.email.toLowerCase(),
+            fullName: record.fullName,
+            userType: record.userType,
+            phoneNumber: record.phoneNumber,
+            dateOfBirth: record.dateOfBirth,
+            gender: record.gender,
+            address: record.address,
+            password: password,
+            createdBy: user.id,
+            tenantCode: userType === 'system' ? null : tenantCode
+         };
+
+         // Create user (placeholder - would need actual implementation)
+         const newUserId = await createUserAccount(userData, userType, tenantCode);
+         
+         // Send welcome email
+         try {
+            await emailService.sendWelcomeEmail(
+               { ...userData, id: newUserId },
+               password,
+               options.tenant
+            );
+         } catch (emailError) {
+            logError(emailError, { 
+               context: 'Bulk import welcome email',
+               userId: newUserId 
+            });
+         }
+
+         successful++;
+
+         // Send progress update
+         progressCallback({
+            type: 'progress',
+            current,
+            total: validRecords.length,
+            successful,
+            failed
+         });
+
+      } catch (error) {
+         failed++;
+         errors.push({
+            type: 'error',
+            row: record.row,
+            email: record.email,
+            message: error.message
+         });
+
+         logError(error, { 
+            context: 'Bulk import user creation',
+            row: record.row,
+            email: record.email 
+         });
+
+         // Send progress update
+         progressCallback({
+            type: 'progress',
+            current,
+            total: validRecords.length,
+            successful,
+            failed
+         });
+      }
+   }
+
+   // Send completion message
+   progressCallback({
+      type: 'complete',
+      successful,
+      failed,
+      errors
+   });
+
+   logSystem('Bulk user import completed', {
+      total: validRecords.length,
+      successful,
+      failed,
+      importedBy: user.id,
+      tenantCode
+   });
+}
+
+/**
+ * Create user account (placeholder implementation)
+ */
+async function createUserAccount(userData, userType, tenantCode) {
+   // This would integrate with the actual user creation services
+   // For now, return a mock ID
+   return Math.floor(Math.random() * 10000);
+}
+
+/**
+ * Helper function to generate secure password
+ */
+function generateSecurePassword(length = 12) {
+   const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+   let password = '';
+   
+   // Ensure at least one character from each required type
+   const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+   const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+   const numbers = '0123456789';
+   const symbols = '!@#$%^&*';
+   
+   password += uppercase[Math.floor(Math.random() * uppercase.length)];
+   password += lowercase[Math.floor(Math.random() * lowercase.length)];
+   password += numbers[Math.floor(Math.random() * numbers.length)];
+   password += symbols[Math.floor(Math.random() * symbols.length)];
+   
+   // Fill the rest randomly
+   for (let i = 4; i < length; i++) {
+      password += charset[Math.floor(Math.random() * charset.length)];
+   }
+   
+   // Shuffle the password
+   return password.split('').sort(() => Math.random() - 0.5).join('');
+}
 
 /**
  * @route GET /

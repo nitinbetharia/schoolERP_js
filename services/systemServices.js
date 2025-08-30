@@ -274,11 +274,163 @@ function createSystemAuthService() {
       }
    }
 
+   /**
+    * Find user by email for password reset
+    */
+   async function findUserByEmail(email) {
+      try {
+         const { SystemUser } = await getSystemModels();
+         
+         const user = await SystemUser.findOne({
+            where: { email: email.toLowerCase() },
+         });
+
+         return user;
+      } catch (error) {
+         logError(error, { context: 'findUserByEmail', email });
+         throw createDatabaseError('Failed to find user by email', 'FIND_USER_ERROR', {
+            originalError: error.message,
+         });
+      }
+   }
+
+   /**
+    * Generate password reset token
+    */
+   async function generatePasswordResetToken(userId) {
+      try {
+         const { SystemUser } = await getSystemModels();
+         
+         const user = await SystemUser.findByPk(userId);
+         if (!user) {
+            throw createNotFoundError('User not found');
+         }
+
+         // Generate token (random string)
+         const crypto = require('crypto');
+         const resetToken = crypto.randomBytes(32).toString('hex');
+         
+         // Set expiration (30 minutes from now)
+         const resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+         // Update user with reset token
+         await user.update({
+            reset_token: resetToken,
+            reset_token_expires: resetTokenExpires,
+         });
+
+         logSystem('Password reset token generated', {
+            userId,
+            tokenExpires: resetTokenExpires,
+         });
+
+         return resetToken;
+      } catch (error) {
+         if (error.isOperational) {
+            throw error;
+         }
+         logError(error, { context: 'generatePasswordResetToken', userId });
+         throw createInternalError('Failed to generate password reset token', 'TOKEN_GENERATION_ERROR', {
+            originalError: error.message,
+         });
+      }
+   }
+
+   /**
+    * Validate password reset token
+    */
+   async function validatePasswordResetToken(token) {
+      try {
+         const { SystemUser } = await getSystemModels();
+         
+         const user = await SystemUser.findOne({
+            where: {
+               reset_token: token,
+               reset_token_expires: {
+                  [require('sequelize').Op.gt]: new Date(),
+               },
+            },
+         });
+
+         if (!user) {
+            return null; // Invalid or expired token
+         }
+
+         return { user, token };
+      } catch (error) {
+         logError(error, { context: 'validatePasswordResetToken', token: token?.substring(0, 10) });
+         throw createDatabaseError('Failed to validate password reset token', 'TOKEN_VALIDATION_ERROR', {
+            originalError: error.message,
+         });
+      }
+   }
+
+   /**
+    * Reset password using token
+    */
+   async function resetPassword(token, newPassword) {
+      try {
+         const { SystemUser } = await getSystemModels();
+         
+         // Validate token first
+         const resetData = await validatePasswordResetToken(token);
+         if (!resetData) {
+            throw createAuthenticationError('Invalid or expired password reset token');
+         }
+
+         const { user } = resetData;
+
+         // Hash new password
+         const saltRounds = appConfig.security.bcryptRounds;
+         const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+
+         // Update password and clear reset token
+         await user.update({
+            password_hash: newPasswordHash,
+            reset_token: null,
+            reset_token_expires: null,
+            // Reset login attempts on successful password reset
+            login_attempts: 0,
+            locked_until: null,
+         });
+
+         logSystem('Password reset completed', {
+            userId: user.id,
+            email: user.email,
+         });
+
+         // Send success email
+         const emailService = require('./emailService');
+         await emailService.sendPasswordResetSuccessEmail(user);
+
+         return {
+            success: true,
+            user: {
+               id: user.id,
+               email: user.email,
+               name: user.full_name,
+            },
+         };
+      } catch (error) {
+         if (error.isOperational) {
+            throw error;
+         }
+         logError(error, { context: 'resetPassword', token: token?.substring(0, 10) });
+         throw createInternalError('Failed to reset password', 'PASSWORD_RESET_ERROR', {
+            originalError: error.message,
+         });
+      }
+   }
+
    return {
       login,
       changePassword,
       createSystemUser,
       updateProfile,
+      findUserByEmail,
+      generatePasswordResetToken,
+      validatePasswordResetToken,
+      resetPassword,
    };
 }
 

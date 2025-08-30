@@ -1,0 +1,899 @@
+<%- contentFor('title') %>Bulk User Import - School ERP<%- /contentFor %>
+
+<%- contentFor('additionalCSS') %>
+<style>
+   .import-progress {
+      display: none;
+   }
+   
+   .import-results {
+      display: none;
+   }
+   
+   .file-upload-area {
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+   }
+   
+   .file-upload-area.dragover {
+      border-color: #0d6efd;
+      background: rgba(13, 110, 253, 0.1);
+   }
+   
+   .file-upload-area .upload-icon {
+      font-size: 3rem;
+      color: #6c757d;
+      margin-bottom: 1rem;
+   }
+   
+   .sample-data-table {
+      font-size: 0.875rem;
+   }
+   
+   .validation-error {
+      background-color: #f8d7da;
+      border-color: #f5c2c7;
+      color: #842029;
+   }
+   
+   .validation-success {
+      background-color: #d1e7dd;
+      border-color: #badbcc;
+      color: #0f5132;
+   }
+   
+   .import-summary-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+   }
+</style>
+<%- /contentFor %>
+
+<div class="container-fluid">
+   <!-- Header -->
+   <div class="row mb-4">
+      <div class="col-12">
+         <div class="d-flex justify-content-between align-items-center">
+            <div>
+               <h1 class="h3 mb-2">Bulk User Import</h1>
+               <p class="text-muted">Import multiple users from CSV file</p>
+            </div>
+            <div>
+               <a href="/admin/user-registration" class="btn btn-outline-secondary">
+                  <i class="fas fa-user-plus me-1"></i> Single User
+               </a>
+               <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#templateModal">
+                  <i class="fas fa-download me-1"></i> Download Template
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Import Steps -->
+   <div class="row">
+      <div class="col-12">
+         <div class="card">
+            <div class="card-body">
+               <!-- Step Indicator -->
+               <div class="row mb-4">
+                  <div class="col-12">
+                     <div class="d-flex justify-content-between align-items-center">
+                        <div class="step-indicator active" id="step1Indicator">
+                           <div class="step-number">1</div>
+                           <div class="step-title">Upload File</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-indicator" id="step2Indicator">
+                           <div class="step-number">2</div>
+                           <div class="step-title">Validate Data</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step-indicator" id="step3Indicator">
+                           <div class="step-number">3</div>
+                           <div class="step-title">Import Users</div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Step 1: File Upload -->
+               <div id="step1" class="import-step">
+                  <div class="row">
+                     <div class="col-md-8">
+                        <div class="file-upload-area" id="fileUploadArea">
+                           <div class="upload-icon">
+                              <i class="fas fa-cloud-upload-alt"></i>
+                           </div>
+                           <h5>Drop your CSV file here or click to browse</h5>
+                           <p class="text-muted">Supported format: CSV files up to 5MB</p>
+                           <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                           <button type="button" class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">
+                              <i class="fas fa-file-upload me-1"></i> Choose File
+                           </button>
+                        </div>
+                        
+                        <div class="mt-3" id="fileInfo" style="display: none;">
+                           <div class="alert alert-info">
+                              <div class="d-flex align-items-center">
+                                 <i class="fas fa-file-csv me-2"></i>
+                                 <div>
+                                    <strong id="fileName"></strong>
+                                    <br>
+                                    <small id="fileDetails"></small>
+                                 </div>
+                                 <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                 </button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     
+                     <div class="col-md-4">
+                        <div class="card bg-light">
+                           <div class="card-body">
+                              <h6 class="card-title">
+                                 <i class="fas fa-info-circle me-1"></i> Requirements
+                              </h6>
+                              <ul class="list-unstyled small">
+                                 <li><i class="fas fa-check text-success me-1"></i> CSV format with headers</li>
+                                 <li><i class="fas fa-check text-success me-1"></i> Maximum 1000 users per file</li>
+                                 <li><i class="fas fa-check text-success me-1"></i> Required fields: email, fullName, userType</li>
+                                 <li><i class="fas fa-check text-success me-1"></i> Valid email addresses</li>
+                                 <li><i class="fas fa-check text-success me-1"></i> No duplicate emails</li>
+                              </ul>
+                              <button type="button" class="btn btn-sm btn-outline-info mt-2" data-bs-toggle="modal" data-bs-target="#helpModal">
+                                 <i class="fas fa-question-circle me-1"></i> Field Guide
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  
+                  <div class="row mt-3">
+                     <div class="col-12">
+                        <button type="button" class="btn btn-primary" id="validateBtn" disabled onclick="validateCsvData()">
+                           <i class="fas fa-check-circle me-1"></i> Validate Data
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Step 2: Data Validation -->
+               <div id="step2" class="import-step" style="display: none;">
+                  <div class="row">
+                     <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                           <h5>Data Validation Results</h5>
+                           <div>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="goToStep(1)">
+                                 <i class="fas fa-arrow-left me-1"></i> Back to Upload
+                              </button>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Validation Summary -->
+                  <div id="validationSummary"></div>
+
+                  <!-- Data Preview -->
+                  <div id="dataPreview"></div>
+                  
+                  <div class="row mt-3">
+                     <div class="col-12">
+                        <button type="button" class="btn btn-success" id="importBtn" disabled onclick="startImport()">
+                           <i class="fas fa-upload me-1"></i> Import Users
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="goToStep(1)">
+                           <i class="fas fa-arrow-left me-1"></i> Back
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Step 3: Import Progress -->
+               <div id="step3" class="import-step" style="display: none;">
+                  <div class="row">
+                     <div class="col-12">
+                        <h5>Importing Users</h5>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-4">
+                           <div class="d-flex justify-content-between align-items-center mb-2">
+                              <span>Progress</span>
+                              <span id="progressText">0 of 0</span>
+                           </div>
+                           <div class="progress" style="height: 25px;">
+                              <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                   id="importProgressBar" role="progressbar" style="width: 0%">
+                              </div>
+                           </div>
+                        </div>
+
+                        <!-- Import Results -->
+                        <div id="importResults"></div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4">
+                           <button type="button" class="btn btn-primary" id="newImportBtn" style="display: none;" onclick="resetImport()">
+                              <i class="fas fa-plus me-1"></i> New Import
+                           </button>
+                           <a href="/admin/user-management" class="btn btn-outline-primary" id="viewUsersBtn" style="display: none;">
+                              <i class="fas fa-users me-1"></i> View Users
+                           </a>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- CSV Template Modal -->
+<div class="modal fade" id="templateModal" tabindex="-1">
+   <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title">
+               <i class="fas fa-download me-1"></i> CSV Template
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body">
+            <p>Use this template to format your user data. All required fields must be included.</p>
+            
+            <div class="table-responsive">
+               <table class="table table-sm sample-data-table">
+                  <thead>
+                     <tr>
+                        <th>email*</th>
+                        <th>fullName*</th>
+                        <th>userType*</th>
+                        <th>phoneNumber</th>
+                        <th>dateOfBirth</th>
+                        <th>gender</th>
+                        <th>address</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td>john.doe@school.com</td>
+                        <td>John Doe</td>
+                        <td>TEACHER</td>
+                        <td>+1234567890</td>
+                        <td>1990-01-15</td>
+                        <td>MALE</td>
+                        <td>123 Main St, City</td>
+                     </tr>
+                     <tr>
+                        <td>jane.smith@school.com</td>
+                        <td>Jane Smith</td>
+                        <td>STUDENT</td>
+                        <td>+1234567891</td>
+                        <td>2005-06-20</td>
+                        <td>FEMALE</td>
+                        <td>456 Oak Ave, Town</td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            
+            <div class="alert alert-info mt-3">
+               <strong>Notes:</strong>
+               <ul class="mb-0">
+                  <li>Fields marked with * are required</li>
+                  <li>UserType must be: SYSTEM_ADMIN, TRUST_ADMIN, SCHOOL_ADMIN, TEACHER, ACCOUNTANT, PARENT, STUDENT</li>
+                  <li>DateOfBirth format: YYYY-MM-DD</li>
+                  <li>Gender: MALE, FEMALE, OTHER</li>
+                  <li>Phone numbers should include country code</li>
+               </ul>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="downloadTemplate()">
+               <i class="fas fa-download me-1"></i> Download CSV Template
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Field Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title">
+               <i class="fas fa-question-circle me-1"></i> Field Guide
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body">
+            <div class="accordion" id="fieldAccordion">
+               <div class="accordion-item">
+                  <h2 class="accordion-header">
+                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#emailHelp">
+                        Email (Required)
+                     </button>
+                  </h2>
+                  <div id="emailHelp" class="accordion-collapse collapse" data-bs-parent="#fieldAccordion">
+                     <div class="accordion-body">
+                        <strong>Valid email address for the user</strong><br>
+                        • Must be unique across all users<br>
+                        • Will be used for login credentials<br>
+                        • Example: user@school.com
+                     </div>
+                  </div>
+               </div>
+               
+               <div class="accordion-item">
+                  <h2 class="accordion-header">
+                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#nameHelp">
+                        Full Name (Required)
+                     </button>
+                  </h2>
+                  <div id="nameHelp" class="accordion-collapse collapse" data-bs-parent="#fieldAccordion">
+                     <div class="accordion-body">
+                        <strong>User's complete name</strong><br>
+                        • Include first and last name<br>
+                        • Can include middle name<br>
+                        • Example: John Michael Doe
+                     </div>
+                  </div>
+               </div>
+               
+               <div class="accordion-item">
+                  <h2 class="accordion-header">
+                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#userTypeHelp">
+                        User Type (Required)
+                     </button>
+                  </h2>
+                  <div id="userTypeHelp" class="accordion-collapse collapse" data-bs-parent="#fieldAccordion">
+                     <div class="accordion-body">
+                        <strong>Role/permission level for the user</strong><br>
+                        • SYSTEM_ADMIN: Full system access<br>
+                        • TRUST_ADMIN: Trust-level management<br>
+                        • SCHOOL_ADMIN: School administration<br>
+                        • TEACHER: Teaching staff<br>
+                        • ACCOUNTANT: Finance management<br>
+                        • PARENT: Student guardian<br>
+                        • STUDENT: Student access
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<%- contentFor('additionalJS') %>
+<script>
+class BulkUserImport {
+   constructor() {
+      this.csvData = null;
+      this.validationResults = null;
+      this.importProgress = {
+         total: 0,
+         current: 0,
+         successful: 0,
+         failed: 0,
+         errors: []
+      };
+      
+      this.initializeEventListeners();
+   }
+
+   initializeEventListeners() {
+      // File upload
+      const fileInput = document.getElementById('csvFileInput');
+      const uploadArea = document.getElementById('fileUploadArea');
+
+      fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+      
+      // Drag and drop
+      uploadArea.addEventListener('dragover', (e) => this.handleDragOver(e));
+      uploadArea.addEventListener('dragleave', (e) => this.handleDragLeave(e));
+      uploadArea.addEventListener('drop', (e) => this.handleFileDrop(e));
+   }
+
+   handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('fileUploadArea').classList.add('dragover');
+   }
+
+   handleDragLeave(e) {
+      e.preventDefault();
+      document.getElementById('fileUploadArea').classList.remove('dragover');
+   }
+
+   handleFileDrop(e) {
+      e.preventDefault();
+      document.getElementById('fileUploadArea').classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+         this.processFile(files[0]);
+      }
+   }
+
+   handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+         this.processFile(file);
+      }
+   }
+
+   processFile(file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+         this.showAlert('Please select a CSV file.', 'danger');
+         return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+         this.showAlert('File size must be less than 5MB.', 'danger');
+         return;
+      }
+
+      // Show file info
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileDetails').textContent = `${(file.size / 1024).toFixed(1)} KB • Modified ${new Date(file.lastModified).toLocaleString()}`;
+      document.getElementById('fileInfo').style.display = 'block';
+      document.getElementById('validateBtn').disabled = false;
+
+      // Read CSV content
+      const reader = new FileReader();
+      reader.onload = (e) => {
+         this.csvData = this.parseCSV(e.target.result);
+         console.log('CSV Data loaded:', this.csvData.length, 'rows');
+      };
+      reader.readAsText(file);
+   }
+
+   parseCSV(text) {
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const data = [];
+
+      for (let i = 1; i < lines.length; i++) {
+         const line = lines[i].trim();
+         if (line) {
+            const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+            const row = {};
+            headers.forEach((header, index) => {
+               row[header] = values[index] || '';
+            });
+            data.push(row);
+         }
+      }
+
+      return data;
+   }
+
+   async validateCsvData() {
+      if (!this.csvData || this.csvData.length === 0) {
+         this.showAlert('No data found in the CSV file.', 'danger');
+         return;
+      }
+
+      this.showLoading('Validating data...');
+
+      try {
+         const response = await fetch('/api/admin/users/bulk/validate', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+               data: this.csvData
+            })
+         });
+
+         const result = await response.json();
+         this.hideLoading();
+
+         if (!response.ok) {
+            throw new Error(result.error || 'Validation failed');
+         }
+
+         this.validationResults = result;
+         this.showValidationResults();
+         this.goToStep(2);
+
+      } catch (error) {
+         this.hideLoading();
+         this.showAlert(error.message, 'danger');
+      }
+   }
+
+   showValidationResults() {
+      const { valid, invalid, summary, preview } = this.validationResults;
+      
+      // Summary cards
+      let summaryHtml = `
+         <div class="row mb-4">
+            <div class="col-md-3">
+               <div class="card text-white bg-success">
+                  <div class="card-body">
+                     <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                           <div class="h4 mb-0">${summary.validCount}</div>
+                           <div>Valid Records</div>
+                        </div>
+                        <div class="ml-3">
+                           <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-3">
+               <div class="card text-white bg-danger">
+                  <div class="card-body">
+                     <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                           <div class="h4 mb-0">${summary.invalidCount}</div>
+                           <div>Invalid Records</div>
+                        </div>
+                        <div class="ml-3">
+                           <i class="fas fa-exclamation-circle fa-2x"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-3">
+               <div class="card text-white bg-warning">
+                  <div class="card-body">
+                     <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                           <div class="h4 mb-0">${summary.duplicateCount}</div>
+                           <div>Duplicates</div>
+                        </div>
+                        <div class="ml-3">
+                           <i class="fas fa-copy fa-2x"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-3">
+               <div class="card text-white import-summary-card">
+                  <div class="card-body">
+                     <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                           <div class="h4 mb-0">${summary.totalCount}</div>
+                           <div>Total Records</div>
+                        </div>
+                        <div class="ml-3">
+                           <i class="fas fa-users fa-2x"></i>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      `;
+
+      // Error details
+      if (summary.invalidCount > 0) {
+         summaryHtml += `
+            <div class="alert alert-warning">
+               <h6><i class="fas fa-exclamation-triangle me-1"></i> Validation Issues Found</h6>
+               <p>Some records have validation errors. Please review and fix these issues before importing.</p>
+            </div>
+         `;
+      } else {
+         summaryHtml += `
+            <div class="alert alert-success">
+               <h6><i class="fas fa-check-circle me-1"></i> All Records Valid</h6>
+               <p>All records passed validation and are ready to import.</p>
+            </div>
+         `;
+      }
+
+      document.getElementById('validationSummary').innerHTML = summaryHtml;
+
+      // Data preview
+      this.showDataPreview(preview, invalid);
+
+      // Enable/disable import button
+      document.getElementById('importBtn').disabled = summary.validCount === 0;
+   }
+
+   showDataPreview(preview, invalid) {
+      let previewHtml = `
+         <div class="card">
+            <div class="card-header">
+               <h6 class="mb-0">Data Preview</h6>
+            </div>
+            <div class="card-body">
+               <div class="table-responsive">
+                  <table class="table table-sm">
+                     <thead>
+                        <tr>
+                           <th>Row</th>
+                           <th>Email</th>
+                           <th>Full Name</th>
+                           <th>User Type</th>
+                           <th>Status</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+      `;
+
+      preview.forEach((row, index) => {
+         const isInvalid = invalid.some(inv => inv.row === row.row);
+         const rowClass = isInvalid ? 'validation-error' : 'validation-success';
+         
+         previewHtml += `
+            <tr class="${rowClass}">
+               <td>${row.row}</td>
+               <td>${row.email}</td>
+               <td>${row.fullName}</td>
+               <td>${row.userType}</td>
+               <td>
+                  ${isInvalid ? 
+                     '<span class="badge bg-danger">Invalid</span>' : 
+                     '<span class="badge bg-success">Valid</span>'
+                  }
+               </td>
+            </tr>
+         `;
+      });
+
+      previewHtml += `
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      `;
+
+      // Show errors if any
+      if (invalid.length > 0) {
+         previewHtml += `
+            <div class="card mt-3">
+               <div class="card-header bg-danger text-white">
+                  <h6 class="mb-0">Validation Errors</h6>
+               </div>
+               <div class="card-body">
+         `;
+         
+         invalid.forEach(error => {
+            previewHtml += `
+               <div class="alert alert-danger mb-2">
+                  <strong>Row ${error.row}:</strong> ${error.errors.join(', ')}
+               </div>
+            `;
+         });
+         
+         previewHtml += `
+               </div>
+            </div>
+         `;
+      }
+
+      document.getElementById('dataPreview').innerHTML = previewHtml;
+   }
+
+   async startImport() {
+      if (!this.validationResults || this.validationResults.summary.validCount === 0) {
+         this.showAlert('No valid records to import.', 'warning');
+         return;
+      }
+
+      this.goToStep(3);
+      this.importProgress.total = this.validationResults.summary.validCount;
+      this.importProgress.current = 0;
+      this.importProgress.successful = 0;
+      this.importProgress.failed = 0;
+      this.importProgress.errors = [];
+
+      this.updateProgress();
+
+      try {
+         const response = await fetch('/api/admin/users/bulk/import', {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+               data: this.csvData,
+               validationResults: this.validationResults
+            })
+         });
+
+         if (!response.ok) {
+            throw new Error('Import failed');
+         }
+
+         // Process streaming response
+         const reader = response.body.getReader();
+         const decoder = new TextDecoder();
+
+         while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const text = decoder.decode(value);
+            const lines = text.split('\n').filter(line => line.trim());
+
+            for (const line of lines) {
+               try {
+                  const result = JSON.parse(line);
+                  this.handleImportProgress(result);
+               } catch (e) {
+                  // Ignore parsing errors
+               }
+            }
+         }
+
+      } catch (error) {
+         this.showAlert(error.message, 'danger');
+      }
+   }
+
+   handleImportProgress(result) {
+      if (result.type === 'progress') {
+         this.importProgress.current = result.current;
+         this.importProgress.successful = result.successful;
+         this.importProgress.failed = result.failed;
+         this.updateProgress();
+      } else if (result.type === 'error') {
+         this.importProgress.errors.push(result);
+      } else if (result.type === 'complete') {
+         this.showImportComplete();
+      }
+   }
+
+   updateProgress() {
+      const percentage = Math.round((this.importProgress.current / this.importProgress.total) * 100);
+      
+      document.getElementById('importProgressBar').style.width = percentage + '%';
+      document.getElementById('progressText').textContent = 
+         `${this.importProgress.current} of ${this.importProgress.total}`;
+   }
+
+   showImportComplete() {
+      const { successful, failed, errors } = this.importProgress;
+      
+      let resultHtml = `
+         <div class="row">
+            <div class="col-md-6">
+               <div class="card text-white bg-success">
+                  <div class="card-body text-center">
+                     <h3>${successful}</h3>
+                     <p class="mb-0">Successfully Imported</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-md-6">
+               <div class="card text-white bg-danger">
+                  <div class="card-body text-center">
+                     <h3>${failed}</h3>
+                     <p class="mb-0">Failed to Import</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      `;
+
+      if (errors.length > 0) {
+         resultHtml += `
+            <div class="card mt-3">
+               <div class="card-header bg-warning">
+                  <h6 class="mb-0">Import Errors</h6>
+               </div>
+               <div class="card-body">
+         `;
+         
+         errors.forEach(error => {
+            resultHtml += `
+               <div class="alert alert-danger mb-1">
+                  <small><strong>Row ${error.row}:</strong> ${error.message}</small>
+               </div>
+            `;
+         });
+         
+         resultHtml += `
+               </div>
+            </div>
+         `;
+      }
+
+      document.getElementById('importResults').innerHTML = resultHtml;
+      document.getElementById('newImportBtn').style.display = 'inline-block';
+      document.getElementById('viewUsersBtn').style.display = 'inline-block';
+   }
+
+   // Utility functions
+   goToStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.import-step').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.step-indicator').forEach(el => el.classList.remove('active'));
+      
+      // Show current step
+      document.getElementById(`step${step}`).style.display = 'block';
+      document.getElementById(`step${step}Indicator`).classList.add('active');
+   }
+
+   resetImport() {
+      this.csvData = null;
+      this.validationResults = null;
+      document.getElementById('fileInfo').style.display = 'none';
+      document.getElementById('validateBtn').disabled = true;
+      document.getElementById('csvFileInput').value = '';
+      this.goToStep(1);
+   }
+
+   clearFile() {
+      this.resetImport();
+   }
+
+   showAlert(message, type) {
+      const alertHtml = `
+         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+         </div>
+      `;
+      
+      const container = document.querySelector('.container-fluid');
+      container.insertAdjacentHTML('afterbegin', alertHtml);
+      
+      setTimeout(() => {
+         const alert = container.querySelector('.alert');
+         if (alert) alert.remove();
+      }, 5000);
+   }
+
+   showLoading(message) {
+      // Implementation for loading spinner
+   }
+
+   hideLoading() {
+      // Implementation to hide loading spinner
+   }
+}
+
+// Template download function
+function downloadTemplate() {
+   const csvContent = `email,fullName,userType,phoneNumber,dateOfBirth,gender,address
+john.doe@school.com,John Doe,TEACHER,+1234567890,1990-01-15,MALE,123 Main St
+jane.smith@school.com,Jane Smith,STUDENT,+1234567891,2005-06-20,FEMALE,456 Oak Ave`;
+
+   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+   const link = document.createElement('a');
+   const url = URL.createObjectURL(blob);
+   
+   link.setAttribute('href', url);
+   link.setAttribute('download', 'user_import_template.csv');
+   link.style.visibility = 'hidden';
+   
+   document.body.appendChild(link);
+   link.click();
+   document.body.removeChild(link);
+   
+   const modal = bootstrap.Modal.getInstance(document.getElementById('templateModal'));
+   modal.hide();
+}
+
+// Initialize the bulk import system
+document.addEventListener('DOMContentLoaded', function() {
+   window.bulkImport = new BulkUserImport();
+});
+</script>
+<%- /contentFor %>

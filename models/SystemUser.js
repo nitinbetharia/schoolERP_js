@@ -87,6 +87,18 @@ const defineSystemUserModel = (sequelize) => {
             comment: 'Last password change timestamp',
          },
 
+         reset_token: {
+            type: DataTypes.STRING(64),
+            allowNull: true,
+            comment: 'Password reset token',
+         },
+
+         reset_token_expires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            comment: 'Password reset token expiry timestamp',
+         },
+
          created_by: {
             type: DataTypes.INTEGER,
             allowNull: true,

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to <%= tenant && tenant.name ? tenant.name : 'School ERP System' %></title>
+    <style>
+        /* Email-safe CSS */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .header-logo {
+            max-height: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555;
+        }
+        
+        .credentials-box {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .credentials-box h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 18px;
+        }
+        
+        .credential-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px 15px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .credential-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .credential-value {
+            font-family: 'Courier New', monospace;
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: #495057;
+        }
+        
+        .login-button {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .login-button a {
+            display: inline-block;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white !important;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+        }
+        
+        .login-button a:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+        }
+        
+        .security-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .security-notice h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+            font-size: 16px;
+        }
+        
+        .security-notice p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .user-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #bee5eb;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .user-info h3 {
+            margin: 0 0 10px 0;
+            color: #0c5460;
+            font-size: 16px;
+        }
+        
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .info-value {
+            color: #0c5460;
+            font-weight: 500;
+        }
+        
+        .quick-links {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        
+        .quick-links h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 16px;
+        }
+        
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .quick-link {
+            display: block;
+            text-decoration: none;
+            color: #007bff;
+            padding: 8px 12px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .quick-link:hover {
+            background-color: #e9ecef;
+        }
+        
+        .footer {
+            background-color: #2c3e50;
+            color: #bdc3c7;
+            padding: 30px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .footer p {
+            margin: 5px 0;
+        }
+        
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #bdc3c7;
+            text-decoration: none;
+        }
+        
+        /* Mobile responsiveness */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+            
+            .header, .content, .footer {
+                padding: 20px !important;
+            }
+            
+            .header h1 {
+                font-size: 24px !important;
+            }
+            
+            .user-info-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .links-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .credential-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                text-align: left;
+            }
+            
+            .credential-value {
+                margin-top: 5px;
+                word-break: break-all;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="welcome-icon">🎉</div>
+            
+            <% if (tenant && tenant.branding && tenant.branding.logo) { %>
+                <img src="<%= tenant.branding.logo %>" alt="<%= tenant.name %>" class="header-logo">
+            <% } else { %>
+                <div style="width: 60px; height: 60px; background-color: rgba(255,255,255,0.2); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; font-size: 24px;">
+                    🏫
+                </div>
+            <% } %>
+            <h1>Welcome to <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>!</h1>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello <%= user.full_name || user.name || user.firstName + ' ' + user.lastName || 'User' %>,
+            </div>
+            
+            <div class="message">
+                <p><strong>Welcome aboard!</strong> Your account has been successfully created and you now have access to the <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>.</p>
+                
+                <p>This email contains your login credentials and important information about your new account.</p>
+            </div>
+            
+            <!-- User Information -->
+            <div class="user-info">
+                <h3>👤 Your Account Information</h3>
+                <div class="user-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value"><%= user.full_name || user.name || (user.firstName + ' ' + user.lastName) %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value"><%= user.email %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">User Role</div>
+                        <div class="info-value"><%= user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) %></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value"><%= user.status || 'Active' %></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Login Credentials -->
+            <div class="credentials-box">
+                <h3>🔐 Your Login Credentials</h3>
+                <div class="credential-item">
+                    <span class="credential-label">Username/Email:</span>
+                    <span class="credential-value"><%= user.email %></span>
+                </div>
+                <% if (password) { %>
+                <div class="credential-item">
+                    <span class="credential-label">Password:</span>
+                    <span class="credential-value"><%= password %></span>
+                </div>
+                <% } %>
+            </div>
+            
+            <!-- Login Button -->
+            <div class="login-button">
+                <a href="<%= loginUrl %>" target="_blank">
+                    🚀 Login to Your Account
+                </a>
+            </div>
+            
+            <!-- Security Notice -->
+            <div class="security-notice">
+                <h3>🛡️ Important Security Notice</h3>
+                <p><strong>Change your password:</strong> For security reasons, please change your password after your first login.</p>
+                <p><strong>Keep credentials safe:</strong> Never share your login credentials with anyone.</p>
+                <p><strong>Secure logout:</strong> Always log out when using shared computers.</p>
+                <% if (password) { %>
+                <p><strong>Temporary password:</strong> The password provided is temporary and should be changed immediately.</p>
+                <% } %>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="quick-links">
+                <h3>🔗 Quick Links</h3>
+                <div class="links-grid">
+                    <% 
+                    const roleLinks = {
+                        'SYSTEM_ADMIN': [
+                            { name: 'System Dashboard', url: '/admin/system' },
+                            { name: 'Manage Trusts', url: '/system/trusts' },
+                            { name: 'System Health', url: '/system/health' }
+                        ],
+                        'TRUST_ADMIN': [
+                            { name: 'Trust Dashboard', url: '/dashboard' },
+                            { name: 'Schools Management', url: '/schools' },
+                            { name: 'User Management', url: '/admin/users/register' }
+                        ],
+                        'SCHOOL_ADMIN': [
+                            { name: 'School Dashboard', url: '/dashboard' },
+                            { name: 'Students', url: '/students' },
+                            { name: 'Teachers', url: '/teachers' },
+                            { name: 'Fee Management', url: '/fees' }
+                        ],
+                        'TEACHER': [
+                            { name: 'Teacher Dashboard', url: '/dashboard' },
+                            { name: 'My Classes', url: '/classes' },
+                            { name: 'Students', url: '/students' },
+                            { name: 'Attendance', url: '/attendance' }
+                        ],
+                        'ACCOUNTANT': [
+                            { name: 'Finance Dashboard', url: '/dashboard' },
+                            { name: 'Fee Collection', url: '/fees/collection' },
+                            { name: 'Reports', url: '/reports/financial' }
+                        ],
+                        'PARENT': [
+                            { name: 'Parent Portal', url: '/dashboard' },
+                            { name: 'My Children', url: '/children' },
+                            { name: 'Fee Payments', url: '/payments' }
+                        ],
+                        'STUDENT': [
+                            { name: 'Student Portal', url: '/dashboard' },
+                            { name: 'My Classes', url: '/classes' },
+                            { name: 'Assignments', url: '/assignments' }
+                        ]
+                    };
+                    
+                    const userRole = user.role || 'STUDENT';
+                    const links = roleLinks[userRole] || roleLinks['STUDENT'];
+                    %>
+                    
+                    <% links.forEach(link => { %>
+                        <a href="<%= baseUrl %><%= link.url %>" class="quick-link" target="_blank">
+                            <%= link.name %>
+                        </a>
+                    <% }); %>
+                    
+                    <a href="<%= baseUrl %>/help" class="quick-link" target="_blank">
+                        Help Center
+                    </a>
+                    <a href="<%= baseUrl %>/profile" class="quick-link" target="_blank">
+                        Update Profile
+                    </a>
+                </div>
+            </div>
+            
+            <div class="message">
+                <p>If you have any questions or need assistance getting started, please don't hesitate to contact our support team or your system administrator.</p>
+                
+                <p>We're excited to have you as part of our <%= tenant && tenant.name ? tenant.name : 'School ERP' %> community!</p>
+                
+                <p>Best regards,<br>
+                <strong><%= tenant && tenant.name ? tenant.name : 'School ERP System' %> Team</strong></p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong><%= tenant && tenant.name ? tenant.name : 'School ERP System' %></strong></p>
+            
+            <% if (tenant && tenant.address) { %>
+                <p><%= tenant.address %></p>
+            <% } %>
+            
+            <% if (tenant && tenant.phone) { %>
+                <p>Phone: <%= tenant.phone %></p>
+            <% } %>
+            
+            <% if (tenant && tenant.email) { %>
+                <p>Email: <a href="mailto:<%= tenant.email %>"><%= tenant.email %></a></p>
+            <% } %>
+            
+            <div class="social-links">
+                <% if (tenant && tenant.website) { %>
+                    <a href="<%= tenant.website %>" target="_blank">🌐 Website</a>
+                <% } %>
+                
+                <% if (tenant && tenant.social && tenant.social.facebook) { %>
+                    <a href="<%= tenant.social.facebook %>" target="_blank">📘 Facebook</a>
+                <% } %>
+                
+                <% if (tenant && tenant.social && tenant.social.twitter) { %>
+                    <a href="<%= tenant.social.twitter %>" target="_blank">🐦 Twitter</a>
+                <% } %>
+                
+                <a href="<%= baseUrl %>/support" target="_blank">💬 Support</a>
+                <a href="<%= baseUrl %>/help" target="_blank">❓ Help</a>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #95a5a6;">
+                This is an automated message. Please do not reply to this email.
+                <br>
+                © <%= new Date().getFullYear() %> <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

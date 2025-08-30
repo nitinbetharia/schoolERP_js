@@ -1,0 +1,874 @@
+<!-- User Registration Management Page -->
+<%
+// Layout configuration 
+pageTitle = 'User Registration';
+pageDescription = 'Create and manage user accounts';
+%>
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2 text-gray-800">
+                <i class="fas fa-user-plus me-2"></i>User Registration
+            </h1>
+            <p class="text-muted mb-0">Create new user accounts and manage registration requests</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="loadUserList()">
+                <i class="fas fa-list me-2"></i>View All Users
+            </button>
+            <button type="button" class="btn btn-brand-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="fas fa-plus me-2"></i>Create New User
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalUsers">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Active Users
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeUsers">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pending Approvals
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingUsers">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                This Month
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="monthlyUsers">
+                                <span class="spinner-border spinner-border-sm"></span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Types Based on User Role -->
+    <% if (user && user.role) { %>
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-shield-alt me-2"></i>Available User Types for Your Role
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="userTypeCards">
+                        <!-- User type cards will be populated by JavaScript based on role -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+
+    <!-- Recent Registration Requests -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-clock me-2"></i>Recent Registration Requests
+            </h6>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                        data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-1"></i>Filter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="filterRequests('all')">All Requests</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterRequests('pending')">Pending</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterRequests('approved')">Approved</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="filterRequests('rejected')">Rejected</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="registrationTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>User Type</th>
+                            <th>Role</th>
+                            <th>Requested By</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationTableBody">
+                        <tr>
+                            <td colspan="8" class="text-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <div class="mt-2">Loading registration requests...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Create New User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="createUserForm" class="needs-validation" novalidate>
+                <div class="modal-body">
+                    
+                    <!-- Step 1: User Type Selection -->
+                    <div class="step-content" id="step1">
+                        <h6 class="fw-bold mb-3">
+                            <span class="badge bg-primary me-2">1</span>Select User Type
+                        </h6>
+                        
+                        <div class="row" id="userTypeSelection">
+                            <!-- User type cards will be populated by JavaScript -->
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> Available user types depend on your role and permissions.
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Basic Information -->
+                    <div class="step-content d-none" id="step2">
+                        <h6 class="fw-bold mb-3">
+                            <span class="badge bg-primary me-2">2</span>Basic Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                <div class="invalid-feedback">Please provide a first name.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                <div class="invalid-feedback">Please provide a last name.</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="invalid-feedback">Please provide a valid email address.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="gender" class="form-label">Gender</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Role and Permissions -->
+                    <div class="step-content d-none" id="step3">
+                        <h6 class="fw-bold mb-3">
+                            <span class="badge bg-primary me-2">3</span>Role and Permissions
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="userRole" class="form-label">User Role *</label>
+                                <select class="form-select" id="userRole" name="role" required>
+                                    <option value="">Select Role</option>
+                                    <!-- Options will be populated based on user type selection -->
+                                </select>
+                                <div class="invalid-feedback">Please select a role.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="userStatus" class="form-label">Initial Status</label>
+                                <select class="form-select" id="userStatus" name="status">
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="PENDING">Pending Approval</option>
+                                    <option value="INACTIVE">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Role-specific fields will be inserted here -->
+                        <div id="roleSpecificFields"></div>
+                    </div>
+
+                    <!-- Step 4: Password Setup -->
+                    <div class="step-content d-none" id="step4">
+                        <h6 class="fw-bold mb-3">
+                            <span class="badge bg-primary me-2">4</span>Password Setup
+                        </h6>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="passwordOption" 
+                                   id="generatePassword" value="generate" checked>
+                            <label class="form-check-label" for="generatePassword">
+                                <strong>Generate secure password</strong>
+                                <br><small class="text-muted">System will create a strong password and send it via email</small>
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="passwordOption" 
+                                   id="setPassword" value="manual">
+                            <label class="form-check-label" for="setPassword">
+                                <strong>Set password manually</strong>
+                                <br><small class="text-muted">Create a password for the user</small>
+                            </label>
+                        </div>
+                        
+                        <div id="manualPasswordFields" class="d-none">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="sendWelcomeEmail" checked>
+                            <label class="form-check-label" for="sendWelcomeEmail">
+                                Send welcome email with login instructions
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step Navigation -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-outline-secondary" id="prevStep" onclick="previousStep()" disabled>
+                            <i class="fas fa-arrow-left me-2"></i>Previous
+                        </button>
+                        <div class="step-indicator">
+                            <span class="badge bg-primary me-1">1</span>
+                            <span class="badge bg-light text-dark me-1">2</span>
+                            <span class="badge bg-light text-dark me-1">3</span>
+                            <span class="badge bg-light text-dark">4</span>
+                        </div>
+                        <button type="button" class="btn btn-brand-primary" id="nextStep" onclick="nextStep()">
+                            Next<i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success d-none" id="createUserBtn">
+                        <i class="fas fa-user-plus me-2"></i>Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    
+    .user-type-card {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+    
+    .user-type-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .user-type-card.selected {
+        border-color: var(--bs-primary);
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+    
+    .step-indicator .badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    @media (max-width: 768px) {
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+    }
+</style>
+
+<!-- JavaScript for User Registration -->
+<script>
+    // User registration management functionality
+    let currentStep = 1;
+    let selectedUserType = null;
+    let userPermissions = null;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUserStats();
+        loadRegistrationRequests();
+        loadUserPermissions();
+        setupFormValidation();
+        setupPasswordToggle();
+    });
+
+    // Load user statistics
+    async function loadUserStats() {
+        try {
+            const response = await fetch('/api/admin/users/stats');
+            const stats = await response.json();
+            
+            document.getElementById('totalUsers').textContent = stats.total || 0;
+            document.getElementById('activeUsers').textContent = stats.active || 0;
+            document.getElementById('pendingUsers').textContent = stats.pending || 0;
+            document.getElementById('monthlyUsers').textContent = stats.monthly || 0;
+        } catch (error) {
+            console.error('Failed to load user stats:', error);
+            // Show error indicators
+            document.querySelectorAll('#totalUsers, #activeUsers, #pendingUsers, #monthlyUsers')
+                .forEach(el => el.innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i>');
+        }
+    }
+
+    // Load user permissions and available user types
+    async function loadUserPermissions() {
+        try {
+            const response = await fetch('/api/admin/users/permissions');
+            userPermissions = await response.json();
+            
+            populateUserTypeCards();
+        } catch (error) {
+            console.error('Failed to load user permissions:', error);
+        }
+    }
+
+    // Populate user type cards based on permissions
+    function populateUserTypeCards() {
+        const container = document.getElementById('userTypeCards');
+        const selectionContainer = document.getElementById('userTypeSelection');
+        
+        if (!userPermissions || !userPermissions.canCreateUserTypes) {
+            return;
+        }
+        
+        let cardsHtml = '';
+        userPermissions.canCreateUserTypes.forEach(userType => {
+            cardsHtml += `
+                <div class="col-md-4 mb-3">
+                    <div class="card user-type-card h-100" onclick="selectUserType('${userType.type}')">
+                        <div class="card-body text-center">
+                            <i class="${userType.icon} fa-3x text-primary mb-3"></i>
+                            <h6 class="card-title">${userType.name}</h6>
+                            <p class="card-text small text-muted">${userType.description}</p>
+                            <div class="mt-2">
+                                <span class="badge bg-secondary">${userType.roles.join(', ')}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = cardsHtml;
+        selectionContainer.innerHTML = cardsHtml;
+    }
+
+    // Select user type
+    function selectUserType(userType) {
+        selectedUserType = userType;
+        
+        // Update UI
+        document.querySelectorAll('.user-type-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        event.currentTarget.classList.add('selected');
+        
+        // Update role options
+        updateRoleOptions();
+    }
+
+    // Update role options based on selected user type
+    function updateRoleOptions() {
+        if (!selectedUserType || !userPermissions) return;
+        
+        const userTypeConfig = userPermissions.canCreateUserTypes.find(ut => ut.type === selectedUserType);
+        if (!userTypeConfig) return;
+        
+        const roleSelect = document.getElementById('userRole');
+        roleSelect.innerHTML = '<option value="">Select Role</option>';
+        
+        userTypeConfig.roles.forEach(role => {
+            const option = document.createElement('option');
+            option.value = role;
+            option.textContent = role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            roleSelect.appendChild(option);
+        });
+    }
+
+    // Step navigation
+    function nextStep() {
+        if (!validateCurrentStep()) {
+            return;
+        }
+        
+        if (currentStep < 4) {
+            currentStep++;
+            updateStepDisplay();
+        }
+    }
+
+    function previousStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            updateStepDisplay();
+        }
+    }
+
+    // Update step display
+    function updateStepDisplay() {
+        // Hide all steps
+        document.querySelectorAll('.step-content').forEach(step => {
+            step.classList.add('d-none');
+        });
+        
+        // Show current step
+        document.getElementById(`step${currentStep}`).classList.remove('d-none');
+        
+        // Update step indicator
+        document.querySelectorAll('.step-indicator .badge').forEach((badge, index) => {
+            if (index + 1 <= currentStep) {
+                badge.classList.remove('bg-light', 'text-dark');
+                badge.classList.add('bg-primary');
+            } else {
+                badge.classList.remove('bg-primary');
+                badge.classList.add('bg-light', 'text-dark');
+            }
+        });
+        
+        // Update navigation buttons
+        document.getElementById('prevStep').disabled = currentStep === 1;
+        
+        if (currentStep === 4) {
+            document.getElementById('nextStep').classList.add('d-none');
+            document.getElementById('createUserBtn').classList.remove('d-none');
+        } else {
+            document.getElementById('nextStep').classList.remove('d-none');
+            document.getElementById('createUserBtn').classList.add('d-none');
+        }
+    }
+
+    // Validate current step
+    function validateCurrentStep() {
+        switch (currentStep) {
+            case 1:
+                if (!selectedUserType) {
+                    showNotification('Please select a user type', 'warning');
+                    return false;
+                }
+                return true;
+            case 2:
+                return validateStep2();
+            case 3:
+                return validateStep3();
+            case 4:
+                return validateStep4();
+            default:
+                return true;
+        }
+    }
+
+    function validateStep2() {
+        const requiredFields = ['firstName', 'lastName', 'email'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+        
+        return isValid;
+    }
+
+    function validateStep3() {
+        const roleField = document.getElementById('userRole');
+        if (!roleField.value) {
+            roleField.classList.add('is-invalid');
+            showNotification('Please select a role', 'warning');
+            return false;
+        } else {
+            roleField.classList.remove('is-invalid');
+            roleField.classList.add('is-valid');
+            return true;
+        }
+    }
+
+    function validateStep4() {
+        const passwordOption = document.querySelector('input[name="passwordOption"]:checked').value;
+        
+        if (passwordOption === 'manual') {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!password) {
+                showNotification('Please enter a password', 'warning');
+                return false;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'warning');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // Setup form validation and submission
+    function setupFormValidation() {
+        const form = document.getElementById('createUserForm');
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateCurrentStep()) {
+                return;
+            }
+            
+            await submitUserCreation();
+        });
+        
+        // Password option toggle
+        document.querySelectorAll('input[name="passwordOption"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const manualFields = document.getElementById('manualPasswordFields');
+                if (this.value === 'manual') {
+                    manualFields.classList.remove('d-none');
+                    document.getElementById('password').required = true;
+                } else {
+                    manualFields.classList.add('d-none');
+                    document.getElementById('password').required = false;
+                }
+            });
+        });
+    }
+
+    // Submit user creation
+    async function submitUserCreation() {
+        try {
+            const submitButton = document.getElementById('createUserBtn');
+            const originalText = submitButton.innerHTML;
+            
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
+            
+            // Gather form data
+            const formData = new FormData(document.getElementById('createUserForm'));
+            formData.append('userType', selectedUserType);
+            
+            // Submit to server
+            const response = await fetch('/api/admin/users/create', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('User created successfully!', 'success');
+                
+                // Reset form and close modal
+                document.getElementById('createUserForm').reset();
+                bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+                
+                // Refresh data
+                loadUserStats();
+                loadRegistrationRequests();
+                
+                // Reset step
+                currentStep = 1;
+                updateStepDisplay();
+                selectedUserType = null;
+                
+            } else {
+                showNotification(result.error || 'Failed to create user', 'error');
+            }
+            
+        } catch (error) {
+            console.error('User creation error:', error);
+            showNotification('Failed to create user. Please try again.', 'error');
+        } finally {
+            // Reset button state
+            const submitButton = document.getElementById('createUserBtn');
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create User';
+        }
+    }
+
+    // Load registration requests
+    async function loadRegistrationRequests() {
+        try {
+            const response = await fetch('/api/admin/users/registration-requests');
+            const requests = await response.json();
+            
+            const tbody = document.getElementById('registrationTableBody');
+            
+            if (requests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                            <div>No registration requests found</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let tableHtml = '';
+            requests.forEach(request => {
+                const statusBadge = getStatusBadge(request.status);
+                tableHtml += `
+                    <tr>
+                        <td>${request.full_name || request.first_name + ' ' + request.last_name}</td>
+                        <td>${request.email}</td>
+                        <td>${request.user_type}</td>
+                        <td>${request.role}</td>
+                        <td>${request.created_by_name || 'System'}</td>
+                        <td>${new Date(request.created_at).toLocaleDateString()}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="viewUser(${request.id})" 
+                                        title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                ${request.status === 'PENDING' ? `
+                                    <button class="btn btn-outline-success" onclick="approveUser(${request.id})"
+                                            title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="rejectUser(${request.id})"
+                                            title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = tableHtml;
+            
+        } catch (error) {
+            console.error('Failed to load registration requests:', error);
+            document.getElementById('registrationTableBody').innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load registration requests
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Get status badge HTML
+    function getStatusBadge(status) {
+        const badges = {
+            'PENDING': '<span class="badge bg-warning">Pending</span>',
+            'APPROVED': '<span class="badge bg-success">Approved</span>',
+            'ACTIVE': '<span class="badge bg-success">Active</span>',
+            'REJECTED': '<span class="badge bg-danger">Rejected</span>',
+            'INACTIVE': '<span class="badge bg-secondary">Inactive</span>'
+        };
+        
+        return badges[status] || `<span class="badge bg-light text-dark">${status}</span>`;
+    }
+
+    // Password visibility toggle
+    function setupPasswordToggle() {
+        // Implementation handled in onclick attribute for simplicity
+    }
+
+    function togglePasswordVisibility(fieldId) {
+        const field = document.getElementById(fieldId);
+        const button = field.parentNode.querySelector('button i');
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            button.className = 'fas fa-eye-slash';
+        } else {
+            field.type = 'password';
+            button.className = 'fas fa-eye';
+        }
+    }
+
+    // Utility functions
+    function showNotification(message, type = 'info') {
+        // Implementation depends on your notification system
+        // For now, using browser alert
+        if (type === 'error') {
+            alert('Error: ' + message);
+        } else if (type === 'success') {
+            alert('Success: ' + message);
+        } else {
+            alert(message);
+        }
+    }
+
+    // Additional functions for user management
+    function viewUser(userId) {
+        // Implementation for viewing user details
+        window.location.href = `/admin/users/${userId}`;
+    }
+
+    function approveUser(userId) {
+        if (confirm('Are you sure you want to approve this user?')) {
+            // Implementation for approving user
+            console.log('Approving user:', userId);
+        }
+    }
+
+    function rejectUser(userId) {
+        const reason = prompt('Please provide a reason for rejection:');
+        if (reason) {
+            // Implementation for rejecting user
+            console.log('Rejecting user:', userId, 'Reason:', reason);
+        }
+    }
+
+    function filterRequests(filter) {
+        // Implementation for filtering requests
+        console.log('Filtering requests:', filter);
+        loadRegistrationRequests(); // Reload with filter
+    }
+
+    function loadUserList() {
+        // Redirect to user list page
+        window.location.href = '/admin/users';
+    }
+</script>

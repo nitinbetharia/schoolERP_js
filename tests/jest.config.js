@@ -1,0 +1,23 @@
+module.exports = {
+   testEnvironment: 'node',
+   testTimeout: 30000,
+   setupFilesAfterEnv: ['<rootDir>/setup.js'],
+   testMatch: [
+      '<rootDir>/**/*.test.js',
+      '<rootDir>/**/*.spec.js'
+   ],
+   collectCoverageFrom: [
+      '../routes/**/*.js',
+      '../services/**/*.js',
+      '../utils/**/*.js',
+      '../middleware/**/*.js',
+      '!**/node_modules/**',
+      '!**/tests/**'
+   ],
+   coverageDirectory: 'coverage',
+   coverageReporters: ['text', 'lcov', 'html'],
+   verbose: true,
+   forceExit: true,
+   detectOpenHandles: true,
+   rootDir: __dirname
+};

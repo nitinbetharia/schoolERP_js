@@ -98,6 +98,24 @@ const defineTenantUserModel = (sequelize) => {
             allowNull: true,
          },
 
+         login_attempts: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
+            comment: 'Failed login attempts counter',
+         },
+
+         reset_token: {
+            type: DataTypes.STRING(64),
+            allowNull: true,
+            comment: 'Password reset token',
+         },
+
+         reset_token_expires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            comment: 'Password reset token expiry timestamp',
+         },
+
          created_at: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
