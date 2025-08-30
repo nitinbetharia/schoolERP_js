@@ -8,9 +8,7 @@ const systemRoutes = require('./system');
 const userRoutes = require('../modules/users/routes/userRoutes');
 const studentRoutes = require('../modules/students/routes/studentRoutes');
 const setupRoutes = require('../modules/setup/routes/setupRoutes'); // PHASE 1: ENABLED
-// TODO: Refactor these modules to use centralized error handling
-// const schoolRoutes = require('../modules/school/routes/index');
-// const udiseRoutes = require('../modules/udise/routes/UdiseRoutes');
+const schoolRoutes = require('../modules/school/routes/index'); // Basic school routes enabled
 
 // Mount core routes
 router.use('/admin/system', systemRoutes);
@@ -19,9 +17,7 @@ router.use('/admin/system', systemRoutes);
 router.use('/users', userRoutes);
 router.use('/students', studentRoutes);
 router.use('/setup', setupRoutes); // PHASE 1: ENABLED
-// TODO: Enable after refactoring error handling
-// router.use('/school', schoolRoutes);
-// router.use('/udise', udiseRoutes());
+router.use('/schools', schoolRoutes); // ENABLED: Basic school functionality
 
 // API status endpoint
 router.get('/status', (req, res) => {

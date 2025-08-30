@@ -145,13 +145,30 @@ async function deleteUser(req, res) {
 }
 
 /**
- * List users with filtering and pagination
+ * List users with filtering and pagination  
  * GET /api/users
  */
 async function listUsers(req, res) {
    try {
       const tenantCode = req.tenantCode;
       const query = req.query;
+
+      // Check if this is system admin access (no tenant context)
+      if (!tenantCode && req.isSystemAdmin) {
+         return res.status(400).json(formatErrorResponse(
+            new Error('Tenant context required'),
+            'User data requires tenant context. ' +
+            'Please access via tenant subdomain (e.g., demo.localhost:3000)'
+         ));
+      }
+
+      // Check if tenant context is missing
+      if (!tenantCode) {
+         return res.status(400).json(formatErrorResponse(
+            new Error('Missing tenant context'),
+            'Please access this endpoint via tenant subdomain'
+         ));
+      }
 
       const result = await userService.listUsers(tenantCode, query);
 
@@ -169,9 +186,7 @@ async function listUsers(req, res) {
     
       res.status(500).json(formatErrorResponse(error, 'Failed to retrieve users'));
    }
-}
-
-/**
+}/**
  * Authenticate user
  * POST /api/users/auth/login
  */

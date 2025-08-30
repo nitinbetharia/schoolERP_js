@@ -148,6 +148,23 @@ async function listStudents(req, res) {
       const tenantCode = req.tenantCode;
       const query = req.query;
 
+      // Check if this is system admin access (no tenant context)
+      if (!tenantCode && req.isSystemAdmin) {
+         return res.status(400).json(formatErrorResponse(
+            new Error('Tenant context required'),
+            'Student data requires tenant context. ' +
+            'Please access via tenant subdomain (e.g., demo.localhost:3000)'
+         ));
+      }
+
+      // Check if tenant context is missing
+      if (!tenantCode) {
+         return res.status(400).json(formatErrorResponse(
+            new Error('Missing tenant context'),
+            'Please access this endpoint via tenant subdomain'
+         ));
+      }
+
       const result = await studentService.listStudents(tenantCode, query);
 
       res.json(formatSuccessResponse(
@@ -214,7 +231,10 @@ async function exportStudentsPDF(req, res) {
          });
       } else {
       // Return file path for email attachment or other use
-         res.json(formatSuccessResponse({ filePath: pdfPath }, 'PDF report generated successfully'));
+         res.json(formatSuccessResponse(
+            { filePath: pdfPath }, 
+            'PDF report generated successfully'
+         ));
       }
 
    } catch (error) {
@@ -275,7 +295,10 @@ async function exportStudentsExcel(req, res) {
          });
       } else {
       // Return file path
-         res.json(formatSuccessResponse({ filePath: excelPath }, 'Excel report generated successfully'));
+         res.json(formatSuccessResponse(
+            { filePath: excelPath }, 
+            'Excel report generated successfully'
+         ));
       }
 
    } catch (error) {
@@ -328,7 +351,10 @@ async function sendWelcomeEmail(req, res) {
             'Welcome email sent successfully'
          ));
       } else {
-         res.status(500).json(formatErrorResponse(null, emailResult.reason || 'Failed to send email'));
+         res.status(500).json(formatErrorResponse(
+            null, 
+            emailResult.reason || 'Failed to send email'
+         ));
       }
 
    } catch (error) {
@@ -349,7 +375,7 @@ async function sendWelcomeEmail(req, res) {
 async function sendBulkEmail(req, res) {
    try {
       const tenantCode = req.tenantCode;
-      const { studentIds, subject, message, emailType = 'notification' } = req.body;
+      const { studentIds, message, emailType = 'notification' } = req.body;
 
       if (!studentIds || studentIds.length === 0) {
          return res.status(400).json(formatErrorResponse(null, 'No students selected'));
