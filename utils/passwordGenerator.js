@@ -31,26 +31,20 @@ class PasswordGenerator {
       const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const numbers = '0123456789';
       const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-      
+
       // Similar characters to exclude
       const similar = 'il1Lo0O';
 
       // Build character pool
       let chars = '';
       if (config.includeLowercase) {
-         chars += config.excludeSimilar 
-            ? lowercase.replace(/[il]/g, '') 
-            : lowercase;
+         chars += config.excludeSimilar ? lowercase.replace(/[il]/g, '') : lowercase;
       }
       if (config.includeUppercase) {
-         chars += config.excludeSimilar 
-            ? uppercase.replace(/[LO]/g, '') 
-            : uppercase;
+         chars += config.excludeSimilar ? uppercase.replace(/[LO]/g, '') : uppercase;
       }
       if (config.includeNumbers) {
-         chars += config.excludeSimilar 
-            ? numbers.replace(/[10]/g, '') 
-            : numbers;
+         chars += config.excludeSimilar ? numbers.replace(/[10]/g, '') : numbers;
       }
       if (config.includeSymbols) {
          chars += symbols;
@@ -66,27 +60,21 @@ class PasswordGenerator {
 
       // Add minimum required characters
       if (config.includeLowercase && config.minLowercase > 0) {
-         const lowerChars = config.excludeSimilar 
-            ? lowercase.replace(/[il]/g, '') 
-            : lowercase;
+         const lowerChars = config.excludeSimilar ? lowercase.replace(/[il]/g, '') : lowercase;
          for (let i = 0; i < config.minLowercase; i++) {
             requirements.push(this.getRandomChar(lowerChars));
          }
       }
 
       if (config.includeUppercase && config.minUppercase > 0) {
-         const upperChars = config.excludeSimilar 
-            ? uppercase.replace(/[LO]/g, '') 
-            : uppercase;
+         const upperChars = config.excludeSimilar ? uppercase.replace(/[LO]/g, '') : uppercase;
          for (let i = 0; i < config.minUppercase; i++) {
             requirements.push(this.getRandomChar(upperChars));
          }
       }
 
       if (config.includeNumbers && config.minNumbers > 0) {
-         const numChars = config.excludeSimilar 
-            ? numbers.replace(/[10]/g, '') 
-            : numbers;
+         const numChars = config.excludeSimilar ? numbers.replace(/[10]/g, '') : numbers;
          for (let i = 0; i < config.minNumbers; i++) {
             requirements.push(this.getRandomChar(numChars));
          }
@@ -253,7 +241,7 @@ class PasswordGenerator {
 
       // Determine strength
       result.score = Math.max(0, Math.min(7, result.score));
-      
+
       if (result.score <= 2) {
          result.strength = 'Very Weak';
       } else if (result.score <= 3) {
@@ -267,7 +255,7 @@ class PasswordGenerator {
       }
 
       result.isValid = result.score >= 4;
-      
+
       if (result.isValid && result.feedback.length === 0) {
          result.feedback.push('Password meets security requirements');
       }

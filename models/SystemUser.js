@@ -1,11 +1,7 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
 const { commonSchemas } = require('../utils/validation');
-const {
-   USER_ROLES,
-   USER_STATUS,
-   VALIDATION,
-} = require('../config/business-constants');
+const { USER_ROLES, USER_STATUS, VALIDATION } = require('../config/business-constants');
 
 /**
  * System User model definition for system database
@@ -141,7 +137,7 @@ const defineSystemUserModel = (sequelize) => {
                }
             },
          },
-      },
+      }
    );
 
    // Instance methods
@@ -164,9 +160,7 @@ const defineSystemUserModel = (sequelize) => {
       return this.save();
    };
 
-   SystemUser.prototype.lockAccount = function (
-      lockDurationMs = 15 * 60 * 1000,
-   ) {
+   SystemUser.prototype.lockAccount = function (lockDurationMs = 15 * 60 * 1000) {
       this.locked_until = new Date(Date.now() + lockDurationMs);
       return this.save();
    };
@@ -273,7 +267,7 @@ const defineSystemAuditLogModel = (sequelize) => {
                name: 'idx_audit_entity',
             },
          ],
-      },
+      }
    );
 
    // Associations
@@ -301,8 +295,7 @@ const systemUserValidationSchemas = {
          .required()
          .messages({
             'string.empty': 'Username is required',
-            'string.pattern.base':
-          'Username can only contain lowercase letters, numbers, hyphens and underscores',
+            'string.pattern.base': 'Username can only contain lowercase letters, numbers, hyphens and underscores',
             'string.min': 'Username must be at least 3 characters',
             'string.max': 'Username cannot exceed 50 characters',
          }),
@@ -326,11 +319,7 @@ const systemUserValidationSchemas = {
    update: Joi.object({
       email: Joi.string().email().max(255).optional(),
 
-      full_name: Joi.string()
-         .trim()
-         .min(VALIDATION.NAME_MIN_LENGTH)
-         .max(200)
-         .optional(),
+      full_name: Joi.string().trim().min(VALIDATION.NAME_MIN_LENGTH).max(200).optional(),
 
       status: Joi.string()
          .valid(...Object.values(USER_STATUS))
@@ -345,12 +334,9 @@ const systemUserValidationSchemas = {
    changePassword: Joi.object({
       currentPassword: Joi.string().required(),
       newPassword: commonSchemas.password,
-      confirmPassword: Joi.string()
-         .valid(Joi.ref('newPassword'))
-         .required()
-         .messages({
-            'any.only': 'Password confirmation does not match',
-         }),
+      confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+         'any.only': 'Password confirmation does not match',
+      }),
    }),
 };
 

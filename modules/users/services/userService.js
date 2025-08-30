@@ -326,7 +326,7 @@ async function findUserByEmail(email, tenantId) {
    try {
       const models = await dbManager.getTenantModelsById(tenantId);
       const { User } = models;
-      
+
       const user = await User.findOne({
          where: { email: email.toLowerCase() },
       });
@@ -349,7 +349,7 @@ async function generatePasswordResetToken(userId, tenantId) {
    try {
       const models = await dbManager.getTenantModelsById(tenantId);
       const { User } = models;
-      
+
       const user = await User.findByPk(userId);
       if (!user) {
          throw new Error('User not found');
@@ -358,7 +358,7 @@ async function generatePasswordResetToken(userId, tenantId) {
       // Generate token (random string)
       const crypto = require('crypto');
       const resetToken = crypto.randomBytes(32).toString('hex');
-      
+
       // Set expiration (30 minutes from now)
       const resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
@@ -392,7 +392,7 @@ async function validatePasswordResetToken(token, tenantId) {
    try {
       const models = await dbManager.getTenantModelsById(tenantId);
       const { User } = models;
-      
+
       const user = await User.findOne({
          where: {
             reset_token: token,
@@ -424,7 +424,7 @@ async function resetPassword(token, newPassword, tenantId) {
    try {
       const models = await dbManager.getTenantModelsById(tenantId);
       const { User } = models;
-      
+
       // Validate token first
       const resetData = await validatePasswordResetToken(token, tenantId);
       if (!resetData) {

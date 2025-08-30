@@ -280,7 +280,7 @@ function createSystemAuthService() {
    async function findUserByEmail(email) {
       try {
          const { SystemUser } = await getSystemModels();
-         
+
          const user = await SystemUser.findOne({
             where: { email: email.toLowerCase() },
          });
@@ -300,7 +300,7 @@ function createSystemAuthService() {
    async function generatePasswordResetToken(userId) {
       try {
          const { SystemUser } = await getSystemModels();
-         
+
          const user = await SystemUser.findByPk(userId);
          if (!user) {
             throw createNotFoundError('User not found');
@@ -309,7 +309,7 @@ function createSystemAuthService() {
          // Generate token (random string)
          const crypto = require('crypto');
          const resetToken = crypto.randomBytes(32).toString('hex');
-         
+
          // Set expiration (30 minutes from now)
          const resetTokenExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
@@ -342,7 +342,7 @@ function createSystemAuthService() {
    async function validatePasswordResetToken(token) {
       try {
          const { SystemUser } = await getSystemModels();
-         
+
          const user = await SystemUser.findOne({
             where: {
                reset_token: token,
@@ -371,7 +371,7 @@ function createSystemAuthService() {
    async function resetPassword(token, newPassword) {
       try {
          const { SystemUser } = await getSystemModels();
-         
+
          // Validate token first
          const resetData = await validatePasswordResetToken(token);
          if (!resetData) {

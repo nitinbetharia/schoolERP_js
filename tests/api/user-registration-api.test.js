@@ -7,12 +7,10 @@ describe('Admin User Registration API Tests', () => {
 
    beforeAll(async () => {
       // Login to get auth token for testing
-      const loginResponse = await request(app)
-         .post('/api/auth/login')
-         .send({
-            email: 'system.admin@test.com',
-            password: 'TestAdmin123'
-         });
+      const loginResponse = await request(app).post('/api/auth/login').send({
+         email: 'system.admin@test.com',
+         password: 'TestAdmin123',
+      });
 
       if (loginResponse.status === 200) {
          authToken = loginResponse.body.token;
@@ -33,9 +31,7 @@ describe('Admin User Registration API Tests', () => {
       });
 
       test('Denies access without authentication', async () => {
-         await request(app)
-            .get('/api/admin/user-permissions')
-            .expect(401);
+         await request(app).get('/api/admin/user-permissions').expect(401);
       });
    });
 
@@ -63,7 +59,7 @@ describe('Admin User Registration API Tests', () => {
             dateOfBirth: '1990-01-01',
             gender: 'OTHER',
             passwordGeneration: 'auto',
-            sendWelcomeEmail: true
+            sendWelcomeEmail: true,
          };
 
          const response = await request(app)
@@ -75,13 +71,13 @@ describe('Admin User Registration API Tests', () => {
          expect(response.body).toHaveProperty('success', true);
          expect(response.body).toHaveProperty('userId');
          expect(response.body).toHaveProperty('emailSent');
-         
+
          testUser = response.body;
       });
 
       test('Validates required fields', async () => {
          const invalidUser = {
-            userType: 'TEACHER'
+            userType: 'TEACHER',
             // Missing required fields
          };
 
@@ -103,7 +99,7 @@ describe('Admin User Registration API Tests', () => {
             phoneNumber: '+9876543210',
             dateOfBirth: '1995-01-01',
             gender: 'MALE',
-            passwordGeneration: 'auto'
+            passwordGeneration: 'auto',
          };
 
          const response = await request(app)
@@ -124,7 +120,7 @@ describe('Admin User Registration API Tests', () => {
             phoneNumber: '+1234567890',
             dateOfBirth: '1990-01-01',
             gender: 'FEMALE',
-            passwordGeneration: 'auto'
+            passwordGeneration: 'auto',
          };
 
          const response = await request(app)
@@ -146,7 +142,7 @@ describe('Admin User Registration API Tests', () => {
             dateOfBirth: '1985-01-01',
             gender: 'OTHER',
             passwordGeneration: 'manual',
-            password: 'ManualPassword123!'
+            password: 'ManualPassword123!',
          };
 
          const response = await request(app)
@@ -191,7 +187,7 @@ describe('Admin User Registration API Tests', () => {
             dateOfBirth: '1990-01-01',
             gender: 'MALE',
             passwordGeneration: 'auto',
-            sendWelcomeEmail: false // Disable email for testing
+            sendWelcomeEmail: false, // Disable email for testing
          };
 
          const response = await request(app)
@@ -202,12 +198,12 @@ describe('Admin User Registration API Tests', () => {
 
          expect(response.body).toHaveProperty('success', true);
          expect(response.body).toHaveProperty('generatedPassword');
-         
+
          const password = response.body.generatedPassword;
          expect(password.length).toBeGreaterThanOrEqual(10);
          expect(password).toMatch(/[A-Z]/); // Has uppercase
-         expect(password).toMatch(/[a-z]/); // Has lowercase  
-         expect(password).toMatch(/\d/);    // Has numbers
+         expect(password).toMatch(/[a-z]/); // Has lowercase
+         expect(password).toMatch(/\d/); // Has numbers
       });
    });
 
@@ -221,7 +217,7 @@ describe('Admin User Registration API Tests', () => {
             dateOfBirth: '2005-01-01',
             gender: 'FEMALE',
             passwordGeneration: 'auto',
-            sendWelcomeEmail: true
+            sendWelcomeEmail: true,
          };
 
          const response = await request(app)
@@ -237,7 +233,7 @@ describe('Admin User Registration API Tests', () => {
       test('User creation succeeds even if email fails', async () => {
          // This would require mocking email service to fail
          // For now, we'll test that the API handles email errors gracefully
-         
+
          const userWithEmailIssue = {
             userType: 'PARENT',
             fullName: 'Email Fail Test',
@@ -246,7 +242,7 @@ describe('Admin User Registration API Tests', () => {
             dateOfBirth: '1980-01-01',
             gender: 'MALE',
             passwordGeneration: 'auto',
-            sendWelcomeEmail: true
+            sendWelcomeEmail: true,
          };
 
          const response = await request(app)
@@ -270,7 +266,7 @@ describe('Admin User Registration API Tests', () => {
             phoneNumber: 'invalid-phone',
             dateOfBirth: '1990-01-01',
             gender: 'MALE',
-            passwordGeneration: 'auto'
+            passwordGeneration: 'auto',
          };
 
          const response = await request(app)
@@ -291,7 +287,7 @@ describe('Admin User Registration API Tests', () => {
             phoneNumber: '+1234567890',
             dateOfBirth: 'invalid-date',
             gender: 'FEMALE',
-            passwordGeneration: 'auto'
+            passwordGeneration: 'auto',
          };
 
          const response = await request(app)
@@ -311,7 +307,7 @@ describe('Admin User Registration API Tests', () => {
             phoneNumber: '+1234567890',
             dateOfBirth: '1990-01-01',
             gender: 'MALE',
-            passwordGeneration: 'auto'
+            passwordGeneration: 'auto',
          };
 
          const response = await request(app)

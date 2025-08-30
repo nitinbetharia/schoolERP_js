@@ -5,10 +5,12 @@ A straightforward school management system built for reliability and ease of mai
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - MySQL 8.0+
 
 ### Setup
+
 ```bash
 # 1. Install dependencies
 npm install
@@ -30,6 +32,7 @@ http://localhost:3000
 ## Tech Stack
 
 **Backend:**
+
 - Node.js + Express.js
 - MySQL + Sequelize ORM
 - Joi validation
@@ -37,11 +40,13 @@ http://localhost:3000
 - Sessions with MySQL store
 
 **Frontend:**
+
 - EJS templates
 - Bootstrap 5 CSS
 - Vanilla JavaScript
 
 **Features:**
+
 - Multi-tenant architecture (separate databases)
 - PDF generation (reports, receipts)
 - Excel exports (student lists, fee reports)
@@ -75,14 +80,17 @@ npm run lint         # Code linting
 ## Core Concepts
 
 ### Multi-Tenant Architecture
+
 - **System Database**: `school_erp_system` (trusts, system users)
 - **Tenant Databases**: `school_erp_trust_{code}` (school data per trust)
 
 ### Authentication
+
 - **System Admin**: admin@system.local / admin123
 - **Trust Admin**: admin@demo.school / password123
 
 ### Key Features
+
 - Student management with UDISE+ compliance
 - Fee collection with PDF receipts
 - Attendance tracking
@@ -139,9 +147,21 @@ SMTP_PASSWORD=your_app_password
 ## Getting Help
 
 For development questions:
+
 1. Check this README
 2. Review code comments
 3. Check `/docs/DEVELOPER_GUIDE.md`
+4. See `/docs/FILE_SIZE_STANDARDS.md` for code organization guidelines
+
+## Code Quality Standards
+
+This project follows industry-standard file size guidelines:
+
+- **Optimal Range**: 150-300 lines per file for maximum maintainability
+- **Maximum Acceptable**: 400 lines per file
+- **Critical Threshold**: 500+ lines require immediate refactoring
+
+For detailed guidelines, see [File Size Standards](docs/FILE_SIZE_STANDARDS.md).
 
 ---
 

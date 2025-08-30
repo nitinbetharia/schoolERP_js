@@ -13,23 +13,23 @@ global.testUsers = {
    systemAdmin: {
       email: 'system.admin@test.com',
       password: 'TestAdmin123',
-      role: 'SYSTEM_ADMIN'
+      role: 'SYSTEM_ADMIN',
    },
    trustAdmin: {
-      email: 'trust.admin@test.com', 
+      email: 'trust.admin@test.com',
       password: 'TestTrust123',
-      role: 'TRUST_ADMIN'
+      role: 'TRUST_ADMIN',
    },
    schoolAdmin: {
       email: 'school.admin@test.com',
-      password: 'TestSchool123', 
-      role: 'SCHOOL_ADMIN'
+      password: 'TestSchool123',
+      role: 'SCHOOL_ADMIN',
    },
    teacher: {
       email: 'teacher@test.com',
       password: 'TestTeacher123',
-      role: 'TEACHER'
-   }
+      role: 'TEACHER',
+   },
 };
 
 // Test tenant configuration
@@ -37,7 +37,7 @@ global.testTenant = {
    id: 1,
    name: 'Test School',
    domain: 'testschool',
-   database: 'testschool_db'
+   database: 'testschool_db',
 };
 
 // Browser instance for tests
@@ -46,7 +46,7 @@ global.browser = null;
 // Setup before all tests
 beforeAll(async () => {
    console.log('🚀 Starting test suite...');
-   
+
    // Launch browser
    global.browser = await puppeteer.launch({
       headless: global.testConfig.headless,
@@ -58,10 +58,10 @@ beforeAll(async () => {
          '--disable-accelerated-2d-canvas',
          '--no-first-run',
          '--no-zygote',
-         '--disable-gpu'
-      ]
+         '--disable-gpu',
+      ],
    });
-   
+
    console.log('✅ Browser launched');
 });
 
@@ -80,25 +80,25 @@ global.testHelpers = {
     */
    async createPage() {
       const page = await global.browser.newPage();
-      
+
       // Set viewport
       await page.setViewport({ width: 1280, height: 720 });
-      
+
       // Set user agent
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-      
+
       // Enable console logs in tests
-      page.on('console', msg => {
+      page.on('console', (msg) => {
          if (msg.type() === 'error') {
             console.error('Browser Console Error:', msg.text());
          }
       });
-      
+
       // Enable page error tracking
-      page.on('pageerror', error => {
+      page.on('pageerror', (error) => {
          console.error('Page Error:', error.message);
       });
-      
+
       return page;
    },
 
@@ -113,18 +113,15 @@ global.testHelpers = {
 
       await page.goto(`${global.testConfig.baseUrl}/login`);
       await page.waitForSelector('#email', { timeout: 5000 });
-      
+
       await page.type('#email', user.email);
       await page.type('#password', user.password);
-      
-      await Promise.all([
-         page.waitForNavigation(),
-         page.click('button[type="submit"]')
-      ]);
-      
+
+      await Promise.all([page.waitForNavigation(), page.click('button[type="submit"]')]);
+
       // Wait for dashboard to load
       await page.waitForSelector('.dashboard-container, .main-content', { timeout: 10000 });
-      
+
       console.log(`✅ Logged in as ${userType} (${user.email})`);
       return page;
    },
@@ -134,7 +131,7 @@ global.testHelpers = {
     */
    async waitForTextContent(page, selector, timeout = 5000) {
       await page.waitForSelector(selector, { timeout });
-      return await page.$eval(selector, el => el.textContent.trim());
+      return await page.$eval(selector, (el) => el.textContent.trim());
    },
 
    /**
@@ -150,11 +147,11 @@ global.testHelpers = {
     */
    async fillField(page, selector, value, options = {}) {
       await page.waitForSelector(selector, { timeout: 5000 });
-      
+
       if (options.clear) {
          await page.click(selector, { clickCount: 3 });
       }
-      
+
       await page.type(selector, value, { delay: 50 });
    },
 
@@ -178,14 +175,14 @@ global.testHelpers = {
             reject(new Error(`Timeout waiting for response matching: ${urlPattern}`));
          }, timeout);
 
-         page.on('response', response => {
+         page.on('response', (response) => {
             if (response.url().includes(urlPattern)) {
                clearTimeout(timer);
                resolve(response);
             }
          });
       });
-   }
+   },
 };
 
 console.log('🔧 Test setup configured');

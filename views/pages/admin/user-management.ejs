@@ -1,0 +1,844 @@
+<%- contentFor('title') %>User Management - School ERP<%- /contentFor %>
+
+<%- contentFor('additionalCSS') %>
+<style>
+   .user-management-container {
+      min-height: 80vh;
+   }
+   
+   .search-filters {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+   }
+   
+   .user-card {
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+   }
+   
+   .user-card:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+   }
+   
+   .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+   }
+   
+   .user-status-badge {
+      font-size: 0.75rem;
+   }
+   
+   .role-badge {
+      font-size: 0.75rem;
+      font-weight: 500;
+   }
+   
+   .action-buttons .btn {
+      margin-right: 0.25rem;
+      margin-bottom: 0.25rem;
+   }
+   
+   .bulk-actions {
+      background: #e9ecef;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: none;
+   }
+   
+   .bulk-actions.show {
+      display: block;
+   }
+   
+   .user-details-modal .modal-body {
+      max-height: 70vh;
+      overflow-y: auto;
+   }
+   
+   .stats-cards {
+      margin-bottom: 2rem;
+   }
+   
+   .stats-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+   }
+   
+   .stats-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+   }
+</style>
+<%- /contentFor %>
+
+<div class="container-fluid user-management-container">
+   <!-- Header -->
+   <div class="row mb-4">
+      <div class="col-12">
+         <div class="d-flex justify-content-between align-items-center">
+            <div>
+               <h1 class="h3 mb-2">User Management</h1>
+               <p class="text-muted">Manage user accounts, roles, and permissions</p>
+            </div>
+            <div>
+               <a href="/admin/user-registration" class="btn btn-primary">
+                  <i class="fas fa-user-plus me-1"></i> Create User
+               </a>
+               <a href="/admin/bulk-user-import" class="btn btn-outline-primary">
+                  <i class="fas fa-upload me-1"></i> Bulk Import
+               </a>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Statistics Cards -->
+   <div class="row stats-cards">
+      <div class="col-md-3">
+         <div class="stats-card">
+            <div class="stats-icon text-primary">
+               <i class="fas fa-users"></i>
+            </div>
+            <h4 id="totalUsers">0</h4>
+            <p class="text-muted mb-0">Total Users</p>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="stats-card">
+            <div class="stats-icon text-success">
+               <i class="fas fa-user-check"></i>
+            </div>
+            <h4 id="activeUsers">0</h4>
+            <p class="text-muted mb-0">Active Users</p>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="stats-card">
+            <div class="stats-icon text-warning">
+               <i class="fas fa-user-clock"></i>
+            </div>
+            <h4 id="pendingUsers">0</h4>
+            <p class="text-muted mb-0">Pending Users</p>
+         </div>
+      </div>
+      <div class="col-md-3">
+         <div class="stats-card">
+            <div class="stats-icon text-info">
+               <i class="fas fa-user-plus"></i>
+            </div>
+            <h4 id="newUsersThisMonth">0</h4>
+            <p class="text-muted mb-0">New This Month</p>
+         </div>
+      </div>
+   </div>
+
+   <!-- Search and Filters -->
+   <div class="search-filters">
+      <form id="filterForm" class="row g-3">
+         <div class="col-md-4">
+            <label class="form-label">Search Users</label>
+            <div class="input-group">
+               <span class="input-group-text">
+                  <i class="fas fa-search"></i>
+               </span>
+               <input type="text" class="form-control" id="searchInput" name="search" 
+                      placeholder="Search by name, email..." value="<%= filters.search || '' %>">
+            </div>
+         </div>
+         <div class="col-md-2">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="roleFilter" name="role">
+               <option value="">All Roles</option>
+               <option value="SYSTEM_ADMIN" <%= filters.role === 'SYSTEM_ADMIN' ? 'selected' : '' %>>System Admin</option>
+               <option value="TRUST_ADMIN" <%= filters.role === 'TRUST_ADMIN' ? 'selected' : '' %>>Trust Admin</option>
+               <option value="SCHOOL_ADMIN" <%= filters.role === 'SCHOOL_ADMIN' ? 'selected' : '' %>>School Admin</option>
+               <option value="TEACHER" <%= filters.role === 'TEACHER' ? 'selected' : '' %>>Teacher</option>
+               <option value="ACCOUNTANT" <%= filters.role === 'ACCOUNTANT' ? 'selected' : '' %>>Accountant</option>
+               <option value="PARENT" <%= filters.role === 'PARENT' ? 'selected' : '' %>>Parent</option>
+               <option value="STUDENT" <%= filters.role === 'STUDENT' ? 'selected' : '' %>>Student</option>
+            </select>
+         </div>
+         <div class="col-md-2">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="statusFilter" name="status">
+               <option value="">All Status</option>
+               <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+               <option value="inactive" <%= filters.status === 'inactive' ? 'selected' : '' %>>Inactive</option>
+               <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+               <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+            </select>
+         </div>
+         <div class="col-md-2">
+            <label class="form-label">Sort By</label>
+            <select class="form-select" id="sortByFilter" name="sortBy">
+               <option value="created_at" <%= filters.sortBy === 'created_at' ? 'selected' : '' %>>Date Created</option>
+               <option value="fullName" <%= filters.sortBy === 'fullName' ? 'selected' : '' %>>Name</option>
+               <option value="email" <%= filters.sortBy === 'email' ? 'selected' : '' %>>Email</option>
+               <option value="userType" <%= filters.sortBy === 'userType' ? 'selected' : '' %>>Role</option>
+               <option value="last_login" <%= filters.sortBy === 'last_login' ? 'selected' : '' %>>Last Login</option>
+            </select>
+         </div>
+         <div class="col-md-2">
+            <label class="form-label">Order</label>
+            <select class="form-select" id="sortOrderFilter" name="sortOrder">
+               <option value="desc" <%= filters.sortOrder === 'desc' ? 'selected' : '' %>>Descending</option>
+               <option value="asc" <%= filters.sortOrder === 'asc' ? 'selected' : '' %>>Ascending</option>
+            </select>
+         </div>
+      </form>
+      
+      <div class="mt-3">
+         <button type="button" class="btn btn-outline-secondary" id="clearFilters">
+            <i class="fas fa-times me-1"></i> Clear Filters
+         </button>
+         <button type="button" class="btn btn-outline-info ms-2" id="exportUsers">
+            <i class="fas fa-download me-1"></i> Export Users
+         </button>
+         <button type="button" class="btn btn-outline-warning ms-2" id="bulkActionsBtn">
+            <i class="fas fa-check-square me-1"></i> Bulk Actions
+         </button>
+      </div>
+   </div>
+
+   <!-- Bulk Actions Panel -->
+   <div class="bulk-actions" id="bulkActionsPanel">
+      <div class="d-flex justify-content-between align-items-center">
+         <div>
+            <span id="selectedCount">0</span> users selected
+         </div>
+         <div>
+            <button type="button" class="btn btn-sm btn-outline-success" id="bulkActivate">
+               <i class="fas fa-check me-1"></i> Activate
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-warning" id="bulkDeactivate">
+               <i class="fas fa-pause me-1"></i> Deactivate
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="bulkDelete">
+               <i class="fas fa-trash me-1"></i> Delete
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" id="closeBulkActions">
+               <i class="fas fa-times me-1"></i> Cancel
+            </button>
+         </div>
+      </div>
+   </div>
+
+   <!-- Users List -->
+   <div class="row">
+      <div class="col-12">
+         <div class="card">
+            <div class="card-body">
+               <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="mb-0">
+                     Users (<span id="userCount"><%= users ? users.length : 0 %></span>)
+                  </h6>
+                  <div class="d-flex align-items-center">
+                     <label class="form-label mb-0 me-2">View:</label>
+                     <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="viewType" id="cardView" checked>
+                        <label class="btn btn-outline-secondary" for="cardView">
+                           <i class="fas fa-th"></i>
+                        </label>
+                        <input type="radio" class="btn-check" name="viewType" id="tableView">
+                        <label class="btn btn-outline-secondary" for="tableView">
+                           <i class="fas fa-list"></i>
+                        </label>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Card View -->
+               <div id="cardViewContainer">
+                  <div class="row" id="usersContainer">
+                     <!-- Users will be loaded here dynamically -->
+                     <div class="col-12 text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                           <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading users...</p>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Table View -->
+               <div id="tableViewContainer" style="display: none;">
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead>
+                           <tr>
+                              <th>
+                                 <input type="checkbox" id="selectAllUsers">
+                              </th>
+                              <th>User</th>
+                              <th>Role</th>
+                              <th>Status</th>
+                              <th>Last Login</th>
+                              <th>Created</th>
+                              <th>Actions</th>
+                           </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                           <!-- Users will be loaded here dynamically -->
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+
+               <!-- Pagination -->
+               <div class="d-flex justify-content-between align-items-center mt-4">
+                  <div class="text-muted">
+                     Showing <span id="showingStart">0</span> to <span id="showingEnd">0</span> 
+                     of <span id="totalCount">0</span> users
+                  </div>
+                  <nav>
+                     <ul class="pagination mb-0" id="pagination">
+                        <!-- Pagination will be generated here -->
+                     </ul>
+                  </nav>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+   <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title">
+               <i class="fas fa-user me-1"></i> User Details
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+         </div>
+         <div class="modal-body" id="userDetailsContent">
+            <!-- User details will be loaded here -->
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-outline-primary" id="editUserBtn">
+               <i class="fas fa-edit me-1"></i> Edit User
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<%- contentFor('additionalJS') %>
+<script>
+class UserManagement {
+   constructor() {
+      this.currentPage = 1;
+      this.filters = {
+         search: '',
+         role: '',
+         status: '',
+         sortBy: 'created_at',
+         sortOrder: 'desc'
+      };
+      this.selectedUsers = new Set();
+      this.viewType = 'card';
+      
+      this.initializeEventListeners();
+      this.loadUsers();
+      this.loadStatistics();
+   }
+
+   initializeEventListeners() {
+      // Filter form
+      document.getElementById('filterForm').addEventListener('input', () => {
+         this.applyFilters();
+      });
+
+      // Search input with debounce
+      let searchTimeout;
+      document.getElementById('searchInput').addEventListener('input', () => {
+         clearTimeout(searchTimeout);
+         searchTimeout = setTimeout(() => this.applyFilters(), 300);
+      });
+
+      // Clear filters
+      document.getElementById('clearFilters').addEventListener('click', () => {
+         this.clearFilters();
+      });
+
+      // View type toggle
+      document.querySelectorAll('input[name="viewType"]').forEach(radio => {
+         radio.addEventListener('change', (e) => {
+            this.toggleView(e.target.id === 'tableView' ? 'table' : 'card');
+         });
+      });
+
+      // Bulk actions
+      document.getElementById('bulkActionsBtn').addEventListener('click', () => {
+         this.toggleBulkActions();
+      });
+      
+      document.getElementById('closeBulkActions').addEventListener('click', () => {
+         this.toggleBulkActions(false);
+      });
+
+      // Export users
+      document.getElementById('exportUsers').addEventListener('click', () => {
+         this.exportUsers();
+      });
+   }
+
+   async loadUsers() {
+      try {
+         const params = new URLSearchParams({
+            page: this.currentPage,
+            limit: 20,
+            ...this.filters
+         });
+
+         const response = await fetch(`/api/admin/users?${params}`);
+         if (!response.ok) {
+            throw new Error('Failed to load users');
+         }
+
+         const data = await response.json();
+         this.renderUsers(data.users || []);
+         this.renderPagination(data.pagination || {});
+         
+      } catch (error) {
+         console.error('Error loading users:', error);
+         this.showError('Failed to load users');
+      }
+   }
+
+   async loadStatistics() {
+      try {
+         const response = await fetch('/api/admin/user-statistics');
+         if (!response.ok) {
+            throw new Error('Failed to load statistics');
+         }
+
+         const stats = await response.json();
+         
+         document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+         document.getElementById('activeUsers').textContent = stats.activeUsers || 0;
+         document.getElementById('pendingUsers').textContent = stats.pendingUsers || 0;
+         document.getElementById('newUsersThisMonth').textContent = stats.newUsersThisMonth || 0;
+         
+      } catch (error) {
+         console.error('Error loading statistics:', error);
+      }
+   }
+
+   renderUsers(users) {
+      if (this.viewType === 'card') {
+         this.renderCardView(users);
+      } else {
+         this.renderTableView(users);
+      }
+   }
+
+   renderCardView(users) {
+      const container = document.getElementById('usersContainer');
+      
+      if (users.length === 0) {
+         container.innerHTML = `
+            <div class="col-12 text-center py-5">
+               <i class="fas fa-users fa-3x text-muted mb-3"></i>
+               <h5 class="text-muted">No users found</h5>
+               <p class="text-muted">Try adjusting your search criteria</p>
+            </div>
+         `;
+         return;
+      }
+
+      const cardsHtml = users.map(user => {
+         const initials = this.getInitials(user.fullName || user.name || 'U');
+         const roleColor = this.getRoleColor(user.userType || user.role);
+         const statusColor = this.getStatusColor(user.status || 'active');
+         
+         return `
+            <div class="col-lg-4 col-md-6 mb-3">
+               <div class="card user-card">
+                  <div class="card-body">
+                     <div class="d-flex align-items-start">
+                        <input type="checkbox" class="user-checkbox me-3 mt-1" value="${user.id}">
+                        <div class="user-avatar me-3">
+                           ${initials}
+                        </div>
+                        <div class="flex-grow-1">
+                           <h6 class="mb-1">${user.fullName || user.name || 'Unknown User'}</h6>
+                           <p class="text-muted mb-2 small">${user.email}</p>
+                           <div class="mb-2">
+                              <span class="badge role-badge bg-${roleColor}">
+                                 ${this.formatRole(user.userType || user.role)}
+                              </span>
+                              <span class="badge user-status-badge bg-${statusColor} ms-1">
+                                 ${this.formatStatus(user.status || 'active')}
+                              </span>
+                           </div>
+                           <div class="action-buttons">
+                              <button class="btn btn-sm btn-outline-primary" onclick="userManagement.viewUser('${user.id}')">
+                                 <i class="fas fa-eye"></i>
+                              </button>
+                              <button class="btn btn-sm btn-outline-secondary" onclick="userManagement.editUser('${user.id}')">
+                                 <i class="fas fa-edit"></i>
+                              </button>
+                              <button class="btn btn-sm btn-outline-warning" onclick="userManagement.resetPassword('${user.id}')">
+                                 <i class="fas fa-key"></i>
+                              </button>
+                           </div>
+                           <small class="text-muted">
+                              Last login: ${this.formatDate(user.last_login) || 'Never'}
+                           </small>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         `;
+      }).join('');
+
+      container.innerHTML = `<div class="row">${cardsHtml}</div>`;
+      
+      // Update user count
+      document.getElementById('userCount').textContent = users.length;
+   }
+
+   renderTableView(users) {
+      const tbody = document.getElementById('usersTable');
+      
+      if (users.length === 0) {
+         tbody.innerHTML = `
+            <tr>
+               <td colspan="7" class="text-center py-4">
+                  <i class="fas fa-users fa-2x text-muted mb-2"></i>
+                  <div class="text-muted">No users found</div>
+               </td>
+            </tr>
+         `;
+         return;
+      }
+
+      const rowsHtml = users.map(user => {
+         const initials = this.getInitials(user.fullName || user.name || 'U');
+         const roleColor = this.getRoleColor(user.userType || user.role);
+         const statusColor = this.getStatusColor(user.status || 'active');
+         
+         return `
+            <tr>
+               <td>
+                  <input type="checkbox" class="user-checkbox" value="${user.id}">
+               </td>
+               <td>
+                  <div class="d-flex align-items-center">
+                     <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                        ${initials}
+                     </div>
+                     <div>
+                        <div class="fw-bold">${user.fullName || user.name || 'Unknown User'}</div>
+                        <small class="text-muted">${user.email}</small>
+                     </div>
+                  </div>
+               </td>
+               <td>
+                  <span class="badge role-badge bg-${roleColor}">
+                     ${this.formatRole(user.userType || user.role)}
+                  </span>
+               </td>
+               <td>
+                  <span class="badge user-status-badge bg-${statusColor}">
+                     ${this.formatStatus(user.status || 'active')}
+                  </span>
+               </td>
+               <td>
+                  <small>${this.formatDate(user.last_login) || 'Never'}</small>
+               </td>
+               <td>
+                  <small>${this.formatDate(user.created_at)}</small>
+               </td>
+               <td>
+                  <div class="btn-group btn-group-sm">
+                     <button class="btn btn-outline-primary" onclick="userManagement.viewUser('${user.id}')">
+                        <i class="fas fa-eye"></i>
+                     </button>
+                     <button class="btn btn-outline-secondary" onclick="userManagement.editUser('${user.id}')">
+                        <i class="fas fa-edit"></i>
+                     </button>
+                     <button class="btn btn-outline-warning" onclick="userManagement.resetPassword('${user.id}')">
+                        <i class="fas fa-key"></i>
+                     </button>
+                  </div>
+               </td>
+            </tr>
+         `;
+      }).join('');
+
+      tbody.innerHTML = rowsHtml;
+      
+      // Update user count
+      document.getElementById('userCount').textContent = users.length;
+   }
+
+   renderPagination(pagination) {
+      const container = document.getElementById('pagination');
+      const { current = 1, total = 1, limit = 20, totalRecords = 0 } = pagination;
+      
+      // Update showing text
+      const start = (current - 1) * limit + 1;
+      const end = Math.min(current * limit, totalRecords);
+      
+      document.getElementById('showingStart').textContent = totalRecords > 0 ? start : 0;
+      document.getElementById('showingEnd').textContent = end;
+      document.getElementById('totalCount').textContent = totalRecords;
+
+      if (total <= 1) {
+         container.innerHTML = '';
+         return;
+      }
+
+      let paginationHtml = '';
+      
+      // Previous button
+      paginationHtml += `
+         <li class="page-item ${current <= 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="userManagement.goToPage(${current - 1})">
+               <i class="fas fa-chevron-left"></i>
+            </a>
+         </li>
+      `;
+
+      // Page numbers
+      const startPage = Math.max(1, current - 2);
+      const endPage = Math.min(total, current + 2);
+
+      if (startPage > 1) {
+         paginationHtml += `
+            <li class="page-item">
+               <a class="page-link" href="#" onclick="userManagement.goToPage(1)">1</a>
+            </li>
+         `;
+         if (startPage > 2) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+         }
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+         paginationHtml += `
+            <li class="page-item ${i === current ? 'active' : ''}">
+               <a class="page-link" href="#" onclick="userManagement.goToPage(${i})">${i}</a>
+            </li>
+         `;
+      }
+
+      if (endPage < total) {
+         if (endPage < total - 1) {
+            paginationHtml += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+         }
+         paginationHtml += `
+            <li class="page-item">
+               <a class="page-link" href="#" onclick="userManagement.goToPage(${total})">${total}</a>
+            </li>
+         `;
+      }
+
+      // Next button
+      paginationHtml += `
+         <li class="page-item ${current >= total ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="userManagement.goToPage(${current + 1})">
+               <i class="fas fa-chevron-right"></i>
+            </a>
+         </li>
+      `;
+
+      container.innerHTML = paginationHtml;
+   }
+
+   // Helper methods
+   getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+   }
+
+   getRoleColor(role) {
+      const colors = {
+         'SYSTEM_ADMIN': 'danger',
+         'TRUST_ADMIN': 'warning',
+         'SCHOOL_ADMIN': 'primary',
+         'TEACHER': 'success',
+         'ACCOUNTANT': 'info',
+         'PARENT': 'secondary',
+         'STUDENT': 'light'
+      };
+      return colors[role] || 'secondary';
+   }
+
+   getStatusColor(status) {
+      const colors = {
+         'active': 'success',
+         'inactive': 'secondary',
+         'pending': 'warning',
+         'suspended': 'danger'
+      };
+      return colors[status] || 'secondary';
+   }
+
+   formatRole(role) {
+      return role ? role.replace(/_/g, ' ').replace(/\w\S*/g, 
+         (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : 'Unknown';
+   }
+
+   formatStatus(status) {
+      return status.charAt(0).toUpperCase() + status.slice(1);
+   }
+
+   formatDate(dateString) {
+      if (!dateString) return null;
+      return new Date(dateString).toLocaleDateString();
+   }
+
+   // Event handlers
+   applyFilters() {
+      this.filters = {
+         search: document.getElementById('searchInput').value,
+         role: document.getElementById('roleFilter').value,
+         status: document.getElementById('statusFilter').value,
+         sortBy: document.getElementById('sortByFilter').value,
+         sortOrder: document.getElementById('sortOrderFilter').value
+      };
+      
+      this.currentPage = 1;
+      this.loadUsers();
+   }
+
+   clearFilters() {
+      document.getElementById('filterForm').reset();
+      this.filters = {
+         search: '',
+         role: '',
+         status: '',
+         sortBy: 'created_at',
+         sortOrder: 'desc'
+      };
+      
+      this.currentPage = 1;
+      this.loadUsers();
+   }
+
+   toggleView(viewType) {
+      this.viewType = viewType;
+      
+      if (viewType === 'table') {
+         document.getElementById('cardViewContainer').style.display = 'none';
+         document.getElementById('tableViewContainer').style.display = 'block';
+      } else {
+         document.getElementById('cardViewContainer').style.display = 'block';
+         document.getElementById('tableViewContainer').style.display = 'none';
+      }
+   }
+
+   toggleBulkActions(show = null) {
+      const panel = document.getElementById('bulkActionsPanel');
+      const isShowing = panel.classList.contains('show');
+      
+      if (show === null) {
+         panel.classList.toggle('show');
+      } else {
+         panel.classList.toggle('show', show);
+      }
+   }
+
+   goToPage(page) {
+      this.currentPage = page;
+      this.loadUsers();
+   }
+
+   // User actions
+   async viewUser(userId) {
+      try {
+         const response = await fetch(`/api/admin/users/${userId}`);
+         if (!response.ok) throw new Error('Failed to load user details');
+         
+         const user = await response.json();
+         this.showUserDetails(user);
+      } catch (error) {
+         this.showError('Failed to load user details');
+      }
+   }
+
+   editUser(userId) {
+      window.location.href = `/admin/users/${userId}/edit`;
+   }
+
+   async resetPassword(userId) {
+      if (!confirm('Are you sure you want to reset this user\'s password?')) return;
+      
+      try {
+         const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
+            method: 'POST'
+         });
+         
+         if (!response.ok) throw new Error('Failed to reset password');
+         
+         this.showSuccess('Password reset email sent successfully');
+      } catch (error) {
+         this.showError('Failed to reset password');
+      }
+   }
+
+   showUserDetails(user) {
+      // Implementation for showing user details modal
+      console.log('Show user details:', user);
+   }
+
+   async exportUsers() {
+      try {
+         const params = new URLSearchParams(this.filters);
+         const response = await fetch(`/api/admin/users/export?${params}`);
+         
+         if (!response.ok) throw new Error('Failed to export users');
+         
+         const blob = await response.blob();
+         const url = window.URL.createObjectURL(blob);
+         const a = document.createElement('a');
+         a.href = url;
+         a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`;
+         document.body.appendChild(a);
+         a.click();
+         document.body.removeChild(a);
+         window.URL.revokeObjectURL(url);
+      } catch (error) {
+         this.showError('Failed to export users');
+      }
+   }
+
+   showSuccess(message) {
+      // Implementation for success toast
+      console.log('Success:', message);
+   }
+
+   showError(message) {
+      // Implementation for error toast
+      console.error('Error:', message);
+   }
+}
+
+// Initialize user management
+document.addEventListener('DOMContentLoaded', function() {
+   window.userManagement = new UserManagement();
+});
+</script>
+<%- /contentFor %>
