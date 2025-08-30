@@ -2,7 +2,14 @@ const express = require('express');
 const router = express.Router();
 const studentController = require('../controllers/studentController');
 const { validateBody, validateQuery, validateParams } = require('../../../utils/validation');
-const { studentValidationSchemas } = require('../../../models/StudentValidation');
+const {
+   createStudentSchema,
+   updateStudentSchema,
+   queryStudentSchema,
+   transferStudentSchema,
+   graduateStudentSchema,
+   bulkStudentSchema,
+} = require('../../../models/student/StudentValidation');
 const { commonSchemas } = require('../../../utils/validation');
 
 /**
@@ -44,18 +51,13 @@ const bulkEmailSchema = require('joi').object({
 });
 
 // Basic CRUD routes
-router.get('/', validateQuery(studentQuerySchema), studentController.listStudents);
+router.get('/', validateQuery(queryStudentSchema), studentController.listStudents);
 
-router.post('/', validateBody(studentValidationSchemas.create), studentController.createStudent);
+router.post('/', validateBody(createStudentSchema), studentController.createStudent);
 
 router.get('/:id', validateParams(idParamSchema), studentController.getStudentById);
 
-router.put(
-   '/:id',
-   validateParams(idParamSchema),
-   validateBody(studentValidationSchemas.update),
-   studentController.updateStudent
-);
+router.put('/:id', validateParams(idParamSchema), validateBody(updateStudentSchema), studentController.updateStudent);
 
 router.delete('/:id', validateParams(idParamSchema), studentController.deleteStudent);
 
