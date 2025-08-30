@@ -23,20 +23,20 @@ async function createUser(req, res) {
 
       const user = await userService.createUser(tenantCode, userData);
 
-      logger.info('User created successfully', { 
-         tenantCode, 
+      logger.info('User created successfully', {
+         tenantCode,
          userId: user.id,
-         createdBy 
+         createdBy,
       });
 
       res.status(201).json(formatSuccessResponse(user, 'User created successfully'));
    } catch (error) {
-      logger.error('Failed to create user', { 
-         error: error.message, 
+      logger.error('Failed to create user', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         userData: req.body?.email 
+         userData: req.body?.email,
       });
-    
+
       if (error.message.includes('already exists')) {
          res.status(409).json(formatErrorResponse(error, 'User with this email already exists'));
       } else {
@@ -62,12 +62,12 @@ async function getUserById(req, res) {
 
       res.json(formatSuccessResponse(user, 'User retrieved successfully'));
    } catch (error) {
-      logger.error('Failed to get user by ID', { 
-         error: error.message, 
+      logger.error('Failed to get user by ID', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         userId: req.params.id 
+         userId: req.params.id,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to retrieve user'));
    }
 }
@@ -84,20 +84,20 @@ async function updateUser(req, res) {
 
       const user = await userService.updateUser(tenantCode, userId, updateData);
 
-      logger.info('User updated successfully', { 
-         tenantCode, 
+      logger.info('User updated successfully', {
+         tenantCode,
          userId,
-         updatedBy: req.user?.id 
+         updatedBy: req.user?.id,
       });
 
       res.json(formatSuccessResponse(user, 'User updated successfully'));
    } catch (error) {
-      logger.error('Failed to update user', { 
-         error: error.message, 
+      logger.error('Failed to update user', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         userId: req.params.id 
+         userId: req.params.id,
       });
-    
+
       if (error.message.includes('not found')) {
          res.status(404).json(formatErrorResponse(error, 'User not found'));
       } else {
@@ -122,20 +122,20 @@ async function deleteUser(req, res) {
 
       await userService.deleteUser(tenantCode, userId);
 
-      logger.info('User deleted successfully', { 
-         tenantCode, 
+      logger.info('User deleted successfully', {
+         tenantCode,
          userId,
-         deletedBy: req.user?.id 
+         deletedBy: req.user?.id,
       });
 
       res.json(formatSuccessResponse(null, 'User deleted successfully'));
    } catch (error) {
-      logger.error('Failed to delete user', { 
-         error: error.message, 
+      logger.error('Failed to delete user', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         userId: req.params.id 
+         userId: req.params.id,
       });
-    
+
       if (error.message.includes('not found')) {
          res.status(404).json(formatErrorResponse(error, 'User not found'));
       } else {
@@ -145,7 +145,7 @@ async function deleteUser(req, res) {
 }
 
 /**
- * List users with filtering and pagination  
+ * List users with filtering and pagination
  * GET /api/users
  */
 async function listUsers(req, res) {
@@ -155,38 +155,42 @@ async function listUsers(req, res) {
 
       // Check if this is system admin access (no tenant context)
       if (!tenantCode && req.isSystemAdmin) {
-         return res.status(400).json(formatErrorResponse(
-            new Error('Tenant context required'),
-            'User data requires tenant context. ' +
-            'Please access via tenant subdomain (e.g., demo.localhost:3000)'
-         ));
+         return res
+            .status(400)
+            .json(
+               formatErrorResponse(
+                  new Error('Tenant context required'),
+                  'User data requires tenant context. ' +
+                     'Please access via tenant subdomain (e.g., demo.localhost:3000)'
+               )
+            );
       }
 
       // Check if tenant context is missing
       if (!tenantCode) {
-         return res.status(400).json(formatErrorResponse(
-            new Error('Missing tenant context'),
-            'Please access this endpoint via tenant subdomain'
-         ));
+         return res
+            .status(400)
+            .json(
+               formatErrorResponse(
+                  new Error('Missing tenant context'),
+                  'Please access this endpoint via tenant subdomain'
+               )
+            );
       }
 
       const result = await userService.listUsers(tenantCode, query);
 
-      res.json(formatSuccessResponse(
-         result.users, 
-         'Users retrieved successfully',
-         { pagination: result.pagination }
-      ));
+      res.json(formatSuccessResponse(result.users, 'Users retrieved successfully', { pagination: result.pagination }));
    } catch (error) {
-      logger.error('Failed to list users', { 
-         error: error.message, 
+      logger.error('Failed to list users', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         query: req.query 
+         query: req.query,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to retrieve users'));
    }
-}/**
+} /**
  * Authenticate user
  * POST /api/users/auth/login
  */
@@ -202,20 +206,20 @@ async function authenticateUser(req, res) {
       req.session.userType = 'tenant';
       req.session.tenantCode = tenantCode;
 
-      logger.info('User authenticated successfully', { 
-         tenantCode, 
+      logger.info('User authenticated successfully', {
+         tenantCode,
          userId: user.id,
-         username 
+         username,
       });
 
       res.json(formatSuccessResponse(user, 'Authentication successful'));
    } catch (error) {
-      logger.warn('Authentication failed', { 
+      logger.warn('Authentication failed', {
          tenantCode: req.tenantCode,
          username: req.body?.username,
-         error: error.message 
+         error: error.message,
       });
-    
+
       // Always return generic message for security
       res.status(401).json(formatErrorResponse(error, 'Invalid username or password'));
    }
@@ -233,7 +237,7 @@ async function logoutUser(req, res) {
                logger.error('Session destruction failed', err);
                return res.status(500).json(formatErrorResponse(err, 'Logout failed'));
             }
-        
+
             res.json(formatSuccessResponse(null, 'Logout successful'));
          });
       } else {
@@ -254,7 +258,7 @@ async function getCurrentUser(req, res) {
       if (!req.user) {
          return res.status(401).json(formatErrorResponse(null, 'Not authenticated'));
       }
-    
+
       res.json(formatSuccessResponse(req.user, 'Current user retrieved successfully'));
    } catch (error) {
       logger.error('Failed to get current user', error);
@@ -278,19 +282,19 @@ async function changePassword(req, res) {
       // Update with new password
       await userService.changePassword(tenantCode, userId, newPassword);
 
-      logger.info('Password changed successfully', { 
-         tenantCode, 
-         userId 
+      logger.info('Password changed successfully', {
+         tenantCode,
+         userId,
       });
 
       res.json(formatSuccessResponse(null, 'Password changed successfully'));
    } catch (error) {
-      logger.error('Failed to change password', { 
-         error: error.message, 
+      logger.error('Failed to change password', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         userId: req.user?.id 
+         userId: req.user?.id,
       });
-    
+
       if (error.message.includes('Invalid')) {
          res.status(401).json(formatErrorResponse(error, 'Current password is incorrect'));
       } else {
@@ -324,5 +328,5 @@ module.exports = {
    logoutUser,
    getCurrentUser,
    changePassword,
-   getUserRoles
+   getUserRoles,
 };

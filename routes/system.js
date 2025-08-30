@@ -21,20 +21,28 @@ const { systemUserValidationSchemas } = require('../models/system/SystemUser');
 router.get('/health', healthCheck);
 
 // Database status endpoint (public for monitoring)
-router.get('/database-status', asyncHandler(async (req, res) => {
-   try {
-      const systemDB = await dbManager.getSystemDB();
-      await systemDB.authenticate();
-      
-      res.json(formatSuccessResponse({
-         status: 'healthy',
-         timestamp: new Date().toISOString(),
-         system_database: 'connected'
-      }, 'Database status check successful'));
-   } catch (error) {
-      res.status(500).json(formatErrorResponse(error, 'Database status check failed'));
-   }
-}));
+router.get(
+   '/database-status',
+   asyncHandler(async (req, res) => {
+      try {
+         const systemDB = await dbManager.getSystemDB();
+         await systemDB.authenticate();
+
+         res.json(
+            formatSuccessResponse(
+               {
+                  status: 'healthy',
+                  timestamp: new Date().toISOString(),
+                  system_database: 'connected',
+               },
+               'Database status check successful'
+            )
+         );
+      } catch (error) {
+         res.status(500).json(formatErrorResponse(error, 'Database status check failed'));
+      }
+   })
+);
 
 /**
  * System Authentication Routes
@@ -75,11 +83,7 @@ router.post(
    asyncHandler(async (req, res) => {
       const { currentPassword, newPassword } = req.body;
 
-      const result = await systemAuthService.changePassword(
-         req.user.id, 
-         currentPassword, 
-         newPassword
-      );
+      const result = await systemAuthService.changePassword(req.user.id, currentPassword, newPassword);
 
       res.json(formatSuccessResponse(result, 'Password changed successfully'));
    })

@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 /**
  * School Model
  * Manages individual schools within a trust
- * 
+ *
  * Consolidated: All school field definitions integrated directly
  */
 
@@ -12,15 +12,15 @@ const getSchoolFields = () => ({
    id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
    },
    name: {
       type: DataTypes.STRING(255),
       allowNull: false,
       validate: {
          notEmpty: true,
-         len: [2, 255]
-      }
+         len: [2, 255],
+      },
    },
    code: {
       type: DataTypes.STRING(50),
@@ -28,41 +28,41 @@ const getSchoolFields = () => ({
       allowNull: false,
       validate: {
          notEmpty: true,
-         len: [2, 50]
-      }
+         len: [2, 50],
+      },
    },
    type: {
       type: DataTypes.ENUM('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'COMPOSITE'),
-      allowNull: false
+      allowNull: false,
    },
    board: {
       type: DataTypes.ENUM('CBSE', 'CISCE', 'STATE', 'INTERNATIONAL', 'OTHERS'),
-      allowNull: false
+      allowNull: false,
    },
    status: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING'),
-      defaultValue: 'ACTIVE'
+      defaultValue: 'ACTIVE',
    },
    address: {
       type: DataTypes.TEXT,
-      allowNull: true
+      allowNull: true,
    },
    contact_info: {
       type: DataTypes.JSON,
-      allowNull: true
+      allowNull: true,
    },
    principal_name: {
       type: DataTypes.STRING(255),
-      allowNull: true
+      allowNull: true,
    },
    established_year: {
       type: DataTypes.INTEGER,
       allowNull: true,
       validate: {
          min: 1800,
-         max: new Date().getFullYear()
-      }
-   }
+         max: new Date().getFullYear(),
+      },
+   },
 });
 
 // Table options
@@ -75,13 +75,13 @@ const getSchoolTableOptions = () => ({
       { fields: ['name'] },
       { fields: ['type'] },
       { fields: ['board'] },
-      { fields: ['status'] }
-   ]
+      { fields: ['status'] },
+   ],
 });
 
 // Instance methods
 const applySchoolInstanceMethods = (School) => {
-   School.prototype.getFullDetails = function() {
+   School.prototype.getFullDetails = function () {
       return {
          id: this.id,
          name: this.name,
@@ -92,7 +92,7 @@ const applySchoolInstanceMethods = (School) => {
          address: this.address,
          contact_info: this.contact_info,
          principal_name: this.principal_name,
-         established_year: this.established_year
+         established_year: this.established_year,
       };
    };
 };
@@ -113,43 +113,33 @@ const getSchoolValidationSchemas = () => ({
    create: require('joi').object({
       name: require('joi').string().min(2).max(255).required(),
       code: require('joi').string().min(2).max(50).required(),
-      type: require('joi').string()
-         .valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'COMPOSITE').required(),
-      board: require('joi').string()
-         .valid('CBSE', 'CISCE', 'STATE', 'INTERNATIONAL', 'OTHERS').required(),
+      type: require('joi').string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'COMPOSITE').required(),
+      board: require('joi').string().valid('CBSE', 'CISCE', 'STATE', 'INTERNATIONAL', 'OTHERS').required(),
       address: require('joi').string().optional(),
       contact_info: require('joi').object().optional(),
       principal_name: require('joi').string().max(255).optional(),
-      established_year: require('joi').number().integer()
-         .min(1800).max(new Date().getFullYear()).optional()
+      established_year: require('joi').number().integer().min(1800).max(new Date().getFullYear()).optional(),
    }),
    update: require('joi').object({
       name: require('joi').string().min(2).max(255).optional(),
-      type: require('joi').string()
-         .valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'COMPOSITE').optional(),
-      board: require('joi').string()
-         .valid('CBSE', 'CISCE', 'STATE', 'INTERNATIONAL', 'OTHERS').optional(),
+      type: require('joi').string().valid('PRIMARY', 'SECONDARY', 'HIGHER_SECONDARY', 'COMPOSITE').optional(),
+      board: require('joi').string().valid('CBSE', 'CISCE', 'STATE', 'INTERNATIONAL', 'OTHERS').optional(),
       status: require('joi').string().valid('ACTIVE', 'INACTIVE', 'PENDING').optional(),
       address: require('joi').string().optional(),
       contact_info: require('joi').object().optional(),
       principal_name: require('joi').string().max(255).optional(),
-      established_year: require('joi').number().integer()
-         .min(1800).max(new Date().getFullYear()).optional()
-   })
+      established_year: require('joi').number().integer().min(1800).max(new Date().getFullYear()).optional(),
+   }),
 });
 
 const defineSchool = (sequelize) => {
-   const School = sequelize.define(
-      'School',
-      getSchoolFields(),
-      getSchoolTableOptions()
-   );
+   const School = sequelize.define('School', getSchoolFields(), getSchoolTableOptions());
 
    // Apply instance methods
    applySchoolInstanceMethods(School);
 
    // Define associations
-   School.associate = function(models) {
+   School.associate = function (models) {
       setupSchoolAssociations(models, School);
    };
 
@@ -157,7 +147,7 @@ const defineSchool = (sequelize) => {
 };
 
 // Export both model definition and validation schemas
-module.exports = { 
-   defineSchool, 
+module.exports = {
+   defineSchool,
    schoolValidationSchemas: getSchoolValidationSchemas(),
 };

@@ -24,19 +24,19 @@ async function createStudent(req, res) {
 
       const student = await studentService.createStudent(tenantCode, studentData);
 
-      logger.info('Student created successfully', { 
-         tenantCode, 
+      logger.info('Student created successfully', {
+         tenantCode,
          studentId: student.id,
-         createdBy 
+         createdBy,
       });
 
       res.status(201).json(formatSuccessResponse(student, 'Student created successfully'));
    } catch (error) {
-      logger.error('Failed to create student', { 
-         error: error.message, 
-         tenantCode: req.tenantCode 
+      logger.error('Failed to create student', {
+         error: error.message,
+         tenantCode: req.tenantCode,
       });
-    
+
       if (error.message.includes('already exists')) {
          res.status(409).json(formatErrorResponse(error, 'Student with this admission number already exists'));
       } else {
@@ -62,12 +62,12 @@ async function getStudentById(req, res) {
 
       res.json(formatSuccessResponse(student, 'Student retrieved successfully'));
    } catch (error) {
-      logger.error('Failed to get student by ID', { 
-         error: error.message, 
+      logger.error('Failed to get student by ID', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         studentId: req.params.id 
+         studentId: req.params.id,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to retrieve student'));
    }
 }
@@ -84,20 +84,20 @@ async function updateStudent(req, res) {
 
       const student = await studentService.updateStudent(tenantCode, studentId, updateData);
 
-      logger.info('Student updated successfully', { 
-         tenantCode, 
+      logger.info('Student updated successfully', {
+         tenantCode,
          studentId,
-         updatedBy: req.user?.id 
+         updatedBy: req.user?.id,
       });
 
       res.json(formatSuccessResponse(student, 'Student updated successfully'));
    } catch (error) {
-      logger.error('Failed to update student', { 
-         error: error.message, 
+      logger.error('Failed to update student', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         studentId: req.params.id 
+         studentId: req.params.id,
       });
-    
+
       if (error.message.includes('not found')) {
          res.status(404).json(formatErrorResponse(error, 'Student not found'));
       } else {
@@ -117,20 +117,20 @@ async function deleteStudent(req, res) {
 
       await studentService.deleteStudent(tenantCode, studentId);
 
-      logger.info('Student deleted successfully', { 
-         tenantCode, 
+      logger.info('Student deleted successfully', {
+         tenantCode,
          studentId,
-         deletedBy: req.user?.id 
+         deletedBy: req.user?.id,
       });
 
       res.json(formatSuccessResponse(null, 'Student deleted successfully'));
    } catch (error) {
-      logger.error('Failed to delete student', { 
-         error: error.message, 
+      logger.error('Failed to delete student', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         studentId: req.params.id 
+         studentId: req.params.id,
       });
-    
+
       if (error.message.includes('not found')) {
          res.status(404).json(formatErrorResponse(error, 'Student not found'));
       } else {
@@ -150,35 +150,41 @@ async function listStudents(req, res) {
 
       // Check if this is system admin access (no tenant context)
       if (!tenantCode && req.isSystemAdmin) {
-         return res.status(400).json(formatErrorResponse(
-            new Error('Tenant context required'),
-            'Student data requires tenant context. ' +
-            'Please access via tenant subdomain (e.g., demo.localhost:3000)'
-         ));
+         return res
+            .status(400)
+            .json(
+               formatErrorResponse(
+                  new Error('Tenant context required'),
+                  'Student data requires tenant context. ' +
+                     'Please access via tenant subdomain (e.g., demo.localhost:3000)'
+               )
+            );
       }
 
       // Check if tenant context is missing
       if (!tenantCode) {
-         return res.status(400).json(formatErrorResponse(
-            new Error('Missing tenant context'),
-            'Please access this endpoint via tenant subdomain'
-         ));
+         return res
+            .status(400)
+            .json(
+               formatErrorResponse(
+                  new Error('Missing tenant context'),
+                  'Please access this endpoint via tenant subdomain'
+               )
+            );
       }
 
       const result = await studentService.listStudents(tenantCode, query);
 
-      res.json(formatSuccessResponse(
-         result.students, 
-         'Students retrieved successfully',
-         { pagination: result.pagination }
-      ));
+      res.json(
+         formatSuccessResponse(result.students, 'Students retrieved successfully', { pagination: result.pagination })
+      );
    } catch (error) {
-      logger.error('Failed to list students', { 
-         error: error.message, 
+      logger.error('Failed to list students', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         query: req.query 
+         query: req.query,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to retrieve students'));
    }
 }
@@ -195,7 +201,7 @@ async function exportStudentsPDF(req, res) {
       // Get students data
       const studentsData = await studentService.getStudentsForExport(tenantCode, {
          classId,
-         status
+         status,
       });
 
       if (studentsData.students.length === 0) {
@@ -203,20 +209,17 @@ async function exportStudentsPDF(req, res) {
       }
 
       // Generate PDF
-      const pdfPath = await pdfService.generateStudentReport(
-         studentsData.students, 
-         studentsData.schoolData
-      );
+      const pdfPath = await pdfService.generateStudentReport(studentsData.students, studentsData.schoolData);
 
-      logger.info('Student PDF report generated', { 
-         tenantCode, 
+      logger.info('Student PDF report generated', {
+         tenantCode,
          studentCount: studentsData.students.length,
          classId,
-         status 
+         status,
       });
 
       if (format === 'download') {
-      // Download file
+         // Download file
          res.download(pdfPath, `students-report-${Date.now()}.pdf`, (err) => {
             if (err) {
                logger.error('PDF download error', err);
@@ -230,19 +233,15 @@ async function exportStudentsPDF(req, res) {
             }, 5000);
          });
       } else {
-      // Return file path for email attachment or other use
-         res.json(formatSuccessResponse(
-            { filePath: pdfPath }, 
-            'PDF report generated successfully'
-         ));
+         // Return file path for email attachment or other use
+         res.json(formatSuccessResponse({ filePath: pdfPath }, 'PDF report generated successfully'));
       }
-
    } catch (error) {
-      logger.error('Failed to generate students PDF', { 
-         error: error.message, 
-         tenantCode: req.tenantCode 
+      logger.error('Failed to generate students PDF', {
+         error: error.message,
+         tenantCode: req.tenantCode,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to generate PDF report'));
    }
 }
@@ -259,7 +258,7 @@ async function exportStudentsExcel(req, res) {
       // Get students data
       const studentsData = await studentService.getStudentsForExport(tenantCode, {
          classId,
-         status
+         status,
       });
 
       if (studentsData.students.length === 0) {
@@ -267,20 +266,17 @@ async function exportStudentsExcel(req, res) {
       }
 
       // Generate Excel
-      const excelPath = await excelService.generateStudentList(
-         studentsData.students, 
-         studentsData.schoolData
-      );
+      const excelPath = await excelService.generateStudentList(studentsData.students, studentsData.schoolData);
 
-      logger.info('Student Excel report generated', { 
-         tenantCode, 
+      logger.info('Student Excel report generated', {
+         tenantCode,
          studentCount: studentsData.students.length,
          classId,
-         status 
+         status,
       });
 
       if (format === 'download') {
-      // Download file
+         // Download file
          res.download(excelPath, `students-list-${Date.now()}.xlsx`, (err) => {
             if (err) {
                logger.error('Excel download error', err);
@@ -294,19 +290,15 @@ async function exportStudentsExcel(req, res) {
             }, 5000);
          });
       } else {
-      // Return file path
-         res.json(formatSuccessResponse(
-            { filePath: excelPath }, 
-            'Excel report generated successfully'
-         ));
+         // Return file path
+         res.json(formatSuccessResponse({ filePath: excelPath }, 'Excel report generated successfully'));
       }
-
    } catch (error) {
-      logger.error('Failed to generate students Excel', { 
-         error: error.message, 
-         tenantCode: req.tenantCode 
+      logger.error('Failed to generate students Excel', {
+         error: error.message,
+         tenantCode: req.tenantCode,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to generate Excel report'));
    }
 }
@@ -339,31 +331,24 @@ async function sendWelcomeEmail(req, res) {
       );
 
       if (emailResult.success) {
-         logger.info('Welcome email sent to student', { 
-            tenantCode, 
+         logger.info('Welcome email sent to student', {
+            tenantCode,
             studentId,
             email: student.email,
-            messageId: emailResult.messageId 
+            messageId: emailResult.messageId,
          });
 
-         res.json(formatSuccessResponse(
-            { messageId: emailResult.messageId }, 
-            'Welcome email sent successfully'
-         ));
+         res.json(formatSuccessResponse({ messageId: emailResult.messageId }, 'Welcome email sent successfully'));
       } else {
-         res.status(500).json(formatErrorResponse(
-            null, 
-            emailResult.reason || 'Failed to send email'
-         ));
+         res.status(500).json(formatErrorResponse(null, emailResult.reason || 'Failed to send email'));
       }
-
    } catch (error) {
-      logger.error('Failed to send welcome email', { 
-         error: error.message, 
+      logger.error('Failed to send welcome email', {
+         error: error.message,
          tenantCode: req.tenantCode,
-         studentId: req.params.id 
+         studentId: req.params.id,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to send welcome email'));
    }
 }
@@ -386,12 +371,12 @@ async function sendBulkEmail(req, res) {
       const schoolData = await studentService.getSchoolData(tenantCode);
 
       const emailResults = [];
-    
+
       // Send emails to each student
       for (const student of students) {
          try {
             let emailResult;
-        
+
             if (emailType === 'welcome') {
                emailResult = await emailService.sendWelcomeEmail(
                   student.email,
@@ -414,52 +399,52 @@ async function sendBulkEmail(req, res) {
                studentId: student.id,
                email: student.email,
                success: emailResult.success,
-               messageId: emailResult.messageId
+               messageId: emailResult.messageId,
             });
-
          } catch (emailError) {
-            logger.error('Individual email failed in bulk send', { 
+            logger.error('Individual email failed in bulk send', {
                studentId: student.id,
                email: student.email,
-               error: emailError.message 
+               error: emailError.message,
             });
-        
+
             emailResults.push({
                studentId: student.id,
                email: student.email,
                success: false,
-               error: emailError.message
+               error: emailError.message,
             });
          }
       }
 
-      const successCount = emailResults.filter(result => result.success).length;
+      const successCount = emailResults.filter((result) => result.success).length;
 
-      logger.info('Bulk email completed', { 
-         tenantCode, 
+      logger.info('Bulk email completed', {
+         tenantCode,
          totalStudents: students.length,
          successCount,
-         failureCount: students.length - successCount
+         failureCount: students.length - successCount,
       });
 
-      res.json(formatSuccessResponse(
-         { 
-            results: emailResults,
-            summary: {
-               total: students.length,
-               success: successCount,
-               failed: students.length - successCount
-            }
-         }, 
-         `Bulk email completed. ${successCount}/${students.length} emails sent successfully`
-      ));
-
+      res.json(
+         formatSuccessResponse(
+            {
+               results: emailResults,
+               summary: {
+                  total: students.length,
+                  success: successCount,
+                  failed: students.length - successCount,
+               },
+            },
+            `Bulk email completed. ${successCount}/${students.length} emails sent successfully`
+         )
+      );
    } catch (error) {
-      logger.error('Failed to send bulk email', { 
-         error: error.message, 
-         tenantCode: req.tenantCode 
+      logger.error('Failed to send bulk email', {
+         error: error.message,
+         tenantCode: req.tenantCode,
       });
-    
+
       res.status(500).json(formatErrorResponse(error, 'Failed to send bulk emails'));
    }
 }
@@ -480,5 +465,5 @@ module.exports = {
    exportStudentsExcel,
    sendWelcomeEmail,
    sendBulkEmail,
-   getStudentsData // Helper for other controllers
+   getStudentsData, // Helper for other controllers
 };

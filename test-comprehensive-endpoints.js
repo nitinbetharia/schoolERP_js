@@ -110,10 +110,7 @@ class ComprehensiveAPITester {
 
       await this.testEndpoint('System Health', `${this.baseURL}/api/v1/admin/system/health`);
       await this.testEndpoint('API Status', `${this.baseURL}/api/v1/status`);
-      await this.testEndpoint(
-         'Database Status',
-         `${this.baseURL}/api/v1/admin/system/database-status`
-      );
+      await this.testEndpoint('Database Status', `${this.baseURL}/api/v1/admin/system/database-status`);
    }
 
    async runWebRouteTests() {
@@ -153,7 +150,7 @@ class ComprehensiveAPITester {
          headers: { Host: 'demo.localhost:3000' },
       });
 
-      // Test with maroon tenant context  
+      // Test with maroon tenant context
       await this.testEndpoint('Students API (Maroon)', `${this.baseURL}/api/v1/students`, {
          headers: { Host: 'maroon.localhost:3000' },
       });
@@ -198,9 +195,7 @@ class ComprehensiveAPITester {
          (t) => !t.success && (t.status === 400 || t.status === 401 || t.status === 403)
       );
       const notFoundErrors = this.results.tests.filter((t) => !t.success && t.status === 404);
-      const serverErrors = this.results.tests.filter(
-         (t) => !t.success && t.status >= 500
-      );
+      const serverErrors = this.results.tests.filter((t) => !t.success && t.status >= 500);
 
       this.log(`Authentication/Validation Errors (400/401/403): ${authErrors.length}`);
       this.log(`Not Found Errors (404): ${notFoundErrors.length}`);
@@ -238,7 +233,7 @@ class ComprehensiveAPITester {
             this.log('\\n🎉 ALL TESTS PASSED!', 'success');
          } else {
             this.log(`\\n⚠️ ${summary.failed}/${summary.total} tests failed`, 'error');
-            
+
             if (summary.authErrors > 0) {
                this.log('💡 Auth errors are expected for protected endpoints', 'info');
             }
