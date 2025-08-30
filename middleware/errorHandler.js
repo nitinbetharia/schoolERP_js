@@ -378,7 +378,7 @@ function catchAsync(fn) {
  */
 async function healthCheck(req, res) {
    try {
-      const { dbManager, modelHealthCheck } = require('../models/database');
+      const { dbManager, modelHealthCheck } = require('../models/system/database');
 
       // Check database health
       const dbHealth = await dbManager.healthCheck();

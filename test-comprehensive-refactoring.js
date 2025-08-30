@@ -125,7 +125,7 @@ studentFiles.forEach((fileName) => {
 
 // Test legacy compatibility
 try {
-   const { defineStudent } = require('./models/Student.js');
+   const { defineStudent } = require('./models/student/Student.js');
    logTest('phase2', 'Legacy Student.js compatibility', typeof defineStudent === 'function');
 } catch (error) {
    logTest('phase2', 'Legacy Student.js compatibility', false, error.message);

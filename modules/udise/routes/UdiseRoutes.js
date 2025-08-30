@@ -3,8 +3,8 @@ const UdiseController = require('../controllers/UdiseController')();
 
 // Q59-ENFORCED: Import validation schemas for UDISE operations
 const { validateBody } = require('../../../utils/validation');
-const { udiseSchoolRegistrationValidationSchemas } = require('../../../models/UdiseSchoolRegistration');
-const { udiseCensusDataValidationSchemas } = require('../../../models/UdiseCensusData');
+const { udiseSchoolRegistrationValidationSchemas } = require('../../../models/udise/UdiseSchoolRegistration');
+const { udiseCensusDataValidationSchemas } = require('../../../models/udise/UdiseCensusData');
 
 /**
  * UDISE Routes

@@ -1,4 +1,4 @@
-const { dbManager } = require('../../../models/database');
+const { dbManager } = require('../../../models/system/database');
 const logger = require('../../../utils/logger');
 // Using standard Error objects with centralized error handling
 

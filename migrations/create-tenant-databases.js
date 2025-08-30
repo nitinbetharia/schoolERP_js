@@ -4,7 +4,7 @@
  */
 
 const { logSystem, logError } = require('../utils/logger');
-const { dbManager } = require('../models/database');
+const { dbManager } = require('../models/system/database');
 
 /**
  * Create tenant databases for all active trusts

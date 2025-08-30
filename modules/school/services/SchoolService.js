@@ -1,5 +1,5 @@
 const logger = require('../../../utils/logger');
-const models = require('../../../models/database');
+const models = require('../../../models/system/database');
 
 /**
  * SchoolService

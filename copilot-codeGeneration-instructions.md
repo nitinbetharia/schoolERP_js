@@ -86,8 +86,8 @@ Place this file at the **root of the repository** so that it is easily accessibl
 
 - Follow the **DRY (Don't Repeat Yourself)** principle to reduce code duplication.
 - Apply **SOLID** principles for maintainable and scalable software design:
-  - **S**: Single Responsibility Principle
-  - **O**: Open/Closed Principle
-  - **L**: Liskov Substitution Principle
-  - **I**: Interface Segregation Principle
-  - **D**: Dependency Inversion Principle
+   - **S**: Single Responsibility Principle
+   - **O**: Open/Closed Principle
+   - **L**: Liskov Substitution Principle
+   - **I**: Interface Segregation Principle
+   - **D**: Dependency Inversion Principle

@@ -12,10 +12,10 @@ async function createTrustAdmin() {
       console.log('🔧 Creating Trust Admin User for Testing...');
 
       // Initialize database
-      const { initializeSystemModels } = require('../models/database');
+      const { initializeSystemModels } = require('../models/system/database');
       await initializeSystemModels();
 
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
       const systemDB = await dbManager.getSystemDB();
 
       // First, get the demo trust
@@ -103,7 +103,7 @@ async function createTrustAdmin() {
       throw error;
    } finally {
       // Close database connections
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
       try {
          await dbManager.closeAllConnections();
          console.log('🔌 Database connections closed');

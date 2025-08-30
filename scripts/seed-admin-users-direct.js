@@ -5,7 +5,7 @@
  */
 const bcrypt = require('bcryptjs');
 const { logger } = require('../utils/logger');
-const { initializeSystemModels } = require('../models/database');
+const { initializeSystemModels } = require('../models/system/database');
 
 async function seedAdminUsers() {
    let systemSequelize;
@@ -79,7 +79,7 @@ async function seedAdminUsers() {
       console.log(`📝 Found demo trust: ${demoTrust.trust_code}`);
 
       // Get tenant database connection directly
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
       const tenantSequelize = await dbManager.getTenantDB(demoTrust.trust_code);
 
       console.log('✅ Tenant database connection established');

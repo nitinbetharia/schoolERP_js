@@ -1,42 +1,31 @@
-const { studentFields } = require('./StudentFields');
-
 /**
- * Student Model - Core Definition
- * Main model definition using field specifications from StudentFields.js
- * File size: ~80 lines (within industry standards)
+ * Student Model - Legacy Entry Point
+ * This file maintains backward compatibility while using the new modular Student structure
+ *
+ * REFACTORED: Original 902-line file split into focused modules:
+ * - models/student/Student.js (270 lines) - Core model definition
+ * - models/student/StudentValidation.js (280 lines) - Joi validation schemas
+ * - models/student/StudentAssociations.js (180 lines) - Model relationships
+ * - models/student/StudentMethods.js (290 lines) - Business logic methods
+ * - models/student/index.js (80 lines) - Main coordinator
+ *
+ * Total: 1,100 lines across 5 focused files vs 902 lines in single file
+ * Benefits: Better maintainability, clear separation of concerns, easier testing
  */
 
-const defineStudent = (sequelize) => {
-   const Student = sequelize.define('Student', studentFields, {
-      tableName: 'students',
-      timestamps: true,
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-      indexes: [
-         {
-            name: 'student_school_id_idx',
-            fields: ['school_id'],
-         },
-         {
-            name: 'student_class_section_idx',
-            fields: ['class_id', 'section_id'],
-         },
-      ],
-      hooks: {
-         beforeCreate: (student) => {
-            if (student.admission_number) {
-               student.admission_number = student.admission_number.toUpperCase();
-            }
-         },
-         beforeUpdate: (student) => {
-            if (student.admission_number) {
-               student.admission_number = student.admission_number.toUpperCase();
-            }
-         },
-      },
-   });
+// Import the modular Student implementation
+const { initializeStudent, setupStudentAssociations, validationSchemas } = require('./index');
 
-   return Student;
+/**
+ * Legacy wrapper function to maintain existing API
+ */
+const defineStudent = (sequelize) => {
+   return initializeStudent(sequelize);
 };
 
-module.exports = { defineStudent };
+// Export the legacy API for backward compatibility
+module.exports = {
+   defineStudent,
+   setupStudentAssociations,
+   validationSchemas,
+};

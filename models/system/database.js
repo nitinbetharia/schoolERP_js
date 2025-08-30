@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
-const { logDB, logError, logSystem } = require('../utils/logger');
-const appConfig = require('../config/app-config.json');
+const { logDB, logError, logSystem } = require('../../utils/logger');
+const appConfig = require('../../config/app-config.json');
 // Simple database error class
 class DatabaseError extends Error {
    constructor(message, originalError = null) {
@@ -9,7 +9,7 @@ class DatabaseError extends Error {
       this.originalError = originalError;
    }
 }
-const { withCriticalRetry, withSequelizeRetry, healthCheckWithRetry } = require('../utils/databaseRetry');
+const { withCriticalRetry, withSequelizeRetry, healthCheckWithRetry } = require('../../utils/databaseRetry');
 require('dotenv').config();
 
 /**
@@ -407,7 +407,7 @@ async function initializeSystemModels() {
       const systemDB = await dbManager.getSystemDB();
 
       // Import and initialize core system models
-      const { defineTrustModel } = require('./Trust');
+      const { defineTrustModel } = require('../tenant/Trust');
       const { defineSystemUserModel, defineSystemAuditLogModel } = require('./SystemUser');
 
       const Trust = defineTrustModel(systemDB);

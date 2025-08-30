@@ -38,7 +38,7 @@ const {
 const routes = require('./routes');
 
 // Initialize models
-const { initializeSystemModels } = require('./models/database');
+const { initializeSystemModels } = require('./models/system/database');
 
 class SchoolERPServer {
    constructor() {
@@ -412,7 +412,7 @@ class SchoolERPServer {
             await emergencyCleanup();
 
             // Close database connections
-            const { dbManager } = require('./models/database');
+            const { dbManager } = require('./models/system/database');
             await dbManager.closeAllConnections();
             logSystem('Database connections closed');
 

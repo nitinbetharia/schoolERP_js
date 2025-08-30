@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/validation');
-const { TRUST_STATUS, VALIDATION } = require('../config/business-constants');
+const { commonSchemas } = require('../../utils/validation');
+const { TRUST_STATUS, VALIDATION } = require('../../config/business-constants');
 
 /**
  * Trust model definition for system database

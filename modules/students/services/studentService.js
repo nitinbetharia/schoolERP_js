@@ -1,4 +1,4 @@
-const { dbManager } = require('../../../models/database');
+const { dbManager } = require('../../../models/system/database');
 const { logger } = require('../../../utils/logger');
 const { getPaginationData } = require('../../../utils/validation');
 

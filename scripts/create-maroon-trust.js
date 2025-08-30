@@ -13,7 +13,7 @@ async function createMaroonTrust() {
       console.log('🏫 Creating Maroon Education Trust...');
 
       // Initialize database
-      const { dbManager, initializeSystemModels } = require('../models/database');
+      const { dbManager, initializeSystemModels } = require('../models/system/database');
       await initializeSystemModels();
 
       const systemDB = await dbManager.getSystemDB();
@@ -107,7 +107,7 @@ async function createMaroonTrust() {
    } finally {
       // Close database connections
       try {
-         const { dbManager } = require('../models/database');
+         const { dbManager } = require('../models/system/database');
          await dbManager.closeAllConnections();
          console.log('🔌 Database connections closed');
       } catch (closeError) {
@@ -120,7 +120,7 @@ async function checkAndCreateTrustAdmin(_trustId) {
    console.log('👤 Checking for existing trust admin...');
 
    try {
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
 
       // Get tenant models for maroon trust
       const tenantModels = await dbManager.getTenantModels('maroon');
@@ -152,7 +152,7 @@ async function createTrustAdminUser() {
    console.log('👤 Step 4: Creating trust admin user...');
 
    try {
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
 
       // Get tenant models for maroon trust
       const tenantModels = await dbManager.getTenantModels('maroon');

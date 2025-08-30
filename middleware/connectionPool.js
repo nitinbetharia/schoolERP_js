@@ -4,7 +4,7 @@
  */
 
 const { logSystem, logError, logApp } = require('../utils/logger');
-const { dbManager } = require('../models/database');
+const { dbManager } = require('../models/system/database');
 
 /**
  * Middleware to monitor connection pool usage

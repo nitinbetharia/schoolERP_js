@@ -3,7 +3,7 @@
  * This ensures we have at least one tenant to migrate
  */
 
-const { dbManager } = require('../models/database');
+const { dbManager } = require('../models/system/database');
 const { logger, logSystem } = require('../utils/logger');
 
 async function createTestTrustAndMigrate() {

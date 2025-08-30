@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { dbManager } = require('../../../models/database');
+const { dbManager } = require('../../../models/system/database');
 const { logger } = require('../../../utils/logger');
 const { getPaginationData } = require('../../../utils/validation');
 
@@ -454,7 +454,7 @@ async function resetPassword(token, newPassword, tenantId) {
 
       // Send success email
       const emailService = require('../../../services/emailService');
-      const { dbManager: dbMgr } = require('../../../models/database');
+      const { dbManager: dbMgr } = require('../../../models/system/database');
       const tenant = await dbMgr.getTenantById(tenantId);
       await emailService.sendPasswordResetSuccessEmail(user, tenant);
 

@@ -13,8 +13,8 @@ const {
    validateBody,
    validateParams,
 } = require('../utils/validation');
-const { trustValidationSchemas } = require('../models/Trust');
-const { systemUserValidationSchemas } = require('../models/SystemUser');
+const { trustValidationSchemas } = require('../models/tenant/Trust');
+const { systemUserValidationSchemas } = require('../models/system/SystemUser');
 
 // Health check endpoint (public)
 router.get('/health', healthCheck);

@@ -104,7 +104,7 @@ async function runPasswordResetMigration() {
    try {
       logSystem('Starting password reset fields migration...');
 
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
 
       // Migrate system users table
       logSystem('Migrating system_users table...');
@@ -113,7 +113,7 @@ async function runPasswordResetMigration() {
 
       // Get all tenants and migrate their users tables
       logSystem('Migrating tenant users tables...');
-      const { defineTrustModel } = require('../models/Trust');
+      const { defineTrustModel } = require('../models/tenant/Trust');
       const Trust = defineTrustModel(systemDB);
 
       const tenants = await Trust.findAll({
@@ -162,7 +162,7 @@ async function rollbackPasswordResetMigration() {
    try {
       logSystem('Starting password reset fields migration rollback...');
 
-      const { dbManager } = require('../models/database');
+      const { dbManager } = require('../models/system/database');
 
       // Rollback system users table
       const systemDB = await dbManager.getSystemDB();
@@ -177,7 +177,7 @@ async function rollbackPasswordResetMigration() {
       }
 
       // Rollback tenant users tables
-      const { defineTrustModel } = require('../models/Trust');
+      const { defineTrustModel } = require('../models/tenant/Trust');
       const Trust = defineTrustModel(systemDB);
 
       const tenants = await Trust.findAll({

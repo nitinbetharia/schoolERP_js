@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/validation');
-const { USER_ROLES, USER_STATUS, VALIDATION } = require('../config/business-constants');
+const { commonSchemas } = require('../../utils/validation');
+const { USER_ROLES, USER_STATUS, VALIDATION } = require('../../config/business-constants');
 
 /**
  * System User model definition for system database

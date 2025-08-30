@@ -63,10 +63,10 @@ try {
 // Test 4: Database Models
 console.log('📋 Test 4: Database Model Loading');
 try {
-   const database = require('./models/database');
+   const database = require('./models/system/database');
    console.log('✅ Database module loaded');
 
-   const SystemUser = require('./models/SystemUser');
+   const SystemUser = require('./models/system/SystemUser');
    console.log('✅ SystemUser model loaded');
 
    console.log('✅ Database Models: ALL TESTS PASSED\n');

@@ -1,4 +1,4 @@
-const { dbManager } = require('../models/database');
+const { dbManager } = require('../models/system/database');
 const { logSystem, logError } = require('../utils/logger');
 
 /**
@@ -90,8 +90,8 @@ const tenantDetection = async (req, res, next) => {
       if (req.path === '/login' || req.path === '/auth/login') {
          console.log('🔍 Fetching tenant info for login page:', req.path, 'tenantCode:', tenantCode);
          try {
-            const { dbManager } = require('../models/database');
-            const { defineTrustModel } = require('../models/Trust');
+            const { dbManager } = require('../models/system/database');
+            const { defineTrustModel } = require('../models/tenant/Trust');
             const systemDB = await dbManager.getSystemDB();
             const Trust = defineTrustModel(systemDB);
 

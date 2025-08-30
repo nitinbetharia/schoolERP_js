@@ -3,7 +3,7 @@
  * Verifies that database cleanup and admin user seeding tasks are completed
  */
 const { logger } = require('../utils/logger');
-const { initializeSystemModels } = require('../models/database');
+const { initializeSystemModels } = require('../models/system/database');
 const http = require('http');
 
 async function verifyCompletion() {

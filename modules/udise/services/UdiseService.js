@@ -1,16 +1,23 @@
-const { Op } = require('sequelize');
-const { logger, logDB, logError, logSystem } = require('../../../utils/logger');
-const { createValidationError, createNotFoundError, createDatabaseError } = require('../../../utils/errorHelpers');
-const { dbManager } = require('../../../models/database');
+const { dbManager } = require('../../../models/system/database');
+const { logError, logSystem } = require('../../../utils/logger');
+const { createDatabaseError } = require('../../../utils/errorHelpers');
+
+// Import modular services
+const registrationService = require('./UdiseRegistrationService');
+const censusService = require('./UdiseCensusService');
+const complianceService = require('./UdiseComplianceService');
+const integrationService = require('./UdiseIntegrationService');
 
 /**
  * UDISE Service
- * Comprehensive service for managing UDISE+ School Registration System
- * Handles registration, census data, compliance, and external system integration
+ * Main coordinator service for UDISE+ School Registration System
+ * Orchestrates registration, census, compliance, and integration operations
  */
 function createUdiseService() {
    /**
     * Get UDISE models for a specific tenant
+    * @param {string} tenantCode - Tenant code
+    * @returns {Object} - Models object
     */
    async function getModels(tenantCode) {
       try {
@@ -30,582 +37,181 @@ function createUdiseService() {
    }
 
    /**
-    * UDISE School Registration Operations
+    * UDISE Registration Operations
+    * Wrapper for registration service methods with model injection
     */
-   const registrationService = {
-      /**
-       * Create new UDISE school registration
-       */
+   const registration = {
       async createRegistration(tenantCode, schoolId, registrationData, createdBy) {
-         try {
-            logSystem(`Creating UDISE registration for school: ${schoolId}`, {
-               tenantCode,
-            });
-
-            const models = await getModels(tenantCode);
-
-            // Check if registration already exists
-            const existingRegistration = await models.UdiseSchoolRegistration.findOne({
-               where: { school_id: schoolId },
-            });
-
-            if (existingRegistration) {
-               throw createValidationError('UDISE registration already exists for this school');
-            }
-
-            // Validate required fields
-            const requiredFields = [
-               'school_name_english',
-               'state_code',
-               'district_code',
-               'block_code',
-               'school_category',
-               'school_management',
-               'school_type',
-               'recognition_status',
-               'academic_year',
-            ];
-            for (const field of requiredFields) {
-               if (!registrationData[field]) {
-                  throw createValidationError(`${field} is required for UDISE registration`);
-               }
-            }
-
-            const registration = await models.UdiseSchoolRegistration.create({
-               school_id: schoolId,
-               ...registrationData,
-               registration_status: 'draft',
-               created_by: createdBy,
-            });
-
-            // Log integration event
-            await this.logIntegration(tenantCode, schoolId, {
-               integration_type: 'registration_submit',
-               operation_name: 'Create UDISE Registration',
-               operation_status: 'success',
-               records_processed: 1,
-               initiated_by: 'user',
-               user_id: createdBy,
-            });
-
-            logSystem(`UDISE registration created successfully: ${registration.id}`, { tenantCode, schoolId });
-            return registration;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.createRegistration',
-               tenantCode,
-               schoolId,
-            });
-
-            // Log failed integration
-            await this.logIntegration(tenantCode, schoolId, {
-               integration_type: 'registration_submit',
-               operation_name: 'Create UDISE Registration',
-               operation_status: 'failure',
-               error_message: error.message,
-               initiated_by: 'user',
-            }).catch(() => {}); // Ignore logging errors
-
-            throw error;
-         }
+         return registrationService.createRegistration(
+            tenantCode, 
+            schoolId, 
+            registrationData, 
+            createdBy
+         );
       },
 
-      /**
-       * Update UDISE registration
-       */
       async updateRegistration(tenantCode, registrationId, updateData, updatedBy) {
-         try {
-            const models = await getModels(tenantCode);
-
-            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
-            if (!registration) {
-               throw createNotFoundError('UDISE registration not found');
-            }
-
-            // Prevent updating certain fields if already approved
-            if (registration.registration_status === 'approved' && updateData.udise_code) {
-               throw createValidationError('Cannot modify UDISE code for approved registration');
-            }
-
-            await registration.update({
-               ...updateData,
-               updated_by: updatedBy,
-            });
-
-            logSystem(`UDISE registration updated: ${registrationId}`, {
-               tenantCode,
-            });
-            return registration;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.updateRegistration',
-               tenantCode,
-               registrationId,
-            });
-            throw error;
-         }
+         return registrationService.updateRegistration(
+            tenantCode, 
+            registrationId, 
+            updateData, 
+            updatedBy
+         );
       },
 
-      /**
-       * Submit registration for approval
-       */
       async submitRegistration(tenantCode, registrationId, submittedBy) {
-         try {
-            const models = await getModels(tenantCode);
-
-            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
-            if (!registration) {
-               throw createNotFoundError('UDISE registration not found');
-            }
-
-            if (registration.registration_status !== 'draft') {
-               throw createValidationError('Only draft registrations can be submitted');
-            }
-
-            // Validate completeness before submission
-            const validationResult = await this.validateRegistration(tenantCode, registrationId);
-            if (!validationResult.isValid) {
-               throw createValidationError('Registration validation failed', validationResult.errors);
-            }
-
-            await registration.update({
-               registration_status: 'submitted',
-               registration_date: new Date(),
-               submitted_by: submittedBy,
-               updated_by: submittedBy,
-            });
-
-            // Log integration event
-            await this.logIntegration(tenantCode, registration.school_id, {
-               integration_type: 'registration_submit',
-               operation_name: 'Submit UDISE Registration',
-               operation_status: 'success',
-               records_processed: 1,
-               initiated_by: 'user',
-               user_id: submittedBy,
-            });
-
-            logSystem(`UDISE registration submitted: ${registrationId}`, {
-               tenantCode,
-            });
-            return registration;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.submitRegistration',
-               tenantCode,
-               registrationId,
-            });
-            throw error;
-         }
+         return registrationService.submitRegistration(
+            tenantCode, 
+            registrationId, 
+            submittedBy
+         );
       },
 
-      /**
-       * Get school registrations with filters
-       */
       async getRegistrations(tenantCode, filters = {}) {
-         try {
-            const models = await getModels(tenantCode);
-
-            const whereClause = {};
-
-            if (filters.school_id) {
-               whereClause.school_id = filters.school_id;
-            }
-            if (filters.registration_status) {
-               whereClause.registration_status = filters.registration_status;
-            }
-            if (filters.state_code) {
-               whereClause.state_code = filters.state_code;
-            }
-            if (filters.district_code) {
-               whereClause.district_code = filters.district_code;
-            }
-            if (filters.academic_year) {
-               whereClause.academic_year = filters.academic_year;
-            }
-
-            const registrations = await models.UdiseSchoolRegistration.findAll({
-               where: whereClause,
-               include: [
-                  {
-                     model: models.UdiseCensusData,
-                     as: 'census_data',
-                     required: false,
-                  },
-                  {
-                     model: models.UdiseComplianceRecord,
-                     as: 'compliance_records',
-                     required: false,
-                  },
-               ],
-               order: [['created_at', 'DESC']],
-               limit: filters.limit || 50,
-               offset: filters.offset || 0,
-            });
-
-            return registrations;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.getRegistrations',
-               tenantCode,
-            });
-            throw error;
-         }
+         return registrationService.getRegistrations(tenantCode, filters);
       },
 
-      /**
-       * Validate registration completeness
-       */
+      async getRegistrationById(tenantCode, registrationId) {
+         return registrationService.getRegistrationById(tenantCode, registrationId);
+      },
+
       async validateRegistration(tenantCode, registrationId) {
-         try {
-            const models = await getModels(tenantCode);
+         return registrationService.validateRegistration(tenantCode, registrationId);
+      },
 
-            const registration = await models.UdiseSchoolRegistration.findByPk(registrationId);
-            if (!registration) {
-               throw createNotFoundError('UDISE registration not found');
-            }
-
-            const errors = [];
-            const warnings = [];
-
-            // Required field validation
-            const requiredFields = [
-               'school_name_english',
-               'state_code',
-               'district_code',
-               'block_code',
-               'school_category',
-               'school_management',
-               'school_type',
-               'recognition_status',
-               'academic_year',
-               'total_classrooms',
-            ];
-
-            for (const field of requiredFields) {
-               if (!registration[field] || registration[field] === '') {
-                  errors.push(`${field} is required`);
-               }
-            }
-
-            // Business rule validation
-            if (registration.school_management === 'private_unaided' && !registration.affiliation_board) {
-               errors.push('Private unaided schools must specify affiliation board');
-            }
-
-            if (registration.total_classrooms < 1) {
-               errors.push('School must have at least 1 classroom');
-            }
-
-            if (registration.toilet_boys + registration.toilet_girls < 1) {
-               warnings.push('School should have toilet facilities');
-            }
-
-            if (!registration.drinking_water_available) {
-               warnings.push('Drinking water facility is essential');
-            }
-
-            return {
-               isValid: errors.length === 0,
-               errors,
-               warnings,
-            };
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.validateRegistration',
-               tenantCode,
-               registrationId,
-            });
-            throw error;
-         }
+      async deleteRegistration(tenantCode, registrationId, deletedBy) {
+         return registrationService.deleteRegistration(
+            tenantCode, 
+            registrationId, 
+            deletedBy
+         );
       },
    };
 
    /**
-    * UDISE Census Data Operations
+    * UDISE Census Operations
+    * Wrapper for census service methods with model injection
     */
-   const censusService = {
-      /**
-       * Create census data record
-       */
+   const census = {
       async createCensusData(tenantCode, udiseRegistrationId, censusData, createdBy) {
-         try {
-            const models = await getModels(tenantCode);
-
-            // Check if census data already exists for this period
-            const existingCensus = await models.UdiseCensusData.findOne({
-               where: {
-                  udise_registration_id: udiseRegistrationId,
-                  academic_year: censusData.academic_year,
-                  data_collection_phase: censusData.data_collection_phase,
-               },
-            });
-
-            if (existingCensus) {
-               throw createValidationError('Census data already exists for this period');
-            }
-
-            const census = await models.UdiseCensusData.create({
-               udise_registration_id: udiseRegistrationId,
-               ...censusData,
-               data_status: 'draft',
-               created_by: createdBy,
-            });
-
-            logSystem(`Census data created: ${census.id}`, { tenantCode });
-            return census;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.createCensusData',
-               tenantCode,
-            });
-            throw error;
-         }
+         return censusService.createCensusData(
+            tenantCode, 
+            udiseRegistrationId, 
+            censusData, 
+            createdBy,
+            getModels
+         );
       },
 
-      /**
-       * Calculate enrollment statistics
-       */
-      async calculateEnrollmentStats(tenantCode, censusId) {
-         try {
-            const models = await getModels(tenantCode);
+      async updateCensusData(tenantCode, censusId, updateData, updatedBy) {
+         return censusService.updateCensusData(
+            tenantCode, 
+            censusId, 
+            updateData, 
+            updatedBy,
+            getModels
+         );
+      },
 
-            const census = await models.UdiseCensusData.findByPk(censusId);
-            if (!census) {
-               throw createNotFoundError('Census data not found');
-            }
+      async getCensusData(tenantCode, filters = {}) {
+         return censusService.getCensusData(tenantCode, filters, getModels);
+      },
 
-            // Calculate totals
-            const totalBoys = [
-               'enrollment_class_1_boys',
-               'enrollment_class_2_boys',
-               'enrollment_class_3_boys',
-               'enrollment_class_4_boys',
-               'enrollment_class_5_boys',
-               'enrollment_class_6_boys',
-               'enrollment_class_7_boys',
-               'enrollment_class_8_boys',
-               'enrollment_class_9_boys',
-               'enrollment_class_10_boys',
-               'enrollment_class_11_boys',
-               'enrollment_class_12_boys',
-            ].reduce((sum, field) => sum + (census[field] || 0), 0);
+      async getCensusById(tenantCode, censusId) {
+         return censusService.getCensusById(tenantCode, censusId, getModels);
+      },
 
-            const totalGirls = [
-               'enrollment_class_1_girls',
-               'enrollment_class_2_girls',
-               'enrollment_class_3_girls',
-               'enrollment_class_4_girls',
-               'enrollment_class_5_girls',
-               'enrollment_class_6_girls',
-               'enrollment_class_7_girls',
-               'enrollment_class_8_girls',
-               'enrollment_class_9_girls',
-               'enrollment_class_10_girls',
-               'enrollment_class_11_girls',
-               'enrollment_class_12_girls',
-            ].reduce((sum, field) => sum + (census[field] || 0), 0);
+      calculateEnrollmentStats(tenantCode, census) {
+         return censusService.calculateEnrollmentStats(tenantCode, census);
+      },
 
-            const totalEnrollment = totalBoys + totalGirls;
+      validateCensusData(censusData) {
+         return censusService.validateCensusData(censusData);
+      },
 
-            // Calculate special categories
-            const totalSC = (census.sc_students_boys || 0) + (census.sc_students_girls || 0);
-            const totalST = (census.st_students_boys || 0) + (census.st_students_girls || 0);
-            const totalOBC = (census.obc_students_boys || 0) + (census.obc_students_girls || 0);
-            const totalMinority = (census.minority_students_boys || 0) + (census.minority_students_girls || 0);
-            const totalCWSN = (census.cwsn_students_boys || 0) + (census.cwsn_students_girls || 0);
-
-            // Calculate ratios
-            const genderRatio = totalBoys > 0 ? (totalGirls / totalBoys) * 100 : 0;
-            const ptrRatio = census.total_teachers > 0 ? totalEnrollment / census.total_teachers : 0;
-
-            return {
-               total_enrollment: totalEnrollment,
-               total_boys: totalBoys,
-               total_girls: totalGirls,
-               gender_ratio: Math.round(genderRatio * 100) / 100,
-               ptr_ratio: Math.round(ptrRatio * 100) / 100,
-               special_categories: {
-                  sc: totalSC,
-                  st: totalST,
-                  obc: totalOBC,
-                  minority: totalMinority,
-                  cwsn: totalCWSN,
-               },
-            };
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.calculateEnrollmentStats',
-               tenantCode,
-            });
-            throw error;
-         }
+      generateEnrollmentTrends(tenantCode, censusHistory) {
+         return censusService.generateEnrollmentTrends(tenantCode, censusHistory);
       },
    };
 
    /**
     * UDISE Compliance Operations
+    * Wrapper for compliance service methods with model injection
     */
-   const complianceService = {
-      /**
-       * Create compliance record
-       */
+   const compliance = {
       async createComplianceRecord(tenantCode, udiseRegistrationId, complianceData, createdBy) {
-         try {
-            const models = await getModels(tenantCode);
-
-            // Calculate compliance score
-            const score = this.calculateComplianceScore(complianceData);
-
-            const compliance = await models.UdiseComplianceRecord.create({
-               udise_registration_id: udiseRegistrationId,
-               ...complianceData,
-               compliance_score: score.score,
-               compliance_grade: score.grade,
-               record_status: 'draft',
-               created_by: createdBy,
-            });
-
-            logSystem(`Compliance record created: ${compliance.id}`, {
-               tenantCode,
-            });
-            return compliance;
-         } catch (error) {
-            logError(error, {
-               context: 'UdiseService.createComplianceRecord',
-               tenantCode,
-            });
-            throw error;
-         }
+         return complianceService.createComplianceRecord(
+            tenantCode, 
+            udiseRegistrationId, 
+            complianceData, 
+            createdBy,
+            getModels
+         );
       },
 
-      /**
-       * Calculate compliance score
-       */
+      async updateComplianceRecord(tenantCode, complianceId, updateData, updatedBy) {
+         return complianceService.updateComplianceRecord(
+            tenantCode, 
+            complianceId, 
+            updateData, 
+            updatedBy,
+            getModels
+         );
+      },
+
+      async getComplianceRecords(tenantCode, filters = {}) {
+         return complianceService.getComplianceRecords(tenantCode, filters, getModels);
+      },
+
       calculateComplianceScore(complianceData) {
-         const criteriaWeights = {
-            // RTE Compliance (30%)
-            rte_25_percent_admission: 5,
-            rte_infrastructure_norms: 8,
-            rte_teacher_qualification: 10,
-            rte_ptr_compliance: 7,
+         return complianceService.calculateComplianceScore(complianceData);
+      },
 
-            // Infrastructure (25%)
-            building_safety_certificate: 5,
-            fire_safety_certificate: 3,
-            playground_space_adequate: 4,
-            library_books_adequate: 3,
-            drinking_water_safe: 5,
-            toilet_facilities_adequate: 5,
+      getComplianceChecklist() {
+         return complianceService.getComplianceChecklist();
+      },
 
-            // Academic & Teacher (20%)
-            teacher_verification_complete: 5,
-            teacher_training_updated: 5,
-            curriculum_board_approved: 5,
-            assessment_system_compliant: 5,
+      validateComplianceData(complianceData) {
+         return complianceService.validateComplianceData(complianceData);
+      },
 
-            // Child Safety (15%)
-            child_protection_policy: 4,
-            anti_ragging_measures: 3,
-            pocso_awareness: 4,
-            grievance_mechanism: 4,
-
-            // Others (10%)
-            financial_audit_current: 3,
-            fee_structure_approved: 2,
-            digital_learning_implemented: 2,
-            green_practices_adopted: 3,
-         };
-
-         let totalScore = 0;
-         let maxScore = 0;
-
-         for (const [criterion, weight] of Object.entries(criteriaWeights)) {
-            maxScore += weight;
-            if (complianceData[criterion] === true) {
-               totalScore += weight;
-            }
-         }
-
-         const percentage = (totalScore / maxScore) * 100;
-
-         let grade;
-         if (percentage >= 90) {
-            grade = 'A+';
-         } else if (percentage >= 85) {
-            grade = 'A';
-         } else if (percentage >= 80) {
-            grade = 'B+';
-         } else if (percentage >= 75) {
-            grade = 'B';
-         } else if (percentage >= 70) {
-            grade = 'C+';
-         } else if (percentage >= 60) {
-            grade = 'C';
-         } else if (percentage >= 50) {
-            grade = 'D';
-         } else {
-            grade = 'F';
-         }
-
-         return {
-            score: Math.round(percentage * 100) / 100,
-            grade,
-         };
+      generateComplianceSummary(complianceRecords) {
+         return complianceService.generateComplianceSummary(complianceRecords);
       },
    };
 
    /**
-    * Integration Logging
+    * Integration and Reporting Operations
+    * Wrapper for integration service methods with model injection
     */
-   async function logIntegration(tenantCode, schoolId, logData) {
-      try {
-         const models = await getModels(tenantCode);
+   async function logIntegration(tenantCode, schoolId, integrationData) {
+      return integrationService.logIntegration(
+         tenantCode, 
+         schoolId, 
+         integrationData, 
+         getModels
+      );
+   }
 
-         const integrationLog = await models.UdiseIntegrationLog.create({
-            school_id: schoolId,
-            external_system: 'udise_plus_portal',
-            request_timestamp: new Date(),
-            response_timestamp: new Date(),
-            environment: process.env.NODE_ENV || 'development',
-            ...logData,
-            created_by: logData.user_id || 'system',
-         });
-
-         return integrationLog;
-      } catch (error) {
-         logError(error, {
-            context: 'UdiseService.logIntegration',
-            tenantCode,
-            schoolId,
-         });
-         // Don't throw here to prevent breaking main operations
-      }
+   async function getIntegrationLogs(tenantCode, filters = {}) {
+      return integrationService.getIntegrationLogs(tenantCode, filters, getModels);
    }
 
    /**
     * Generate UDISE Reports
+    * @param {string} tenantCode - Tenant code
+    * @param {string} reportType - Type of report
+    * @param {Object} filters - Filter parameters
+    * @returns {Object} - Generated report
     */
    async function generateReports(tenantCode, reportType, filters = {}) {
       try {
-         const models = await getModels(tenantCode);
-
-         switch (reportType) {
-            case 'registration_summary':
-               return await this.generateRegistrationSummary(tenantCode, filters);
-
-            case 'enrollment_statistics':
-               return await this.generateEnrollmentReport(tenantCode, filters);
-
-            case 'compliance_dashboard':
-               return await this.generateComplianceReport(tenantCode, filters);
-
-            case 'integration_status':
-               return await this.generateIntegrationReport(tenantCode, filters);
-
-            default:
-               throw createValidationError('Invalid report type');
-         }
+         return await integrationService.generateReport(
+            tenantCode, 
+            reportType, 
+            filters, 
+            getModels
+         );
       } catch (error) {
          logError(error, {
             context: 'UdiseService.generateReports',
@@ -616,13 +222,70 @@ function createUdiseService() {
       }
    }
 
+   /**
+    * Health check for UDISE service
+    * @param {string} tenantCode - Tenant code
+    * @returns {Object} - Health check result
+    */
+   async function healthCheck(tenantCode) {
+      try {
+         const models = await getModels(tenantCode);
+         
+         // Test basic model access
+         const registrationCount = await models.UdiseSchoolRegistration.count();
+         const censusCount = await models.UdiseCensusData.count();
+         const complianceCount = await models.UdiseComplianceRecord.count();
+         
+         logSystem(`UDISE service health check passed for ${tenantCode}`, {
+            tenantCode,
+            registrationCount,
+            censusCount,
+            complianceCount,
+         });
+
+         return {
+            status: 'healthy',
+            tenant: tenantCode,
+            timestamp: new Date(),
+            statistics: {
+               registrations: registrationCount,
+               census_records: censusCount,
+               compliance_records: complianceCount,
+            },
+         };
+      } catch (error) {
+         logError(error, {
+            context: 'UdiseService.healthCheck',
+            tenantCode,
+         });
+         
+         return {
+            status: 'unhealthy',
+            tenant: tenantCode,
+            timestamp: new Date(),
+            error: error.message,
+         };
+      }
+   }
+
+   // Return the service interface
    return {
-      registration: registrationService,
-      census: censusService,
-      compliance: complianceService,
+      // Core services
+      registration,
+      census,
+      compliance,
+      
+      // Utility functions
       logIntegration,
+      getIntegrationLogs,
       generateReports,
       getModels,
+      healthCheck,
+      
+      // Legacy compatibility (if needed)
+      registrationService: registration,
+      censusService: census,
+      complianceService: compliance,
    };
 }
 

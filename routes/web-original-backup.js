@@ -4,8 +4,8 @@ const router = express.Router();
 const { logSystem, logError } = require('../utils/logger');
 const { systemAuthService } = require('../services/systemServices');
 const userService = require('../modules/users/services/userService');
-const { systemUserValidationSchemas } = require('../models/SystemUser');
-const { tenantUserValidationSchemas } = require('../models/TenantUser');
+const { systemUserValidationSchemas } = require('../models/system/SystemUser');
+const { tenantUserValidationSchemas } = require('../models/tenant/TenantUser');
 
 // Frontend test route (no auth required)
 router.get('/test-frontend', (req, res) => {

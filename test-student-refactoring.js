@@ -30,7 +30,7 @@ function logTest(testName, passed, error = null) {
 
 // Test 1: Original Student.js exists and exports correctly
 try {
-   const StudentModule = require('./models/Student.js');
+   const StudentModule = require('./models/student/Student.js');
    logTest('Student.js module exports', StudentModule && typeof StudentModule.defineStudent === 'function');
 } catch (error) {
    logTest('Student.js module exports', false, error.message);
@@ -113,7 +113,7 @@ requiredFiles.forEach((fileName) => {
 
 // Test 6: Legacy compatibility
 try {
-   const { defineStudent } = require('./models/Student.js');
+   const { defineStudent } = require('./models/student/Student.js');
    logTest('Legacy defineStudent function', typeof defineStudent === 'function');
 } catch (error) {
    logTest('Legacy defineStudent function', false, error.message);

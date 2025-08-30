@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const Joi = require('joi');
-const { commonSchemas } = require('../utils/validation');
+const { commonSchemas } = require('../../utils/validation');
 
 /**
  * Tenant User Model
