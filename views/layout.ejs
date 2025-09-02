@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="<%= description || 'School ERP Management System - Comprehensive educational administration platform' %>">
+    <meta name="author" content="School ERP System">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com">
+    
+    <!-- Page Title -->
+    <title><%= title %><%= tenant && tenant.name ? ' - ' + tenant.name : ' - School ERP System' %></title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Favicon -->
+    <% if (tenant && tenant.branding && tenant.branding.favicon) { %>
+    <link rel="icon" type="image/x-icon" href="<%= tenant.branding.favicon %>">
+    <% } else { %>
+    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+    <% } %>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" 
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/app.css">
+    
+    <!-- Dynamic Branding & Theme Variables -->
+    <style>
+        :root {
+            --bs-primary: #0d6efd;
+            --bs-secondary: #6c757d;
+            --bs-success: #198754;
+            --bs-info: #0dcaf0;
+            --bs-warning: #ffc107;
+            --bs-danger: #dc3545;
+            --bs-dark: #212529;
+            --bs-light: #f8f9fa;
+            
+            <% 
+            // Determine context for branding
+            const isSystemAdminContext = (typeof isSystemAdmin !== 'undefined' && isSystemAdmin) || 
+                                        (typeof user !== 'undefined' && user && user.role === 'SYSTEM_ADMIN') ||
+                                        (!tenant || !tenant.trust_code);
+            const isDemoTrust = tenant && tenant.trust_code === 'demo';
+            %>
+            
+            <% if (tenant && tenant.branding && tenant.branding.primaryColor) { %>
+            /* Custom tenant branding from database */
+            --tenant-primary: <%= tenant.branding.primaryColor %>;
+            --tenant-secondary: <%= tenant.branding.secondaryColor || '#6c757d' %>;
+            --tenant-accent: <%= tenant.branding.accentColor || '#198754' %>;
+            <% } else if (isSystemAdminContext) { %>
+            /* System Admin - Blue Theme */
+            --tenant-primary: #1e40af;
+            --tenant-secondary: #1e3a8a;
+            --tenant-accent: #3b82f6;
+            --brand-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            <% } else if (isDemoTrust) { %>
+            /* Demo Trust - Military Green Theme */
+            --tenant-primary: #166534;
+            --tenant-secondary: #15803d;
+            --tenant-accent: #22c55e;
+            --brand-gradient: linear-gradient(135deg, #166534 0%, #15803d 100%);
+            <% } else { %>
+            /* Default Theme */
+            --tenant-primary: var(--bs-primary);
+            --tenant-secondary: var(--bs-secondary);
+            --tenant-accent: var(--bs-success);
+            --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            <% } %>
+            
+            /* Apply tenant colors to brand classes */
+            --brand-primary: var(--tenant-primary);
+            --brand-secondary: var(--tenant-secondary);
+            --brand-accent: var(--tenant-accent);
+            
+            --app-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --app-header-height: 70px;
+        }
+        
+        body { font-family: var(--app-font-family); background-color: #f8f9fa; }
+        .brand-primary { background-color: var(--tenant-primary) !important; }
+        .text-brand-primary { color: var(--tenant-primary) !important; }
+        .btn-brand-primary { background-color: var(--tenant-primary); border-color: var(--tenant-primary); color: white; }
+        .btn-brand-primary:hover { background-color: var(--tenant-secondary); border-color: var(--tenant-secondary); color: white; }
+        .main-content { min-height: calc(100vh - var(--app-header-height)); padding-top: var(--app-header-height); }
+        .app-header { height: var(--app-header-height); box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+    </style>
+    
+    <%- style %>
+</head>
+
+<body class="h-100">
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="position-fixed" style="top: 80px; right: 20px; z-index: 1060; max-width: 400px;"></div>
+    
+    <!-- Main Layout Container -->
+    <div class="d-flex flex-column h-100">
+        
+        <!-- Header Section -->
+        <% if (typeof hideHeader === 'undefined' || !hideHeader) { %>
+        <header class="app-header bg-white border-bottom fixed-top no-print">
+            <% if (typeof user !== 'undefined' && user) { %>
+                <%- include('./partials/header/authenticated') %>
+            <% } else { %>
+                <%- include('./partials/header/public') %>
+            <% } %>
+        </header>
+        <% } %>
+        
+        <!-- Navigation Section -->
+        <% if (typeof user !== 'undefined' && user && (typeof hideNav === 'undefined' || !hideNav)) { %>
+        <nav class="no-print">
+            <% if (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin') { %>
+                <%- include('./partials/nav/system-admin') %>
+            <% } else if (user.role === 'TRUST_ADMIN' || user.role === 'trust-admin') { %>
+                <%- include('./partials/nav/trust-admin') %>
+            <% } else if (user.role === 'TEACHER' || user.role === 'teacher') { %>
+                <%- include('./partials/nav/teacher') %>
+            <% } else { %>
+                <%- include('./partials/nav/default') %>
+            <% } %>
+        </nav>
+        <% } %>
+        
+        <!-- Flash Messages -->
+        <%- include('./partials/flash-messages') %>
+        
+        <!-- Toast Notifications -->
+        <%- include('./partials/toast-notifications') %>
+        
+        <!-- Flash Helper Functions -->
+        <%- include('./partials/flash-helpers') %>
+        
+        <!-- Main Content Area -->
+        <main class="flex-grow-1 <% if (typeof hideHeader === 'undefined' || !hideHeader) { %>main-content<% } %>" role="main">
+            <div class="container-fluid py-4">
+                <%- body %>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <% if (typeof hideFooter === 'undefined' || !hideFooter) { %>
+        <footer class="bg-white border-top mt-auto py-3 no-print">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            &copy; <%= new Date().getFullYear() %> School ERP System. All rights reserved.
+                            <% if (tenant && tenant.name) { %> | <%= tenant.name %><% } %>
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <small class="text-muted">
+                            <a href="/help" class="text-decoration-none text-muted me-3">Help</a>
+                            <a href="/privacy" class="text-decoration-none text-muted me-3">Privacy</a>
+                            <a href="/terms" class="text-decoration-none text-muted">Terms</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <% } %>
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
+            crossorigin="anonymous"></script>
+    
+    <script src="/static/js/app.js"></script>
+    
+    <!-- Global JavaScript Functions -->
+    <script>
+        window.SchoolERP = {
+            version: '1.0.0',
+            user: <% if (typeof user !== 'undefined' && user) { %><%- JSON.stringify(user) %><% } else { %>null<% } %>,
+            tenant: <% if (tenant) { %><%- JSON.stringify(tenant) %><% } else { %>null<% } %>,
+            apiBase: '/api/v1'
+        };
+        
+        window.showNotification = function(message, type = 'info', duration = 5000, title = null) {
+            const container = document.getElementById('notificationContainer');
+            if (!container) return;
+            
+            const notificationId = 'notification-' + Date.now();
+            const alertClass = type === 'error' ? 'danger' : type;
+            const icon = {
+                success: 'check-circle',
+                error: 'exclamation-circle', 
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            }[type] || 'info-circle';
+            
+            const notification = document.createElement('div');
+            notification.id = notificationId;
+            notification.className = `alert alert-${alertClass} alert-dismissible fade show mb-2`;
+            notification.innerHTML = `
+                <i class="fas fa-${icon} me-2"></i>
+                ${title ? `<strong>${title}</strong><br>` : ''}${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            container.appendChild(notification);
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    const element = document.getElementById(notificationId);
+                    if (element) {
+                        const bsAlert = new bootstrap.Alert(element);
+                        bsAlert.close();
+                    }
+                }, duration);
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.flash-messages .alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+            
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            
+            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    </script>
+    
+    <%- script %>
+</body>
+</html>

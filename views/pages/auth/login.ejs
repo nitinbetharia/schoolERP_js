@@ -1,0 +1,504 @@
+<!-- Login Page -->
+<% 
+// Set layout variables for clean login page - only hide elements when not authenticated
+hideNav = true;
+hideFooter = true;
+// Don't hide header completely as it's needed for authenticated users, 
+// but we'll hide the public header via CSS
+%>
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-3 px-3">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                <!-- Login Card -->
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-4 p-sm-5">
+                        
+                        <!-- Logo & Title -->
+                        <div class="text-center mb-5">
+                            <% if (tenant && tenant.branding && tenant.branding.logo) { %>
+                            <img src="<%= tenant.branding.logo %>" alt="<%= tenant.name %>" class="mb-4" style="height: 60px;">
+                            <% } else { %>
+                            <div class="bg-brand-primary text-white rounded d-inline-flex align-items-center justify-content-center mb-4" 
+                                 style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <% } %>
+                            
+                            <h2 class="h4 text-dark fw-semibold mb-2">
+                                Welcome Back
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Sign in to <%= tenant && tenant.name ? tenant.name : 'School ERP System' %>
+                            </p>
+                        </div>
+                        
+                        <!-- Login Form -->
+                        <form id="loginForm" method="POST" action="/login" class="needs-validation" novalidate>
+                            
+                            <!-- School Selection (Tenant Only) -->
+                            <% if (tenant && tenant.schools && tenant.schools.length > 0) { %>
+                            <div class="mb-4">
+                                <label for="school" class="form-label fw-medium">
+                                    Select School
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-school text-muted"></i>
+                                    </span>
+                                    <select class="form-select border-start-0 ps-0" 
+                                            id="school" 
+                                            name="school_id" 
+                                            required>
+                                        <option value="">Choose your school...</option>
+                                        <% tenant.schools.forEach(school => { %>
+                                        <option value="<%= school.id %>"><%= school.name %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please select a school.
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Select the school you are affiliated with
+                                </small>
+                            </div>
+                            <% } %>
+                            
+                            <!-- Email/Username Field -->
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-medium">
+                                    Email Address / Username
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-envelope text-muted"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control border-start-0 ps-0" 
+                                           id="email" 
+                                           name="email" 
+                                           placeholder="Enter your email address or username"
+                                           required 
+                                           autocomplete="username"
+                                           value="">
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please enter a valid email address or username.
+                                </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    System will automatically detect your account type
+                                </small>
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-medium">
+                                    Password
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" 
+                                           class="form-control border-start-0 border-end-0 ps-0" 
+                                           id="password" 
+                                           name="password" 
+                                           placeholder="Enter your password"
+                                           required 
+                                           autocomplete="current-password">
+                                    <button class="btn btn-outline-secondary border-start-0" 
+                                            type="button" 
+                                            id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please enter your password.
+                                </div>
+                            </div>
+                            
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                    <label class="form-check-label" for="remember">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <a href="/forgot-password" class="text-decoration-none small">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-brand-primary w-100 py-2 fw-medium" id="loginButton">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Sign In
+                            </button>
+                            
+                        </form>
+                        
+                        <!-- Additional Options -->
+                        <% if (typeof showRegister === 'undefined' || showRegister !== false) { %>
+                        <div class="text-center mt-4">
+                            <p class="text-muted small mb-0">
+                                New to the platform? 
+                                <a href="/register" class="text-brand-primary text-decoration-none fw-medium">
+                                    Request Access
+                                </a>
+                            </p>
+                        </div>
+                        <% } %>
+                    </div>
+                    
+                    <!-- Login Status Indicator -->
+                    <div class="card-footer bg-light text-center py-3">
+                        <div id="loginStatus" class="small text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Secure login powered by School ERP System
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Help Card -->
+                <div class="card border-0 bg-transparent mt-4">
+                    <div class="card-body text-center p-3">
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-question-circle me-1"></i>
+                            Need help signing in?
+                        </p>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="/help/login" class="text-decoration-none small">
+                                <i class="fas fa-book me-1"></i>Login Guide
+                            </a>
+                            <a href="/support" class="text-decoration-none small">
+                                <i class="fas fa-headset me-1"></i>Contact Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for Login Page Viewport -->
+<style>
+    /* Hide header on login page specifically */
+    .app-header {
+        display: none !important;
+    }
+    
+    /* Prevent horizontal scrollbar on login page */
+    html, body {
+        overflow-x: hidden !important;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Global box-sizing reset for all elements */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+    
+    /* Ensure containers don't exceed viewport */
+    .container-fluid {
+        max-width: 100%;
+        overflow-x: hidden;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Make login card fully responsive */
+    .min-vh-100 {
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+    
+    /* Fix input groups that might cause overflow */
+    .input-group {
+        flex-wrap: nowrap;
+        max-width: 100%;
+    }
+    
+    .input-group .form-control {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+    
+    .input-group .input-group-text,
+    .input-group .btn {
+        flex-shrink: 0;
+    }
+    
+    /* Fix validation feedback for input groups */
+    .input-group + .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    
+    /* Show validation feedback when form is validated */
+    .was-validated .input-group + .invalid-feedback {
+        display: block;
+    }
+    
+    /* Hide default invalid feedback inside input groups */
+    .input-group .invalid-feedback {
+        display: none;
+    }
+    
+    /* Style for invalid input groups */
+    .was-validated .input-group .form-control:invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .was-validated .input-group .form-control:invalid ~ .input-group-text,
+    .was-validated .input-group .form-control:invalid ~ .btn {
+        border-color: #dc3545;
+    }
+    
+    /* Style for valid input groups */
+    .was-validated .input-group .form-control:valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+    
+    .was-validated .input-group .form-control:valid ~ .input-group-text,
+    .was-validated .input-group .form-control:valid ~ .btn {
+        border-color: #198754;
+    }
+    
+    /* Ensure buttons don't cause overflow */
+    .btn {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Card responsive adjustments */
+    .card {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    /* Adjust card margins on small screens */
+    @media (max-width: 576px) {
+        .container-fluid {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+        
+        .card-body {
+            padding: 1.5rem 1rem !important;
+        }
+        
+        .min-vh-100 {
+            padding: 0.5rem !important;
+        }
+        
+        /* Tighter input group controls */
+        .input-group {
+            flex-wrap: nowrap;
+        }
+        
+        .input-group .form-control {
+            min-width: 0;
+            font-size: 0.875rem;
+        }
+        
+        .input-group-text {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.5rem;
+        }
+        
+        /* Smaller button in input group */
+        .input-group .btn {
+            padding: 0.375rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    }
+    
+    /* Additional safety for very small screens */
+    @media (max-width: 320px) {
+        .container-fluid {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+        
+        .card-body {
+            padding: 1rem 0.75rem !important;
+        }
+        
+        .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .input-group .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.375rem;
+        }
+        
+        .input-group-text {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.375rem;
+        }
+        
+        .form-control {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.5rem;
+        }
+        
+        h2.h4 {
+            font-size: 1.1rem !important;
+        }
+    }
+    
+    /* Additional safety rules to prevent any element from exceeding viewport */
+    .row, .col, .col-12, .col-sm-10, .col-md-8, .col-lg-6, .col-xl-5 {
+        max-width: 100%;
+        overflow: hidden;
+    }
+</style>
+
+<!-- Custom JavaScript for Login Page -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const loginButton = document.getElementById('loginButton');
+        const loginStatus = document.getElementById('loginStatus');
+        
+        // Password visibility toggle
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+        
+        // Auto-detect login type based on email format
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            let accountType = 'School Portal';
+            
+            // System admin detection logic (matches backend)
+            if (!email.includes('@') || email.includes('admin') || email.endsWith('@system.local')) {
+                accountType = 'System Admin';
+            }
+            
+            // Update status indicator to show detected account type
+            loginStatus.innerHTML = `<i class="fas fa-${accountType === 'System Admin' ? 'cogs' : 'school'} me-1"></i>${accountType} Access`;
+        });
+        
+        // Form validation and submission
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                this.classList.add('was-validated');
+                return;
+            }
+            
+            // Show loading state
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing In...';
+            
+            // Get form data
+            const formData = new FormData(this);
+            const loginData = Object.fromEntries(formData.entries());
+            
+            // Auto-detect login type (matches backend logic)
+            const email = loginData.email.trim();
+            const isSystemLogin = !email.includes('@') || email.includes('admin') || email.endsWith('@system.local');
+            
+            // Submit to backend (backend will auto-detect based on email format)
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(loginData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Success feedback
+                    loginStatus.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i>Login successful! Redirecting...';
+                    
+                    // Redirect after short delay (backend determines redirect based on user type)
+                    setTimeout(() => {
+                        window.location.href = data.redirect || (isSystemLogin ? '/admin/system' : '/dashboard');
+                    }, 1000);
+                } else {
+                    // Error handling
+                    throw new Error(data.error || 'Login failed');
+                }
+            })
+            .catch(error => {
+                console.error('Login error:', error);
+                
+                // Show error message
+                window.showNotification(error.message || 'Login failed. Please check your credentials and try again.', 'error');
+                
+                // Reset form state
+                loginButton.disabled = false;
+                loginButton.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+                
+                loginStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-1"></i>Login failed. Please try again.';
+                
+                // Clear password field for security
+                passwordInput.value = '';
+                passwordInput.focus();
+            });
+        });
+        
+        // Auto-focus email field
+        emailInput.focus();
+        
+        // Handle browser autofill detection
+        function checkAutofill() {
+            if (emailInput.value || passwordInput.value) {
+                loginForm.classList.add('was-validated');
+            }
+        }
+        
+        // Check for autofill after page load
+        setTimeout(checkAutofill, 100);
+        
+        // Real-time validation feedback
+        [emailInput, passwordInput].forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                } else {
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                }
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid') && this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                }
+            });
+        });
+    });
+</script>

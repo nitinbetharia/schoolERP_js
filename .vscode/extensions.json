@@ -1,0 +1,16 @@
+{
+   "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "github.copilot",
+      "github.copilot-chat",
+      "ms-vscode.vscode-json",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "ms-vscode.vscode-typescript-next",
+      "shd101wyy.markdown-preview-enhanced",
+      "yzhang.markdown-all-in-one",
+      "gruntfuggly.todo-tree",
+      "aaron-bond.better-comments"
+   ]
+}

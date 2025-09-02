@@ -1,0 +1,139 @@
+<!-- Teacher Navigation -->
+<div class="bg-white border-bottom">
+   <div class="container-fluid">
+      <nav class="navbar navbar-expand-lg navbar-light p-0">
+         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#teacherNav">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+
+         <div class="collapse navbar-collapse" id="teacherNav">
+            <ul class="navbar-nav me-auto">
+               <li class="nav-item">
+                  <a
+                     class="nav-link <%= currentPath === '/teacher/dashboard' ? 'active' : '' %>"
+                     href="/teacher/dashboard">
+                     <i class="fas fa-home me-1"></i>Dashboard
+                  </a>
+               </li>
+               <li class="nav-item">
+                  <a
+                     class="nav-link <%= currentPath && currentPath.includes('/teacher/classes') ? 'active' : '' %>"
+                     href="/teacher/classes">
+                     <i class="fas fa-chalkboard me-1"></i>My Classes
+                  </a>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/teacher/students') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-user-graduate me-1"></i>Students
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/teacher/students">
+                           <i class="fas fa-list me-2"></i>My Students
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/students/grades">
+                           <i class="fas fa-star me-2"></i>Grades & Marks
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/students/performance">
+                           <i class="fas fa-chart-line me-2"></i>Performance
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/teacher/attendance') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-calendar-check me-1"></i>Attendance
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/teacher/attendance/mark">
+                           <i class="fas fa-check-square me-2"></i>Mark Attendance
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/attendance/view">
+                           <i class="fas fa-eye me-2"></i>View Attendance
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/attendance/reports">
+                           <i class="fas fa-chart-bar me-2"></i>Reports
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/teacher/assignments') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-tasks me-1"></i>Assignments
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/teacher/assignments">
+                           <i class="fas fa-list me-2"></i>All Assignments
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/assignments/new">
+                           <i class="fas fa-plus me-2"></i>Create Assignment
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/assignments/submissions">
+                           <i class="fas fa-upload me-2"></i>Submissions
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item">
+                  <a
+                     class="nav-link <%= currentPath && currentPath.includes('/teacher/schedule') ? 'active' : '' %>"
+                     href="/teacher/schedule">
+                     <i class="fas fa-calendar-alt me-1"></i>Schedule
+                  </a>
+               </li>
+            </ul>
+
+            <!-- Right side nav items -->
+            <ul class="navbar-nav">
+               <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                     <i class="fas fa-ellipsis-h"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                     <li>
+                        <a class="dropdown-item" href="/teacher/messages">
+                           <i class="fas fa-envelope me-2"></i>Messages
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/teacher/resources">
+                           <i class="fas fa-book me-2"></i>Resources
+                        </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/help"> <i class="fas fa-question-circle me-2"></i>Help </a>
+                     </li>
+                  </ul>
+               </li>
+            </ul>
+         </div>
+      </nav>
+   </div>
+</div>

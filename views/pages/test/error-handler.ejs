@@ -1,0 +1,128 @@
+<!-- Test Error Page -->
+<% currentPath = '/test-error'; %>
+
+<div class="row">
+   <div class="col-lg-8 mx-auto">
+      <div class="card border-0 shadow-sm">
+         <div class="card-header bg-white border-bottom-0 py-3">
+            <h4 class="card-title mb-0">
+               <i class="fas fa-bug me-2 text-danger"></i>
+               Error Handler Test
+            </h4>
+            <small class="text-muted">Test different error scenarios</small>
+         </div>
+         <div class="card-body p-4">
+            <p class="text-muted mb-4">
+               Click the buttons below to test different error scenarios and verify that the error templates are working
+               correctly.
+            </p>
+
+            <div class="row g-3">
+               <div class="col-md-6">
+                  <div class="card h-100 border border-danger border-opacity-25">
+                     <div class="card-body text-center">
+                        <i class="fas fa-search text-danger mb-3" style="font-size: 2rem"></i>
+                        <h6 class="card-title">404 Not Found</h6>
+                        <p class="small text-muted mb-3">Test the 404 error page</p>
+                        <a href="/nonexistent-page" class="btn btn-outline-danger btn-sm"> Trigger 404 </a>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="col-md-6">
+                  <div class="card h-100 border border-warning border-opacity-25">
+                     <div class="card-body text-center">
+                        <i class="fas fa-lock text-warning mb-3" style="font-size: 2rem"></i>
+                        <h6 class="card-title">403 Forbidden</h6>
+                        <p class="small text-muted mb-3">Test the 403 access denied page</p>
+                        <a href="/system/health" class="btn btn-outline-warning btn-sm"> Trigger 403 </a>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="col-md-6">
+                  <div class="card h-100 border border-info border-opacity-25">
+                     <div class="card-body text-center">
+                        <i class="fas fa-server text-info mb-3" style="font-size: 2rem"></i>
+                        <h6 class="card-title">500 Server Error</h6>
+                        <p class="small text-muted mb-3">Test the 500 server error page</p>
+                        <button class="btn btn-outline-info btn-sm" onclick="triggerServerError()">Trigger 500</button>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="col-md-6">
+                  <div class="card h-100 border border-secondary border-opacity-25">
+                     <div class="card-body text-center">
+                        <i class="fas fa-exclamation-triangle text-secondary mb-3" style="font-size: 2rem"></i>
+                        <h6 class="card-title">Generic Error</h6>
+                        <p class="small text-muted mb-3">Test the generic error page</p>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="triggerGenericError()">
+                           Trigger Error
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="mt-5 p-4 bg-light rounded-3">
+               <h6 class="text-dark mb-3"><i class="fas fa-info-circle me-2"></i>Error Handler Features</h6>
+               <div class="row">
+                  <div class="col-md-6">
+                     <ul class="list-unstyled mb-0 small">
+                        <li class="mb-1">✅ Automatic error template selection</li>
+                        <li class="mb-1">✅ User-friendly error messages</li>
+                        <li class="mb-1">✅ Debug information in development</li>
+                        <li class="mb-1">✅ Flash message integration</li>
+                     </ul>
+                  </div>
+                  <div class="col-md-6">
+                     <ul class="list-unstyled mb-0 small">
+                        <li class="mb-1">✅ JSON responses for API requests</li>
+                        <li class="mb-1">✅ HTML responses for web requests</li>
+                        <li class="mb-1">✅ Proper HTTP status codes</li>
+                        <li class="mb-1">✅ Error logging and monitoring</li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script>
+   function triggerServerError() {
+      // Trigger a server error via AJAX
+      fetch('/test-500-error', {
+         method: 'GET',
+      })
+         .then((response) => {
+            if (!response.ok) {
+               // Redirect to show the error page
+               window.location.href = '/test-500-error';
+            }
+         })
+         .catch(() => {
+            // If AJAX fails, try direct navigation
+            window.location.href = '/test-500-error';
+         });
+   }
+
+   function triggerGenericError() {
+      // Trigger a generic error
+      fetch('/test-generic-error', {
+         method: 'GET',
+      })
+         .then((response) => {
+            if (!response.ok) {
+               // Redirect to show the error page
+               window.location.href = '/test-generic-error';
+            }
+         })
+         .catch(() => {
+            // If AJAX fails, try direct navigation
+            window.location.href = '/test-generic-error';
+         });
+   }
+</script>

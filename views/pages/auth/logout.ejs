@@ -1,0 +1,99 @@
+<!-- Logout Page -->
+<% // Set layout variables for clean logout page hideNav = true; hideFooter = false; %>
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5">
+   <div class="container">
+      <div class="row justify-content-center">
+         <div class="col-md-5">
+            <!-- Logout Confirmation Card -->
+            <div class="card shadow border-0">
+               <div class="card-body p-5 text-center">
+                  <!-- Icon -->
+                  <div class="mb-4">
+                     <div
+                        class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center"
+                        style="width: 80px; height: 80px; font-size: 2rem">
+                        <i class="fas fa-sign-out-alt"></i>
+                     </div>
+                  </div>
+
+                  <!-- Content -->
+                  <h2 class="h4 text-dark fw-semibold mb-3">Sign Out</h2>
+                  <p class="text-muted mb-4">
+                     Are you sure you want to sign out of your account?
+                     <br />You will need to sign in again to access the system.
+                  </p>
+
+                  <!-- Action Buttons -->
+                  <div class="d-grid gap-2 d-md-block">
+                     <form method="POST" action="/logout" class="d-inline">
+                        <button type="submit" class="btn btn-danger px-4 py-2">
+                           <i class="fas fa-sign-out-alt me-2"></i>
+                           Yes, Sign Out
+                        </button>
+                     </form>
+
+                     <button type="button" class="btn btn-outline-secondary px-4 py-2 ms-md-2" onclick="history.back()">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Cancel
+                     </button>
+                  </div>
+
+                  <!-- Additional Info -->
+                  <div class="mt-4 pt-3 border-top">
+                     <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Your session will be terminated and all unsaved work will be lost.
+                     </small>
+                  </div>
+               </div>
+            </div>
+
+            <!-- Alternative Actions -->
+            <div class="text-center mt-4">
+               <p class="text-muted small mb-2">Need to switch accounts instead?</p>
+               <a href="/login" class="text-brand-primary text-decoration-none small">
+                  <i class="fas fa-exchange-alt me-1"></i>
+                  Sign in with different account
+               </a>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Auto-logout functionality -->
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+      const logoutForm = document.querySelector('form[action="/logout"]');
+      const logoutButton = logoutForm.querySelector('button[type="submit"]');
+
+      // Handle form submission
+      logoutForm.addEventListener('submit', function (e) {
+         // Show loading state
+         logoutButton.disabled = true;
+         logoutButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing Out...';
+
+         // Add small delay for UX
+         setTimeout(() => {
+            // Form will submit normally after this
+         }, 500);
+      });
+
+      // Optional: Auto-redirect after timeout (for GET requests)
+      const urlParams = new URLSearchParams(window.location.search);
+      const autoLogout = urlParams.get('auto');
+
+      if (autoLogout === 'true') {
+         // Show different message for auto-logout
+         document.querySelector('.card-body h2').textContent = 'Session Expired';
+         document.querySelector('.card-body p').innerHTML =
+            'Your session has expired for security reasons.<br>You will be redirected to the login page.';
+
+         // Auto-redirect to login after 3 seconds
+         setTimeout(() => {
+            window.location.href = '/login';
+         }, 3000);
+      }
+   });
+</script>

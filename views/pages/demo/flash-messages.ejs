@@ -1,0 +1,254 @@
+<!-- Flash Messages Demo Page -->
+<% currentPath = '/demo/flash-messages'; %>
+
+<div class="row">
+   <div class="col-lg-8 mx-auto">
+      <div class="card border-0 shadow-sm">
+         <div class="card-header bg-white border-bottom-0 py-3">
+            <h4 class="card-title mb-0">
+               <i class="fas fa-bell me-2 text-primary"></i>
+               Flash Messages Demo
+            </h4>
+            <small class="text-muted">Test the flash messaging and notification system</small>
+         </div>
+         <div class="card-body p-4">
+            <!-- Server-side Flash Demo -->
+            <div class="mb-5">
+               <h5 class="text-dark mb-3"><i class="fas fa-server me-2"></i>Server-side Flash Messages</h5>
+               <p class="text-muted mb-4">
+                  These are traditional flash messages that appear after page reload/redirect. They auto-dismiss after a
+                  few seconds with smooth animations.
+               </p>
+
+               <div class="row g-3">
+                  <div class="col-md-6">
+                     <form action="/demo/flash" method="POST" class="d-grid">
+                        <input type="hidden" name="type" value="success" />
+                        <button type="submit" class="btn btn-success">
+                           <i class="fas fa-check-circle me-2"></i>Show Success
+                        </button>
+                     </form>
+                  </div>
+                  <div class="col-md-6">
+                     <form action="/demo/flash" method="POST" class="d-grid">
+                        <input type="hidden" name="type" value="error" />
+                        <button type="submit" class="btn btn-danger">
+                           <i class="fas fa-exclamation-circle me-2"></i>Show Error
+                        </button>
+                     </form>
+                  </div>
+                  <div class="col-md-6">
+                     <form action="/demo/flash" method="POST" class="d-grid">
+                        <input type="hidden" name="type" value="warning" />
+                        <button type="submit" class="btn btn-warning">
+                           <i class="fas fa-exclamation-triangle me-2"></i>Show Warning
+                        </button>
+                     </form>
+                  </div>
+                  <div class="col-md-6">
+                     <form action="/demo/flash" method="POST" class="d-grid">
+                        <input type="hidden" name="type" value="info" />
+                        <button type="submit" class="btn btn-info">
+                           <i class="fas fa-info-circle me-2"></i>Show Info
+                        </button>
+                     </form>
+                  </div>
+               </div>
+            </div>
+
+            <hr class="my-5" />
+
+            <!-- Client-side Toast Demo -->
+            <div class="mb-5">
+               <h5 class="text-dark mb-3"><i class="fas fa-magic me-2"></i>Client-side Toast Notifications</h5>
+               <p class="text-muted mb-4">
+                  These are dynamic toast notifications that appear instantly without page refresh. Perfect for AJAX
+                  responses and real-time feedback.
+               </p>
+
+               <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                     <button
+                        type="button"
+                        class="btn btn-outline-success d-grid"
+                        onclick="ToastNotification.success('Operation completed successfully!')">
+                        <i class="fas fa-check-circle me-2"></i>Success Toast
+                     </button>
+                  </div>
+                  <div class="col-md-6">
+                     <button
+                        type="button"
+                        class="btn btn-outline-danger d-grid"
+                        onclick="ToastNotification.error('Something went wrong!')">
+                        <i class="fas fa-exclamation-circle me-2"></i>Error Toast
+                     </button>
+                  </div>
+                  <div class="col-md-6">
+                     <button
+                        type="button"
+                        class="btn btn-outline-warning d-grid"
+                        onclick="ToastNotification.warning('Please review your input!')">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Warning Toast
+                     </button>
+                  </div>
+                  <div class="col-md-6">
+                     <button
+                        type="button"
+                        class="btn btn-outline-info d-grid"
+                        onclick="ToastNotification.info('Here is some useful information!')">
+                        <i class="fas fa-info-circle me-2"></i>Info Toast
+                     </button>
+                  </div>
+               </div>
+
+               <div class="text-center">
+                  <button type="button" class="btn btn-brand-primary" onclick="showMultipleToasts()">
+                     <i class="fas fa-stream me-2"></i>Show Multiple Toasts
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary ms-2" onclick="ToastNotification.clear()">
+                     <i class="fas fa-times-circle me-2"></i>Clear All
+                  </button>
+               </div>
+            </div>
+
+            <hr class="my-5" />
+
+            <!-- AJAX Form Demo -->
+            <div class="mb-5">
+               <h5 class="text-dark mb-3"><i class="fas fa-paper-plane me-2"></i>AJAX Form with Flash</h5>
+               <p class="text-muted mb-4">
+                  Demonstration of form submission with AJAX and automatic flash message handling.
+               </p>
+
+               <form id="demoAjaxForm" class="row g-3">
+                  <div class="col-md-6">
+                     <label for="demoName" class="form-label">Name</label>
+                     <input type="text" class="form-control" id="demoName" name="name" required />
+                  </div>
+                  <div class="col-md-6">
+                     <label for="demoEmail" class="form-label">Email</label>
+                     <input type="email" class="form-control" id="demoEmail" name="email" required />
+                  </div>
+                  <div class="col-12">
+                     <label for="demoMessage" class="form-label">Message</label>
+                     <textarea class="form-control" id="demoMessage" name="message" rows="3" required></textarea>
+                  </div>
+                  <div class="col-12">
+                     <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-brand-primary">
+                           <i class="fas fa-paper-plane me-2"></i>Submit (Success)
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" onclick="simulateAjaxError()">
+                           <i class="fas fa-bug me-2"></i>Submit (Error)
+                        </button>
+                     </div>
+                  </div>
+               </form>
+            </div>
+
+            <!-- Features List -->
+            <div class="bg-light rounded-3 p-4">
+               <h6 class="text-dark mb-3"><i class="fas fa-star me-2"></i>Flash Messaging Features</h6>
+               <div class="row">
+                  <div class="col-md-6">
+                     <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Auto-dismiss with progress bars
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Hover to pause auto-dismiss
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Smooth slide animations
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Multiple message stacking
+                        </li>
+                     </ul>
+                  </div>
+                  <div class="col-md-6">
+                     <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           AJAX-ready flash helpers
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Mobile-responsive design
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Bootstrap 5 integration
+                        </li>
+                        <li class="mb-2">
+                           <i class="fas fa-check text-success me-2"></i>
+                           Cross-page flash persistence
+                        </li>
+                     </ul>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Demo JavaScript -->
+<script>
+   // Multiple toasts demo
+   function showMultipleToasts() {
+      ToastNotification.success('First toast notification!');
+      setTimeout(() => ToastNotification.info('Second toast with delay!'), 500);
+      setTimeout(() => ToastNotification.warning('Third toast stacking!'), 1000);
+      setTimeout(() => ToastNotification.error('Final toast in sequence!'), 1500);
+   }
+
+   // AJAX form demo
+   document.getElementById('demoAjaxForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Simulate successful AJAX request
+      setTimeout(() => {
+         FlashHelper.success('Form submitted successfully! Data has been saved.');
+         this.reset();
+      }, 1000);
+
+      // Show loading state
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+         submitBtn.innerHTML = originalText;
+         submitBtn.disabled = false;
+      }, 1000);
+   });
+
+   // Simulate AJAX error
+   function simulateAjaxError() {
+      const form = document.getElementById('demoAjaxForm');
+      const errorBtn = form.querySelector('.btn-outline-danger');
+      const originalText = errorBtn.innerHTML;
+
+      errorBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+      errorBtn.disabled = true;
+
+      setTimeout(() => {
+         FlashHelper.error('Validation failed: Email address is already in use.');
+         errorBtn.innerHTML = originalText;
+         errorBtn.disabled = false;
+      }, 1500);
+   }
+
+   // Show welcome message on page load
+   document.addEventListener('DOMContentLoaded', function () {
+      setTimeout(() => {
+         FlashHelper.info('Welcome to the Flash Messages Demo! Try the buttons above.');
+      }, 1000);
+   });
+</script>

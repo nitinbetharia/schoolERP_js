@@ -1,0 +1,318 @@
+<!-- System Health Monitoring Page Content -->
+<style>
+    .health-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .health-card:hover {
+        transform: translateY(-2px);
+    }
+    .health-status {
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 700;
+            line-height: 1;
+        }
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+        .status-healthy {
+            color: #198754;
+            background-color: #d1e7dd;
+        }
+        .status-warning {
+            color: #fd7e14;
+            background-color: #ffe5d0;
+        }
+        .status-error {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+        .uptime-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            color: #0d6efd;
+        }
+        .memory-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+        .memory-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #ffc107 70%, #dc3545 100%);
+            transition: width 0.3s ease;
+        }
+        .auto-refresh {
+            animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<!-- System Health Monitoring Content -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <main class="col-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="bi bi-heart-pulse"></i> System Health
+                </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-outline-primary" onclick="refreshStats()">
+                            <i class="bi bi-arrow-clockwise" id="refreshIcon"></i> Refresh
+                        </button>
+                        <div class="form-check form-switch ms-3">
+                            <input class="form-check-input" type="checkbox" id="autoRefresh">
+                            <label class="form-check-label" for="autoRefresh">Auto-refresh</label>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (health.error) { %>
+                    <!-- Error State -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-heading">
+                                    <i class="bi bi-exclamation-triangle"></i> System Health Check Failed
+                                </h4>
+                                <p><%= health.error %></p>
+                                <hr>
+                                <p class="mb-0">Unable to retrieve system health information at this time.</p>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <!-- System Status Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card health-card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-database display-4 <%= health.database ? 'text-success' : 'text-danger' %>"></i>
+                                    <h5 class="card-title mt-2">Database</h5>
+                                    <span class="badge health-status <%= health.database ? 'status-healthy' : 'status-error' %>">
+                                        <%= health.database ? 'Connected' : 'Disconnected' %>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card health-card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-building display-4 text-info"></i>
+                                    <h5 class="card-title mt-2">Active Trusts</h5>
+                                    <div class="metric-value text-info"><%= health.trusts || 0 %></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card health-card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-people display-4 text-primary"></i>
+                                    <h5 class="card-title mt-2">System Users</h5>
+                                    <div class="metric-value text-primary"><%= health.users || 0 %></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card health-card text-center">
+                                <div class="card-body">
+                                    <i class="bi bi-clock display-4 text-success"></i>
+                                    <h5 class="card-title mt-2">Uptime</h5>
+                                    <div class="uptime-display" id="uptimeDisplay">
+                                        <% if (health.uptime) { %>
+                                            <%= Math.floor(health.uptime / 3600) %>h <%= Math.floor((health.uptime % 3600) / 60) %>m
+                                        <% } else { %>
+                                            0h 0m
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Metrics -->
+                    <div class="row">
+                        <!-- Memory Usage -->
+                        <div class="col-md-6">
+                            <div class="card health-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-memory"></i> Memory Usage
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <% if (health.memory) { %>
+                                        <% const memoryMB = (health.memory.heapUsed / 1024 / 1024).toFixed(2); %>
+                                        <% const totalMB = (health.memory.heapTotal / 1024 / 1024).toFixed(2); %>
+                                        <% const usagePercent = ((health.memory.heapUsed / health.memory.heapTotal) * 100).toFixed(1); %>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="metric-label">Heap Usage</span>
+                                            <span class="fw-bold"><%= memoryMB %>MB / <%= totalMB %>MB</span>
+                                        </div>
+                                        <div class="memory-bar">
+                                            <div class="memory-bar-fill" style="width: <%= usagePercent %>%"></div>
+                                        </div>
+                                        <div class="text-center mt-2 text-muted"><%= usagePercent %>% used</div>
+                                        
+                                        <hr>
+                                        
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <div class="metric-label">RSS</div>
+                                                <div class="fw-bold"><%= (health.memory.rss / 1024 / 1024).toFixed(2) %>MB</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="metric-label">External</div>
+                                                <div class="fw-bold"><%= (health.memory.external / 1024 / 1024).toFixed(2) %>MB</div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="metric-label">Array Buffers</div>
+                                                <div class="fw-bold"><%= (health.memory.arrayBuffers / 1024 / 1024).toFixed(2) %>MB</div>
+                                            </div>
+                                        </div>
+                                    <% } else { %>
+                                        <p class="text-muted">Memory information not available</p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Information -->
+                        <div class="col-md-6">
+                            <div class="card health-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-info-circle"></i> System Information
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="metric-label">Node.js Version</div>
+                                            <div class="fw-bold"><%= health.version || 'Unknown' %></div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-label">Platform</div>
+                                            <div class="fw-bold"><%= process.platform || 'Unknown' %></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr>
+                                    
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="metric-label">Environment</div>
+                                            <div class="fw-bold"><%= process.env.NODE_ENV || 'development' %></div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="metric-label">PID</div>
+                                            <div class="fw-bold"><%= process.pid || 'Unknown' %></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr>
+                                    
+                                    <div class="metric-label">Uptime Details</div>
+                                    <div class="fw-bold">
+                                        <% if (health.uptime) { %>
+                                            <% const days = Math.floor(health.uptime / 86400); %>
+                                            <% const hours = Math.floor((health.uptime % 86400) / 3600); %>
+                                            <% const minutes = Math.floor((health.uptime % 3600) / 60); %>
+                                            <% const seconds = Math.floor(health.uptime % 60); %>
+                                            <%= days %>d <%= hours %>h <%= minutes %>m <%= seconds %>s
+                                        <% } else { %>
+                                            0d 0h 0m 0s
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Last Updated -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="text-center text-muted">
+                                <small>
+                                    <i class="bi bi-clock"></i>
+                                    Last updated: <span id="lastUpdated"><%= new Date().toLocaleString() %></span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </main>
+    </div>
+</div>
+
+<script>
+        let autoRefreshInterval = null;
+        
+        function refreshStats() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('auto-refresh');
+            
+            fetch('/system/health', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // For a full refresh, we'll just reload the page
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error refreshing stats:', error);
+                alert('Error refreshing health stats');
+            })
+            .finally(() => {
+                refreshIcon.classList.remove('auto-refresh');
+            });
+        }
+        
+        function updateUptime() {
+            const uptimeElement = document.getElementById('uptimeDisplay');
+            if (uptimeElement) {
+                // This would need server-side uptime value to update properly
+                // For now, just update the timestamp
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+            }
+        }
+        
+        document.getElementById('autoRefresh').addEventListener('change', function() {
+            if (this.checked) {
+                autoRefreshInterval = setInterval(() => {
+                    refreshStats();
+                }, 30000); // Refresh every 30 seconds
+                this.nextElementSibling.textContent = 'Auto-refresh (30s)';
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+                this.nextElementSibling.textContent = 'Auto-refresh';
+            }
+        });
+        
+        // Update uptime display every second
+        setInterval(updateUptime, 1000);
+    </script>

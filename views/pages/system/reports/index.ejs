@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>System Reports | School ERP System</title>
+      <meta name="description" content="Comprehensive system analytics and reporting" />
+
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+   </head>
+   <body class="bg-light">
+      <%- include('../../partials/header/authenticated') %>
+
+      <div class="container-fluid">
+         <div class="row">
+            <!-- Sidebar -->
+            <%- include('../../partials/nav/system-admin') %>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+               <div
+                  class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                  <h1 class="h2"><i class="bi bi-file-earmark-bar-graph"></i> System Reports & Analytics</h1>
+                  <div class="btn-toolbar mb-2 mb-md-0">
+                     <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="generateReport()">
+                           <i class="bi bi-plus-circle"></i> Generate Report
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                           <i class="bi bi-calendar"></i> Schedule Report
+                        </button>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Flash Messages -->
+               <%- include('../../partials/flash') %>
+
+               <!-- Report Categories -->
+               <div class="row g-4 mb-4">
+                  <!-- System Performance -->
+                  <div class="col-lg-3 col-md-6">
+                     <div class="card text-center h-100 border-primary">
+                        <div class="card-body">
+                           <i class="bi bi-speedometer2 text-primary mb-3" style="font-size: 2.5rem"></i>
+                           <h5 class="card-title">System Performance</h5>
+                           <p class="card-text text-muted">Server metrics, response times, and resource usage</p>
+                           <button class="btn btn-outline-primary btn-sm" disabled>
+                              <i class="bi bi-graph-up"></i> View Reports
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Usage Analytics -->
+                  <div class="col-lg-3 col-md-6">
+                     <div class="card text-center h-100 border-success">
+                        <div class="card-body">
+                           <i class="bi bi-bar-chart text-success mb-3" style="font-size: 2.5rem"></i>
+                           <h5 class="card-title">Usage Analytics</h5>
+                           <p class="card-text text-muted">User activity, feature adoption, and engagement metrics</p>
+                           <button class="btn btn-outline-success btn-sm" disabled>
+                              <i class="bi bi-people"></i> View Analytics
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Financial Reports -->
+                  <div class="col-lg-3 col-md-6">
+                     <div class="card text-center h-100 border-warning">
+                        <div class="card-body">
+                           <i class="bi bi-currency-dollar text-warning mb-3" style="font-size: 2.5rem"></i>
+                           <h5 class="card-title">Financial Reports</h5>
+                           <p class="card-text text-muted">Revenue, billing, and financial performance across trusts</p>
+                           <button class="btn btn-outline-warning btn-sm" disabled>
+                              <i class="bi bi-graph-down"></i> View Financial
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Custom Reports -->
+                  <div class="col-lg-3 col-md-6">
+                     <div class="card text-center h-100 border-info">
+                        <div class="card-body">
+                           <i class="bi bi-gear text-info mb-3" style="font-size: 2.5rem"></i>
+                           <h5 class="card-title">Custom Reports</h5>
+                           <p class="card-text text-muted">Build custom reports with flexible data sources</p>
+                           <button class="btn btn-outline-info btn-sm" disabled>
+                              <i class="bi bi-plus-circle"></i> Create Custom
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Quick Stats Dashboard -->
+               <div class="row mb-4">
+                  <div class="col-12">
+                     <div class="card">
+                        <div class="card-header">
+                           <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> System Analytics Overview</h5>
+                        </div>
+                        <div class="card-body">
+                           <div class="row">
+                              <div class="col-md-3">
+                                 <div class="text-center border-end">
+                                    <div class="h3 text-primary">1,247</div>
+                                    <div class="text-muted">Total Users</div>
+                                    <div class="small text-success">↑ 12% this month</div>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="text-center border-end">
+                                    <div class="h3 text-success">98.7%</div>
+                                    <div class="text-muted">System Uptime</div>
+                                    <div class="small text-success">↑ 0.3% improved</div>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="text-center border-end">
+                                    <div class="h3 text-info">847ms</div>
+                                    <div class="text-muted">Avg Response Time</div>
+                                    <div class="small text-success">↓ 23ms faster</div>
+                                 </div>
+                              </div>
+                              <div class="col-md-3">
+                                 <div class="text-center">
+                                    <div class="h3 text-warning">₹2.4M</div>
+                                    <div class="text-muted">Monthly Revenue</div>
+                                    <div class="small text-success">↑ 8% growth</div>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <hr />
+
+                           <div class="alert alert-info mb-0">
+                              <i class="bi bi-info-circle me-2"></i>
+                              <strong>Analytics Dashboard:</strong> Real-time analytics and detailed reporting features
+                              are currently in development. Basic statistics are shown above based on current system
+                              data.
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+
+               <!-- Recent Reports -->
+               <div class="row">
+                  <div class="col-12">
+                     <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                           <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i> Recent Reports</h5>
+                           <div class="btn-group btn-group-sm">
+                              <button class="btn btn-outline-secondary" disabled>
+                                 <i class="bi bi-funnel"></i> Filter
+                              </button>
+                              <button class="btn btn-outline-secondary" disabled>
+                                 <i class="bi bi-download"></i> Export All
+                              </button>
+                           </div>
+                        </div>
+                        <div class="card-body">
+                           <div class="table-responsive">
+                              <table class="table table-hover">
+                                 <thead>
+                                    <tr>
+                                       <th>Report Name</th>
+                                       <th>Type</th>
+                                       <th>Generated By</th>
+                                       <th>Date Created</th>
+                                       <th>Status</th>
+                                       <th>Actions</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    <tr>
+                                       <td>
+                                          <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                          Monthly System Performance Report
+                                       </td>
+                                       <td><span class="badge bg-primary">System</span></td>
+                                       <td>System Admin</td>
+                                       <td>2025-08-23 09:30</td>
+                                       <td><span class="badge bg-success">Completed</span></td>
+                                       <td>
+                                          <button class="btn btn-sm btn-outline-secondary" disabled>
+                                             <i class="bi bi-download"></i>
+                                          </button>
+                                          <button class="btn btn-sm btn-outline-info" disabled>
+                                             <i class="bi bi-eye"></i>
+                                          </button>
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td>
+                                          <i class="bi bi-file-earmark-bar-graph text-success me-2"></i>
+                                          Trust Revenue Analysis Q3
+                                       </td>
+                                       <td><span class="badge bg-success">Financial</span></td>
+                                       <td>System Admin</td>
+                                       <td>2025-08-22 16:45</td>
+                                       <td><span class="badge bg-warning">Processing</span></td>
+                                       <td>
+                                          <button class="btn btn-sm btn-outline-secondary" disabled>
+                                             <i class="bi bi-clock"></i>
+                                          </button>
+                                          <button class="btn btn-sm btn-outline-danger" disabled>
+                                             <i class="bi bi-x-circle"></i>
+                                          </button>
+                                       </td>
+                                    </tr>
+                                    <tr>
+                                       <td>
+                                          <i class="bi bi-file-earmark-spreadsheet text-info me-2"></i>
+                                          User Activity Summary
+                                       </td>
+                                       <td><span class="badge bg-info">Usage</span></td>
+                                       <td>System Admin</td>
+                                       <td>2025-08-22 11:20</td>
+                                       <td><span class="badge bg-success">Completed</span></td>
+                                       <td>
+                                          <button class="btn btn-sm btn-outline-secondary" disabled>
+                                             <i class="bi bi-download"></i>
+                                          </button>
+                                          <button class="btn btn-sm btn-outline-info" disabled>
+                                             <i class="bi bi-eye"></i>
+                                          </button>
+                                       </td>
+                                    </tr>
+                                 </tbody>
+                              </table>
+                           </div>
+
+                           <div class="d-flex justify-content-between align-items-center mt-3">
+                              <div class="text-muted">Showing 3 of 15 reports</div>
+                              <nav>
+                                 <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item disabled">
+                                       <span class="page-link">Previous</span>
+                                    </li>
+                                    <li class="page-item active">
+                                       <span class="page-link">1</span>
+                                    </li>
+                                    <li class="page-item">
+                                       <a class="page-link" href="#" onclick="return false;">2</a>
+                                    </li>
+                                    <li class="page-item">
+                                       <a class="page-link" href="#" onclick="return false;">Next</a>
+                                    </li>
+                                 </ul>
+                              </nav>
+                           </div>
+
+                           <div class="alert alert-warning mt-4 mb-0">
+                              <i class="bi bi-clock me-2"></i>
+                              <strong>Development Notice:</strong> Advanced reporting features including real-time chart
+                              generation, scheduled reports, and custom report builder are currently under development
+                              and will be available in the next release.
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </main>
+         </div>
+      </div>
+
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+      <script>
+         function generateReport() {
+            alert('Report generation wizard will be available soon!');
+         }
+      </script>
+   </body>
+</html>

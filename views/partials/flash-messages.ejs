@@ -1,0 +1,516 @@
+<!-- Flash Messages Container -->
+<div id="flash-messages-container" class="flash-messages-wrapper position-fixed top-0 end-0 p-3" style="z-index: 1055; top: 80px !important; max-width: 400px;">
+    <% if (typeof success !== 'undefined' && success && (Array.isArray(success) ? success.length > 0 : success)) { %>
+        <% const successMessages = Array.isArray(success) ? success : [success]; %>
+        <% successMessages.forEach((message, index) => { %>
+        <div class="alert alert-success alert-dismissible fade show flash-alert mb-3" 
+             role="alert" 
+             data-auto-dismiss="5000"
+             data-alert-type="success">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <i class="fas fa-check-circle fs-5"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Success!</strong>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-close ms-2" 
+                        data-bs-dismiss="alert" 
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="progress-bar-container mt-2">
+                <div class="alert-progress-bar bg-success" style="animation: shrink 5s linear forwards;"></div>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+
+    <% if (typeof error !== 'undefined' && error && (Array.isArray(error) ? error.length > 0 : error)) { %>
+        <% const errorMessages = Array.isArray(error) ? error : [error]; %>
+        <% errorMessages.forEach((message, index) => { %>
+        <div class="alert alert-danger alert-dismissible fade show flash-alert mb-3" 
+             role="alert" 
+             data-auto-dismiss="8000"
+             data-alert-type="error">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <i class="fas fa-exclamation-circle fs-5"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Error!</strong>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text mb-2"><%= message.message %></span>
+                            <% } %>
+                            
+                            <% if (message.validationErrors && message.validationErrors.length > 0) { %>
+                                <div class="validation-errors mt-2">
+                                    <small class="text-muted d-block mb-1">Validation Issues:</small>
+                                    <% message.validationErrors.forEach(function(ve) { %>
+                                        <div class="validation-error-item small">
+                                            <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                            <strong><%= ve.field %>:</strong> <%= ve.message %>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                            
+                            <% if (message.suggestions) { %>
+                                <div class="error-suggestions mt-2">
+                                    <small class="text-info d-block">
+                                        <i class="fas fa-lightbulb me-1"></i><%= message.suggestions %>
+                                    </small>
+                                </div>
+                            <% } %>
+                            
+                            <% if (message.technical && (message.context || message.debugDetails || message.stack)) { %>
+                                <div class="debug-info mt-2">
+                                    <button class="btn btn-link btn-sm p-0 text-muted" type="button" 
+                                            data-bs-toggle="collapse" 
+                                            data-bs-target="#debug-<%= index %>" 
+                                            aria-expanded="false">
+                                        <i class="fas fa-code me-1"></i>Debug Info
+                                    </button>
+                                    <div class="collapse mt-2" id="debug-<%= index %>">
+                                        <div class="card card-body bg-dark text-light small">
+                                            <% if (message.context) { %>
+                                                <div class="mb-2">
+                                                    <strong>Context:</strong>
+                                                    <pre class="text-light mb-0"><%= JSON.stringify(message.context, null, 2) %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.debugDetails) { %>
+                                                <div class="mb-2">
+                                                    <strong>Details:</strong>
+                                                    <pre class="text-light mb-0"><%= JSON.stringify(message.debugDetails, null, 2) %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.stack) { %>
+                                                <div class="mb-2">
+                                                    <strong>Stack:</strong>
+                                                    <pre class="text-light mb-0"><%= message.stack %></pre>
+                                                </div>
+                                            <% } %>
+                                            <% if (message.timestamp) { %>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-clock me-1"></i><%= new Date(message.timestamp).toLocaleString() %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-close ms-2" 
+                        data-bs-dismiss="alert" 
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="progress-bar-container mt-2">
+                <div class="alert-progress-bar bg-danger" style="animation: shrink 8s linear forwards;"></div>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+
+    <% if (typeof warning !== 'undefined' && warning && (Array.isArray(warning) ? warning.length > 0 : warning)) { %>
+        <% const warningMessages = Array.isArray(warning) ? warning : [warning]; %>
+        <% warningMessages.forEach((message, index) => { %>
+        <div class="alert alert-warning alert-dismissible fade show flash-alert mb-3" 
+             role="alert" 
+             data-auto-dismiss="6000"
+             data-alert-type="warning">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <i class="fas fa-exclamation-triangle fs-5"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Warning!</strong>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-close ms-2" 
+                        data-bs-dismiss="alert" 
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="progress-bar-container mt-2">
+                <div class="alert-progress-bar bg-warning" style="animation: shrink 6s linear forwards;"></div>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+
+    <% if (typeof info !== 'undefined' && info && (Array.isArray(info) ? info.length > 0 : info)) { %>
+        <% const infoMessages = Array.isArray(info) ? info : [info]; %>
+        <% infoMessages.forEach((message, index) => { %>
+        <div class="alert alert-info alert-dismissible fade show flash-alert mb-3" 
+             role="alert" 
+             data-auto-dismiss="5000"
+             data-alert-type="info">
+            <div class="d-flex align-items-start">
+                <div class="flex-shrink-0 me-2">
+                    <i class="fas fa-info-circle fs-5"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Info!</strong>
+                    <div class="flash-message-content">
+                        <% if (typeof message === 'object') { %>
+                            <% if (message.message) { %>
+                                <span class="d-block flash-message-text"><%= message.message %></span>
+                            <% } else { %>
+                                <span class="d-block flash-message-text"><%= JSON.stringify(message) %></span>
+                            <% } %>
+                        <% } else { %>
+                            <span class="d-block flash-message-text"><%= message %></span>
+                        <% } %>
+                    </div>
+                </div>
+                <button type="button" 
+                        class="btn-close ms-2" 
+                        data-bs-dismiss="alert" 
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="progress-bar-container mt-2">
+                <div class="alert-progress-bar bg-info" style="animation: shrink 5s linear forwards;"></div>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- Flash Messages Styles -->
+<style>
+/* Flash Messages Styling */
+.flash-messages-wrapper {
+    width: 100%;
+    max-width: 400px;
+}
+
+.flash-alert {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    animation: slideInFromRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    margin-bottom: 12px !important;
+}
+
+.flash-alert.alert-success {
+    border-left-color: #22c55e;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.95) 0%, rgba(34, 197, 94, 0.85) 100%);
+    color: white;
+}
+
+.flash-alert.alert-danger {
+    border-left-color: #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.95) 0%, rgba(239, 68, 68, 0.85) 100%);
+    color: white;
+}
+
+.flash-alert.alert-warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.95) 0%, rgba(245, 158, 11, 0.85) 100%);
+    color: white;
+}
+
+.flash-alert.alert-info {
+    border-left-color: #3b82f6;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(59, 130, 246, 0.85) 100%);
+    color: white;
+}
+
+.flash-alert .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.flash-alert .btn-close:hover {
+    opacity: 1;
+}
+
+.progress-bar-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.alert-progress-bar {
+    height: 100%;
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    opacity: 0.8;
+}
+
+.alert-progress-bar.bg-success {
+    background: #16a34a !important;
+}
+
+.alert-progress-bar.bg-danger {
+    background: #dc2626 !important;
+}
+
+.alert-progress-bar.bg-warning {
+    background: #d97706 !important;
+}
+
+.alert-progress-bar.bg-info {
+    background: #2563eb !important;
+}
+
+/* Enhanced Animations */
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(120%) scale(0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: translateX(-5%) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes slideOutToRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(120%) scale(0.8);
+    }
+}
+
+@keyframes shrink {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
+
+/* Fade out animation for auto-dismiss */
+.flash-alert.fade-out {
+    animation: slideOutToRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .flash-messages-wrapper {
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        max-width: calc(100% - 1.5rem) !important;
+    }
+    
+    .flash-alert {
+        margin-bottom: 8px !important;
+    }
+}
+
+/* Hover effects */
+.flash-alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.flash-alert:hover .alert-progress-bar {
+    animation-play-state: paused;
+}
+
+/* Enhanced Error Display Styles */
+.flash-message-content .validation-errors {
+    background: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid #ffc107;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+}
+
+.validation-error-item {
+    margin: 0.25rem 0;
+    color: #6c757d;
+}
+
+.error-suggestions {
+    background: rgba(13, 202, 240, 0.1);
+    border-left: 3px solid #0dcaf0;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.debug-info .card {
+    font-size: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.debug-info pre {
+    font-size: 0.7rem;
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes shrink {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Hover effects */
+.flash-alert:hover .alert-progress-bar {
+    animation-play-state: paused;
+}
+
+.flash-alert:not(:hover) .alert-progress-bar {
+    animation-play-state: running;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .flash-alert {
+        margin: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .flash-alert {
+        margin: 0.5rem 0.5rem;
+    }
+}
+</style>
+
+<!-- Flash Messages JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-dismiss flash messages
+    const flashAlerts = document.querySelectorAll('.flash-alert[data-auto-dismiss]');
+    
+    flashAlerts.forEach(function(alert) {
+        const autoDismissTime = parseInt(alert.dataset.autoDismiss);
+        const progressBar = alert.querySelector('.alert-progress-bar');
+        
+        // Auto-dismiss timer
+        const dismissTimer = setTimeout(function() {
+            dismissAlert(alert);
+        }, autoDismissTime);
+        
+        // Pause on hover
+        alert.addEventListener('mouseenter', function() {
+            if (progressBar) {
+                progressBar.style.animationPlayState = 'paused';
+            }
+            clearTimeout(dismissTimer);
+        });
+        
+        // Resume on mouse leave
+        alert.addEventListener('mouseleave', function() {
+            if (progressBar) {
+                progressBar.style.animationPlayState = 'running';
+            }
+            // Calculate remaining time based on progress bar width
+            const remainingWidth = progressBar.offsetWidth / alert.offsetWidth;
+            const remainingTime = autoDismissTime * remainingWidth;
+            
+            setTimeout(function() {
+                dismissAlert(alert);
+            }, remainingTime);
+        });
+        
+        // Manual close button
+        const closeBtn = alert.querySelector('.btn-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                clearTimeout(dismissTimer);
+                dismissAlert(alert);
+            });
+        }
+    });
+    
+    function dismissAlert(alert) {
+        alert.style.animation = 'slideOutRight 0.3s ease-in forwards';
+        setTimeout(function() {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 300);
+    }
+    
+    // Add shake animation for error alerts
+    const errorAlerts = document.querySelectorAll('.flash-alert[data-alert-type="error"]');
+    errorAlerts.forEach(function(alert) {
+        alert.addEventListener('animationend', function() {
+            if (this.style.animation.includes('slideInRight')) {
+                this.style.animation += ', shake 0.5s ease-in-out';
+            }
+        });
+    });
+});
+
+// Add shake animation CSS
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+`;
+document.head.appendChild(shakeStyle);
+</script>

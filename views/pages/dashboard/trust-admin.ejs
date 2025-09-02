@@ -1,0 +1,290 @@
+<!-- Trust Admin Dashboard -->
+<% currentPath = '/dashboard'; %>
+
+<div class="row">
+   <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+         <div>
+            <h1 class="h3 mb-1">Trust Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening in your schools today.</p>
+         </div>
+         <div class="d-flex gap-2">
+            <button
+               type="button"
+               class="btn btn-outline-secondary"
+               data-bs-toggle="modal"
+               data-bs-target="#addSchoolModal">
+               <i class="fas fa-school me-1"></i>Add School
+            </button>
+            <button
+               type="button"
+               class="btn btn-brand-primary"
+               data-bs-toggle="modal"
+               data-bs-target="#addStudentModal">
+               <i class="fas fa-user-plus me-1"></i>Add Student
+            </button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-3 mb-4">
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Schools</h6>
+                  <h2 class="mb-0 fw-bold">8</h2>
+                  <small class="opacity-75">+2 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-school fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Students</h6>
+                  <h2 class="mb-0 fw-bold">2,847</h2>
+                  <small class="opacity-75">+127 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-user-graduate fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Teachers</h6>
+                  <h2 class="mb-0 fw-bold">145</h2>
+                  <small class="opacity-75">+8 this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-chalkboard-teacher fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+               <div>
+                  <h6 class="card-title mb-1 opacity-75">Revenue</h6>
+                  <h2 class="mb-0 fw-bold">₹2.4M</h2>
+                  <small class="opacity-75">+12% this month</small>
+               </div>
+               <div>
+                  <i class="fas fa-rupee-sign fa-2x opacity-50"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="row g-4">
+   <!-- Schools Overview -->
+   <div class="col-lg-8">
+      <div class="card h-100">
+         <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Schools Overview</h5>
+            <a href="/schools" class="text-decoration-none">View All</a>
+         </div>
+         <div class="card-body">
+            <div class="table-responsive">
+               <table class="table table-hover">
+                  <thead class="table-light">
+                     <tr>
+                        <th>School</th>
+                        <th>Students</th>
+                        <th>Teachers</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 AB
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">ABC Public School</div>
+                                 <small class="text-muted">Sector 15, Noida</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">456</span>
+                           <br /><small class="text-success">+12 this week</small>
+                        </td>
+                        <td>24</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                           <a href="/schools/1" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 XY
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">XYZ International</div>
+                                 <small class="text-muted">Greater Noida</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">789</span>
+                           <br /><small class="text-success">+23 this week</small>
+                        </td>
+                        <td>38</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td>
+                           <a href="/schools/2" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                     <tr>
+                        <td>
+                           <div class="d-flex align-items-center">
+                              <div
+                                 class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                                 style="width: 32px; height: 32px; font-size: 0.8rem">
+                                 GL
+                              </div>
+                              <div>
+                                 <div class="fw-semibold">Global Academy</div>
+                                 <small class="text-muted">Ghaziabad</small>
+                              </div>
+                           </div>
+                        </td>
+                        <td>
+                           <span class="fw-semibold">623</span>
+                           <br /><small class="text-success">+8 this week</small>
+                        </td>
+                        <td>32</td>
+                        <td><span class="badge bg-warning">Maintenance</span></td>
+                        <td>
+                           <a href="/schools/3" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye"></i>
+                           </a>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Quick Actions & Notifications -->
+   <div class="col-lg-4">
+      <!-- Quick Actions -->
+      <div class="card mb-3">
+         <div class="card-header">
+            <h6 class="card-title mb-0">Quick Actions</h6>
+         </div>
+         <div class="card-body">
+            <div class="d-grid gap-2">
+               <a href="/students/bulk-import" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-file-import me-2"></i>Bulk Import Students
+               </a>
+               <a href="/fees/generate-invoices" class="btn btn-outline-success btn-sm">
+                  <i class="fas fa-file-invoice me-2"></i>Generate Fee Invoices
+               </a>
+               <a href="/reports/attendance" class="btn btn-outline-info btn-sm">
+                  <i class="fas fa-chart-bar me-2"></i>Attendance Reports
+               </a>
+               <a href="/backup" class="btn btn-outline-warning btn-sm">
+                  <i class="fas fa-download me-2"></i>Download Backup
+               </a>
+            </div>
+         </div>
+      </div>
+
+      <!-- Recent Notifications -->
+      <div class="card">
+         <div class="card-header">
+            <h6 class="card-title mb-0">Recent Updates</h6>
+         </div>
+         <div class="card-body">
+            <div class="list-group list-group-flush">
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-check"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">Fee Collection Update</p>
+                        <p class="mb-1 small text-muted">ABC School collected ₹2.3L today</p>
+                        <small class="text-muted">2 hours ago</small>
+                     </div>
+                  </div>
+               </div>
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-user"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">New Teacher Joined</p>
+                        <p class="mb-1 small text-muted">Ms. Sarah joined XYZ International</p>
+                        <small class="text-muted">5 hours ago</small>
+                     </div>
+                  </div>
+               </div>
+               <div class="list-group-item px-0 py-2">
+                  <div class="d-flex">
+                     <div class="flex-shrink-0">
+                        <div
+                           class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center"
+                           style="width: 24px; height: 24px; font-size: 0.7rem">
+                           <i class="fas fa-exclamation"></i>
+                        </div>
+                     </div>
+                     <div class="flex-grow-1 ms-2">
+                        <p class="mb-1 small fw-semibold">System Maintenance</p>
+                        <p class="mb-1 small text-muted">Scheduled for tonight 11 PM</p>
+                        <small class="text-muted">1 day ago</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>

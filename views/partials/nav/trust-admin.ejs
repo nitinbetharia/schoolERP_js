@@ -1,0 +1,198 @@
+<!-- Trust Admin Navigation -->
+<div class="bg-white border-bottom">
+   <div class="container-fluid">
+      <nav clas                        <a class="dropdown-item" href="/coming-soon?title=Fee Structure Management&description=Configure fee structures and payment plans&icon=fas fa-money-bill-wave">
+                           <i class="fas fa-money-bill-wave me-2"></i>Fee Structure
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Fee Collection&description=Manage fee collection and payment tracking&icon=fas fa-cash-register">
+                           <i class="fas fa-cash-register me-2"></i>Collection
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Pending Fees&description=Track pending fees and send reminders&icon=fas fa-exclamation-triangle">
+                           <i class="fas fa-exclamation-triangle me-2"></i>Pending Fees
+                        </a>bar-expand-lg navbar-light p-0">
+         <button
+            class="navbar-toggler border-0"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#trustAdminNav">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+
+         <div class="collapse navbar-collapse" id="trustAdminNav">
+            <ul class="navbar-nav me-auto">
+               <li class="nav-item">
+                  <a class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>" href="/dashboard">
+                     <i class="fas fa-home me-1"></i>Dashboard
+                  </a>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/schools') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-school me-1"></i>Schools
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/schools"> <i class="fas fa-list me-2"></i>All Schools </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/schools/new"> <i class="fas fa-plus me-2"></i>Add School </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Class Management&description=Manage classes, subjects, and class assignments&icon=fas fa-chalkboard">
+                           <i class="fas fa-chalkboard me-2"></i>Manage Classes
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Section Management&description=Create and manage class sections and divisions&icon=fas fa-layer-group">
+                           <i class="fas fa-layer-group me-2"></i>Sections
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/students') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-user-graduate me-1"></i>Students
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/students"> <i class="fas fa-list me-2"></i>All Students </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/students/new">
+                           <i class="fas fa-user-plus me-2"></i>Add Student
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Student Bulk Import&description=Import multiple students from Excel/CSV files&icon=fas fa-file-import">
+                           <i class="fas fa-file-import me-2"></i>Bulk Import
+                        </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Student Enrollment&description=Manage student enrollment and admission process&icon=fas fa-clipboard-list">
+                           <i class="fas fa-clipboard-list me-2"></i>Enrollment
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Student Documents&description=Manage student documents and certificates&icon=fas fa-folder-open">
+                           <i class="fas fa-folder-open me-2"></i>Documents
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/staff') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-users me-1"></i>Staff
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/staff"> <i class="fas fa-list me-2"></i>All Staff </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Teacher Management&description=Manage teachers, subjects, and class assignments&icon=fas fa-chalkboard-teacher">
+                           <i class="fas fa-chalkboard-teacher me-2"></i>Teachers
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Add Staff Member&description=Add new staff members and manage their profiles&icon=fas fa-user-plus"> 
+                           <i class="fas fa-user-plus me-2"></i>Add Staff 
+                        </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/coming-soon?title=Staff Attendance&description=Track and manage staff attendance records&icon=fas fa-clock">
+                           <i class="fas fa-clock me-2"></i>Attendance
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/fees') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-money-bill-wave me-1"></i>Fees
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/fees/structure">
+                           <i class="fas fa-list me-2"></i>Fee Structure
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/fees/collection">
+                           <i class="fas fa-cash-register me-2"></i>Collection
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/fees/pending">
+                           <i class="fas fa-exclamation-triangle me-2"></i>Pending
+                        </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/fees/reports"> <i class="fas fa-chart-pie me-2"></i>Reports </a>
+                     </li>
+                  </ul>
+               </li>
+               <li class="nav-item dropdown">
+                  <a
+                     class="nav-link dropdown-toggle <%= currentPath && currentPath.includes('/reports') ? 'active' : '' %>"
+                     href="#"
+                     role="button"
+                     data-bs-toggle="dropdown">
+                     <i class="fas fa-chart-bar me-1"></i>Reports
+                  </a>
+                  <ul class="dropdown-menu">
+                     <li>
+                        <a class="dropdown-item" href="/reports/academic">
+                           <i class="fas fa-graduation-cap me-2"></i>Academic
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/reports/financial">
+                           <i class="fas fa-dollar-sign me-2"></i>Financial
+                        </a>
+                     </li>
+                     <li>
+                        <a class="dropdown-item" href="/reports/attendance">
+                           <i class="fas fa-calendar-check me-2"></i>Attendance
+                        </a>
+                     </li>
+                     <li><hr class="dropdown-divider" /></li>
+                     <li>
+                        <a class="dropdown-item" href="/reports/custom">
+                           <i class="fas fa-cog me-2"></i>Custom Reports
+                        </a>
+                     </li>
+                  </ul>
+               </li>
+            </ul>
+
+            <!-- Right side nav items -->
+            <ul class="navbar-nav">
+               <li class="nav-item">
+                  <a class="nav-link" href="/help"> <i class="fas fa-question-circle me-1"></i>Help </a>
+               </li>
+            </ul>
+         </div>
+      </nav>
+   </div>
+</div>
