@@ -72,6 +72,35 @@ module.exports = function (middleware) {
    });
 
    /**
+    * @route GET /:id/edit
+    * @desc Wizard: Edit trust
+    * @access Private (System Admin only)
+    */
+   router.get('/:id/edit', requireAuth, (req, res) => {
+      try {
+         const userType = req.session.userType;
+         if (userType !== 'system') {
+            req.flash('error', 'Access denied. System admin privileges required.');
+            return res.redirect('/dashboard');
+         }
+
+         res.render('pages/system/trusts/edit', {
+            title: 'Edit Trust',
+            description: 'Edit trust details and configuration',
+            user: req.session.user,
+            tenant: null,
+            userType: userType,
+            currentPath: '/system/trusts/edit',
+            trustId: req.params.id,
+         });
+      } catch (error) {
+         logError(error, { context: 'system/trusts/:id/edit GET' });
+         req.flash('error', 'Unable to load trust edit page');
+         res.redirect('/system/trusts');
+      }
+   });
+
+   /**
     * @route GET /analytics
     * @desc Trust analytics dashboard
     * @access Private (System Admin only)

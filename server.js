@@ -106,16 +106,35 @@ class SchoolERPServer {
 
       // Add Content Security Policy for XSS protection
       this.app.use((req, res, next) => {
-         res.setHeader(
-            'Content-Security-Policy',
-            "default-src 'self'; " +
-               "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.jsdelivr.net cdnjs.cloudflare.com; " +
-               "style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com cdnjs.cloudflare.com; " +
-               "font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; " +
-               "img-src 'self' data: https:; " +
-               "connect-src 'self'; " +
-               "frame-src 'none';"
-         );
+         const scriptSrc = [
+            'script-src',
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+            'cdn.jsdelivr.net',
+            'cdnjs.cloudflare.com',
+         ].join(' ');
+
+         const styleSrc = [
+            'style-src',
+            "'self'",
+            "'unsafe-inline'",
+            'cdn.jsdelivr.net',
+            'fonts.googleapis.com',
+            'cdnjs.cloudflare.com',
+         ].join(' ');
+
+         const cspDirectives = [
+            "default-src 'self'",
+            scriptSrc,
+            styleSrc,
+            "font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com",
+            "img-src 'self' data: https:",
+            "connect-src 'self'",
+            "frame-src 'none'",
+         ].join('; ');
+
+         res.setHeader('Content-Security-Policy', cspDirectives);
          res.setHeader('X-Content-Type-Options', 'nosniff');
          res.setHeader('X-Frame-Options', 'DENY');
          res.setHeader('X-XSS-Protection', '1; mode=block');
@@ -245,16 +264,34 @@ class SchoolERPServer {
       // Connection pool monitoring middleware
       this.app.use(connectionPoolMonitor);
 
+      // Handle favicon requests to avoid noisy 404 errors in logs
+      // Browsers automatically request /favicon.ico; returning 204 keeps logs clean
+      this.app.get('/favicon.ico', (req, res) => {
+         try {
+            const fs = require('fs');
+            const iconPath = path.join(__dirname, 'public', 'favicon.ico');
+            if (fs.existsSync(iconPath)) {
+               return res.sendFile(iconPath);
+            }
+         } catch {
+            // ignore and fall back to 204
+         }
+         return res.status(204).end();
+      });
+
       // Flash message middleware for web routes
       const { setupFlashMessages } = require('./middleware/flash');
       this.app.use(setupFlashMessages);
 
-      // Tenant detection middleware (for all routes except system admin and trust-scoped routes)
+      // Tenant detection middleware (skip for system admin, auth, static, and some API routes)
       this.app.use((req, res, next) => {
          console.log('🚀 TENANT DETECTION MIDDLEWARE:', {
             path: req.path,
             host: req.get('host'),
             shouldSkip:
+               req.path.startsWith('/system') ||
+               req.path.startsWith('/auth') ||
+               req.path.startsWith('/static') ||
                req.path.startsWith('/api/v1/admin/system') ||
                req.path.startsWith('/api/v1/trust/') ||
                req.path === '/api/v1/health' ||
@@ -264,6 +301,9 @@ class SchoolERPServer {
          });
 
          if (
+            req.path.startsWith('/system') ||
+            req.path.startsWith('/auth') ||
+            req.path.startsWith('/static') ||
             req.path.startsWith('/api/v1/admin/system') ||
             req.path.startsWith('/api/v1/trust/') ||
             req.path === '/api/v1/health' ||
@@ -278,13 +318,16 @@ class SchoolERPServer {
          return tenantDetection(req, res, next);
       });
 
-      // Tenant validation middleware (for tenant-specific routes except trust-scoped routes)
+      // Tenant validation middleware (skip for system admin, auth, static, and some API routes)
       this.app.use((req, res, next) => {
          console.log('🏛️ TENANT VALIDATION MIDDLEWARE:', {
             path: req.path,
             tenantCode: req.tenantCode,
             isSystemAdmin: req.isSystemAdmin,
             shouldSkipPath:
+               req.path.startsWith('/system') ||
+               req.path.startsWith('/auth') ||
+               req.path.startsWith('/static') ||
                req.path.startsWith('/api/v1/admin/system') ||
                req.path.startsWith('/api/v1/trust/') ||
                req.path === '/api/v1/health' ||
@@ -297,6 +340,9 @@ class SchoolERPServer {
          });
 
          if (
+            req.path.startsWith('/system') ||
+            req.path.startsWith('/auth') ||
+            req.path.startsWith('/static') ||
             req.path.startsWith('/api/v1/admin/system') ||
             req.path.startsWith('/api/v1/trust/') ||
             req.path === '/api/v1/health' ||

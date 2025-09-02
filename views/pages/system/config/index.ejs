@@ -3,7 +3,7 @@
    <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>System Configuration | School ERP System</title>
+   <title>System Configuration | School ERP System</title>
       <meta name="description" content="System-wide configuration and settings" />
 
       <!-- Bootstrap CSS -->
@@ -36,146 +36,167 @@
                </div>
 
                <!-- Flash Messages -->
-               <%- include('../../partials/flash') %>
+               <%- include('../../partials/flash-messages') %>
 
-               <!-- Configuration Categories -->
+               <!-- Configuration Sections (rendered by server for section + configData) -->
                <div class="row g-4">
-                  <!-- General Settings -->
-                  <div class="col-lg-6">
-                     <div class="card h-100">
-                        <div class="card-header bg-primary text-white">
-                           <h5 class="card-title mb-0"><i class="bi bi-sliders"></i> General Settings</h5>
+                  <div class="col-12">
+                     <div class="alert alert-secondary">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Editing section:</strong>
+                        <span class="text-uppercase"><%= section || 'general' %></span>
+                     </div>
+                  </div>
+                  <div class="col-lg-8">
+                     <div class="card">
+                        <div class="card-header">
+                           <h5 class="card-title mb-0">Update <%= (section || 'general') %> configuration</h5>
                         </div>
                         <div class="card-body">
-                           <div class="mb-3">
-                              <p class="text-muted mb-3">Core system configuration and defaults</p>
-                              <ul class="list-unstyled">
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-globe text-primary me-2"></i>
-                                    <span>System Timezone & Locale</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-currency-dollar text-primary me-2"></i>
-                                    <span>Default Currency Settings</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-calendar text-primary me-2"></i>
-                                    <span>Academic Year Configuration</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-image text-primary me-2"></i>
-                                    <span>System Branding & Logos</span>
-                                 </li>
-                              </ul>
-                           </div>
-                           <button class="btn btn-outline-primary btn-sm w-100" disabled>
-                              <i class="bi bi-tools"></i> Configure (Coming Soon)
-                           </button>
+                           <form method="post" action="/system/config/<%= section %>">
+                              <% if (section === 'general') { %>
+                                 <div class="row g-3">
+                                    <div class="col-md-6">
+                                       <label class="form-label">Timezone</label>
+                                       <input name="timezone" class="form-control" value="<%= configData.timezone %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Locale</label>
+                                       <input name="locale" class="form-control" value="<%= configData.locale %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Currency</label>
+                                       <input name="currency" class="form-control" value="<%= configData.currency %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Academic Year Start Month</label>
+                                       <input name="academicYearStartMonth" type="number" class="form-control" value="<%= configData.academicYearStartMonth %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Branding Name</label>
+                                       <input name="branding_name" class="form-control" value="<%= configData.branding?.name %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Branding Logo URL</label>
+                                       <input name="branding_logo" class="form-control" value="<%= configData.branding?.logo %>" />
+                                    </div>
+                                 </div>
+                              <% } %>
+
+                              <% if (section === 'security') { %>
+                                 <div class="row g-3">
+                                    <div class="col-md-6">
+                                       <label class="form-label">Session Max Age (ms)</label>
+                                       <input name="sessionMaxAge" type="number" class="form-control" value="<%= configData.sessionMaxAge %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Max Login Attempts</label>
+                                       <input name="maxLoginAttempts" type="number" class="form-control" value="<%= configData.maxLoginAttempts %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Lockout Time (ms)</label>
+                                       <input name="lockoutTimeMs" type="number" class="form-control" value="<%= configData.lockoutTimeMs %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Bcrypt Rounds</label>
+                                       <input name="bcryptRounds" type="number" class="form-control" value="<%= configData.bcryptRounds %>" />
+                                    </div>
+                                    <div class="col-md-12 form-check mt-2">
+                                       <input class="form-check-input" type="checkbox" id="twoFactorEnabled" name="twoFactorEnabled" <%= configData.twoFactor?.enabled ? 'checked' : '' %> />
+                                       <label class="form-check-label" for="twoFactorEnabled">Enable Two-Factor Authentication</label>
+                                    </div>
+                                 </div>
+                              <% } %>
+
+                              <% if (section === 'email') { %>
+                                 <div class="row g-3">
+                                    <div class="col-md-6">
+                                       <label class="form-label">SMTP Host</label>
+                                       <input name="host" class="form-control" value="<%= configData.host %>" />
+                                    </div>
+                                    <div class="col-md-3">
+                                       <label class="form-label">Port</label>
+                                       <input name="port" type="number" class="form-control" value="<%= configData.port %>" />
+                                    </div>
+                                    <div class="col-md-3 form-check mt-4 pt-2">
+                                       <input class="form-check-input" type="checkbox" id="secure" name="secure" <%= configData.secure ? 'checked' : '' %> />
+                                       <label class="form-check-label" for="secure">Secure (TLS)</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">User</label>
+                                       <input name="user" class="form-control" value="<%= configData.user %>" />
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">From Address</label>
+                                       <input name="from" class="form-control" value="<%= configData.from %>" />
+                                    </div>
+                                 </div>
+                              <% } %>
+
+                              <% if (section === 'integrations') { %>
+                                 <div class="row g-3">
+                                    <div class="col-md-6">
+                                       <label class="form-label">Payment Gateway</label>
+                                       <select class="form-select" name="paymentProvider">
+                                          <option value="none" <%= configData.paymentGateway?.provider === 'none' ? 'selected' : '' %>>None</option>
+                                          <option value="razorpay" <%= configData.paymentGateway?.provider === 'razorpay' ? 'selected' : '' %>>Razorpay</option>
+                                          <option value="stripe" <%= configData.paymentGateway?.provider === 'stripe' ? 'selected' : '' %>>Stripe</option>
+                                       </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">SMS Provider</label>
+                                       <select class="form-select" name="smsProvider">
+                                          <option value="none" <%= configData.sms?.provider === 'none' ? 'selected' : '' %>>None</option>
+                                          <option value="twilio" <%= configData.sms?.provider === 'twilio' ? 'selected' : '' %>>Twilio</option>
+                                       </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Storage Provider</label>
+                                       <select class="form-select" name="storageProvider">
+                                          <option value="local" <%= configData.storage?.provider === 'local' ? 'selected' : '' %>>Local</option>
+                                          <option value="s3" <%= configData.storage?.provider === 's3' ? 'selected' : '' %>>S3</option>
+                                       </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                       <label class="form-label">Analytics Provider</label>
+                                       <select class="form-select" name="analyticsProvider">
+                                          <option value="none" <%= configData.analytics?.provider === 'none' ? 'selected' : '' %>>None</option>
+                                          <option value="appinsights" <%= configData.analytics?.provider === 'appinsights' ? 'selected' : '' %>>Azure Application Insights</option>
+                                       </select>
+                                    </div>
+                                 </div>
+                              <% } %>
+
+                              <div class="mt-4 d-flex gap-2">
+                                 <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save me-1"></i> Save Changes
+                                 </button>
+                                 <a href="/system/config/<%= section %>" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                                 </a>
+                              </div>
+                           </form>
                         </div>
                      </div>
                   </div>
-
-                  <!-- Security Settings -->
-                  <div class="col-lg-6">
-                     <div class="card h-100">
-                        <div class="card-header bg-danger text-white">
-                           <h5 class="card-title mb-0"><i class="bi bi-shield-lock"></i> Security Settings</h5>
+                  <div class="col-lg-4">
+                     <div class="card">
+                        <div class="card-header bg-light">
+                           <h5 class="card-title mb-0">Quick Links</h5>
                         </div>
-                        <div class="card-body">
-                           <div class="mb-3">
-                              <p class="text-muted mb-3">Security policies and authentication settings</p>
-                              <ul class="list-unstyled">
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-key text-danger me-2"></i>
-                                    <span>Password Policy Configuration</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-clock text-danger me-2"></i>
-                                    <span>Session Timeout Settings</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-ban text-danger me-2"></i>
-                                    <span>Account Lockout Policies</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-shield-check text-danger me-2"></i>
-                                    <span>Two-Factor Authentication</span>
-                                 </li>
-                              </ul>
-                           </div>
-                           <button class="btn btn-outline-danger btn-sm w-100" disabled>
-                              <i class="bi bi-shield"></i> Configure (Coming Soon)
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-
-                  <!-- Email Settings -->
-                  <div class="col-lg-6">
-                     <div class="card h-100">
-                        <div class="card-header bg-info text-white">
-                           <h5 class="card-title mb-0"><i class="bi bi-envelope-at"></i> Email Settings</h5>
-                        </div>
-                        <div class="card-body">
-                           <div class="mb-3">
-                              <p class="text-muted mb-3">Email server and notification configuration</p>
-                              <ul class="list-unstyled">
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-server text-info me-2"></i>
-                                    <span>SMTP Server Configuration</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-envelope text-info me-2"></i>
-                                    <span>Email Templates Management</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-bell text-info me-2"></i>
-                                    <span>Notification Preferences</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-list-check text-info me-2"></i>
-                                    <span>Delivery Status Tracking</span>
-                                 </li>
-                              </ul>
-                           </div>
-                           <button class="btn btn-outline-info btn-sm w-100" disabled>
-                              <i class="bi bi-envelope"></i> Configure (Coming Soon)
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-
-                  <!-- Integration Settings -->
-                  <div class="col-lg-6">
-                     <div class="card h-100">
-                        <div class="card-header bg-success text-white">
-                           <h5 class="card-title mb-0"><i class="bi bi-diagram-3"></i> Integrations</h5>
-                        </div>
-                        <div class="card-body">
-                           <div class="mb-3">
-                              <p class="text-muted mb-3">Third-party service integrations</p>
-                              <ul class="list-unstyled">
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-bank text-success me-2"></i>
-                                    <span>Payment Gateway Integration</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-chat-dots text-success me-2"></i>
-                                    <span>SMS Service Configuration</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-cloud text-success me-2"></i>
-                                    <span>Cloud Storage Services</span>
-                                 </li>
-                                 <li class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-graph-up text-success me-2"></i>
-                                    <span>Analytics & Reporting APIs</span>
-                                 </li>
-                              </ul>
-                           </div>
-                           <button class="btn btn-outline-success btn-sm w-100" disabled>
-                              <i class="bi bi-plug"></i> Configure (Coming Soon)
-                           </button>
+                        <div class="list-group list-group-flush">
+                           <a class="list-group-item list-group-item-action <%= section==='general' ? 'active' : '' %>" href="/system/config/general">
+                              <i class="bi bi-sliders me-2"></i>General
+                           </a>
+                           <a class="list-group-item list-group-item-action <%= section==='security' ? 'active' : '' %>" href="/system/config/security">
+                              <i class="bi bi-shield-lock me-2"></i>Security
+                           </a>
+                           <a class="list-group-item list-group-item-action <%= section==='email' ? 'active' : '' %>" href="/system/config/email">
+                              <i class="bi bi-envelope-at me-2"></i>Email
+                           </a>
+                           <a class="list-group-item list-group-item-action <%= section==='integrations' ? 'active' : '' %>" href="/system/config/integrations">
+                              <i class="bi bi-diagram-3 me-2"></i>Integrations
+                           </a>
                         </div>
                      </div>
                   </div>
@@ -238,17 +259,7 @@
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
       <script>
-         function reloadConfig() {
-            alert('Configuration reload functionality will be implemented soon!');
-         }
-
-         function backupSettings() {
-            alert('Configuration backup functionality will be implemented soon!');
-         }
-
-         // Set up button handlers
-         document.querySelector('.btn-outline-secondary').addEventListener('click', reloadConfig);
-         document.querySelector('.btn-outline-warning').addEventListener('click', backupSettings);
+         // Optional: hook up reload/backup later
       </script>
    </body>
 </html>

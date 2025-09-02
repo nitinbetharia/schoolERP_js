@@ -274,6 +274,15 @@ function createTrustService() {
          const totalTrusts = await Trust.count();
          const activeTrusts = await Trust.count({ where: { status: 'ACTIVE' } });
          const pendingTrusts = await Trust.count({ where: { status: 'SETUP_PENDING' } });
+         const suspendedTrusts = await Trust.count({ where: { status: 'SUSPENDED' } });
+         const inactiveTrusts = await Trust.count({ where: { status: 'INACTIVE' } });
+
+         // New trusts created in last 7 days
+         const { Op } = require('sequelize');
+         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+         const newTrusts7d = await Trust.count({
+            where: { created_at: { [Op.gte]: sevenDaysAgo } },
+         });
 
          // Get system user count
          const totalSystemUsers = await SystemUser.count();
@@ -286,6 +295,9 @@ function createTrustService() {
             totalTrusts,
             activeTrusts,
             pendingTrusts,
+            suspendedTrusts,
+            inactiveTrusts,
+            newTrusts7d,
             totalSystemUsers,
             activeUsers: activeSystemUsers,
             systemHealth: dbHealth.status === 'healthy' ? 'healthy' : 'unhealthy',
@@ -310,6 +322,57 @@ function createTrustService() {
       }
    }
 
+   /**
+    * Get recent system activity for dashboard
+    * Combines recent trusts and system users changes
+    */
+   async function getRecentActivity(limit = 5) {
+      try {
+         const Trust = await getTrustModel();
+         const { dbManager } = require('../models/system/database');
+         const { defineSystemUserModel } = require('../models/system/SystemUser');
+         const systemDB = await dbManager.getSystemDB();
+         const SystemUser = defineSystemUserModel(systemDB);
+
+         const recentTrusts = await Trust.findAll({
+            order: [['updated_at', 'DESC']],
+            limit,
+            attributes: ['id', 'trust_name', 'trust_code', 'status', 'updated_at', 'created_at'],
+         });
+
+         const recentSysUsers = await SystemUser.findAll({
+            order: [['created_at', 'DESC']],
+            limit,
+            attributes: ['id', 'username', 'email', 'status', 'created_at'],
+         });
+
+         const trustEvents = recentTrusts.map((t) => ({
+            type: 'TRUST',
+            time: t.updated_at || t.created_at,
+            title: t.trust_name,
+            code: t.trust_code,
+            action: 'Trust updated',
+            status: t.status,
+         }));
+
+         const userEvents = recentSysUsers.map((u) => ({
+            type: 'SYSTEM_USER',
+            time: u.created_at,
+            title: u.username,
+            code: u.email,
+            action: 'System user created',
+            status: u.status,
+         }));
+
+         const combined = [...trustEvents, ...userEvents].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+         return combined.slice(0, limit);
+      } catch (error) {
+         logError(error, { context: 'getRecentActivity' });
+         return [];
+      }
+   }
+
    return {
       createTrust,
       getTrust,
@@ -317,6 +380,7 @@ function createTrustService() {
       listTrusts,
       completeSetup,
       getSystemStats,
+      getRecentActivity,
    };
 }
 

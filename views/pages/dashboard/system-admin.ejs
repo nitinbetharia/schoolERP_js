@@ -1,5 +1,4 @@
 <!-- System Admin Dashboard -->
-<% currentPath = '/system/dashboard'; %>
 
 <div class="row">
    <div class="col-12">
@@ -87,6 +86,67 @@
          </div>
       </div>
    </div>
+   <!-- New row of stats -->
+   <div class="col-md-3">
+      <div class="card bg-warning text-dark">
+         <div class="card-body">
+            <div class="d-flex justify-content-between">
+               <div>
+                  <h6 class="card-title mb-1">Pending Trusts</h6>
+                  <h2 class="mb-0"><%= stats ? stats.pendingTrusts : '-' %></h2>
+               </div>
+               <div class="align-self-center">
+                  <i class="fas fa-hourglass-half fa-2x opacity-75"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-secondary text-white">
+         <div class="card-body">
+            <div class="d-flex justify-content-between">
+               <div>
+                  <h6 class="card-title mb-1">Suspended</h6>
+                  <h2 class="mb-0"><%= stats && stats.suspendedTrusts || 0 %></h2>
+               </div>
+               <div class="align-self-center">
+                  <i class="fas fa-pause-circle fa-2x opacity-75"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-dark text-white">
+         <div class="card-body">
+            <div class="d-flex justify-content-between">
+               <div>
+                  <h6 class="card-title mb-1">Inactive</h6>
+                  <h2 class="mb-0"><%= stats && stats.inactiveTrusts || 0 %></h2>
+               </div>
+               <div class="align-self-center">
+                  <i class="fas fa-power-off fa-2x opacity-75"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="col-md-3">
+      <div class="card bg-success-subtle">
+         <div class="card-body">
+            <div class="d-flex justify-content-between">
+               <div>
+                  <h6 class="card-title mb-1">New (7 days)</h6>
+                  <h2 class="mb-0"><%= stats && stats.newTrusts7d || 0 %></h2>
+               </div>
+               <div class="align-self-center">
+                  <i class="fas fa-calendar-plus fa-2x text-success opacity-75"></i>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
 </div>
 
 <!-- Main Content -->
@@ -103,30 +163,36 @@
                   <thead>
                      <tr>
                         <th>Time</th>
-                        <th>Trust</th>
+                        <th>Entity</th>
                         <th>Action</th>
                         <th>Status</th>
                      </tr>
                   </thead>
                   <tbody>
-                     <tr>
-                        <td><small class="text-muted">2 min ago</small></td>
-                        <td>ABC Education Trust</td>
-                        <td>New school registered</td>
-                        <td><span class="badge bg-success">Success</span></td>
-                     </tr>
-                     <tr>
-                        <td><small class="text-muted">5 min ago</small></td>
-                        <td>XYZ Schools</td>
-                        <td>Bulk student enrollment</td>
-                        <td><span class="badge bg-info">Processing</span></td>
-                     </tr>
-                     <tr>
-                        <td><small class="text-muted">10 min ago</small></td>
-                        <td>Global Academy</td>
-                        <td>System backup completed</td>
-                        <td><span class="badge bg-success">Success</span></td>
-                     </tr>
+                     <% if (recent && recent.length) { %>
+                        <% recent.forEach(item => { %>
+                           <tr>
+                              <td><small class="text-muted"><%= new Date(item.time).toLocaleString() %></small></td>
+                              <td>
+                                 <% if (item.type === 'TRUST') { %>
+                                    <i class="fas fa-building me-1 text-primary"></i>
+                                    <%= item.title %> <small class="text-muted">(<%= item.code %>)</small>
+                                 <% } else { %>
+                                    <i class="fas fa-user-cog me-1 text-info"></i>
+                                    <%= item.title %> <small class="text-muted">(<%= item.code %>)</small>
+                                 <% } %>
+                              </td>
+                              <td><%= item.action %></td>
+                              <td>
+                                 <span class="badge <%= item.status === 'ACTIVE' ? 'bg-success' : item.status === 'SETUP_PENDING' ? 'bg-warning' : 'bg-secondary' %>"><%= item.status %></span>
+                              </td>
+                           </tr>
+                        <% }) %>
+                     <% } else { %>
+                        <tr>
+                           <td colspan="4" class="text-center text-muted py-4">No recent activity</td>
+                        </tr>
+                     <% } %>
                   </tbody>
                </table>
             </div>
@@ -182,6 +248,49 @@
                </div>
             </div>
             <% } %>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- RBAC Quick Actions -->
+<div class="row mt-3">
+   <div class="col-12">
+   <div class="card">
+         <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0"><i class="fas fa-rocket me-2"></i>Quick Actions</h5>
+      <small class="text-muted">Based on RBAC</small>
+         </div>
+         <div class="card-body">
+      <div class="row g-3">
+               <% if (rbacMenu && rbacMenu.length) { %>
+                  <% rbacMenu.forEach(item => { %>
+                     <div class="col-md-3">
+            <div class="border rounded p-3 h-100">
+               <div class="d-flex justify-content-between align-items-center mb-2">
+               <strong><i class="bi bi-grid-3x3-gap me-2"></i><%= item.name %></strong>
+               </div>
+               <div class="d-flex flex-wrap gap-2">
+                              <% if (item.canRead && item.openHref) { %>
+                  <a href="<%= item.openHref %>" class="btn btn-sm btn-outline-primary"><i class="bi bi-folder2-open"></i> Open</a>
+                              <% } %>
+                              <% if (item.canCreate && item.newHref) { %>
+                  <a href="<%= item.newHref %>" class="btn btn-sm btn-outline-success"><i class="bi bi-plus-circle"></i> New</a>
+                              <% } %>
+                              <% if (item.canUpdate && item.manageHref) { %>
+                  <a href="<%= item.manageHref %>" class="btn btn-sm btn-outline-warning"><i class="bi bi-sliders"></i> Manage</a>
+                              <% } %>
+                              <% if (item.canDelete && item.adminHref) { %>
+                  <a href="<%= item.adminHref %>" class="btn btn-sm btn-outline-danger"><i class="bi bi-shield-lock"></i> Admin</a>
+                              <% } %>
+                           </div>
+                        </div>
+                     </div>
+                  <% }) %>
+               <% } else { %>
+                  <div class="col-12 text-muted">No RBAC actions available</div>
+               <% } %>
+            </div>
          </div>
       </div>
    </div>

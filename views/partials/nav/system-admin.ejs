@@ -7,7 +7,9 @@
          <div class="nav-section">
             <ul class="nav flex-column">
                <li class="nav-item">
-                  <a class="nav-link <%= currentPath === '/admin/system' ? 'active' : '' %>" href="/admin/system">
+                  <a
+                     class="nav-link <%= (currentPath === '/admin/system' || currentPath === '/system') ? 'active' : '' %>"
+                     href="/system">
                      <i class="bi bi-speedometer2 nav-icon"></i>
                      <span>Dashboard</span>
                   </a>

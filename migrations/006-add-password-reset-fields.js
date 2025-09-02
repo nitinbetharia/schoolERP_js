@@ -14,7 +14,7 @@ const { logSystem, logError } = require('../utils/logger');
  * Add password reset token fields to system users table
  */
 async function addPasswordResetFieldsToSystemUsers(sequelize) {
-   const { QueryInterface } = sequelize;
+   const QueryInterface = sequelize.getQueryInterface();
    const { DataTypes } = require('sequelize');
 
    try {

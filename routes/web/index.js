@@ -78,6 +78,10 @@ const utilityRoutes = require('./utils');
 // Mount route modules with middleware
 router.use('/', authRoutes(middleware));
 router.use('/system', systemRoutes(middleware));
+
+// Backward-compatible redirects for legacy URLs
+router.get('/admin/system', (req, res) => res.redirect('/system'));
+router.get('/admin/system/profile', (req, res) => res.redirect('/system/profile'));
 router.use('/admin', userRoutes(middleware));
 router.use('/system/trusts', trustRoutes(middleware));
 router.use('/system/schools', schoolRoutes(middleware));

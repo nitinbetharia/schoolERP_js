@@ -33,6 +33,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
           crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +46,35 @@
     <link rel="stylesheet" href="/static/css/app.css">
     
     <!-- Dynamic Branding & Theme Variables -->
+    <% 
+        // Determine context and resolve theme once to avoid EJS in CSS
+        const __isSystemAdminContext = (typeof isSystemAdmin !== 'undefined' && isSystemAdmin) || 
+                                       (typeof user !== 'undefined' && user && (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin')) ||
+                                       (!tenant || !tenant.trust_code);
+        const __isDemoTrust = !!(tenant && tenant.trust_code === 'demo');
+        const __branding = tenant && tenant.branding ? tenant.branding : null;
+        const __theme = {
+            primary: '#0d6efd',
+            secondary: '#6c757d',
+            accent: '#198754',
+            gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        };
+        if (__branding && __branding.primaryColor) {
+            __theme.primary = __branding.primaryColor;
+            __theme.secondary = __branding.secondaryColor || __theme.secondary;
+            __theme.accent = __branding.accentColor || __theme.accent;
+        } else if (__isSystemAdminContext) {
+            __theme.primary = '#1e40af';
+            __theme.secondary = '#1e3a8a';
+            __theme.accent = '#3b82f6';
+            __theme.gradient = 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)';
+        } else if (__isDemoTrust) {
+            __theme.primary = '#166534';
+            __theme.secondary = '#15803d';
+            __theme.accent = '#22c55e';
+            __theme.gradient = 'linear-gradient(135deg, #166534 0%, #15803d 100%)';
+        }
+    %>
     <style>
         :root {
             --bs-primary: #0d6efd;
@@ -53,49 +85,22 @@
             --bs-danger: #dc3545;
             --bs-dark: #212529;
             --bs-light: #f8f9fa;
-            
-            <% 
-            // Determine context for branding
-            const isSystemAdminContext = (typeof isSystemAdmin !== 'undefined' && isSystemAdmin) || 
-                                        (typeof user !== 'undefined' && user && user.role === 'SYSTEM_ADMIN') ||
-                                        (!tenant || !tenant.trust_code);
-            const isDemoTrust = tenant && tenant.trust_code === 'demo';
-            %>
-            
-            <% if (tenant && tenant.branding && tenant.branding.primaryColor) { %>
-            /* Custom tenant branding from database */
-            --tenant-primary: <%= tenant.branding.primaryColor %>;
-            --tenant-secondary: <%= tenant.branding.secondaryColor || '#6c757d' %>;
-            --tenant-accent: <%= tenant.branding.accentColor || '#198754' %>;
-            <% } else if (isSystemAdminContext) { %>
-            /* System Admin - Blue Theme */
-            --tenant-primary: #1e40af;
-            --tenant-secondary: #1e3a8a;
-            --tenant-accent: #3b82f6;
-            --brand-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-            <% } else if (isDemoTrust) { %>
-            /* Demo Trust - Military Green Theme */
-            --tenant-primary: #166534;
-            --tenant-secondary: #15803d;
-            --tenant-accent: #22c55e;
-            --brand-gradient: linear-gradient(135deg, #166534 0%, #15803d 100%);
-            <% } else { %>
-            /* Default Theme */
-            --tenant-primary: var(--bs-primary);
-            --tenant-secondary: var(--bs-secondary);
-            --tenant-accent: var(--bs-success);
-            --brand-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            <% } %>
-            
+
+            /* Resolved theme values */
+            --tenant-primary: <%= __theme.primary %>;
+            --tenant-secondary: <%= __theme.secondary %>;
+            --tenant-accent: <%= __theme.accent %>;
+            --brand-gradient: <%= __theme.gradient %>;
+
             /* Apply tenant colors to brand classes */
             --brand-primary: var(--tenant-primary);
             --brand-secondary: var(--tenant-secondary);
             --brand-accent: var(--tenant-accent);
-            
+
             --app-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --app-header-height: 70px;
         }
-        
+
         body { font-family: var(--app-font-family); background-color: #f8f9fa; }
         .brand-primary { background-color: var(--tenant-primary) !important; }
         .text-brand-primary { color: var(--tenant-primary) !important; }
@@ -126,20 +131,19 @@
         </header>
         <% } %>
         
-        <!-- Navigation Section -->
-        <% if (typeof user !== 'undefined' && user && (typeof hideNav === 'undefined' || !hideNav)) { %>
-        <nav class="no-print">
-            <% if (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin') { %>
-                <%- include('./partials/nav/system-admin') %>
-            <% } else if (user.role === 'TRUST_ADMIN' || user.role === 'trust-admin') { %>
-                <%- include('./partials/nav/trust-admin') %>
-            <% } else if (user.role === 'TEACHER' || user.role === 'teacher') { %>
-                <%- include('./partials/nav/teacher') %>
-            <% } else { %>
-                <%- include('./partials/nav/default') %>
-            <% } %>
-        </nav>
-        <% } %>
+                <% const isSystemAdminUser = (typeof user !== 'undefined' && user && (user.role === 'SYSTEM_ADMIN' || user.role === 'system-admin')); %>
+                <!-- Navigation Section (top-nav for non-system roles) -->
+                <% if (typeof user !== 'undefined' && user && (typeof hideNav === 'undefined' || !hideNav) && !isSystemAdminUser) { %>
+                    <nav class="no-print">
+                        <% if (user.role === 'TRUST_ADMIN' || user.role === 'trust-admin') { %>
+                                <%- include('./partials/nav/trust-admin') %>
+                        <% } else if (user.role === 'TEACHER' || user.role === 'teacher') { %>
+                                <%- include('./partials/nav/teacher') %>
+                        <% } else { %>
+                                <%- include('./partials/nav/default') %>
+                        <% } %>
+                    </nav>
+                <% } %>
         
         <!-- Flash Messages -->
         <%- include('./partials/flash-messages') %>
@@ -150,12 +154,26 @@
         <!-- Flash Helper Functions -->
         <%- include('./partials/flash-helpers') %>
         
-        <!-- Main Content Area -->
-        <main class="flex-grow-1 <% if (typeof hideHeader === 'undefined' || !hideHeader) { %>main-content<% } %>" role="main">
-            <div class="container-fluid py-4">
-                <%- body %>
-            </div>
-        </main>
+                <!-- Main Content Area -->
+                <% if (isSystemAdminUser) { %>
+                    <!-- System Admin: Sidebar + Content layout -->
+                                <div class="container-fluid">
+                                    <div class="row main-content">
+                            <%- include('./partials/nav/system-admin') %>
+                                        <main class="col-md-9 col-lg-10 ms-sm-auto px-3 flex-grow-1" role="main">
+                                <div class="container-fluid py-4">
+                                    <%- body %>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <main class="flex-grow-1 <% if (typeof hideHeader === 'undefined' || !hideHeader) { %>main-content<% } %>" role="main">
+                        <div class="container-fluid py-4">
+                            <%- body %>
+                        </div>
+                    </main>
+                <% } %>
         
         <!-- Footer -->
         <% if (typeof hideFooter === 'undefined' || !hideFooter) { %>
@@ -187,15 +205,26 @@
             crossorigin="anonymous"></script>
     
     <script src="/static/js/app.js"></script>
-    
+
+    <!-- Boot data (kept as JSON to avoid EJS in JS context) -->
+    <script id="boot-data" type="application/json"><%- JSON.stringify({
+        version: '1.0.0',
+        user: (typeof user !== 'undefined' && user) ? user : null,
+        tenant: tenant || null,
+        apiBase: '/api/v1'
+    }) %></script>
+
     <!-- Global JavaScript Functions -->
     <script>
-        window.SchoolERP = {
-            version: '1.0.0',
-            user: <% if (typeof user !== 'undefined' && user) { %><%- JSON.stringify(user) %><% } else { %>null<% } %>,
-            tenant: <% if (tenant) { %><%- JSON.stringify(tenant) %><% } else { %>null<% } %>,
-            apiBase: '/api/v1'
-        };
+        (function() {
+            try {
+                const el = document.getElementById('boot-data');
+                const data = el ? JSON.parse(el.textContent) : {};
+                window.SchoolERP = data;
+            } catch (e) {
+                window.SchoolERP = { version: '1.0.0', user: null, tenant: null, apiBase: '/api/v1' };
+            }
+        })();
         
         window.showNotification = function(message, type = 'info', duration = 5000, title = null) {
             const container = document.getElementById('notificationContainer');
@@ -232,7 +261,7 @@
             }
         };
         
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const alerts = document.querySelectorAll('.flash-messages .alert');
                 alerts.forEach(alert => {

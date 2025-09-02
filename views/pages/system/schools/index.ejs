@@ -8,9 +8,9 @@
             <h1 class="h2"><i class="bi bi-bank"></i> School Management</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
                <div class="btn-group me-2">
-                  <button type="button" class="btn btn-sm btn-outline-primary">
+                  <a href="/system/schools/new" class="btn btn-sm btn-outline-primary">
                      <i class="bi bi-plus-circle"></i> Add School
-                  </button>
+                  </a>
                   <button type="button" class="btn btn-sm btn-outline-secondary">
                      <i class="bi bi-download"></i> Export
                   </button>
@@ -18,8 +18,7 @@
             </div>
          </div>
 
-         <!-- Flash Messages -->
-         <%- include('../../partials/flash') %>
+         <!-- Flash Messages are rendered by layout.ejs -->
 
          <!-- Coming Soon Card -->
          <div class="row justify-content-center">

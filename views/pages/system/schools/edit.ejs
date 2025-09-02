@@ -1,0 +1,143 @@
+<% layout('layout') %>
+<div class="container-fluid">
+   <div class="d-flex align-items-center justify-content-between mb-3">
+      <h1 class="h3 mb-0">Edit School</h1>
+      <a href="/system/schools" class="btn btn-outline-secondary"> <i class="bi bi-arrow-left"></i> Back to Schools </a>
+   </div>
+
+   <div class="alert alert-info">Editing school ID: <%= schoolId %></div>
+
+   <ul class="nav nav-pills mb-3" id="schoolEditWizard" role="tablist">
+      <li class="nav-item" role="presentation">
+         <button
+            class="nav-link active"
+            id="step1-tab"
+            data-bs-toggle="pill"
+            data-bs-target="#step1"
+            type="button"
+            role="tab">
+            1. Basic Info
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2" type="button" role="tab">
+            2. Contacts
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3" type="button" role="tab">
+            3. Configuration
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button class="nav-link" id="step4-tab" data-bs-toggle="pill" data-bs-target="#step4" type="button" role="tab">
+            4. Review
+         </button>
+      </li>
+   </ul>
+
+   <div class="tab-content" id="schoolEditWizardContent">
+      <div class="tab-pane fade show active" id="step1" role="tabpanel" aria-labelledby="step1-tab">
+         <div class="card mb-3">
+            <div class="card-body">
+               <div class="row g-3">
+                  <div class="col-md-6">
+                     <label class="form-label">School Name</label>
+                     <input type="text" class="form-control" id="schoolName" value="" placeholder="" />
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label">Trust</label>
+                     <input type="text" class="form-control" id="trustName" value="" />
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="d-flex justify-content-end">
+            <button class="btn btn-primary" data-next="#step2-tab">Next</button>
+         </div>
+      </div>
+
+      <div class="tab-pane fade" id="step2" role="tabpanel" aria-labelledby="step2-tab">
+         <div class="card mb-3">
+            <div class="card-body">
+               <div class="row g-3">
+                  <div class="col-md-6">
+                     <label class="form-label">Principal Name</label>
+                     <input type="text" class="form-control" id="principalName" value="" />
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label">Principal Email</label>
+                     <input type="email" class="form-control" id="principalEmail" value="" />
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" data-prev="#step1-tab">Back</button>
+            <button class="btn btn-primary" data-next="#step3-tab">Next</button>
+         </div>
+      </div>
+
+      <div class="tab-pane fade" id="step3" role="tabpanel" aria-labelledby="step3-tab">
+         <div class="card mb-3">
+            <div class="card-body">
+               <div class="row g-3">
+                  <div class="col-md-4">
+                     <label class="form-label">Start Academic Year</label>
+                     <input type="number" class="form-control" id="startYear" value="" />
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label">Time Zone</label>
+                     <select class="form-select" id="timezone">
+                        <option value="Asia/Kolkata">Asia/Kolkata</option>
+                     </select>
+                  </div>
+                  <div class="col-md-4">
+                     <label class="form-label">Currency</label>
+                     <select class="form-select" id="currency">
+                        <option value="INR">INR</option>
+                     </select>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" data-prev="#step2-tab">Back</button>
+            <button class="btn btn-primary" data-next="#step4-tab">Next</button>
+         </div>
+      </div>
+
+      <div class="tab-pane fade" id="step4" role="tabpanel" aria-labelledby="step4-tab">
+         <div class="card mb-3">
+            <div class="card-body">
+               <p class="text-muted">Review changes and save. (Wiring to API pending)</p>
+            </div>
+         </div>
+         <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" data-prev="#step3-tab">Back</button>
+            <button class="btn btn-success" id="submitWizard">Save Changes</button>
+         </div>
+      </div>
+   </div>
+
+   <script>
+      document.addEventListener('DOMContentLoaded', () => {
+         document.querySelectorAll('[data-next]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+               const target = btn.getAttribute('data-next');
+               document.querySelector(target).click();
+            });
+         });
+         document.querySelectorAll('[data-prev]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+               const target = btn.getAttribute('data-prev');
+               document.querySelector(target).click();
+            });
+         });
+         document.getElementById('submitWizard').addEventListener('click', () => {
+            // TODO: POST/PATCH to /api/v1/schools/:id; show flash then redirect.
+            window.location.href = '/system/schools';
+         });
+      });
+   </script>
+</div>

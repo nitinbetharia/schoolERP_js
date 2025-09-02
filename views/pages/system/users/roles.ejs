@@ -1,0 +1,49 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-shield-check"></i> Role Management</h1>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">System Roles</h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted">Predefined roles from configuration</p>
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead><tr><th>Key</th><th>Name</th><th>Level</th></tr></thead>
+              <tbody>
+                <% Object.entries(rbac.roles).forEach(([key, role]) => { %>
+                  <tr>
+                    <td><code><%= key %></code></td>
+                    <td><%= role.name %></td>
+                    <td><%= role.level %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Permission Hierarchy</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <% Object.entries(rbac.permissionHierarchy).forEach(([parent, children]) => { %>
+              <li class="list-group-item">
+                <strong><%= parent %></strong>
+                <div class="text-muted small">grants: <%= children.join(', ') || 'none' %></div>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

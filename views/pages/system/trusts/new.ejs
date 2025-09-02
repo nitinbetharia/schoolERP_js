@@ -1,0 +1,259 @@
+<!-- Create New Trust (Wizard) -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h4 mb-0"><i class="bi bi-plus-circle me-2"></i>Create New Trust</h1>
+      <a href="/system/trusts" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
+   </div>
+
+   <ul class="nav nav-pills mb-3" id="trustWizard" role="tablist">
+      <li class="nav-item" role="presentation">
+         <button
+            class="nav-link active"
+            id="tstep1-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tstep1"
+            type="button"
+            role="tab">
+            1. Basic
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button
+            class="nav-link"
+            id="tstep2-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tstep2"
+            type="button"
+            role="tab">
+            2. Contacts
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button
+            class="nav-link"
+            id="tstep3-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tstep3"
+            type="button"
+            role="tab">
+            3. Config
+         </button>
+      </li>
+      <li class="nav-item" role="presentation">
+         <button
+            class="nav-link"
+            id="tstep4-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#tstep4"
+            type="button"
+            role="tab">
+            4. Review
+         </button>
+      </li>
+   </ul>
+
+   <div class="row justify-content-center">
+      <div class="col-lg-8">
+         <div class="card">
+            <div class="card-body">
+               <form id="createTrustForm" action="/system/trusts" method="POST" novalidate>
+                  <div class="tab-content">
+                     <!-- Step 1 -->
+                     <div class="tab-pane fade show active" id="tstep1" role="tabpanel" aria-labelledby="tstep1-tab">
+                        <div class="row g-3">
+                           <div class="col-md-6">
+                              <label for="trust_name" class="form-label"
+                                 >Trust Name <span class="text-danger">*</span></label
+                              >
+                              <input type="text" id="trust_name" name="trust_name" class="form-control" required />
+                              <div class="form-text">Full legal name of the educational trust</div>
+                           </div>
+                           <div class="col-md-6">
+                              <label for="trust_code" class="form-label"
+                                 >Trust Code <span class="text-danger">*</span></label
+                              >
+                              <input
+                                 type="text"
+                                 id="trust_code"
+                                 name="trust_code"
+                                 class="form-control"
+                                 pattern="[a-z0-9_]+"
+                                 maxlength="20"
+                                 required />
+                              <div class="form-text">Lowercase letters, numbers and underscore only</div>
+                           </div>
+                           <div class="col-md-6">
+                              <label for="subdomain" class="form-label"
+                                 >Subdomain <span class="text-danger">*</span></label
+                              >
+                              <input
+                                 type="text"
+                                 id="subdomain"
+                                 name="subdomain"
+                                 class="form-control"
+                                 pattern="[a-z0-9-]+"
+                                 maxlength="20"
+                                 required />
+                              <div class="form-text">Lowercase letters, numbers and hyphen only</div>
+                           </div>
+                           <div class="col-md-6 align-self-end">
+                              <div class="small text-muted">
+                                 Access URL: <code id="subdomainPreview">http://[subdomain].localhost:3000</code>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                           <button class="btn btn-primary" type="button" data-next="#tstep2-tab">Next</button>
+                        </div>
+                     </div>
+
+                     <!-- Step 2 -->
+                     <div class="tab-pane fade" id="tstep2" role="tabpanel" aria-labelledby="tstep2-tab">
+                        <div class="row g-3">
+                           <div class="col-md-6">
+                              <label for="contact_email" class="form-label"
+                                 >Contact Email <span class="text-danger">*</span></label
+                              >
+                              <input
+                                 type="email"
+                                 id="contact_email"
+                                 name="contact_email"
+                                 class="form-control"
+                                 required />
+                           </div>
+                           <div class="col-md-6">
+                              <label for="contact_phone" class="form-label"
+                                 >Contact Phone <span class="text-danger">*</span></label
+                              >
+                              <input type="tel" id="contact_phone" name="contact_phone" class="form-control" required />
+                           </div>
+                           <div class="col-12">
+                              <label for="address" class="form-label">Address</label>
+                              <textarea id="address" name="address" class="form-control" rows="3"></textarea>
+                           </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                           <button class="btn btn-outline-secondary" type="button" data-prev="#tstep1-tab">Back</button>
+                           <button class="btn btn-primary" type="button" data-next="#tstep3-tab">Next</button>
+                        </div>
+                     </div>
+
+                     <!-- Step 3 -->
+                     <div class="tab-pane fade" id="tstep3" role="tabpanel" aria-labelledby="tstep3-tab">
+                        <div class="row g-3">
+                           <div class="col-md-6">
+                              <label for="timezone" class="form-label">Timezone</label>
+                              <select class="form-select" id="timezone" name="timezone">
+                                 <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
+                                 <option value="UTC">UTC</option>
+                              </select>
+                           </div>
+                           <div class="col-md-6">
+                              <label for="currency" class="form-label">Default Currency</label>
+                              <select class="form-select" id="currency" name="currency">
+                                 <option value="INR" selected>INR - Indian Rupee</option>
+                                 <option value="USD">USD - US Dollar</option>
+                              </select>
+                           </div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-3">
+                           <button class="btn btn-outline-secondary" type="button" data-prev="#tstep2-tab">Back</button>
+                           <button class="btn btn-primary" type="button" data-next="#tstep4-tab">Next</button>
+                        </div>
+                     </div>
+
+                     <!-- Step 4 -->
+                     <div class="tab-pane fade" id="tstep4" role="tabpanel" aria-labelledby="tstep4-tab">
+                        <div class="alert alert-info">Review your entries and submit.</div>
+                        <div class="d-flex justify-content-between">
+                           <button class="btn btn-outline-secondary" type="button" data-prev="#tstep3-tab">Back</button>
+                           <button type="submit" class="btn btn-success">
+                              <i class="bi bi-check2-circle me-1"></i>Create Trust
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script>
+   (function () {
+      const nameEl = document.getElementById('trust_name');
+      const codeEl = document.getElementById('trust_code');
+      const subEl = document.getElementById('subdomain');
+      const prevEl = document.getElementById('subdomainPreview');
+
+      function slugify(input, mode) {
+         let v = (input || '').toLowerCase();
+         if (mode === 'code') {
+            v = v.replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_');
+         } else {
+            v = v.replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+         }
+         return v.slice(0, 20);
+      }
+
+      if (nameEl) {
+         nameEl.addEventListener('input', function () {
+            if (!codeEl.value) codeEl.value = slugify(this.value, 'code');
+            if (!subEl.value) subEl.value = slugify(this.value, 'sub');
+            if (prevEl) {
+               prevEl.textContent = subEl.value
+                  ? `http://${subEl.value}.localhost:3000`
+                  : 'http://[subdomain].localhost:3000';
+            }
+         });
+      }
+      if (subEl) {
+         subEl.addEventListener('input', function () {
+            this.value = slugify(this.value, 'sub');
+            if (prevEl) {
+               prevEl.textContent = this.value
+                  ? `http://${this.value}.localhost:3000`
+                  : 'http://[subdomain].localhost:3000';
+            }
+         });
+      }
+
+      function showTab(tabSelector) {
+         const triggerEl = document.querySelector(tabSelector);
+         if (!triggerEl) return;
+         if (window.bootstrap && bootstrap.Tab) {
+            const tab = new bootstrap.Tab(triggerEl);
+            tab.show();
+         } else {
+            // Fallback to click
+            triggerEl.click();
+         }
+      }
+
+      document.querySelectorAll('[data-next]').forEach((btn) => {
+         btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-next');
+            showTab(target);
+         });
+      });
+      document.querySelectorAll('[data-prev]').forEach((btn) => {
+         btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-prev');
+            showTab(target);
+         });
+      });
+
+      document.getElementById('createTrustForm').addEventListener('submit', function (e) {
+         const required = this.querySelectorAll('[required]');
+         for (const el of required) {
+            if (!el.value.trim()) {
+               e.preventDefault();
+               el.classList.add('is-invalid');
+            } else {
+               el.classList.remove('is-invalid');
+            }
+         }
+      });
+   })();
+</script>
