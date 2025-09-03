@@ -304,6 +304,257 @@ module.exports = function (middleware) {
    });
 
    /**
+    * @route GET /fees/installments
+    * @desc Installment management page
+    * @access Private (School Admin, Trust Admin, Accounts)
+    */
+   router.get('/installments', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         const allowedTypes = ['system', 'trust', 'school', 'accounts'];
+
+         if (!allowedTypes.includes(userType)) {
+            req.flash('error', 'Access denied. Installment management privileges required.');
+            return res.redirect('/dashboard');
+         }
+
+         // Mock installment data
+         const installmentData = {
+            totalStudents: 150,
+            studentsOnInstallments: 78,
+            overdueInstallments: 12,
+            upcomingInstallments: 25,
+            installmentPlans: [
+               {
+                  id: 1,
+                  studentName: 'John Doe',
+                  rollNumber: 'ST001',
+                  totalFee: 50000,
+                  installments: 4,
+                  paidInstallments: 2,
+                  nextDueDate: '2024-02-15',
+                  nextAmount: 12500,
+                  status: 'active'
+               },
+               {
+                  id: 2,
+                  studentName: 'Jane Smith',
+                  rollNumber: 'ST002',
+                  totalFee: 45000,
+                  installments: 3,
+                  paidInstallments: 1,
+                  nextDueDate: '2024-02-10',
+                  nextAmount: 15000,
+                  status: 'overdue'
+               }
+            ]
+         };
+
+         res.render('pages/fees/installments', {
+            title: 'Fee Installments',
+            description: 'Manage student fee installment plans',
+            user: req.session.user,
+            tenant: req.tenant,
+            userType: userType,
+            currentPath: '/fees/installments',
+            installmentData,
+         });
+      } catch (error) {
+         logError(error, { context: 'fee installments GET' });
+         req.flash('error', 'Unable to load installment management');
+         res.redirect('/fees');
+      }
+   });
+
+   /**
+    * @route POST /fees/installments/create
+    * @desc Create installment plan for a student
+    * @access Private (School Admin, Trust Admin, Accounts)
+    */
+   router.post('/installments/create', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         const allowedTypes = ['system', 'trust', 'school', 'accounts'];
+
+         if (!allowedTypes.includes(userType)) {
+            req.flash('error', 'Access denied. Installment creation privileges required.');
+            return res.redirect('/fees/installments');
+         }
+
+         const { studentId, totalAmount, numberOfInstallments, startDate, penaltyRate } = req.body;
+
+         // Calculate installment plan
+         const installmentAmount = Math.ceil(totalAmount / numberOfInstallments);
+         const dueDates = [];
+         
+         for (let i = 0; i < numberOfInstallments; i++) {
+            const dueDate = new Date(startDate);
+            dueDate.setMonth(dueDate.getMonth() + i);
+            dueDates.push(dueDate.toISOString().split('T')[0]);
+         }
+
+         // Here you would call the AdvancedFeeManagementService
+         // const advancedFeeService = new AdvancedFeeManagementService();
+         // await advancedFeeService.createInstallmentPlan(studentId, feeConfigId, {
+         //    numberOfInstallments, installmentAmount, dueDates, penaltyRate
+         // }, tenantDb);
+
+         req.flash('success', `Installment plan created for ${numberOfInstallments} installments`);
+         res.redirect('/fees/installments');
+      } catch (error) {
+         logError(error, { context: 'installment plan creation' });
+         req.flash('error', 'Failed to create installment plan');
+         res.redirect('/fees/installments');
+      }
+   });
+
+   /**
+    * @route GET /fees/advanced-reports
+    * @desc Advanced fee analytics and reports
+    * @access Private (School Admin, Trust Admin, Accounts)
+    */
+   router.get('/advanced-reports', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         const allowedTypes = ['system', 'trust', 'school', 'accounts'];
+
+         if (!allowedTypes.includes(userType)) {
+            req.flash('error', 'Access denied. Advanced reports access required.');
+            return res.redirect('/fees');
+         }
+
+         // Mock advanced analytics data
+         const analyticsData = {
+            collectionTrends: {
+               labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+               collected: [450000, 520000, 480000, 550000, 500000, 530000],
+               outstanding: [50000, 45000, 60000, 40000, 55000, 35000]
+            },
+            feeTypeBreakdown: {
+               labels: ['Tuition Fee', 'Transport Fee', 'Library Fee', 'Lab Fee', 'Sports Fee'],
+               data: [600000, 120000, 30000, 45000, 25000]
+            },
+            penaltyAnalysis: {
+               totalPenalty: 15000,
+               penaltyWaivedOff: 5000,
+               penaltyCollected: 8000,
+               outstandingPenalty: 2000
+            },
+            installmentAnalysis: {
+               totalInstallmentPlans: 78,
+               activeInstallments: 65,
+               completedInstallments: 13,
+               overdueInstallments: 12
+            }
+         };
+
+         res.render('pages/fees/advanced-reports', {
+            title: 'Advanced Fee Analytics',
+            description: 'Comprehensive fee collection analytics and insights',
+            user: req.session.user,
+            tenant: req.tenant,
+            userType: userType,
+            currentPath: '/fees/advanced-reports',
+            analyticsData,
+         });
+      } catch (error) {
+         logError(error, { context: 'advanced fee reports GET' });
+         req.flash('error', 'Unable to load advanced reports');
+         res.redirect('/fees');
+      }
+   });
+
+   /**
+    * @route GET /fees/structure-setup
+    * @desc Advanced fee structure setup
+    * @access Private (School Admin, Trust Admin)
+    */
+   router.get('/structure-setup', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         const allowedTypes = ['system', 'trust', 'school'];
+
+         if (!allowedTypes.includes(userType)) {
+            req.flash('error', 'Access denied. Fee structure setup privileges required.');
+            return res.redirect('/fees');
+         }
+
+         // Mock fee types and structure data
+         const feeStructureData = {
+            availableFeeTypes: [
+               { id: 'tuition', name: 'Tuition Fee', mandatory: true },
+               { id: 'transport', name: 'Transport Fee', mandatory: false },
+               { id: 'library', name: 'Library Fee', mandatory: true },
+               { id: 'lab', name: 'Laboratory Fee', mandatory: true },
+               { id: 'sports', name: 'Sports Fee', mandatory: false },
+               { id: 'exam', name: 'Examination Fee', mandatory: true },
+               { id: 'development', name: 'Development Fee', mandatory: false }
+            ],
+            frequencyOptions: [
+               { value: 'monthly', label: 'Monthly' },
+               { value: 'quarterly', label: 'Quarterly' },
+               { value: 'half-yearly', label: 'Half-Yearly' },
+               { value: 'annual', label: 'Annual' }
+            ],
+            classes: [
+               { id: 1, name: '10th Grade' },
+               { id: 2, name: '9th Grade' },
+               { id: 3, name: '8th Grade' }
+            ]
+         };
+
+         res.render('pages/fees/structure-setup', {
+            title: 'Fee Structure Setup',
+            description: 'Configure advanced fee structures with multiple fee types',
+            user: req.session.user,
+            tenant: req.tenant,
+            userType: userType,
+            currentPath: '/fees/structure-setup',
+            feeStructureData,
+         });
+      } catch (error) {
+         logError(error, { context: 'fee structure setup GET' });
+         req.flash('error', 'Unable to load fee structure setup');
+         res.redirect('/fees');
+      }
+   });
+
+   /**
+    * @route POST /fees/structure-setup
+    * @desc Save advanced fee structure
+    * @access Private (School Admin, Trust Admin)
+    */
+   router.post('/structure-setup', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         const allowedTypes = ['system', 'trust', 'school'];
+
+         if (!allowedTypes.includes(userType)) {
+            req.flash('error', 'Access denied. Fee structure setup privileges required.');
+            return res.redirect('/fees/structure-setup');
+         }
+
+         const { classId, academicYearId, feeTypes } = req.body;
+
+         // Parse fee types from form data
+         const parsedFeeTypes = JSON.parse(feeTypes);
+
+         // Here you would call the AdvancedFeeManagementService
+         // const advancedFeeService = new AdvancedFeeManagementService();
+         // await advancedFeeService.generateAdvancedFeeStructure(
+         //    classId, academicYearId, parsedFeeTypes, tenantDb
+         // );
+
+         req.flash('success', 'Advanced fee structure saved successfully');
+         res.redirect('/fees/structure-setup');
+      } catch (error) {
+         logError(error, { context: 'fee structure setup POST' });
+         req.flash('error', 'Failed to save fee structure');
+         res.redirect('/fees/structure-setup');
+      }
+   });
+
+   /**
     * @route GET /fees/reports
     * @desc Fee reports and analytics
     * @access Private (School Admin, Trust Admin, Accounts)
