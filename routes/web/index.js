@@ -72,12 +72,20 @@ const systemRoutes = require('./system');
 const userRoutes = require('./users');
 const trustRoutes = require('./trusts');
 const schoolRoutes = require('./schools');
+const studentsRoutes = require('./students');
+const feesRoutes = require('./fees');
+const teacherRoutes = require('./teacher');
 const apiRoutes = require('./api');
 const utilityRoutes = require('./utils');
 
 // Mount route modules with middleware
 router.use('/', authRoutes(middleware));
 router.use('/system', systemRoutes(middleware));
+
+// Core ERP functionality routes
+router.use('/students', studentsRoutes(middleware));
+router.use('/fees', feesRoutes(middleware));
+router.use('/teacher', teacherRoutes(middleware));
 
 // Backward-compatible redirects for legacy URLs
 router.get('/admin/system', (req, res) => res.redirect('/system'));
@@ -98,6 +106,9 @@ router.get('/health/web-router', (req, res) => {
          routes: {
             auth: 'mounted',
             system: 'mounted',
+            students: 'mounted',
+            fees: 'mounted',
+            teacher: 'mounted',
             users: 'mounted',
             trusts: 'mounted',
             schools: 'mounted',

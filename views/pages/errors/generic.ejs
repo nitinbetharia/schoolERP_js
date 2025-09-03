@@ -21,7 +21,7 @@ const errorTitle = {
 <div class="min-vh-100 d-flex align-items-center justify-content-center py-5">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
+            <div class="form-col">
                 <div class="text-center">
                     
                     <!-- Error Illustration -->
@@ -51,22 +51,22 @@ const errorTitle = {
                         <div class="alert alert-light border text-start">
                             <div class="row small">
                                 <% if (error.timestamp) { %>
-                                <div class="col-md-6 mb-2">
+                                <div class="form-col">
                                     <strong>Time:</strong> <%= new Date(error.timestamp).toLocaleString() %>
                                 </div>
                                 <% } %>
                                 <% if (error.requestId) { %>
-                                <div class="col-md-6 mb-2">
+                                <div class="form-col">
                                     <strong>Request ID:</strong> <code><%= error.requestId %></code>
                                 </div>
                                 <% } %>
                                 <% if (error.path) { %>
-                                <div class="col-12 mb-2">
+                                <div class="form-col">
                                     <strong>Path:</strong> <code><%= error.path %></code>
                                 </div>
                                 <% } %>
                                 <% if (process.env.NODE_ENV === 'development' && error.stack) { %>
-                                <div class="col-12 mt-2">
+                                <div class="form-col">
                                     <details>
                                         <summary class="btn btn-sm btn-outline-secondary">Stack Trace (Dev)</summary>
                                         <pre class="mt-2 p-2 bg-dark text-light small text-start overflow-auto"><%= error.stack %></pre>
@@ -100,7 +100,7 @@ const errorTitle = {
                     
                     <!-- Help Options -->
                     <div class="row g-3 text-center">
-                        <div class="col-md-4">
+                        <div class="form-col">
                             <div class="card h-100 border-0 bg-light">
                                 <div class="card-body py-4">
                                     <i class="fas fa-question-circle text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
@@ -114,7 +114,7 @@ const errorTitle = {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="form-col">
                             <div class="card h-100 border-0 bg-light">
                                 <div class="card-body py-4">
                                     <i class="fas fa-bug text-brand-primary mb-2" style="font-size: 1.5rem;"></i>
@@ -128,7 +128,7 @@ const errorTitle = {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="form-col">
                             <div class="card h-100 border-0 bg-light">
                                 <div class="card-body py-4">
                                     <i class="fas fa-headset text-brand-primary mb-2" style="font-size: 1.5rem;"></i>

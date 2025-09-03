@@ -14,7 +14,7 @@
       <%- include('../../partials/header/authenticated') %>
 
       <div class="container-fluid">
-         <div class="row">
+         <div class="form-row">
             <!-- Sidebar -->
             <%- include('../../partials/nav/system-admin') %>
 
@@ -25,7 +25,7 @@
                   <h1 class="h2"><i class="bi bi-file-earmark-bar-graph"></i> System Reports & Analytics</h1>
                   <div class="btn-toolbar mb-2 mb-md-0">
                      <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-primary" onclick="generateReport()">
+                        <button type="button" class="btn btn-sm btn-brand-primary" onclick="generateReport()">
                            <i class="bi bi-plus-circle"></i> Generate Report
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary">
@@ -41,13 +41,13 @@
                <!-- Report Categories -->
                <div class="row g-4 mb-4">
                   <!-- System Performance -->
-                  <div class="col-lg-3 col-md-6">
-                     <div class="card text-center h-100 border-primary">
+                  <div class="form-col">
+                     <div class="card text-center h-100 border-brand-primary">
                         <div class="card-body">
-                           <i class="bi bi-speedometer2 text-primary mb-3" style="font-size: 2.5rem"></i>
+                           <i class="bi bi-speedometer2 text-brand-primary mb-3" style="font-size: 2.5rem"></i>
                            <h5 class="card-title">System Performance</h5>
                            <p class="card-text text-muted">Server metrics, response times, and resource usage</p>
-                           <button class="btn btn-outline-primary btn-sm" disabled>
+                           <button class="btn btn-outline-brand-primary btn-sm" disabled>
                               <i class="bi bi-graph-up"></i> View Reports
                            </button>
                         </div>
@@ -55,7 +55,7 @@
                   </div>
 
                   <!-- Usage Analytics -->
-                  <div class="col-lg-3 col-md-6">
+                  <div class="form-col">
                      <div class="card text-center h-100 border-success">
                         <div class="card-body">
                            <i class="bi bi-bar-chart text-success mb-3" style="font-size: 2.5rem"></i>
@@ -69,7 +69,7 @@
                   </div>
 
                   <!-- Financial Reports -->
-                  <div class="col-lg-3 col-md-6">
+                  <div class="form-col">
                      <div class="card text-center h-100 border-warning">
                         <div class="card-body">
                            <i class="bi bi-currency-dollar text-warning mb-3" style="font-size: 2.5rem"></i>
@@ -83,7 +83,7 @@
                   </div>
 
                   <!-- Custom Reports -->
-                  <div class="col-lg-3 col-md-6">
+                  <div class="form-col">
                      <div class="card text-center h-100 border-info">
                         <div class="card-body">
                            <i class="bi bi-gear text-info mb-3" style="font-size: 2.5rem"></i>
@@ -99,35 +99,35 @@
 
                <!-- Quick Stats Dashboard -->
                <div class="row mb-4">
-                  <div class="col-12">
+                  <div class="form-col">
                      <div class="card">
                         <div class="card-header">
                            <h5 class="card-title mb-0"><i class="bi bi-graph-up"></i> System Analytics Overview</h5>
                         </div>
                         <div class="card-body">
-                           <div class="row">
-                              <div class="col-md-3">
+                           <div class="form-row">
+                              <div class="form-col">
                                  <div class="text-center border-end">
-                                    <div class="h3 text-primary">1,247</div>
+                                    <div class="h3 text-brand-primary">1,247</div>
                                     <div class="text-muted">Total Users</div>
                                     <div class="small text-success">↑ 12% this month</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center border-end">
                                     <div class="h3 text-success">98.7%</div>
                                     <div class="text-muted">System Uptime</div>
                                     <div class="small text-success">↑ 0.3% improved</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center border-end">
                                     <div class="h3 text-info">847ms</div>
                                     <div class="text-muted">Avg Response Time</div>
                                     <div class="small text-success">↓ 23ms faster</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center">
                                     <div class="h3 text-warning">₹2.4M</div>
                                     <div class="text-muted">Monthly Revenue</div>
@@ -150,8 +150,8 @@
                </div>
 
                <!-- Recent Reports -->
-               <div class="row">
-                  <div class="col-12">
+               <div class="form-row">
+                  <div class="form-col">
                      <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                            <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i> Recent Reports</h5>
@@ -166,7 +166,9 @@
                         </div>
                         <div class="card-body">
                            <div class="table-responsive">
-                              <table class="table table-hover">
+                              <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="table table-hover">
                                  <thead>
                                     <tr>
                                        <th>Report Name</th>
@@ -180,10 +182,10 @@
                                  <tbody>
                                     <tr>
                                        <td>
-                                          <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                          <i class="bi bi-file-earmark-text text-brand-primary me-2"></i>
                                           Monthly System Performance Report
                                        </td>
-                                       <td><span class="badge bg-primary">System</span></td>
+                                       <td><span class="badge bg-brand-primary">System</span></td>
                                        <td>System Admin</td>
                                        <td>2025-08-23 09:30</td>
                                        <td><span class="badge bg-success">Completed</span></td>

@@ -1,0 +1,655 @@
+<!-- Fee Collection Management -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/fees" class="breadcrumb-link">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Fee Management
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Fee Collection</span>
+            </nav>
+            
+            <h1 class="page-title">Fee Collection</h1>
+            <p class="page-description">Track and manage fee payments from students</p>
+        </div>
+    </div>
+
+    <!-- Collection Filters -->
+    <div class="filters-section">
+        <form method="GET" class="filters-form">
+            <div class="filter-group">
+                <label for="search">Search Students</label>
+                <input 
+                    type="text" 
+                    id="search" 
+                    name="search" 
+                    value="<%= filters.search %>" 
+                    placeholder="Search by name, roll number..."
+                    class="form-control"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label for="class">Class</label>
+                <select id="class" name="class" class="form-control">
+                    <option value="">All Classes</option>
+                    <option value="10th" <%= filters.class === '10th' ? 'selected' : '' %>>10th</option>
+                    <option value="9th" <%= filters.class === '9th' ? 'selected' : '' %>>9th</option>
+                    <option value="8th" <%= filters.class === '8th' ? 'selected' : '' %>>8th</option>
+                    <option value="7th" <%= filters.class === '7th' ? 'selected' : '' %>>7th</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="status">Payment Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="All" <%= filters.status === 'All' ? 'selected' : '' %>>All Status</option>
+                    <option value="Paid" <%= filters.status === 'Paid' ? 'selected' : '' %>>Paid</option>
+                    <option value="Pending" <%= filters.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Overdue" <%= filters.status === 'Overdue' ? 'selected' : '' %>>Overdue</option>
+                    <option value="Partial" <%= filters.status === 'Partial' ? 'selected' : '' %>>Partially Paid</option>
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-search"></i>
+                    Filter
+                </button>
+                <a href="/fees/collection" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Collection Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card total">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= collections.length %></h3>
+                <p>Total Students</p>
+            </div>
+        </div>
+        
+        <div class="summary-card paid">
+            <div class="card-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= collections.filter(c => c.status === 'Paid').length %></h3>
+                <p>Fees Paid</p>
+            </div>
+        </div>
+        
+        <div class="summary-card pending">
+            <div class="card-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= collections.filter(c => c.status === 'Pending').length %></h3>
+                <p>Pending Payment</p>
+            </div>
+        </div>
+        
+        <div class="summary-card overdue">
+            <div class="card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= collections.filter(c => c.status === 'Overdue').length %></h3>
+                <p>Overdue</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collections Table -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Fee Collection Status</h3>
+            <div class="table-actions">
+                <button class="btn btn-brand-primary" onclick="collectMultiplePayments()">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Collect Selected
+                </button>
+                <button class="btn btn-outline" onclick="exportCollectionData()">
+                    <i class="fas fa-download"></i>
+                    Export
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                        </th>
+                        <th>Student Details</th>
+                        <th>Class</th>
+                        <th>Total Due</th>
+                        <th>Paid Amount</th>
+                        <th>Balance</th>
+                        <th>Last Payment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (collections && collections.length > 0) { %>
+                        <% collections.forEach(function(collection) { %>
+                            <tr data-student-id="<%= collection.id %>">
+                                <td>
+                                    <input 
+                                        type="checkbox" 
+                                        class="student-checkbox" 
+                                        value="<%= collection.id %>"
+                                        <%= collection.status === 'Paid' ? 'disabled' : '' %>
+                                    >
+                                </td>
+                                <td class="student-details">
+                                    <div class="student-info">
+                                        <strong><%= collection.studentName %></strong>
+                                        <span class="roll-number"><%= collection.rollNumber %></span>
+                                    </div>
+                                </td>
+                                <td><%= collection.class %> <%= collection.section %></td>
+                                <td class="amount">
+                                    <strong>₹<%= collection.totalDue.toLocaleString('en-IN') %></strong>
+                                </td>
+                                <td class="amount paid">
+                                    ₹<%= collection.totalPaid.toLocaleString('en-IN') %>
+                                </td>
+                                <td class="amount balance">
+                                    <strong class="<%= collection.balance > 0 ? 'pending' : 'paid' %>">
+                                        ₹<%= collection.balance.toLocaleString('en-IN') %>
+                                    </strong>
+                                </td>
+                                <td>
+                                    <% if (collection.lastPayment) { %>
+                                        <%= new Date(collection.lastPayment).toLocaleDateString('en-IN') %>
+                                    <% } else { %>
+                                        <span class="no-payment">No payment</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-<%= collection.status.toLowerCase() %>">
+                                        <% if (collection.status === 'Paid') { %>
+                                            <i class="fas fa-check-circle"></i>
+                                        <% } else if (collection.status === 'Pending') { %>
+                                            <i class="fas fa-clock"></i>
+                                        <% } else if (collection.status === 'Overdue') { %>
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        <% } %>
+                                        <%= collection.status %>
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <% if (collection.status !== 'Paid') { %>
+                                        <a href="/fees/payment/<%= collection.id %>" 
+                                           class="action-btn collect-btn" 
+                                           title="Collect Payment">
+                                            <i class="fas fa-hand-holding-usd"></i>
+                                        </a>
+                                    <% } %>
+                                    
+                                    <a href="/students/<%= collection.id %>" 
+                                       class="action-btn view-btn" 
+                                       title="View Student">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <button class="action-btn history-btn" 
+                                            onclick="showPaymentHistory(<%= collection.id %>)"
+                                            title="Payment History">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" class="no-data">
+                                <div class="no-data-message">
+                                    <i class="fas fa-receipt fa-3x"></i>
+                                    <h4>No Fee Collection Data</h4>
+                                    <p>No students match your current filters or no fee structure has been set up.</p>
+                                    <a href="/fees/structure" class="btn btn-brand-primary">
+                                        <i class="fas fa-cog"></i>
+                                        Set Up Fee Structure
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Payment History Modal -->
+<div id="paymentHistoryModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Payment History</h3>
+            <button class="modal-close" onclick="closeModal('paymentHistoryModal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="paymentHistoryContent">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Fee Collection Specific Styles -->
+<style>
+.filters-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.summary-card.total {
+    border-left: 4px solid #007bff;
+}
+
+.summary-card.paid {
+    border-left: 4px solid #28a745;
+}
+
+.summary-card.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.summary-card.overdue {
+    border-left: 4px solid #dc3545;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+.total .card-icon {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+}
+
+.paid .card-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.pending .card-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.overdue .card-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.card-details h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+}
+
+.card-details p {
+    color: #4a5568;
+    margin: 0;
+    font-weight: 500;
+}
+
+.student-details {
+    min-width: 180px;
+}
+
+.student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.student-info strong {
+    color: #2d3748;
+}
+
+.roll-number {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.amount {
+    text-align: right;
+    font-weight: 500;
+}
+
+.amount.paid {
+    color: #28a745;
+}
+
+.amount.balance .pending {
+    color: #dc3545;
+}
+
+.amount.balance .paid {
+    color: #28a745;
+}
+
+.no-payment {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-overdue {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 4px;
+    border: none;
+    background: none;
+    color: #6c757d;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.collect-btn:hover {
+    background: #e7f3ff;
+    color: #0066cc;
+}
+
+.view-btn:hover {
+    background: #f0f8ff;
+    color: #0066cc;
+}
+
+.history-btn:hover {
+    background: #fff0e6;
+    color: #cc6600;
+}
+
+.table-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #6c757d;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .filters-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<!-- Fee Collection Enhancement Scripts -->
+<script>
+function toggleSelectAll(checkbox) {
+    const studentCheckboxes = document.querySelectorAll('.student-checkbox:not(:disabled)');
+    studentCheckboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+}
+
+function collectMultiplePayments() {
+    const selectedStudents = document.querySelectorAll('.student-checkbox:checked');
+    if (selectedStudents.length === 0) {
+        alert('Please select at least one student for payment collection.');
+        return;
+    }
+    
+    const studentIds = Array.from(selectedStudents).map(cb => cb.value);
+    // Redirect to bulk payment collection page
+    window.location.href = `/fees/payment/bulk?students=${studentIds.join(',')}`;
+}
+
+function exportCollectionData() {
+    // Implement export functionality
+    const exportData = [];
+    const rows = document.querySelectorAll('tbody tr[data-student-id]');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        exportData.push({
+            studentName: cells[1].querySelector('strong').textContent,
+            rollNumber: cells[1].querySelector('.roll-number').textContent,
+            class: cells[2].textContent,
+            totalDue: cells[3].textContent,
+            totalPaid: cells[4].textContent,
+            balance: cells[5].textContent,
+            status: cells[7].textContent.trim()
+        });
+    });
+    
+    // Convert to CSV and download
+    const csv = convertToCSV(exportData);
+    downloadCSV(csv, 'fee-collection-data.csv');
+}
+
+function showPaymentHistory(studentId) {
+    // Mock payment history data
+    const paymentHistory = [
+        {
+            date: '2024-01-15',
+            amount: 5000,
+            feeType: 'Tuition Fee',
+            paymentMethod: 'Cash',
+            receiptNumber: 'RCP001'
+        },
+        {
+            date: '2024-01-10',
+            amount: 1000,
+            feeType: 'Development Fee',
+            paymentMethod: 'Online',
+            receiptNumber: 'RCP002'
+        }
+    ];
+    
+    let historyHtml = '<div class="payment-history">';
+    
+    if (paymentHistory.length > 0) {
+        historyHtml += '<div class="data-table-container">
+                <div class="data-table-container">
+                <table class="history-table">';
+        historyHtml += '<thead><tr><th>Date</th><th>Fee Type</th><th>Amount</th><th>Method</th><th>Receipt</th></tr></thead>';
+        historyHtml += '<tbody>';
+        
+        paymentHistory.forEach(payment => {
+            historyHtml += `<tr>
+                <td>${new Date(payment.date).toLocaleDateString('en-IN')}</td>
+                <td>${payment.feeType}</td>
+                <td>₹${payment.amount.toLocaleString('en-IN')}</td>
+                <td>${payment.paymentMethod}</td>
+                <td>${payment.receiptNumber}</td>
+            </tr>`;
+        });
+        
+        historyHtml += '</tbody></table>
+            </div>';
+    } else {
+        historyHtml += '<p class="no-history">No payment history available for this student.</p>';
+    }
+    
+    historyHtml += '</div>';
+    
+    document.getElementById('paymentHistoryContent').innerHTML = historyHtml;
+    document.getElementById('paymentHistoryModal').style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function convertToCSV(data) {
+    if (data.length === 0) return '';
+    
+    const headers = Object.keys(data[0]);
+    const csvHeaders = headers.join(',');
+    
+    const csvRows = data.map(row => {
+        return headers.map(header => {
+            const value = row[header];
+            return `"${String(value).replace(/"/g, '""')}"`;
+        }).join(',');
+    });
+    
+    return [csvHeaders, ...csvRows].join('\n');
+}
+
+function downloadCSV(csv, filename) {
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+</script>

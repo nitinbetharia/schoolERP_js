@@ -5,7 +5,7 @@
             <i class="bi bi-building"></i> Manage Trusts
                     </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/system/trusts/new" class="btn btn-primary">
+                        <a href="/system/trusts/new" class="btn btn-brand-primary">
                             <i class="bi bi-plus-circle"></i> Add New Trust
                         </a>
                     </div>
@@ -14,12 +14,12 @@
                 <!-- Search and Filters -->
                 <div class="search-filters">
                     <form method="GET" action="/system/trusts" class="row g-3">
-                        <div class="col-md-4">
+                        <div class="form-col">
                             <label for="search" class="form-label">Search Trusts</label>
                             <input type="text" class="form-control" id="search" name="search" 
                                    placeholder="Search by name, code, or email..." value="<%= filters.search || '' %>">
                         </div>
-                        <div class="col-md-3">
+                        <div class="form-col">
                             <label for="status" class="form-label">Status</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="">All Statuses</option>
@@ -29,8 +29,8 @@
                                 <option value="INACTIVE" <%= filters.status === 'INACTIVE' ? 'selected' : '' %>>Inactive</option>
                             </select>
                         </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-outline-primary me-2">
+                        <div class="form-col">
+                            <button type="submit" class="btn btn-outline-brand-primary me-2">
                                 <i class="bi bi-search"></i> Search
                             </button>
                             <a href="/system/trusts" class="btn btn-outline-secondary">
@@ -41,10 +41,10 @@
                 </div>
 
                 <!-- Trusts Grid -->
-                <div class="row">
+                <div class="form-row">
                     <% if (trusts && trusts.length > 0) { %>
                         <% trusts.forEach(trust => { %>
-                            <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="form-col">
                                 <div class="card trust-card h-100">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0"><%= trust.trust_name %></h5>
@@ -82,7 +82,7 @@
                                         </div>
                                     </div>
                                     <div class="card-footer bg-transparent trust-actions">
-                                        <a href="/system/trusts/<%= trust.id %>/edit" class="btn btn-sm btn-outline-primary">
+                                        <a href="/system/trusts/<%= trust.id %>/edit" class="btn btn-sm btn-outline-brand-primary">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
                                         <% if (trust.status === 'ACTIVE') { %>
@@ -102,13 +102,13 @@
                             </div>
                         <% }); %>
                     <% } else { %>
-                        <div class="col-12">
+                        <div class="form-col">
                             <div class="card">
                                 <div class="card-body text-center py-5">
                                     <i class="bi bi-building display-1 text-muted mb-3"></i>
                                     <h4>No Trusts Found</h4>
                                     <p class="text-muted">No educational trusts match your current filters.</p>
-                                    <a href="/system/trusts/new" class="btn btn-primary">
+                                    <a href="/system/trusts/new" class="btn btn-brand-primary">
                                         <i class="bi bi-plus-circle"></i> Create First Trust
                                     </a>
                                 </div>

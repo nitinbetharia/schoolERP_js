@@ -1,0 +1,465 @@
+<!-- Fee Management Dashboard -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-money-bill-wave"></i>
+                Fee Management
+            </h1>
+            <p class="page-description">Manage fee structure, collection, and payments</p>
+        </div>
+    </div>
+
+    <!-- Fee Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card collected">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-details">
+                <h3>₹<%= feeStats.totalCollected.toLocaleString('en-IN') %></h3>
+                <p>Total Collected</p>
+                <span class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <%= feeStats.collectionRate %>% Collection Rate
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-details">
+                <h3>₹<%= feeStats.totalPending.toLocaleString('en-IN') %></h3>
+                <p>Pending Collection</p>
+                <span class="stat-info">
+                    <%= feeStats.studentsWithPendingFees %> students
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card overdue">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-details">
+                <h3>₹<%= feeStats.totalOverdue.toLocaleString('en-IN') %></h3>
+                <p>Overdue Amount</p>
+                <span class="stat-warning">
+                    <%= feeStats.studentsWithOverdueFees %> students overdue
+                </span>
+            </div>
+        </div>
+        
+        <div class="stat-card total">
+            <div class="stat-icon">
+                <i class="fas fa-calculator"></i>
+            </div>
+            <div class="stat-details">
+                <h3>₹<%= (feeStats.totalCollected + feeStats.totalPending).toLocaleString('en-IN') %></h3>
+                <p>Total Expected</p>
+                <span class="stat-info">
+                    Current academic year
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions-section">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="quick-actions-grid">
+            <a href="/fees/collection" class="quick-action-card">
+                <div class="action-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="action-details">
+                    <h4>Collect Payment</h4>
+                    <p>Process student fee payments</p>
+                </div>
+                <i class="fas fa-arrow-right action-arrow"></i>
+            </a>
+            
+            <% if (userType === 'system' || userType === 'trust' || userType === 'school') { %>
+                <a href="/fees/structure" class="quick-action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <div class="action-details">
+                        <h4>Fee Structure</h4>
+                        <p>Manage fee types and amounts</p>
+                    </div>
+                    <i class="fas fa-arrow-right action-arrow"></i>
+                </a>
+            <% } %>
+            
+            <a href="/fees/reports" class="quick-action-card">
+                <div class="action-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="action-details">
+                    <h4>Reports</h4>
+                    <p>View collection reports and analytics</p>
+                </div>
+                <i class="fas fa-arrow-right action-arrow"></i>
+            </a>
+            
+            <a href="/students?status=pending_fees" class="quick-action-card">
+                <div class="action-icon">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="action-details">
+                    <h4>Pending Students</h4>
+                    <p>Students with pending fees</p>
+                </div>
+                <i class="fas fa-arrow-right action-arrow"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="recent-payments-section">
+        <div class="section-header">
+            <h3 class="section-title">Recent Payments</h3>
+            <a href="/fees/collection" class="view-all-link">
+                View All Payments
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="payments-table-container">
+            <div class="table-responsive">
+                <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Roll Number</th>
+                            <th>Amount</th>
+                            <th>Fee Type</th>
+                            <th>Payment Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (recentPayments && recentPayments.length > 0) { %>
+                            <% recentPayments.forEach(function(payment) { %>
+                                <tr>
+                                    <td class="student-name">
+                                        <strong><%= payment.studentName %></strong>
+                                    </td>
+                                    <td class="roll-number">
+                                        <%= payment.rollNumber %>
+                                    </td>
+                                    <td class="amount">
+                                        <strong>₹<%= payment.amount.toLocaleString('en-IN') %></strong>
+                                    </td>
+                                    <td><%= payment.feeType %></td>
+                                    <td>
+                                        <%= new Date(payment.paymentDate).toLocaleDateString('en-IN') %>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= payment.status.toLowerCase() %>">
+                                            <%= payment.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="no-data">
+                                    <div class="no-data-message">
+                                        <i class="fas fa-receipt fa-2x"></i>
+                                        <h4>No Recent Payments</h4>
+                                        <p>No payments have been processed recently.</p>
+                                        <a href="/fees/collection" class="btn btn-brand-primary">
+                                            <i class="fas fa-plus"></i>
+                                            Start Collecting Fees
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Fee Dashboard Specific Styles -->
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+}
+
+.stat-card.collected {
+    border-left-color: #28a745;
+}
+
+.stat-card.pending {
+    border-left-color: #ffc107;
+}
+
+.stat-card.overdue {
+    border-left-color: #dc3545;
+}
+
+.stat-card.total {
+    border-left-color: #007bff;
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+
+.collected .stat-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.pending .stat-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.overdue .stat-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.total .stat-icon {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+}
+
+.stat-details h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+}
+
+.stat-details p {
+    color: #4a5568;
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+}
+
+.stat-trend, .stat-info, .stat-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.stat-trend.positive {
+    color: #28a745;
+}
+
+.stat-info {
+    color: #6c757d;
+}
+
+.stat-warning {
+    color: #dc3545;
+}
+
+.quick-actions-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.quick-action-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+.action-details h4 {
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.action-details p {
+    color: #4a5568;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.action-arrow {
+    position: absolute;
+    right: 1.5rem;
+    color: #cbd5e0;
+    transition: all 0.3s ease;
+}
+
+.quick-action-card:hover .action-arrow {
+    color: #007bff;
+    transform: translateX(4px);
+}
+
+.recent-payments-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.view-all-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.view-all-link:hover {
+    color: #0056b3;
+    gap: 0.75rem;
+}
+
+.payments-table-container {
+    overflow-x: auto;
+}
+
+.student-name strong {
+    color: #2d3748;
+}
+
+.roll-number {
+    font-family: 'Courier New', monospace;
+    font-weight: 500;
+}
+
+.amount strong {
+    color: #28a745;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.no-data-message i {
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.no-data-message h4 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .quick-action-card {
+        padding: 1rem;
+    }
+}
+</style>

@@ -1,0 +1,1311 @@
+<!-- Teacher Reports -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/reports" class="breadcrumb-link">Reports</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Teacher Reports</span>
+            </nav>
+            
+            <h1 class="page-title">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Teacher Reports
+            </h1>
+            <p class="page-description">Comprehensive teacher performance, workload analysis and professional development reports</p>
+        </div>
+        
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="generatePerformanceReport()">
+                <i class="fas fa-chart-line"></i>
+                Performance Analysis
+            </button>
+            <button class="btn btn-brand-primary" onclick="openExportModal()">
+                <i class="fas fa-download"></i>
+                Export Reports
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel d-none d-md-block">
+        <div class="filter-section">
+            <h4>Teacher Report Filters</h4>
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label for="reportTypeFilter">Report Type</label>
+                    <select id="reportTypeFilter" class="form-control">
+                        <option value="teacher-profile">Teacher Profiles</option>
+                        <option value="workload-analysis">Workload Analysis</option>
+                        <option value="performance-evaluation">Performance Evaluation</option>
+                        <option value="attendance-tracking">Teacher Attendance</option>
+                        <option value="class-assignment">Class Assignment Report</option>
+                        <option value="subject-allocation">Subject Allocation</option>
+                        <option value="professional-development">Professional Development</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="departmentFilter">Department</label>
+                    <select id="departmentFilter" class="form-control">
+                        <option value="">All Departments</option>
+                        <option value="mathematics">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="social-studies">Social Studies</option>
+                        <option value="arts">Arts & Crafts</option>
+                        <option value="physical-education">Physical Education</option>
+                        <option value="music">Music</option>
+                        <option value="computer">Computer Science</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="experienceFilter">Experience Range</label>
+                    <select id="experienceFilter" class="form-control">
+                        <option value="">All Experience Levels</option>
+                        <option value="0-2">0-2 years (Fresher)</option>
+                        <option value="3-5">3-5 years (Junior)</option>
+                        <option value="6-10">6-10 years (Senior)</option>
+                        <option value="11-15">11-15 years (Expert)</option>
+                        <option value="15+">15+ years (Master)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="qualificationFilter">Qualification</label>
+                    <select id="qualificationFilter" class="form-control">
+                        <option value="">All Qualifications</option>
+                        <option value="graduate">Graduate</option>
+                        <option value="post-graduate">Post Graduate</option>
+                        <option value="m-ed">M.Ed</option>
+                        <option value="b-ed">B.Ed</option>
+                        <option value="phd">PhD</option>
+                        <option value="diploma">Diploma</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="employmentFilter">Employment Type</label>
+                    <select id="employmentFilter" class="form-control">
+                        <option value="">All Types</option>
+                        <option value="permanent">Permanent</option>
+                        <option value="temporary">Temporary</option>
+                        <option value="contract">Contract</option>
+                        <option value="substitute">Substitute</option>
+                        <option value="guest">Guest Faculty</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="performanceFilter">Performance Rating</label>
+                    <select id="performanceFilter" class="form-control">
+                        <option value="">All Ratings</option>
+                        <option value="excellent">Excellent (4.5-5.0)</option>
+                        <option value="very-good">Very Good (4.0-4.4)</option>
+                        <option value="good">Good (3.5-3.9)</option>
+                        <option value="satisfactory">Satisfactory (3.0-3.4)</option>
+                        <option value="needs-improvement">Needs Improvement (<3.0)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn btn-brand-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Overview Cards -->
+    <div class="teacher-overview">
+        <div class="overview-card total-teachers d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="totalTeachers">85</h3>
+                <p>Total Teachers</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        <i class="fas fa-user-check text-success"></i>
+                        Active: <strong>82</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card avg-experience d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="avgExperience">8.5 years</h3>
+                <p>Average Experience</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Range: <strong>1-25 years</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card avg-rating d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="avgRating">4.2/5.0</h3>
+                <p>Average Rating</p>
+                <div class="sub-stats">
+                    <span class="stat-item positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +0.3 vs last review
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card workload d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="avgWorkload">28.5 hrs</h3>
+                <p>Avg Weekly Hours</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Standard: <strong>30 hrs</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Analytics Charts -->
+    <div class="teacher-charts">
+        <div class="chart-container responsive department-distribution">
+            <div class="chart-header">
+                <h4>Department-wise Distribution</h4>
+                <div class="chart-actions">
+                    <select id="departmentChartType" class="form-control small">
+                        <option value="pie" selected>Pie Chart</option>
+                        <option value="doughnut">Doughnut Chart</option>
+                        <option value="bar">Bar Chart</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="departmentChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive experience-analysis">
+            <div class="chart-header">
+                <h4>Experience Level Analysis</h4>
+                <div class="chart-actions">
+                    <select id="experienceView" class="form-control small">
+                        <option value="count" selected>Teacher Count</option>
+                        <option value="percentage">Percentage</option>
+                        <option value="performance">Avg Performance</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="experienceChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive performance-trends">
+            <div class="chart-header">
+                <h4>Performance Trends</h4>
+                <div class="chart-actions">
+                    <select id="performancePeriod" class="form-control small">
+                        <option value="quarterly" selected>Quarterly</option>
+                        <option value="annually">Annual</option>
+                        <option value="semester">Semester-wise</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="performanceChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive workload-distribution">
+            <div class="chart-header">
+                <h4>Workload Distribution</h4>
+                <div class="chart-actions">
+                    <select id="workloadView" class="form-control small">
+                        <option value="weekly-hours" selected>Weekly Hours</option>
+                        <option value="classes-taught">Classes Taught</option>
+                        <option value="student-ratio">Student Ratio</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="workloadChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Insights -->
+    <div class="teacher-insights">
+        <div class="insight-card top-performers">
+            <div class="insight-header">
+                <h5>Top Performing Teachers</h5>
+                <span class="insight-badge success">Excellence</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="teacher-info">
+                        <div class="teacher-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="teacher-details">
+                            <span class="teacher-name">Dr. Priya Sharma</span>
+                            <span class="teacher-subject">Mathematics • 12 years</span>
+                        </div>
+                    </div>
+                    <div class="performance-metrics">
+                        <span class="rating-badge excellent">4.9/5.0</span>
+                        <span class="achievement-badge">
+                            <i class="fas fa-trophy"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="teacher-info">
+                        <div class="teacher-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="teacher-details">
+                            <span class="teacher-name">Mr. Rajesh Kumar</span>
+                            <span class="teacher-subject">Science • 15 years</span>
+                        </div>
+                    </div>
+                    <div class="performance-metrics">
+                        <span class="rating-badge excellent">4.8/5.0</span>
+                        <span class="achievement-badge">
+                            <i class="fas fa-medal"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="teacher-info">
+                        <div class="teacher-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="teacher-details">
+                            <span class="teacher-name">Ms. Aisha Patel</span>
+                            <span class="teacher-subject">English • 8 years</span>
+                        </div>
+                    </div>
+                    <div class="performance-metrics">
+                        <span class="rating-badge excellent">4.7/5.0</span>
+                        <span class="achievement-badge">
+                            <i class="fas fa-award"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card development-needs">
+            <div class="insight-header">
+                <h5>Development Opportunities</h5>
+                <span class="insight-badge info">Growth Focus</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="development-area">
+                        <i class="fas fa-laptop-code"></i>
+                        <span class="area-name">Digital Teaching Skills</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge">15 teachers</span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="development-area">
+                        <i class="fas fa-comments"></i>
+                        <span class="area-name">Communication Skills</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge">8 teachers</span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="development-area">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="area-name">Assessment Techniques</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge">12 teachers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card workload-alerts">
+            <div class="insight-header">
+                <h5>Workload Alerts</h5>
+                <span class="insight-badge warning">Monitor</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="alert-info">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        <span class="alert-text">Overloaded (>35 hrs/week)</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge warning">5 teachers</span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="alert-info">
+                        <i class="fas fa-info-circle text-info"></i>
+                        <span class="alert-text">Underutilized (<20 hrs/week)</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge info">3 teachers</span>
+                    </div>
+                </div>
+                
+                <div class="insight-item">
+                    <div class="alert-info">
+                        <i class="fas fa-clock text-brand-primary"></i>
+                        <span class="alert-text">Optimal Load (25-30 hrs)</span>
+                    </div>
+                    <div class="teacher-count">
+                        <span class="count-badge success">77 teachers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Data Table -->
+    <div class="teacher-data-section responsive-table">
+        <div class="section-header">
+            <h4>Teacher Directory</h4>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" id="dataSearch" placeholder="Search teachers..." class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select id="recordsPerPage" class="form-control small">
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <button class="btn btn-outline small" onclick="addNewTeacher()">
+                    <i class="fas fa-plus"></i>
+                    Add Teacher
+                </button>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table" id="teacherDataTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th sortable="true" data-column="employeeId">Employee ID</th>
+                        <th sortable="true" data-column="name">Teacher Name</th>
+                        <th sortable="true" data-column="department">Department</th>
+                        <th sortable="true" data-column="qualification">Qualification</th>
+                        <th sortable="true" data-column="experience">Experience</th>
+                        <th sortable="true" data-column="classesAssigned">Classes</th>
+                        <th sortable="true" data-column="workload">Weekly Hours</th>
+                        <th sortable="true" data-column="rating">Rating</th>
+                        <th sortable="true" data-column="joiningDate">Joining Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherTableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="showingFrom">1</span> to <span id="showingTo">25</span> of <span id="totalRecords">85</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" onclick="changePage(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="nextPage" onclick="changePage(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Export Teacher Reports</h3>
+            <button class="modal-close" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="exportForm" onsubmit="exportData(event)">
+                <div class="form-group">
+                    <label for="exportType">Report Type</label>
+                    <select id="exportType" name="type" class="form-control" required>
+                        <option value="teacher-directory">Teacher Directory</option>
+                        <option value="performance-report">Performance Report</option>
+                        <option value="workload-analysis">Workload Analysis</option>
+                        <option value="department-wise">Department-wise Report</option>
+                        <option value="professional-development">Professional Development Plan</option>
+                        <option value="attendance-record">Teacher Attendance Record</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" name="format" class="form-control" required>
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF Report</option>
+                        <option value="csv">CSV Data</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Include Analytics & Charts</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="includeCharts" value="department-distribution" checked> Department Distribution</label>
+                        <label><input type="checkbox" name="includeCharts" value="experience-analysis" checked> Experience Analysis</label>
+                        <label><input type="checkbox" name="includeCharts" value="performance-trends"> Performance Trends</label>
+                        <label><input type="checkbox" name="includeCharts" value="workload-distribution"> Workload Distribution</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportScope">Export Scope</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="scope" value="filtered" checked> Current Filtered Results</label>
+                        <label><input type="radio" name="scope" value="selected"> Selected Teachers Only</label>
+                        <label><input type="radio" name="scope" value="department"> Department-wise</label>
+                        <label><input type="radio" name="scope" value="all"> All Teachers</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Information</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="options" value="personal-details"> Include Personal Details</label>
+                        <label><input type="checkbox" name="options" value="contact-info"> Include Contact Information</label>
+                        <label><input type="checkbox" name="options" value="qualification-details"> Include Detailed Qualifications</label>
+                        <label><input type="checkbox" name="options" value="performance-history"> Include Performance History</label>
+                        <label><input type="checkbox" name="options" value="development-plans"> Include Development Plans</label>
+                        <label><input type="checkbox" name="options" value="class-feedback"> Include Class Feedback</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-brand-primary">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Teacher Reports Styles -->
+<style>
+.teacher-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.teacher-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.teacher-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.insight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.insight-item:hover {
+    background: #e9ecef;
+    transform: translateX(2px);
+}
+
+.teacher-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.teacher-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    font-size: 1.25rem;
+}
+
+.teacher-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.teacher-name {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.teacher-subject {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.performance-metrics {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rating-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.rating-badge.excellent {
+    background: #d4edda;
+    color: #155724;
+}
+
+.rating-badge.very-good {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.rating-badge.good {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.rating-badge.satisfactory {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.achievement-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #ffd700;
+    color: #856404;
+}
+
+.development-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.development-area i {
+    color: #6c757d;
+    font-size: 1.25rem;
+}
+
+.area-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.alert-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-text {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.teacher-count,
+.count-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.count-badge {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.count-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.count-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.count-badge.info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.teacher-data-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.experience-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.experience-badge.fresher {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.experience-badge.junior {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.experience-badge.senior {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.experience-badge.expert {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.experience-badge.master {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.qualification-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.workload-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.workload-bar {
+    width: 60px;
+    height: 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.workload-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.workload-fill.normal {
+    background: #28a745;
+}
+
+.workload-fill.high {
+    background: #ffc107;
+}
+
+.workload-fill.overload {
+    background: #dc3545;
+}
+
+.workload-fill.underload {
+    background: #6c757d;
+}
+
+@media (max-width: 1024px) {
+    .teacher-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .teacher-insights {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .teacher-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .insight-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .teacher-info {
+        width: 100%;
+    }
+    
+    .performance-metrics {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .teacher-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .teacher-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<!-- Teacher Reports Scripts -->
+<script>
+let currentPage = 1;
+let recordsPerPage = 25;
+let totalRecords = 85;
+let selectedRows = new Set();
+
+// Mock teacher data
+const mockTeacherData = [
+    { employeeId: 'T001', name: 'Dr. Priya Sharma', department: 'Mathematics', qualification: 'PhD', experience: 12, classesAssigned: 6, workload: 30, rating: 4.9, joiningDate: '2012-06-15' },
+    { employeeId: 'T002', name: 'Mr. Rajesh Kumar', department: 'Science', qualification: 'M.Sc, B.Ed', experience: 15, classesAssigned: 5, workload: 28, rating: 4.8, joiningDate: '2009-03-20' },
+    { employeeId: 'T003', name: 'Ms. Aisha Patel', department: 'English', qualification: 'MA, B.Ed', experience: 8, classesAssigned: 7, workload: 32, rating: 4.7, joiningDate: '2016-07-10' },
+    { employeeId: 'T004', name: 'Mr. Vikram Singh', department: 'Hindi', qualification: 'MA', experience: 6, classesAssigned: 5, workload: 25, rating: 4.2, joiningDate: '2018-04-05' },
+    { employeeId: 'T005', name: 'Ms. Neha Gupta', department: 'Social Studies', qualification: 'MA, M.Ed', experience: 10, classesAssigned: 6, workload: 29, rating: 4.5, joiningDate: '2014-08-12' }
+];
+
+function applyFilters() {
+    showNotification('Teacher filters applied successfully!', 'success');
+    loadTeacherData();
+    updateTeacherCharts();
+    updateTeacherStats();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-form select').forEach(select => select.value = '');
+    showNotification('Filters cleared!', 'info');
+    loadTeacherData();
+    updateTeacherCharts();
+    updateTeacherStats();
+}
+
+function loadTeacherData() {
+    const tbody = document.getElementById('teacherTableBody');
+    tbody.innerHTML = '';
+    
+    mockTeacherData.forEach((teacher, index) => {
+        const experienceClass = getExperienceClass(teacher.experience);
+        const ratingClass = getRatingClass(teacher.rating);
+        const workloadIndicator = getWorkloadIndicator(teacher.workload);
+        
+        const row = `
+            <tr>
+                <td><input type="checkbox" class="row-select" value="${teacher.employeeId}" onchange="toggleRowSelect('${teacher.employeeId}')"></td>
+                <td>${teacher.employeeId}</td>
+                <td>
+                    <div class="teacher-cell">
+                        <div class="teacher-avatar small">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>${teacher.name}</span>
+                    </div>
+                </td>
+                <td>${teacher.department}</td>
+                <td><span class="qualification-badge">${teacher.qualification}</span></td>
+                <td><span class="experience-badge ${experienceClass}">${teacher.experience} years</span></td>
+                <td class="text-center">${teacher.classesAssigned}</td>
+                <td>
+                    <div class="workload-indicator">
+                        <span>${teacher.workload}h</span>
+                        ${workloadIndicator}
+                    </div>
+                </td>
+                <td><span class="rating-badge ${ratingClass}">${teacher.rating}/5.0</span></td>
+                <td>${teacher.joiningDate}</td>
+                <td>
+                    <button class="action-btn view-btn" onclick="viewTeacherProfile('${teacher.employeeId}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn performance-btn" onclick="viewPerformance('${teacher.employeeId}')">
+                        <i class="fas fa-chart-line"></i>
+                    </button>
+                    <button class="action-btn edit-btn" onclick="editTeacher('${teacher.employeeId}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+    
+    updatePagination();
+}
+
+function getExperienceClass(years) {
+    if (years <= 2) return 'fresher';
+    if (years <= 5) return 'junior';
+    if (years <= 10) return 'senior';
+    if (years <= 15) return 'expert';
+    return 'master';
+}
+
+function getRatingClass(rating) {
+    if (rating >= 4.5) return 'excellent';
+    if (rating >= 4.0) return 'very-good';
+    if (rating >= 3.5) return 'good';
+    return 'satisfactory';
+}
+
+function getWorkloadIndicator(hours) {
+    let fillWidth, fillClass;
+    
+    if (hours < 20) {
+        fillWidth = (hours / 40) * 100;
+        fillClass = 'underload';
+    } else if (hours <= 30) {
+        fillWidth = (hours / 40) * 100;
+        fillClass = 'normal';
+    } else if (hours <= 35) {
+        fillWidth = (hours / 40) * 100;
+        fillClass = 'high';
+    } else {
+        fillWidth = 100;
+        fillClass = 'overload';
+    }
+    
+    return `
+        <div class="workload-bar">
+            <div class="workload-fill ${fillClass}" style="width: ${fillWidth}%"></div>
+        </div>
+    `;
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const showingFrom = (currentPage - 1) * recordsPerPage + 1;
+    const showingTo = Math.min(currentPage * recordsPerPage, totalRecords);
+    
+    document.getElementById('showingFrom').textContent = showingFrom;
+    document.getElementById('showingTo').textContent = showingTo;
+    document.getElementById('totalRecords').textContent = totalRecords;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('div');
+        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => goToPage(i);
+        pageNumbers.appendChild(pageBtn);
+    }
+    
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        goToPage(newPage);
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadTeacherData();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+        if (selectAll.checked) {
+            selectedRows.add(checkbox.value);
+        } else {
+            selectedRows.delete(checkbox.value);
+        }
+    });
+}
+
+function toggleRowSelect(employeeId) {
+    if (selectedRows.has(employeeId)) {
+        selectedRows.delete(employeeId);
+    } else {
+        selectedRows.add(employeeId);
+    }
+    
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    const checkedRows = document.querySelectorAll('.row-select:checked');
+    
+    selectAll.indeterminate = checkedRows.length > 0 && checkedRows.length < rowSelects.length;
+    selectAll.checked = checkedRows.length === rowSelects.length;
+}
+
+function updateTeacherCharts() {
+    console.log('Updating teacher charts...');
+    
+    // Department Distribution Chart
+    const departmentData = {
+        labels: ['Mathematics', 'Science', 'English', 'Hindi', 'Social Studies', 'Arts', 'PE', 'Music', 'Computer'],
+        datasets: [{
+            data: [12, 15, 10, 8, 12, 6, 4, 3, 5],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0']
+        }]
+    };
+    console.log('Department chart data:', departmentData);
+    
+    // Experience Analysis Chart
+    const experienceData = {
+        labels: ['0-2 years', '3-5 years', '6-10 years', '11-15 years', '15+ years'],
+        datasets: [{
+            label: 'Teacher Count',
+            data: [8, 15, 25, 20, 12],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2
+        }]
+    };
+    console.log('Experience chart data:', experienceData);
+    
+    // Performance Trends Chart
+    const performanceData = {
+        labels: ['Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024'],
+        datasets: [{
+            label: 'Average Rating',
+            data: [3.8, 3.9, 4.0, 4.1, 4.2],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4
+        }]
+    };
+    console.log('Performance chart data:', performanceData);
+    
+    // Workload Distribution Chart
+    const workloadData = {
+        labels: ['<20 hrs', '20-25 hrs', '26-30 hrs', '31-35 hrs', '>35 hrs'],
+        datasets: [{
+            label: 'Teacher Count',
+            data: [3, 18, 45, 15, 4],
+            backgroundColor: ['#6c757d', '#28a745', '#17a2b8', '#ffc107', '#dc3545']
+        }]
+    };
+    console.log('Workload chart data:', workloadData);
+}
+
+function updateTeacherStats() {
+    document.getElementById('totalTeachers').textContent = '85';
+    document.getElementById('avgExperience').textContent = '8.5 years';
+    document.getElementById('avgRating').textContent = '4.2/5.0';
+    document.getElementById('avgWorkload').textContent = '28.5 hrs';
+}
+
+function viewTeacherProfile(employeeId) {
+    showNotification(`Opening profile for Employee ID: ${employeeId}`, 'info');
+}
+
+function viewPerformance(employeeId) {
+    showNotification(`Viewing performance analysis for: ${employeeId}`, 'info');
+}
+
+function editTeacher(employeeId) {
+    showNotification(`Editing teacher profile: ${employeeId}`, 'info');
+}
+
+function addNewTeacher() {
+    showNotification('Opening new teacher registration form...', 'info');
+}
+
+function generatePerformanceReport() {
+    showNotification('Generating comprehensive performance analysis...', 'info');
+    setTimeout(() => {
+        showNotification('Performance report generated successfully!', 'success');
+    }, 2000);
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function exportData(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const exportConfig = {
+        type: formData.get('type'),
+        format: formData.get('format'),
+        includeCharts: formData.getAll('includeCharts'),
+        scope: formData.get('scope'),
+        options: formData.getAll('options')
+    };
+    
+    showNotification('Generating teacher report...', 'info');
+    
+    // Mock export process
+    setTimeout(() => {
+        const fileName = `teacher_${exportConfig.type}_${new Date().toISOString().split('T')[0]}.${exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format}`;
+        showNotification(`Report generated: ${fileName}`, 'success');
+        closeExportModal();
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 2500);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    if (type === 'warning') bgColor = '#ffc107';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadTeacherData();
+    updateTeacherCharts();
+    updateTeacherStats();
+    
+    // Sort functionality
+    document.querySelectorAll('[sortable="true"]').forEach(header => {
+        header.addEventListener('click', () => {
+            console.log('Sorting by:', header.dataset.column);
+            showNotification(`Table sorted by ${header.dataset.column}`, 'info');
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('dataSearch').addEventListener('input', function(e) {
+        console.log('Searching teacher data for:', e.target.value);
+    });
+    
+    // Records per page change
+    document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+        recordsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        loadTeacherData();
+    });
+    
+    // Chart controls
+    document.getElementById('departmentChartType').addEventListener('change', function(e) {
+        console.log('Changing department chart type to:', e.target.value);
+        updateTeacherCharts();
+    });
+    
+    document.getElementById('experienceView').addEventListener('change', function(e) {
+        console.log('Changing experience view to:', e.target.value);
+        updateTeacherCharts();
+    });
+    
+    document.getElementById('performancePeriod').addEventListener('change', function(e) {
+        console.log('Changing performance period to:', e.target.value);
+        updateTeacherCharts();
+    });
+    
+    document.getElementById('workloadView').addEventListener('change', function(e) {
+        console.log('Changing workload view to:', e.target.value);
+        updateTeacherCharts();
+    });
+    
+    // Add CSS animations and additional styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .teacher-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .teacher-avatar.small {
+            width: 2rem;
+            height: 2rem;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.25rem;
+        }
+        
+        .view-btn:hover {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+        
+        .performance-btn:hover {
+            background: #e8f5e8;
+            color: #28a745;
+        }
+        
+        .edit-btn:hover {
+            background: #fff7e6;
+            color: #d46b08;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('exportModal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+};
+</script>

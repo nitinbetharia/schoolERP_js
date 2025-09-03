@@ -14,7 +14,7 @@
       <%- include('../../partials/header/authenticated') %>
 
       <div class="container-fluid">
-         <div class="row">
+         <div class="form-row">
             <!-- Sidebar -->
             <%- include('../../partials/nav/system-admin') %>
 
@@ -40,14 +40,14 @@
 
                <!-- Configuration Sections (rendered by server for section + configData) -->
                <div class="row g-4">
-                  <div class="col-12">
+                  <div class="form-col">
                      <div class="alert alert-secondary">
                         <i class="bi bi-info-circle me-2"></i>
                         <strong>Editing section:</strong>
                         <span class="text-uppercase"><%= section || 'general' %></span>
                      </div>
                   </div>
-                  <div class="col-lg-8">
+                  <div class="form-col">
                      <div class="card">
                         <div class="card-header">
                            <h5 class="card-title mb-0">Update <%= (section || 'general') %> configuration</h5>
@@ -56,27 +56,27 @@
                            <form method="post" action="/system/config/<%= section %>">
                               <% if (section === 'general') { %>
                                  <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Timezone</label>
                                        <input name="timezone" class="form-control" value="<%= configData.timezone %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Locale</label>
                                        <input name="locale" class="form-control" value="<%= configData.locale %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Currency</label>
                                        <input name="currency" class="form-control" value="<%= configData.currency %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Academic Year Start Month</label>
                                        <input name="academicYearStartMonth" type="number" class="form-control" value="<%= configData.academicYearStartMonth %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Branding Name</label>
                                        <input name="branding_name" class="form-control" value="<%= configData.branding?.name %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Branding Logo URL</label>
                                        <input name="branding_logo" class="form-control" value="<%= configData.branding?.logo %>" />
                                     </div>
@@ -85,23 +85,23 @@
 
                               <% if (section === 'security') { %>
                                  <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Session Max Age (ms)</label>
                                        <input name="sessionMaxAge" type="number" class="form-control" value="<%= configData.sessionMaxAge %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Max Login Attempts</label>
                                        <input name="maxLoginAttempts" type="number" class="form-control" value="<%= configData.maxLoginAttempts %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Lockout Time (ms)</label>
                                        <input name="lockoutTimeMs" type="number" class="form-control" value="<%= configData.lockoutTimeMs %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Bcrypt Rounds</label>
                                        <input name="bcryptRounds" type="number" class="form-control" value="<%= configData.bcryptRounds %>" />
                                     </div>
-                                    <div class="col-md-12 form-check mt-2">
+                                    <div class="form-col">
                                        <input class="form-check-input" type="checkbox" id="twoFactorEnabled" name="twoFactorEnabled" <%= configData.twoFactor?.enabled ? 'checked' : '' %> />
                                        <label class="form-check-label" for="twoFactorEnabled">Enable Two-Factor Authentication</label>
                                     </div>
@@ -110,23 +110,23 @@
 
                               <% if (section === 'email') { %>
                                  <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">SMTP Host</label>
                                        <input name="host" class="form-control" value="<%= configData.host %>" />
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="form-col">
                                        <label class="form-label">Port</label>
                                        <input name="port" type="number" class="form-control" value="<%= configData.port %>" />
                                     </div>
-                                    <div class="col-md-3 form-check mt-4 pt-2">
+                                    <div class="form-col">
                                        <input class="form-check-input" type="checkbox" id="secure" name="secure" <%= configData.secure ? 'checked' : '' %> />
                                        <label class="form-check-label" for="secure">Secure (TLS)</label>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">User</label>
                                        <input name="user" class="form-control" value="<%= configData.user %>" />
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">From Address</label>
                                        <input name="from" class="form-control" value="<%= configData.from %>" />
                                     </div>
@@ -135,7 +135,7 @@
 
                               <% if (section === 'integrations') { %>
                                  <div class="row g-3">
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Payment Gateway</label>
                                        <select class="form-select" name="paymentProvider">
                                           <option value="none" <%= configData.paymentGateway?.provider === 'none' ? 'selected' : '' %>>None</option>
@@ -143,21 +143,21 @@
                                           <option value="stripe" <%= configData.paymentGateway?.provider === 'stripe' ? 'selected' : '' %>>Stripe</option>
                                        </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">SMS Provider</label>
                                        <select class="form-select" name="smsProvider">
                                           <option value="none" <%= configData.sms?.provider === 'none' ? 'selected' : '' %>>None</option>
                                           <option value="twilio" <%= configData.sms?.provider === 'twilio' ? 'selected' : '' %>>Twilio</option>
                                        </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Storage Provider</label>
                                        <select class="form-select" name="storageProvider">
                                           <option value="local" <%= configData.storage?.provider === 'local' ? 'selected' : '' %>>Local</option>
                                           <option value="s3" <%= configData.storage?.provider === 's3' ? 'selected' : '' %>>S3</option>
                                        </select>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <label class="form-label">Analytics Provider</label>
                                        <select class="form-select" name="analyticsProvider">
                                           <option value="none" <%= configData.analytics?.provider === 'none' ? 'selected' : '' %>>None</option>
@@ -168,7 +168,7 @@
                               <% } %>
 
                               <div class="mt-4 d-flex gap-2">
-                                 <button type="submit" class="btn btn-primary">
+                                 <button type="submit" class="btn btn-brand-primary">
                                     <i class="bi bi-save me-1"></i> Save Changes
                                  </button>
                                  <a href="/system/config/<%= section %>" class="btn btn-outline-secondary">
@@ -179,7 +179,7 @@
                         </div>
                      </div>
                   </div>
-                  <div class="col-lg-4">
+                  <div class="form-col">
                      <div class="card">
                         <div class="card-header bg-light">
                            <h5 class="card-title mb-0">Quick Links</h5>
@@ -204,7 +204,7 @@
 
                <!-- Current Configuration Status -->
                <div class="row mt-4">
-                  <div class="col-12">
+                  <div class="form-col">
                      <div class="card">
                         <div class="card-header">
                            <h5 class="card-title mb-0">
@@ -212,26 +212,26 @@
                            </h5>
                         </div>
                         <div class="card-body">
-                           <div class="row">
-                              <div class="col-md-3">
+                           <div class="form-row">
+                              <div class="form-col">
                                  <div class="text-center">
-                                    <div class="h4 text-primary">4</div>
+                                    <div class="h4 text-brand-primary">4</div>
                                     <div class="text-muted small">Configuration Areas</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center">
                                     <div class="h4 text-warning">0</div>
                                     <div class="text-muted small">Configured</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center">
                                     <div class="h4 text-info">4</div>
                                     <div class="text-muted small">Pending Setup</div>
                                  </div>
                               </div>
-                              <div class="col-md-3">
+                              <div class="form-col">
                                  <div class="text-center">
                                     <div class="h4 text-success">100%</div>
                                     <div class="text-muted small">System Ready</div>

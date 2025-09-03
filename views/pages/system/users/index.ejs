@@ -5,15 +5,15 @@
             <i class="bi bi-people"></i> System Users
         </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <button class="btn btn-brand-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="bi bi-plus-circle"></i> Add System User
             </button>
         </div>
     </div>
 
                 <!-- Users List -->
-                <div class="row">
-                    <div class="col-12">
+                <div class="form-row">
+                    <div class="form-col">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">System Administrators</h5>
@@ -21,7 +21,9 @@
                             <div class="card-body">
                                 <% if (users && users.length > 0) { %>
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
+                                        <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="table table-hover">
                                             <thead>
                                                 <tr>
                                                     <th>User</th>
@@ -38,7 +40,7 @@
                                                     <tr>
                                                         <td>
                                                             <div class="d-flex align-items-center">
-                                                                <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                                <div class="avatar-sm bg-brand-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
                                                                     <%= (user.name || user.username || user.email).charAt(0).toUpperCase() %>
                                                                 </div>
                                                                 <div>
@@ -68,7 +70,7 @@
                                                             <% } %>
                                                         </td>
                                                         <td>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="editUser('<%= user.id %>')">
+                                                            <button class="btn btn-sm btn-outline-brand-primary" onclick="editUser('<%= user.id %>')">
                                                                 <i class="bi bi-pencil"></i>
                                                             </button>
                                                             <% if (user.id !== currentUser?.id) { %>
@@ -93,7 +95,7 @@
                                         <i class="bi bi-people display-1 text-muted mb-3"></i>
                                         <h4>No System Users Found</h4>
                                         <p class="text-muted">There are no system administrators configured.</p>
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                        <button class="btn btn-brand-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                                             <i class="bi bi-plus-circle"></i> Add First System User
                                         </button>
                                     </div>
@@ -105,7 +107,7 @@
 
                 <!-- Current User Info -->
                 <div class="row mt-4">
-                    <div class="col-12">
+                    <div class="form-col">
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">
@@ -113,13 +115,13 @@
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
+                                <div class="form-row">
+                                    <div class="form-col">
                                         <p><strong>Username:</strong> <%= user.username || 'N/A' %></p>
                                         <p><strong>Email:</strong> <%= user.email || 'N/A' %></p>
                                         <p><strong>Role:</strong> <span class="user-role"><%= user.role.replace('_', ' ') %></span></p>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                         <p><strong>User ID:</strong> <%= user.id %></p>
                                         <p><strong>Status:</strong> 
                                             <span class="badge bg-success">ACTIVE</span>
@@ -170,7 +172,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add User</button>
+                        <button type="submit" class="btn btn-brand-primary">Add User</button>
                     </div>
                 </form>
             </div>

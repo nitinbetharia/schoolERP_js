@@ -53,7 +53,7 @@
    </ul>
 
    <div class="row justify-content-center">
-      <div class="col-lg-8">
+      <div class="form-col">
          <div class="card">
             <div class="card-body">
                <form id="createTrustForm" action="/system/trusts" method="POST" novalidate>
@@ -61,14 +61,14 @@
                      <!-- Step 1 -->
                      <div class="tab-pane fade show active" id="tstep1" role="tabpanel" aria-labelledby="tstep1-tab">
                         <div class="row g-3">
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="trust_name" class="form-label"
                                  >Trust Name <span class="text-danger">*</span></label
                               >
                               <input type="text" id="trust_name" name="trust_name" class="form-control" required />
                               <div class="form-text">Full legal name of the educational trust</div>
                            </div>
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="trust_code" class="form-label"
                                  >Trust Code <span class="text-danger">*</span></label
                               >
@@ -82,7 +82,7 @@
                                  required />
                               <div class="form-text">Lowercase letters, numbers and underscore only</div>
                            </div>
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="subdomain" class="form-label"
                                  >Subdomain <span class="text-danger">*</span></label
                               >
@@ -96,21 +96,21 @@
                                  required />
                               <div class="form-text">Lowercase letters, numbers and hyphen only</div>
                            </div>
-                           <div class="col-md-6 align-self-end">
+                           <div class="form-col">
                               <div class="small text-muted">
                                  Access URL: <code id="subdomainPreview">http://[subdomain].localhost:3000</code>
                               </div>
                            </div>
                         </div>
                         <div class="d-flex justify-content-end mt-3">
-                           <button class="btn btn-primary" type="button" data-next="#tstep2-tab">Next</button>
+                           <button class="btn btn-brand-primary" type="button" data-next="#tstep2-tab">Next</button>
                         </div>
                      </div>
 
                      <!-- Step 2 -->
                      <div class="tab-pane fade" id="tstep2" role="tabpanel" aria-labelledby="tstep2-tab">
                         <div class="row g-3">
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="contact_email" class="form-label"
                                  >Contact Email <span class="text-danger">*</span></label
                               >
@@ -121,34 +121,34 @@
                                  class="form-control"
                                  required />
                            </div>
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="contact_phone" class="form-label"
                                  >Contact Phone <span class="text-danger">*</span></label
                               >
                               <input type="tel" id="contact_phone" name="contact_phone" class="form-control" required />
                            </div>
-                           <div class="col-12">
+                           <div class="form-col">
                               <label for="address" class="form-label">Address</label>
                               <textarea id="address" name="address" class="form-control" rows="3"></textarea>
                            </div>
                         </div>
                         <div class="d-flex justify-content-between mt-3">
                            <button class="btn btn-outline-secondary" type="button" data-prev="#tstep1-tab">Back</button>
-                           <button class="btn btn-primary" type="button" data-next="#tstep3-tab">Next</button>
+                           <button class="btn btn-brand-primary" type="button" data-next="#tstep3-tab">Next</button>
                         </div>
                      </div>
 
                      <!-- Step 3 -->
                      <div class="tab-pane fade" id="tstep3" role="tabpanel" aria-labelledby="tstep3-tab">
                         <div class="row g-3">
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="timezone" class="form-label">Timezone</label>
                               <select class="form-select" id="timezone" name="timezone">
                                  <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
                                  <option value="UTC">UTC</option>
                               </select>
                            </div>
-                           <div class="col-md-6">
+                           <div class="form-col">
                               <label for="currency" class="form-label">Default Currency</label>
                               <select class="form-select" id="currency" name="currency">
                                  <option value="INR" selected>INR - Indian Rupee</option>
@@ -158,7 +158,7 @@
                         </div>
                         <div class="d-flex justify-content-between mt-3">
                            <button class="btn btn-outline-secondary" type="button" data-prev="#tstep2-tab">Back</button>
-                           <button class="btn btn-primary" type="button" data-next="#tstep4-tab">Next</button>
+                           <button class="btn btn-brand-primary" type="button" data-next="#tstep4-tab">Next</button>
                         </div>
                      </div>
 

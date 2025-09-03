@@ -66,7 +66,7 @@
 
 <!-- System Health Monitoring Content -->
 <div class="container-fluid">
-    <div class="row">
+    <div class="form-row">
         <!-- Main Content -->
         <main class="col-12">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -74,7 +74,7 @@
                     <i class="bi bi-heart-pulse"></i> System Health
                 </h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        <button class="btn btn-outline-primary" onclick="refreshStats()">
+                        <button class="btn btn-outline-brand-primary" onclick="refreshStats()">
                             <i class="bi bi-arrow-clockwise" id="refreshIcon"></i> Refresh
                         </button>
                         <div class="form-check form-switch ms-3">
@@ -86,8 +86,8 @@
 
                 <% if (health.error) { %>
                     <!-- Error State -->
-                    <div class="row">
-                        <div class="col-12">
+                    <div class="form-row">
+                        <div class="form-col">
                             <div class="alert alert-danger" role="alert">
                                 <h4 class="alert-heading">
                                     <i class="bi bi-exclamation-triangle"></i> System Health Check Failed
@@ -101,7 +101,7 @@
                 <% } else { %>
                     <!-- System Status Cards -->
                     <div class="row mb-4">
-                        <div class="col-md-3">
+                        <div class="form-col">
                             <div class="card health-card text-center">
                                 <div class="card-body">
                                     <i class="bi bi-database display-4 <%= health.database ? 'text-success' : 'text-danger' %>"></i>
@@ -112,7 +112,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="form-col">
                             <div class="card health-card text-center">
                                 <div class="card-body">
                                     <i class="bi bi-building display-4 text-info"></i>
@@ -121,16 +121,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="form-col">
                             <div class="card health-card text-center">
                                 <div class="card-body">
-                                    <i class="bi bi-people display-4 text-primary"></i>
+                                    <i class="bi bi-people display-4 text-brand-primary"></i>
                                     <h5 class="card-title mt-2">System Users</h5>
-                                    <div class="metric-value text-primary"><%= health.users || 0 %></div>
+                                    <div class="metric-value text-brand-primary"><%= health.users || 0 %></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="form-col">
                             <div class="card health-card text-center">
                                 <div class="card-body">
                                     <i class="bi bi-clock display-4 text-success"></i>
@@ -148,9 +148,9 @@
                     </div>
 
                     <!-- Detailed Metrics -->
-                    <div class="row">
+                    <div class="form-row">
                         <!-- Memory Usage -->
-                        <div class="col-md-6">
+                        <div class="form-col">
                             <div class="card health-card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
@@ -175,15 +175,15 @@
                                         <hr>
                                         
                                         <div class="row text-center">
-                                            <div class="col-4">
+                                            <div class="form-col">
                                                 <div class="metric-label">RSS</div>
                                                 <div class="fw-bold"><%= (health.memory.rss / 1024 / 1024).toFixed(2) %>MB</div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="form-col">
                                                 <div class="metric-label">External</div>
                                                 <div class="fw-bold"><%= (health.memory.external / 1024 / 1024).toFixed(2) %>MB</div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="form-col">
                                                 <div class="metric-label">Array Buffers</div>
                                                 <div class="fw-bold"><%= (health.memory.arrayBuffers / 1024 / 1024).toFixed(2) %>MB</div>
                                             </div>
@@ -196,7 +196,7 @@
                         </div>
 
                         <!-- System Information -->
-                        <div class="col-md-6">
+                        <div class="form-col">
                             <div class="card health-card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
@@ -204,12 +204,12 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-6">
+                                    <div class="form-row">
+                                        <div class="form-col">
                                             <div class="metric-label">Node.js Version</div>
                                             <div class="fw-bold"><%= health.version || 'Unknown' %></div>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="form-col">
                                             <div class="metric-label">Platform</div>
                                             <div class="fw-bold"><%= process.platform || 'Unknown' %></div>
                                         </div>
@@ -217,12 +217,12 @@
                                     
                                     <hr>
                                     
-                                    <div class="row">
-                                        <div class="col-6">
+                                    <div class="form-row">
+                                        <div class="form-col">
                                             <div class="metric-label">Environment</div>
                                             <div class="fw-bold"><%= process.env.NODE_ENV || 'development' %></div>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="form-col">
                                             <div class="metric-label">PID</div>
                                             <div class="fw-bold"><%= process.pid || 'Unknown' %></div>
                                         </div>
@@ -249,7 +249,7 @@
 
                     <!-- Last Updated -->
                     <div class="row mt-4">
-                        <div class="col-12">
+                        <div class="form-col">
                             <div class="text-center text-muted">
                                 <small>
                                     <i class="bi bi-clock"></i>

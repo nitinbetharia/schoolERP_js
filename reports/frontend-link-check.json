@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "totalLinks": 0,
+    "workingLinks": 0,
+    "brokenLinks": 0,
+    "successRate": 0,
+    "pagesScanned": 0,
+    "timestamp": "2025-09-03T09:59:01.838Z"
+  },
+  "pages": [],
+  "workingLinks": [],
+  "brokenLinks": [],
+  "linksByType": {
+    "system": [],
+    "auth": [],
+    "dashboard": [],
+    "api": [],
+    "static": [],
+    "external": [],
+    "other": []
+  },
+  "recommendations": []
+}

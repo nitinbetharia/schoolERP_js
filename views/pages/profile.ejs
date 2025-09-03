@@ -1,0 +1,996 @@
+<!-- User Profile Management -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Profile</span>
+            </nav>
+            
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-description">Manage your personal information and account settings</p>
+        </div>
+    </div>
+
+    <!-- Profile Overview -->
+    <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-card">
+                <div class="profile-avatar">
+                    <img id="profileImage" src="/images/default-avatar.png" alt="Profile Picture">
+                    <button class="avatar-edit" onclick="changeProfilePicture()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <div class="profile-info">
+                    <h3><%= user.name %></h3>
+                    <p class="role"><%= user.role %></p>
+                    <p class="email"><%= user.email %></p>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-value">
+                            <%= user.role === 'Teacher' ? user.classesAssigned || 0 : user.role === 'Student' ? user.attendanceRate || 0 : user.schoolsManaged || 0 %>
+                        </span>
+                        <span class="stat-label">
+                            <%= user.role === 'Teacher' ? 'Classes' : user.role === 'Student' ? 'Attendance %' : 'Schools' %>
+                        </span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value"><%= user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A' %></span>
+                        <span class="stat-label">Last Login</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Navigation -->
+            <div class="profile-nav">
+                <button class="nav-item active" onclick="showSection('personal')">
+                    <i class="fas fa-user"></i>
+                    Personal Information
+                </button>
+                <button class="nav-item" onclick="showSection('security')">
+                    <i class="fas fa-shield-alt"></i>
+                    Security Settings
+                </button>
+                <button class="nav-item" onclick="showSection('preferences')">
+                    <i class="fas fa-cog"></i>
+                    Preferences
+                </button>
+                <button class="nav-item" onclick="showSection('activity')">
+                    <i class="fas fa-history"></i>
+                    Activity Log
+                </button>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <!-- Personal Information Section -->
+            <div id="personalSection" class="profile-section active">
+                <div class="section-header">
+                    <h3>Personal Information</h3>
+                    <button class="btn btn-brand-primary" onclick="enableEdit('personal')">
+                        <i class="fas fa-edit"></i>
+                        Edit Information
+                    </button>
+                </div>
+                
+                <form id="personalForm" class="profile-form" onsubmit="savePersonalInfo(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" class="form-control" 
+                                   value="<%= user.firstName || '' %>" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" class="form-control" 
+                                   value="<%= user.lastName || '' %>" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   value="<%= user.email %>" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-control" 
+                                   value="<%= user.phone || '' %>" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth" class="form-control" 
+                                   value="<%= user.dateOfBirth ? user.dateOfBirth.toISOString().split('T')[0] : '' %>" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender" class="form-control" disabled>
+                                <option value="">Select Gender</option>
+                                <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                                <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                                <option value="Other" <%= user.gender === 'Other' ? 'selected' : '' %>>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" class="form-control" rows="3" readonly><%= user.address || '' %></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions" style="display: none;">
+                        <button type="button" class="btn btn-outline" onclick="cancelEdit('personal')">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-brand-primary">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Settings Section -->
+            <div id="securitySection" class="profile-section">
+                <div class="section-header">
+                    <h3>Security Settings</h3>
+                </div>
+                
+                <!-- Change Password -->
+                <div class="security-card">
+                    <h4>Change Password</h4>
+                    <p>Keep your account secure with a strong password</p>
+                    <form id="passwordForm" class="profile-form" onsubmit="changePassword(event)">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" name="currentPassword" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="newPassword" class="form-control" required minlength="8">
+                            <small class="form-help">Password must be at least 8 characters long</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="confirmPassword">Confirm New Password</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-brand-primary">
+                            <i class="fas fa-key"></i>
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Two-Factor Authentication -->
+                <div class="security-card">
+                    <h4>Two-Factor Authentication</h4>
+                    <p>Add an extra layer of security to your account</p>
+                    <div class="feature-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="twoFactorAuth" <%= user.twoFactorEnabled ? 'checked' : '' %> 
+                                   onchange="toggleTwoFactor()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Enable Two-Factor Authentication</span>
+                    </div>
+                </div>
+                
+                <!-- Login Sessions -->
+                <div class="security-card">
+                    <h4>Active Sessions</h4>
+                    <p>Manage devices and sessions that are logged into your account</p>
+                    <div class="sessions-list">
+                        <div class="session-item current">
+                            <div class="session-info">
+                                <i class="fas fa-desktop"></i>
+                                <div class="session-details">
+                                    <strong>Current Session</strong>
+                                    <p>Windows 11 • Chrome • <%= new Date().toLocaleDateString() %></p>
+                                </div>
+                            </div>
+                            <span class="session-status active">Active</span>
+                        </div>
+                        <div class="session-item">
+                            <div class="session-info">
+                                <i class="fas fa-mobile-alt"></i>
+                                <div class="session-details">
+                                    <strong>Mobile Device</strong>
+                                    <p>Android • Chrome Mobile • 2 days ago</p>
+                                </div>
+                            </div>
+                            <button class="btn-terminate" onclick="terminateSession('mobile')">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Terminate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Section -->
+            <div id="preferencesSection" class="profile-section">
+                <div class="section-header">
+                    <h3>Preferences</h3>
+                </div>
+                
+                <form id="preferencesForm" class="profile-form" onsubmit="savePreferences(event)">
+                    <!-- Theme Settings -->
+                    <div class="preference-group">
+                        <h4>Appearance</h4>
+                        <div class="preference-item">
+                            <label for="theme">Theme</label>
+                            <select id="theme" name="theme" class="form-control">
+                                <option value="light" <%= (user.preferences && user.preferences.theme === 'light') || !user.preferences ? 'selected' : '' %>>Light</option>
+                                <option value="dark" <%= user.preferences && user.preferences.theme === 'dark' ? 'selected' : '' %>>Dark</option>
+                                <option value="auto" <%= user.preferences && user.preferences.theme === 'auto' ? 'selected' : '' %>>Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Settings -->
+                    <div class="preference-group">
+                        <h4>Language & Region</h4>
+                        <div class="preference-item">
+                            <label for="language">Language</label>
+                            <select id="language" name="language" class="form-control">
+                                <option value="en" <%= (user.preferences && user.preferences.language === 'en') || !user.preferences ? 'selected' : '' %>>English</option>
+                                <option value="hi" <%= user.preferences && user.preferences.language === 'hi' ? 'selected' : '' %>>हिन्दी</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification Settings -->
+                    <div class="preference-group">
+                        <h4>Notifications</h4>
+                        <div class="preference-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="emailNotifications" 
+                                       <%= (user.preferences && user.preferences.emailNotifications !== false) || !user.preferences ? 'checked' : '' %>>
+                                <span>Email notifications</span>
+                            </label>
+                        </div>
+                        <div class="preference-item">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="smsNotifications" 
+                                       <%= user.preferences && user.preferences.smsNotifications ? 'checked' : '' %>>
+                                <span>SMS notifications</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-brand-primary">
+                            <i class="fas fa-save"></i>
+                            Save Preferences
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Activity Log Section -->
+            <div id="activitySection" class="profile-section">
+                <div class="section-header">
+                    <h3>Recent Activity</h3>
+                </div>
+                
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon login">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </div>
+                        <div class="activity-details">
+                            <strong>Logged in</strong>
+                            <p>From Windows 11 • Chrome</p>
+                            <span class="activity-time">Today, 9:30 AM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon update">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="activity-details">
+                            <strong>Profile updated</strong>
+                            <p>Changed phone number</p>
+                            <span class="activity-time">Yesterday, 2:15 PM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon password">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div class="activity-details">
+                            <strong>Password changed</strong>
+                            <p>Security update completed</p>
+                            <span class="activity-time">3 days ago, 11:45 AM</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Profile Image Upload Modal -->
+<div id="imageUploadModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Change Profile Picture</h3>
+            <button class="modal-close" onclick="closeImageModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drop image here or click to browse</p>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;">
+            </div>
+            <div class="image-preview" id="imagePreview" style="display: none;">
+                <img id="previewImage" alt="Preview">
+                <button class="btn btn-outline" onclick="removeImage()">Remove</button>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeImageModal()">Cancel</button>
+            <button class="btn btn-brand-primary" onclick="uploadImage()" id="uploadBtn" disabled>
+                <i class="fas fa-upload"></i>
+                Upload
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Specific Styles -->
+<style>
+.profile-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+}
+
+.profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.profile-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.profile-avatar {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.profile-avatar img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+}
+
+.avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-info h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.role {
+    color: #007bff;
+    font-weight: 500;
+    margin: 0 0 0.25rem 0;
+}
+
+.email {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.profile-nav {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-item:hover {
+    background: #f8f9fa;
+}
+
+.nav-item.active {
+    background: #007bff;
+    color: white;
+}
+
+.profile-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-section {
+    display: none;
+    padding: 2rem;
+}
+
+.profile-section.active {
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.security-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.security-card h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.security-card p {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.feature-toggle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 26px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #007bff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.sessions-list {
+    margin-top: 1rem;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.session-item.current {
+    border: 1px solid #28a745;
+}
+
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.session-info i {
+    font-size: 1.5rem;
+    color: #6c757d;
+}
+
+.session-details p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.session-status.active {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.btn-terminate {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.preference-group {
+    margin-bottom: 2rem;
+}
+
+.preference-group h4 {
+    margin: 0 0 1rem 0;
+    color: #495057;
+}
+
+.preference-item {
+    margin-bottom: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.activity-icon.login {
+    background: #28a745;
+}
+
+.activity-icon.update {
+    background: #007bff;
+}
+
+.activity-icon.password {
+    background: #ffc107;
+}
+
+.activity-details strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.activity-details p {
+    margin: 0 0 0.25rem 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.upload-area i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ccc;
+}
+
+.image-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-sidebar {
+        order: 1;
+    }
+    
+    .profile-content {
+        order: 0;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Profile Management Scripts -->
+<script>
+function showSection(sectionName) {
+    // Hide all sections
+    const sections = document.querySelectorAll('.profile-section');
+    sections.forEach(section => section.classList.remove('active'));
+    
+    // Remove active class from nav items
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => item.classList.remove('active'));
+    
+    // Show selected section
+    document.getElementById(sectionName + 'Section').classList.add('active');
+    
+    // Add active class to clicked nav item
+    event.target.classList.add('active');
+}
+
+function enableEdit(formType) {
+    if (formType === 'personal') {
+        const form = document.getElementById('personalForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        const actions = form.querySelector('.form-actions');
+        
+        inputs.forEach(input => {
+            if (input.name !== 'email') { // Don't allow email editing
+                input.removeAttribute('readonly');
+                input.removeAttribute('disabled');
+            }
+        });
+        
+        actions.style.display = 'flex';
+        
+        // Change edit button text
+        event.target.innerHTML = '<i class="fas fa-times"></i> Cancel Edit';
+        event.target.onclick = () => cancelEdit('personal');
+    }
+}
+
+function cancelEdit(formType) {
+    if (formType === 'personal') {
+        const form = document.getElementById('personalForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        const actions = form.querySelector('.form-actions');
+        
+        inputs.forEach(input => {
+            input.setAttribute('readonly', 'readonly');
+            if (input.tagName === 'SELECT') {
+                input.setAttribute('disabled', 'disabled');
+            }
+        });
+        
+        actions.style.display = 'none';
+        
+        // Reset form values (in real implementation, reload from server)
+        
+        // Change button back
+        const editBtn = document.querySelector('[onclick*="enableEdit"]');
+        editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit Information';
+        editBtn.onclick = () => enableEdit('personal');
+    }
+}
+
+function savePersonalInfo(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Validate data
+    if (!data.firstName || !data.lastName) {
+        alert('First name and last name are required.');
+        return;
+    }
+    
+    // In real implementation, send to server
+    console.log('Saving personal info:', data);
+    
+    showNotification('Personal information updated successfully!', 'success');
+    cancelEdit('personal');
+}
+
+function changePassword(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Validate passwords match
+    if (data.newPassword !== data.confirmPassword) {
+        alert('New passwords do not match.');
+        return;
+    }
+    
+    // In real implementation, send to server
+    console.log('Changing password...');
+    
+    showNotification('Password updated successfully!', 'success');
+    event.target.reset();
+}
+
+function toggleTwoFactor() {
+    const enabled = event.target.checked;
+    
+    if (enabled) {
+        alert('Two-factor authentication setup will be initiated.');
+    } else {
+        if (confirm('Are you sure you want to disable two-factor authentication?')) {
+            alert('Two-factor authentication disabled.');
+        } else {
+            event.target.checked = true;
+        }
+    }
+}
+
+function terminateSession(sessionId) {
+    if (confirm('Are you sure you want to terminate this session?')) {
+        alert('Session terminated successfully.');
+        // In real implementation, remove session from list
+    }
+}
+
+function savePreferences(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Handle checkboxes
+    data.emailNotifications = formData.has('emailNotifications');
+    data.smsNotifications = formData.has('smsNotifications');
+    
+    console.log('Saving preferences:', data);
+    
+    showNotification('Preferences saved successfully!', 'success');
+}
+
+function changeProfilePicture() {
+    document.getElementById('imageUploadModal').style.display = 'block';
+}
+
+function closeImageModal() {
+    document.getElementById('imageUploadModal').style.display = 'none';
+    document.getElementById('imageInput').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('uploadArea').style.display = 'block';
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#28a745' : '#dc3545'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// File upload handling
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    uploadArea.addEventListener('click', () => imageInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#007bff';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#ddd';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#ddd';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleImageUpload(files[0]);
+        }
+    });
+    
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageUpload(e.target.files[0]);
+        }
+    });
+    
+    function handleImageUpload(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            uploadArea.style.display = 'none';
+            imagePreview.style.display = 'block';
+            uploadBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    window.removeImage = function() {
+        imagePreview.style.display = 'none';
+        uploadArea.style.display = 'block';
+        imageInput.value = '';
+        uploadBtn.disabled = true;
+    };
+    
+    window.uploadImage = function() {
+        // In real implementation, upload to server
+        const newImageSrc = previewImage.src;
+        document.getElementById('profileImage').src = newImageSrc;
+        
+        showNotification('Profile picture updated successfully!', 'success');
+        closeImageModal();
+    };
+});
+</script>

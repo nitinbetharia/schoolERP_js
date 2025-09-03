@@ -1,0 +1,1380 @@
+<!-- System Reports -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/reports" class="breadcrumb-link">Reports</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">System Reports</span>
+            </nav>
+            
+            <h1 class="page-title">
+                <i class="fas fa-server"></i>
+                System Reports
+            </h1>
+            <p class="page-description">System usage analytics, performance metrics, and administrative insights</p>
+        </div>
+        
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="generateSystemHealth()">
+                <i class="fas fa-heartbeat"></i>
+                System Health Check
+            </button>
+            <button class="btn btn-brand-primary" onclick="openExportModal()">
+                <i class="fas fa-download"></i>
+                Export Reports
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel d-none d-md-block">
+        <div class="filter-section">
+            <h4>System Report Filters</h4>
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label for="reportTypeFilter">Report Category</label>
+                    <select id="reportTypeFilter" class="form-control">
+                        <option value="system-usage">System Usage Analytics</option>
+                        <option value="user-activity">User Activity Report</option>
+                        <option value="performance-metrics">Performance Metrics</option>
+                        <option value="security-audit">Security Audit Log</option>
+                        <option value="data-backup">Data Backup Status</option>
+                        <option value="system-errors">Error & Exception Report</option>
+                        <option value="api-usage">API Usage Analytics</option>
+                        <option value="database-health">Database Health Report</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="timeRangeFilter">Time Range</label>
+                    <select id="timeRangeFilter" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="last-7-days" selected>Last 7 Days</option>
+                        <option value="last-30-days">Last 30 Days</option>
+                        <option value="last-3-months">Last 3 Months</option>
+                        <option value="last-6-months">Last 6 Months</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="moduleFilter">System Module</label>
+                    <select id="moduleFilter" class="form-control">
+                        <option value="">All Modules</option>
+                        <option value="authentication">Authentication</option>
+                        <option value="student-management">Student Management</option>
+                        <option value="teacher-management">Teacher Management</option>
+                        <option value="academic-management">Academic Management</option>
+                        <option value="fee-management">Fee Management</option>
+                        <option value="attendance">Attendance System</option>
+                        <option value="reports">Reports Module</option>
+                        <option value="communications">Communications</option>
+                        <option value="library">Library Management</option>
+                        <option value="transport">Transport Management</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="userTypeFilter">User Type</label>
+                    <select id="userTypeFilter" class="form-control">
+                        <option value="">All Users</option>
+                        <option value="admin">System Admin</option>
+                        <option value="principal">Principal</option>
+                        <option value="teacher">Teachers</option>
+                        <option value="staff">Staff Members</option>
+                        <option value="student">Students</option>
+                        <option value="parent">Parents</option>
+                        <option value="guest">Guest Users</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="severityFilter">Alert Severity</label>
+                    <select id="severityFilter" class="form-control">
+                        <option value="">All Levels</option>
+                        <option value="critical">Critical</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                        <option value="info">Information</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">System Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="active">Active/Online</option>
+                        <option value="maintenance">Under Maintenance</option>
+                        <option value="degraded">Degraded Performance</option>
+                        <option value="offline">Offline/Error</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn btn-brand-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health Overview -->
+    <div class="system-overview">
+        <div class="overview-card system-status d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="systemStatus">Online</h3>
+                <p>System Status</p>
+                <div class="sub-stats">
+                    <span class="stat-item positive">
+                        <i class="fas fa-check-circle"></i>
+                        Uptime: <strong>99.8%</strong>
+                    </span>
+                </div>
+            </div>
+            <div class="status-indicator online"></div>
+        </div>
+        
+        <div class="overview-card active-users d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="activeUsers">127</h3>
+                <p>Active Users</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Peak today: <strong>189</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card system-load d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="systemLoad">62%</h3>
+                <p>System Load</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        CPU: <strong>45%</strong> | RAM: <strong>68%</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card database-size d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="databaseSize">2.4 GB</h3>
+                <p>Database Size</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Growth: <strong>+15MB/week</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card backup-status d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="backupStatus">Success</h3>
+                <p>Last Backup</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        2 hours ago
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card error-count d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="errorCount">3</h3>
+                <p>Recent Errors</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Last 24h: <strong>8 total</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Analytics Charts -->
+    <div class="system-charts">
+        <div class="chart-container responsive usage-trends">
+            <div class="chart-header">
+                <h4>System Usage Trends</h4>
+                <div class="chart-actions">
+                    <select id="usagePeriod" class="form-control small">
+                        <option value="hourly">Hourly (24h)</option>
+                        <option value="daily" selected>Daily (7 days)</option>
+                        <option value="weekly">Weekly (4 weeks)</option>
+                        <option value="monthly">Monthly (6 months)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="usageChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive user-activity">
+            <div class="chart-header">
+                <h4>User Activity Distribution</h4>
+                <div class="chart-actions">
+                    <select id="activityMetric" class="form-control small">
+                        <option value="logins" selected>Login Activity</option>
+                        <option value="page-views">Page Views</option>
+                        <option value="actions">User Actions</option>
+                        <option value="session-duration">Session Duration</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="activityChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive performance-metrics">
+            <div class="chart-header">
+                <h4>Performance Metrics</h4>
+                <div class="chart-actions">
+                    <select id="performanceType" class="form-control small">
+                        <option value="response-time" selected>Response Time</option>
+                        <option value="throughput">Throughput</option>
+                        <option value="error-rate">Error Rate</option>
+                        <option value="resource-usage">Resource Usage</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="performanceChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive module-usage">
+            <div class="chart-header">
+                <h4>Module Usage Statistics</h4>
+                <div class="chart-actions">
+                    <select id="moduleView" class="form-control small">
+                        <option value="usage-count" selected>Usage Count</option>
+                        <option value="time-spent">Time Spent</option>
+                        <option value="user-adoption">User Adoption</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="moduleChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Alerts & Notifications -->
+    <div class="system-alerts">
+        <div class="alert-section critical-alerts">
+            <div class="section-header">
+                <h5>Critical Alerts</h5>
+                <span class="alert-count critical">2</span>
+            </div>
+            <div class="alert-list">
+                <div class="alert-item critical">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Database Connection Pool Warning</div>
+                        <div class="alert-description">Connection pool usage at 95% capacity</div>
+                        <div class="alert-timestamp">5 minutes ago</div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-outline" onclick="resolveAlert('alert1')">Resolve</button>
+                    </div>
+                </div>
+                
+                <div class="alert-item critical">
+                    <div class="alert-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Failed Login Attempts</div>
+                        <div class="alert-description">15+ failed login attempts from IP: 192.168.1.100</div>
+                        <div class="alert-timestamp">12 minutes ago</div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn btn-sm btn-outline" onclick="blockIP('192.168.1.100')">Block IP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert-section performance-alerts">
+            <div class="section-header">
+                <h5>Performance Alerts</h5>
+                <span class="alert-count warning">4</span>
+            </div>
+            <div class="alert-list">
+                <div class="alert-item warning">
+                    <div class="alert-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Slow Query Detected</div>
+                        <div class="alert-description">Student search query taking >5 seconds</div>
+                        <div class="alert-timestamp">1 hour ago</div>
+                    </div>
+                </div>
+                
+                <div class="alert-item warning">
+                    <div class="alert-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">High Memory Usage</div>
+                        <div class="alert-description">System memory usage at 82%</div>
+                        <div class="alert-timestamp">2 hours ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert-section info-alerts">
+            <div class="section-header">
+                <h5>System Information</h5>
+                <span class="alert-count info">6</span>
+            </div>
+            <div class="alert-list">
+                <div class="alert-item info">
+                    <div class="alert-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Scheduled Backup Completed</div>
+                        <div class="alert-description">Daily backup completed successfully (2.4 GB)</div>
+                        <div class="alert-timestamp">3 hours ago</div>
+                    </div>
+                </div>
+                
+                <div class="alert-item info">
+                    <div class="alert-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Peak User Activity</div>
+                        <div class="alert-description">189 concurrent users during lunch break</div>
+                        <div class="alert-timestamp">4 hours ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Audit Log Table -->
+    <div class="audit-log-section">
+        <div class="section-header">
+            <h4>System Audit Log</h4>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" id="auditSearch" placeholder="Search audit logs..." class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select id="auditRecordsPerPage" class="form-control small">
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <button class="btn btn-outline small" onclick="exportAuditLog()">
+                    <i class="fas fa-download"></i>
+                    Export Log
+                </button>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table" id="auditLogTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAllAudit" onchange="toggleSelectAllAudit()"></th>
+                        <th sortable="true" data-column="timestamp">Timestamp</th>
+                        <th sortable="true" data-column="user">User</th>
+                        <th sortable="true" data-column="action">Action</th>
+                        <th sortable="true" data-column="module">Module</th>
+                        <th sortable="true" data-column="resource">Resource</th>
+                        <th sortable="true" data-column="ip">IP Address</th>
+                        <th sortable="true" data-column="status">Status</th>
+                        <th sortable="true" data-column="severity">Severity</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="auditLogTableBody">
+                    <!-- Audit log data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="auditShowingFrom">1</span> to <span id="auditShowingTo">25</span> of <span id="auditTotalRecords">1,247</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="auditPrevPage" onclick="changeAuditPage(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-numbers" id="auditPageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="auditNextPage" onclick="changeAuditPage(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Export System Reports</h3>
+            <button class="modal-close" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="exportForm" onsubmit="exportData(event)">
+                <div class="form-group">
+                    <label for="exportType">Report Type</label>
+                    <select id="exportType" name="type" class="form-control" required>
+                        <option value="system-overview">System Overview Report</option>
+                        <option value="performance-analysis">Performance Analysis</option>
+                        <option value="user-activity">User Activity Report</option>
+                        <option value="security-audit">Security Audit Log</option>
+                        <option value="error-analysis">Error & Exception Analysis</option>
+                        <option value="usage-statistics">Usage Statistics</option>
+                        <option value="health-check">System Health Check</option>
+                        <option value="comprehensive">Comprehensive System Report</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" name="format" class="form-control" required>
+                        <option value="excel">Excel Workbook (.xlsx)</option>
+                        <option value="pdf">PDF Report</option>
+                        <option value="csv">CSV Data</option>
+                        <option value="json">JSON Export</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Include System Metrics</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="includeMetrics" value="usage-trends" checked> Usage Trends</label>
+                        <label><input type="checkbox" name="includeMetrics" value="performance-charts" checked> Performance Charts</label>
+                        <label><input type="checkbox" name="includeMetrics" value="user-activity" checked> User Activity</label>
+                        <label><input type="checkbox" name="includeMetrics" value="module-statistics"> Module Statistics</label>
+                        <label><input type="checkbox" name="includeMetrics" value="error-logs"> Error Logs</label>
+                        <label><input type="checkbox" name="includeMetrics" value="security-events"> Security Events</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="timeRange">Report Period</label>
+                    <select id="timeRange" name="timeRange" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="last-7-days" selected>Last 7 Days</option>
+                        <option value="last-30-days">Last 30 Days</option>
+                        <option value="last-3-months">Last 3 Months</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                </div>
+                
+                <div class="form-group custom-date-range" style="display: none;">
+                    <label>Custom Date Range</label>
+                    <div class="date-range-inputs">
+                        <input type="date" name="startDate" class="form-control">
+                        <span>to</span>
+                        <input type="date" name="endDate" class="form-control">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Report Options</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="options" value="detailed-analysis"> Include Detailed Analysis</label>
+                        <label><input type="checkbox" name="options" value="recommendations"> Include Recommendations</label>
+                        <label><input type="checkbox" name="options" value="historical-comparison"> Include Historical Comparison</label>
+                        <label><input type="checkbox" name="options" value="executive-summary" checked> Include Executive Summary</label>
+                        <label><input type="checkbox" name="options" value="technical-details"> Include Technical Details</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-brand-primary">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- System Health Check Modal -->
+<div id="healthCheckModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>System Health Check</h3>
+            <button class="modal-close" onclick="closeHealthCheckModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="health-check-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="healthCheckProgress"></div>
+                </div>
+                <div class="progress-text" id="healthCheckText">Initializing health check...</div>
+            </div>
+            
+            <div class="health-check-results" id="healthCheckResults">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- System Reports Styles -->
+<style>
+.system-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.system-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.system-alerts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.status-indicator.online {
+    background: #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+}
+
+.status-indicator.maintenance {
+    background: #ffc107;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.4);
+}
+
+.status-indicator.offline {
+    background: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+
+.alert-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.alert-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.alert-count.critical {
+    background: #dc3545;
+    color: white;
+}
+
+.alert-count.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.alert-count.info {
+    background: #17a2b8;
+    color: white;
+}
+
+.alert-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.2s;
+}
+
+.alert-item:hover {
+    background: #f8f9fa;
+}
+
+.alert-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.alert-item.critical .alert-icon {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.alert-item.warning .alert-icon {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.alert-item.info .alert-icon {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.alert-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-timestamp {
+    color: #adb5bd;
+    font-size: 0.8rem;
+}
+
+.alert-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.audit-log-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.severity-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.severity-badge.critical {
+    background: #dc3545;
+    color: white;
+}
+
+.severity-badge.high {
+    background: #fd7e14;
+    color: white;
+}
+
+.severity-badge.medium {
+    background: #ffc107;
+    color: #212529;
+}
+
+.severity-badge.low {
+    background: #17a2b8;
+    color: white;
+}
+
+.severity-badge.info {
+    background: #6c757d;
+    color: white;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.health-check-progress {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.health-check-results {
+    display: none;
+}
+
+.health-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.result-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.result-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date-range-inputs span {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 1024px) {
+    .system-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .system-alerts {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .system-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .alert-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .alert-actions {
+        align-self: stretch;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .system-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+</style>
+
+<!-- System Reports Scripts -->
+<script>
+let auditCurrentPage = 1;
+let auditRecordsPerPage = 25;
+let auditTotalRecords = 1247;
+
+// Mock audit log data
+const mockAuditData = [
+    { timestamp: '2024-01-15 10:30:25', user: 'admin@school.edu', action: 'LOGIN', module: 'Authentication', resource: 'System Login', ip: '192.168.1.10', status: 'SUCCESS', severity: 'info' },
+    { timestamp: '2024-01-15 10:28:15', user: 'teacher@school.edu', action: 'VIEW_STUDENTS', module: 'Student Management', resource: 'Class 10A Students', ip: '192.168.1.15', status: 'SUCCESS', severity: 'info' },
+    { timestamp: '2024-01-15 10:25:45', user: 'principal@school.edu', action: 'UPDATE_GRADES', module: 'Academic Management', resource: 'Student ID: 2024001', ip: '192.168.1.5', status: 'SUCCESS', severity: 'medium' },
+    { timestamp: '2024-01-15 10:22:33', user: 'system', action: 'BACKUP_COMPLETED', module: 'System', resource: 'Daily Backup', ip: 'localhost', status: 'SUCCESS', severity: 'info' },
+    { timestamp: '2024-01-15 10:20:10', user: 'unknown', action: 'FAILED_LOGIN', module: 'Authentication', resource: 'Login Attempt', ip: '192.168.1.100', status: 'ERROR', severity: 'critical' }
+];
+
+function applyFilters() {
+    showNotification('System report filters applied successfully!', 'success');
+    loadAuditData();
+    updateSystemCharts();
+    updateSystemStats();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-form select').forEach(select => select.value = '');
+    showNotification('Filters cleared!', 'info');
+    loadAuditData();
+    updateSystemCharts();
+    updateSystemStats();
+}
+
+function loadAuditData() {
+    const tbody = document.getElementById('auditLogTableBody');
+    tbody.innerHTML = '';
+    
+    mockAuditData.forEach((log, index) => {
+        const severityClass = getSeverityClass(log.severity);
+        const statusClass = getStatusClass(log.status);
+        
+        const row = `
+            <tr>
+                <td><input type="checkbox" class="audit-row-select" value="${index}" onchange="toggleAuditRowSelect(${index})"></td>
+                <td>${log.timestamp}</td>
+                <td>${log.user}</td>
+                <td><code>${log.action}</code></td>
+                <td>${log.module}</td>
+                <td>${log.resource}</td>
+                <td>${log.ip}</td>
+                <td><span class="status-badge ${statusClass}">${log.status}</span></td>
+                <td><span class="severity-badge ${severityClass}">${log.severity.toUpperCase()}</span></td>
+                <td>
+                    <button class="action-btn view-btn" onclick="viewAuditDetails(${index})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+    
+    updateAuditPagination();
+}
+
+function getSeverityClass(severity) {
+    switch(severity.toLowerCase()) {
+        case 'critical': return 'critical';
+        case 'high': return 'high';
+        case 'medium': return 'medium';
+        case 'low': return 'low';
+        default: return 'info';
+    }
+}
+
+function getStatusClass(status) {
+    switch(status.toLowerCase()) {
+        case 'success': return 'success';
+        case 'error': return 'error';
+        case 'failed': return 'error';
+        default: return 'pending';
+    }
+}
+
+function updateAuditPagination() {
+    const totalPages = Math.ceil(auditTotalRecords / auditRecordsPerPage);
+    const showingFrom = (auditCurrentPage - 1) * auditRecordsPerPage + 1;
+    const showingTo = Math.min(auditCurrentPage * auditRecordsPerPage, auditTotalRecords);
+    
+    document.getElementById('auditShowingFrom').textContent = showingFrom;
+    document.getElementById('auditShowingTo').textContent = showingTo;
+    document.getElementById('auditTotalRecords').textContent = auditTotalRecords;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('auditPageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, auditCurrentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('div');
+        pageBtn.className = `page-number ${i === auditCurrentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => goToAuditPage(i);
+        pageNumbers.appendChild(pageBtn);
+    }
+}
+
+function changeAuditPage(direction) {
+    const totalPages = Math.ceil(auditTotalRecords / auditRecordsPerPage);
+    const newPage = auditCurrentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        goToAuditPage(newPage);
+    }
+}
+
+function goToAuditPage(page) {
+    auditCurrentPage = page;
+    loadAuditData();
+}
+
+function toggleSelectAllAudit() {
+    const selectAll = document.getElementById('selectAllAudit');
+    const rowSelects = document.querySelectorAll('.audit-row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function toggleAuditRowSelect(index) {
+    const selectAll = document.getElementById('selectAllAudit');
+    const rowSelects = document.querySelectorAll('.audit-row-select');
+    const checkedRows = document.querySelectorAll('.audit-row-select:checked');
+    
+    selectAll.indeterminate = checkedRows.length > 0 && checkedRows.length < rowSelects.length;
+    selectAll.checked = checkedRows.length === rowSelects.length;
+}
+
+function updateSystemCharts() {
+    console.log('Updating system charts...');
+    
+    // System Usage Trends
+    const usageData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: 'Active Users',
+            data: [145, 167, 189, 178, 162, 87, 92],
+            borderColor: '#007bff',
+            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+            tension: 0.4
+        }]
+    };
+    
+    // User Activity Distribution
+    const activityData = {
+        labels: ['Admins', 'Teachers', 'Students', 'Staff', 'Parents'],
+        datasets: [{
+            data: [8, 45, 380, 25, 195],
+            backgroundColor: ['#dc3545', '#28a745', '#007bff', '#ffc107', '#6f42c1']
+        }]
+    };
+    
+    // Performance Metrics
+    const performanceData = {
+        labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+        datasets: [{
+            label: 'Response Time (ms)',
+            data: [120, 95, 180, 250, 195, 140],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)'
+        }]
+    };
+    
+    // Module Usage
+    const moduleData = {
+        labels: ['Student Mgmt', 'Academic', 'Attendance', 'Fee Mgmt', 'Reports', 'Communication'],
+        datasets: [{
+            label: 'Usage Count',
+            data: [450, 320, 280, 190, 150, 95],
+            backgroundColor: '#17a2b8'
+        }]
+    };
+    
+    console.log('All chart data prepared for system analytics');
+}
+
+function updateSystemStats() {
+    document.getElementById('systemStatus').textContent = 'Online';
+    document.getElementById('activeUsers').textContent = '127';
+    document.getElementById('systemLoad').textContent = '62%';
+    document.getElementById('databaseSize').textContent = '2.4 GB';
+    document.getElementById('backupStatus').textContent = 'Success';
+    document.getElementById('errorCount').textContent = '3';
+}
+
+function generateSystemHealth() {
+    openHealthCheckModal();
+    runHealthCheck();
+}
+
+function openHealthCheckModal() {
+    document.getElementById('healthCheckModal').style.display = 'block';
+}
+
+function closeHealthCheckModal() {
+    document.getElementById('healthCheckModal').style.display = 'none';
+}
+
+function runHealthCheck() {
+    const progressFill = document.getElementById('healthCheckProgress');
+    const progressText = document.getElementById('healthCheckText');
+    const resultsContainer = document.getElementById('healthCheckResults');
+    
+    const checks = [
+        { name: 'Database Connection', duration: 1000 },
+        { name: 'Web Server Status', duration: 800 },
+        { name: 'Memory Usage', duration: 600 },
+        { name: 'Disk Space', duration: 900 },
+        { name: 'Network Connectivity', duration: 700 },
+        { name: 'Security Scan', duration: 1200 }
+    ];
+    
+    let currentCheck = 0;
+    let totalDuration = checks.reduce((sum, check) => sum + check.duration, 0);
+    let elapsedTime = 0;
+    
+    function performCheck() {
+        if (currentCheck >= checks.length) {
+            progressFill.style.width = '100%';
+            progressText.textContent = 'Health check completed!';
+            
+            setTimeout(() => {
+                showHealthResults();
+            }, 500);
+            return;
+        }
+        
+        const check = checks[currentCheck];
+        progressText.textContent = `Checking ${check.name}...`;
+        
+        setTimeout(() => {
+            elapsedTime += check.duration;
+            const progress = (elapsedTime / totalDuration) * 100;
+            progressFill.style.width = `${progress}%`;
+            
+            currentCheck++;
+            performCheck();
+        }, check.duration);
+    }
+    
+    performCheck();
+}
+
+function showHealthResults() {
+    const resultsContainer = document.getElementById('healthCheckResults');
+    
+    const results = [
+        { name: 'Database Connection', status: 'healthy', icon: 'fas fa-check-circle', color: '#28a745' },
+        { name: 'Web Server Status', status: 'healthy', icon: 'fas fa-check-circle', color: '#28a745' },
+        { name: 'Memory Usage', status: 'warning', icon: 'fas fa-exclamation-triangle', color: '#ffc107' },
+        { name: 'Disk Space', status: 'healthy', icon: 'fas fa-check-circle', color: '#28a745' },
+        { name: 'Network Connectivity', status: 'healthy', icon: 'fas fa-check-circle', color: '#28a745' },
+        { name: 'Security Scan', status: 'healthy', icon: 'fas fa-shield-alt', color: '#28a745' }
+    ];
+    
+    resultsContainer.innerHTML = results.map(result => `
+        <div class="health-result-item">
+            <span class="result-name">${result.name}</span>
+            <div class="result-status">
+                <i class="${result.icon}" style="color: ${result.color}"></i>
+                <span style="color: ${result.color}; text-transform: capitalize;">${result.status}</span>
+            </div>
+        </div>
+    `).join('');
+    
+    resultsContainer.style.display = 'block';
+}
+
+function viewAuditDetails(index) {
+    const log = mockAuditData[index];
+    showNotification(`Viewing details for audit log: ${log.action} by ${log.user}`, 'info');
+}
+
+function resolveAlert(alertId) {
+    showNotification(`Alert ${alertId} marked as resolved`, 'success');
+}
+
+function blockIP(ip) {
+    showNotification(`IP address ${ip} has been blocked`, 'warning');
+}
+
+function exportAuditLog() {
+    showNotification('Exporting audit log...', 'info');
+    setTimeout(() => {
+        showNotification('Audit log exported successfully!', 'success');
+    }, 1500);
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function exportData(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const exportConfig = {
+        type: formData.get('type'),
+        format: formData.get('format'),
+        includeMetrics: formData.getAll('includeMetrics'),
+        timeRange: formData.get('timeRange'),
+        options: formData.getAll('options')
+    };
+    
+    showNotification('Generating system report...', 'info');
+    
+    // Mock export process
+    setTimeout(() => {
+        const fileName = `system_${exportConfig.type}_${new Date().toISOString().split('T')[0]}.${exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format}`;
+        showNotification(`Report generated: ${fileName}`, 'success');
+        closeExportModal();
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 3000);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    if (type === 'warning') bgColor = '#ffc107';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadAuditData();
+    updateSystemCharts();
+    updateSystemStats();
+    
+    // Time range filter change
+    document.getElementById('timeRange').addEventListener('change', function(e) {
+        const customRangeDiv = document.querySelector('.custom-date-range');
+        if (e.target.value === 'custom') {
+            customRangeDiv.style.display = 'block';
+        } else {
+            customRangeDiv.style.display = 'none';
+        }
+    });
+    
+    // Sort functionality
+    document.querySelectorAll('[sortable="true"]').forEach(header => {
+        header.addEventListener('click', () => {
+            console.log('Sorting by:', header.dataset.column);
+            showNotification(`Audit log sorted by ${header.dataset.column}`, 'info');
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('auditSearch').addEventListener('input', function(e) {
+        console.log('Searching audit logs for:', e.target.value);
+    });
+    
+    // Records per page change
+    document.getElementById('auditRecordsPerPage').addEventListener('change', function(e) {
+        auditRecordsPerPage = parseInt(e.target.value);
+        auditCurrentPage = 1;
+        loadAuditData();
+    });
+    
+    // Chart controls
+    document.getElementById('usagePeriod').addEventListener('change', function(e) {
+        console.log('Changing usage period to:', e.target.value);
+        updateSystemCharts();
+    });
+    
+    document.getElementById('activityMetric').addEventListener('change', function(e) {
+        console.log('Changing activity metric to:', e.target.value);
+        updateSystemCharts();
+    });
+    
+    document.getElementById('performanceType').addEventListener('change', function(e) {
+        console.log('Changing performance type to:', e.target.value);
+        updateSystemCharts();
+    });
+    
+    document.getElementById('moduleView').addEventListener('change', function(e) {
+        console.log('Changing module view to:', e.target.value);
+        updateSystemCharts();
+    });
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .view-btn:hover {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const exportModal = document.getElementById('exportModal');
+    const healthModal = document.getElementById('healthCheckModal');
+    
+    if (event.target === exportModal) {
+        closeExportModal();
+    }
+    
+    if (event.target === healthModal) {
+        closeHealthCheckModal();
+    }
+};
+</script>

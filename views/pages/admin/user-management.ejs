@@ -91,17 +91,17 @@
 <div class="container-fluid user-management-container">
    <!-- Header -->
    <div class="row mb-4">
-      <div class="col-12">
+      <div class="form-col">
          <div class="d-flex justify-content-between align-items-center">
             <div>
                <h1 class="h3 mb-2">User Management</h1>
                <p class="text-muted">Manage user accounts, roles, and permissions</p>
             </div>
             <div>
-               <a href="/admin/user-registration" class="btn btn-primary">
+               <a href="/admin/user-registration" class="btn btn-brand-primary">
                   <i class="fas fa-user-plus me-1"></i> Create User
                </a>
-               <a href="/admin/bulk-user-import" class="btn btn-outline-primary">
+               <a href="/admin/bulk-user-import" class="btn btn-outline-brand-primary">
                   <i class="fas fa-upload me-1"></i> Bulk Import
                </a>
             </div>
@@ -111,16 +111,16 @@
 
    <!-- Statistics Cards -->
    <div class="row stats-cards">
-      <div class="col-md-3">
+      <div class="form-col">
          <div class="stats-card">
-            <div class="stats-icon text-primary">
+            <div class="stats-icon text-brand-primary">
                <i class="fas fa-users"></i>
             </div>
             <h4 id="totalUsers">0</h4>
             <p class="text-muted mb-0">Total Users</p>
          </div>
       </div>
-      <div class="col-md-3">
+      <div class="form-col">
          <div class="stats-card">
             <div class="stats-icon text-success">
                <i class="fas fa-user-check"></i>
@@ -129,7 +129,7 @@
             <p class="text-muted mb-0">Active Users</p>
          </div>
       </div>
-      <div class="col-md-3">
+      <div class="form-col">
          <div class="stats-card">
             <div class="stats-icon text-warning">
                <i class="fas fa-user-clock"></i>
@@ -138,7 +138,7 @@
             <p class="text-muted mb-0">Pending Users</p>
          </div>
       </div>
-      <div class="col-md-3">
+      <div class="form-col">
          <div class="stats-card">
             <div class="stats-icon text-info">
                <i class="fas fa-user-plus"></i>
@@ -152,7 +152,7 @@
    <!-- Search and Filters -->
    <div class="search-filters">
       <form id="filterForm" class="row g-3">
-         <div class="col-md-4">
+         <div class="form-col">
             <label class="form-label">Search Users</label>
             <div class="input-group">
                <span class="input-group-text">
@@ -162,7 +162,7 @@
                       placeholder="Search by name, email..." value="<%= filters.search || '' %>">
             </div>
          </div>
-         <div class="col-md-2">
+         <div class="form-col">
             <label class="form-label">Role</label>
             <select class="form-select" id="roleFilter" name="role">
                <option value="">All Roles</option>
@@ -175,7 +175,7 @@
                <option value="STUDENT" <%= filters.role === 'STUDENT' ? 'selected' : '' %>>Student</option>
             </select>
          </div>
-         <div class="col-md-2">
+         <div class="form-col">
             <label class="form-label">Status</label>
             <select class="form-select" id="statusFilter" name="status">
                <option value="">All Status</option>
@@ -185,7 +185,7 @@
                <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
             </select>
          </div>
-         <div class="col-md-2">
+         <div class="form-col">
             <label class="form-label">Sort By</label>
             <select class="form-select" id="sortByFilter" name="sortBy">
                <option value="created_at" <%= filters.sortBy === 'created_at' ? 'selected' : '' %>>Date Created</option>
@@ -195,7 +195,7 @@
                <option value="last_login" <%= filters.sortBy === 'last_login' ? 'selected' : '' %>>Last Login</option>
             </select>
          </div>
-         <div class="col-md-2">
+         <div class="form-col">
             <label class="form-label">Order</label>
             <select class="form-select" id="sortOrderFilter" name="sortOrder">
                <option value="desc" <%= filters.sortOrder === 'desc' ? 'selected' : '' %>>Descending</option>
@@ -241,8 +241,8 @@
    </div>
 
    <!-- Users List -->
-   <div class="row">
-      <div class="col-12">
+   <div class="form-row">
+      <div class="form-col">
          <div class="card">
             <div class="card-body">
                <div class="d-flex justify-content-between align-items-center mb-3">
@@ -268,8 +268,8 @@
                <div id="cardViewContainer">
                   <div class="row" id="usersContainer">
                      <!-- Users will be loaded here dynamically -->
-                     <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
+                     <div class="form-col">
+                        <div class="spinner-border text-brand-primary" role="status">
                            <span class="visually-hidden">Loading...</span>
                         </div>
                         <p class="mt-2 text-muted">Loading users...</p>
@@ -280,7 +280,9 @@
                <!-- Table View -->
                <div id="tableViewContainer" style="display: none;">
                   <div class="table-responsive">
-                     <table class="table table-hover">
+                     <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="table table-hover">
                         <thead>
                            <tr>
                               <th>
@@ -333,7 +335,7 @@
             <!-- User details will be loaded here -->
          </div>
          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-primary" id="editUserBtn">
+            <button type="button" class="btn btn-outline-brand-primary" id="editUserBtn">
                <i class="fas fa-edit me-1"></i> Edit User
             </button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -457,7 +459,7 @@ class UserManagement {
       
       if (users.length === 0) {
          container.innerHTML = `
-            <div class="col-12 text-center py-5">
+            <div class="form-col">
                <i class="fas fa-users fa-3x text-muted mb-3"></i>
                <h5 class="text-muted">No users found</h5>
                <p class="text-muted">Try adjusting your search criteria</p>
@@ -472,7 +474,7 @@ class UserManagement {
          const statusColor = this.getStatusColor(user.status || 'active');
          
          return `
-            <div class="col-lg-4 col-md-6 mb-3">
+            <div class="form-col">
                <div class="card user-card">
                   <div class="card-body">
                      <div class="d-flex align-items-start">
@@ -492,7 +494,7 @@ class UserManagement {
                               </span>
                            </div>
                            <div class="action-buttons">
-                              <button class="btn btn-sm btn-outline-primary" onclick="userManagement.viewUser('${user.id}')">
+                              <button class="btn btn-sm btn-outline-brand-primary" onclick="userManagement.viewUser('${user.id}')">
                                  <i class="fas fa-eye"></i>
                               </button>
                               <button class="btn btn-sm btn-outline-secondary" onclick="userManagement.editUser('${user.id}')">
@@ -513,7 +515,7 @@ class UserManagement {
          `;
       }).join('');
 
-      container.innerHTML = `<div class="row">${cardsHtml}</div>`;
+      container.innerHTML = `<div class="form-row">${cardsHtml}</div>`;
       
       // Update user count
       document.getElementById('userCount').textContent = users.length;
@@ -573,7 +575,7 @@ class UserManagement {
                </td>
                <td>
                   <div class="btn-group btn-group-sm">
-                     <button class="btn btn-outline-primary" onclick="userManagement.viewUser('${user.id}')">
+                     <button class="btn btn-outline-brand-primary" onclick="userManagement.viewUser('${user.id}')">
                         <i class="fas fa-eye"></i>
                      </button>
                      <button class="btn btn-outline-secondary" onclick="userManagement.editUser('${user.id}')">

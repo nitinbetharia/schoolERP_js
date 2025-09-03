@@ -26,19 +26,19 @@ pageDescription = 'Create and manage user accounts';
 
     <!-- Quick Stats Cards -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="form-col">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        <div class="form-col">
+                            <div class="text-xs font-weight-bold text-brand-primary text-uppercase mb-1">
                                 Total Users
                             </div>
                             <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalUsers">
                                 <span class="spinner-border spinner-border-sm"></span>
                             </div>
                         </div>
-                        <div class="col-auto">
+                        <div class="form-col">
                             <i class="fas fa-users fa-2x text-gray-300"></i>
                         </div>
                     </div>
@@ -46,11 +46,11 @@ pageDescription = 'Create and manage user accounts';
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="form-col">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="form-col">
                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                 Active Users
                             </div>
@@ -58,7 +58,7 @@ pageDescription = 'Create and manage user accounts';
                                 <span class="spinner-border spinner-border-sm"></span>
                             </div>
                         </div>
-                        <div class="col-auto">
+                        <div class="form-col">
                             <i class="fas fa-user-check fa-2x text-gray-300"></i>
                         </div>
                     </div>
@@ -66,11 +66,11 @@ pageDescription = 'Create and manage user accounts';
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="form-col">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="form-col">
                             <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                 Pending Approvals
                             </div>
@@ -78,7 +78,7 @@ pageDescription = 'Create and manage user accounts';
                                 <span class="spinner-border spinner-border-sm"></span>
                             </div>
                         </div>
-                        <div class="col-auto">
+                        <div class="form-col">
                             <i class="fas fa-user-clock fa-2x text-gray-300"></i>
                         </div>
                     </div>
@@ -86,11 +86,11 @@ pageDescription = 'Create and manage user accounts';
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="form-col">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
+                        <div class="form-col">
                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                 This Month
                             </div>
@@ -98,7 +98,7 @@ pageDescription = 'Create and manage user accounts';
                                 <span class="spinner-border spinner-border-sm"></span>
                             </div>
                         </div>
-                        <div class="col-auto">
+                        <div class="form-col">
                             <i class="fas fa-calendar-plus fa-2x text-gray-300"></i>
                         </div>
                     </div>
@@ -110,10 +110,10 @@ pageDescription = 'Create and manage user accounts';
     <!-- Registration Types Based on User Role -->
     <% if (user && user.role) { %>
     <div class="row mb-4">
-        <div class="col-12">
+        <div class="form-col">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">
+                    <h6 class="m-0 font-weight-bold text-brand-primary">
                         <i class="fas fa-shield-alt me-2"></i>Available User Types for Your Role
                     </h6>
                 </div>
@@ -130,7 +130,7 @@ pageDescription = 'Create and manage user accounts';
     <!-- Recent Registration Requests -->
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
+            <h6 class="m-0 font-weight-bold text-brand-primary">
                 <i class="fas fa-clock me-2"></i>Recent Registration Requests
             </h6>
             <div class="dropdown">
@@ -148,6 +148,8 @@ pageDescription = 'Create and manage user accounts';
         </div>
         <div class="card-body">
             <div class="table-responsive">
+                <div class="data-table-container">
+                <div class="data-table-container">
                 <table class="table table-bordered" id="registrationTable" width="100%" cellspacing="0">
                     <thead>
                         <tr>
@@ -193,7 +195,7 @@ pageDescription = 'Create and manage user accounts';
                     <!-- Step 1: User Type Selection -->
                     <div class="step-content" id="step1">
                         <h6 class="fw-bold mb-3">
-                            <span class="badge bg-primary me-2">1</span>Select User Type
+                            <span class="badge bg-brand-primary me-2">1</span>Select User Type
                         </h6>
                         
                         <div class="row" id="userTypeSelection">
@@ -209,40 +211,40 @@ pageDescription = 'Create and manage user accounts';
                     <!-- Step 2: Basic Information -->
                     <div class="step-content d-none" id="step2">
                         <h6 class="fw-bold mb-3">
-                            <span class="badge bg-primary me-2">2</span>Basic Information
+                            <span class="badge bg-brand-primary me-2">2</span>Basic Information
                         </h6>
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="form-row">
+                            <div class="form-col">
                                 <label for="firstName" class="form-label">First Name *</label>
                                 <input type="text" class="form-control" id="firstName" name="firstName" required>
                                 <div class="invalid-feedback">Please provide a first name.</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="form-col">
                                 <label for="lastName" class="form-label">Last Name *</label>
                                 <input type="text" class="form-control" id="lastName" name="lastName" required>
                                 <div class="invalid-feedback">Please provide a last name.</div>
                             </div>
                         </div>
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="form-row">
+                            <div class="form-col">
                                 <label for="email" class="form-label">Email Address *</label>
                                 <input type="email" class="form-control" id="email" name="email" required>
                                 <div class="invalid-feedback">Please provide a valid email address.</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="form-col">
                                 <label for="phone" class="form-label">Phone Number</label>
                                 <input type="tel" class="form-control" id="phone" name="phone">
                             </div>
                         </div>
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="form-row">
+                            <div class="form-col">
                                 <label for="dateOfBirth" class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="form-col">
                                 <label for="gender" class="form-label">Gender</label>
                                 <select class="form-select" id="gender" name="gender">
                                     <option value="">Select Gender</option>
@@ -257,11 +259,11 @@ pageDescription = 'Create and manage user accounts';
                     <!-- Step 3: Role and Permissions -->
                     <div class="step-content d-none" id="step3">
                         <h6 class="fw-bold mb-3">
-                            <span class="badge bg-primary me-2">3</span>Role and Permissions
+                            <span class="badge bg-brand-primary me-2">3</span>Role and Permissions
                         </h6>
                         
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                        <div class="form-row">
+                            <div class="form-col">
                                 <label for="userRole" class="form-label">User Role *</label>
                                 <select class="form-select" id="userRole" name="role" required>
                                     <option value="">Select Role</option>
@@ -269,7 +271,7 @@ pageDescription = 'Create and manage user accounts';
                                 </select>
                                 <div class="invalid-feedback">Please select a role.</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="form-col">
                                 <label for="userStatus" class="form-label">Initial Status</label>
                                 <select class="form-select" id="userStatus" name="status">
                                     <option value="ACTIVE">Active</option>
@@ -286,7 +288,7 @@ pageDescription = 'Create and manage user accounts';
                     <!-- Step 4: Password Setup -->
                     <div class="step-content d-none" id="step4">
                         <h6 class="fw-bold mb-3">
-                            <span class="badge bg-primary me-2">4</span>Password Setup
+                            <span class="badge bg-brand-primary me-2">4</span>Password Setup
                         </h6>
                         
                         <div class="form-check mb-3">
@@ -308,8 +310,8 @@ pageDescription = 'Create and manage user accounts';
                         </div>
                         
                         <div id="manualPasswordFields" class="d-none">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                            <div class="form-row">
+                                <div class="form-col">
                                     <label for="password" class="form-label">Password</label>
                                     <div class="input-group">
                                         <input type="password" class="form-control" id="password" name="password">
@@ -318,7 +320,7 @@ pageDescription = 'Create and manage user accounts';
                                         </button>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
+                                <div class="form-col">
                                     <label for="confirmPassword" class="form-label">Confirm Password</label>
                                     <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
                                 </div>
@@ -339,7 +341,7 @@ pageDescription = 'Create and manage user accounts';
                             <i class="fas fa-arrow-left me-2"></i>Previous
                         </button>
                         <div class="step-indicator">
-                            <span class="badge bg-primary me-1">1</span>
+                            <span class="badge bg-brand-primary me-1">1</span>
                             <span class="badge bg-light text-dark me-1">2</span>
                             <span class="badge bg-light text-dark me-1">3</span>
                             <span class="badge bg-light text-dark">4</span>
@@ -469,10 +471,10 @@ pageDescription = 'Create and manage user accounts';
         let cardsHtml = '';
         userPermissions.canCreateUserTypes.forEach(userType => {
             cardsHtml += `
-                <div class="col-md-4 mb-3">
+                <div class="form-col">
                     <div class="card user-type-card h-100" onclick="selectUserType('${userType.type}')">
                         <div class="card-body text-center">
-                            <i class="${userType.icon} fa-3x text-primary mb-3"></i>
+                            <i class="${userType.icon} fa-3x text-brand-primary mb-3"></i>
                             <h6 class="card-title">${userType.name}</h6>
                             <p class="card-text small text-muted">${userType.description}</p>
                             <div class="mt-2">
@@ -554,9 +556,9 @@ pageDescription = 'Create and manage user accounts';
         document.querySelectorAll('.step-indicator .badge').forEach((badge, index) => {
             if (index + 1 <= currentStep) {
                 badge.classList.remove('bg-light', 'text-dark');
-                badge.classList.add('bg-primary');
+                badge.classList.add('bg-brand-primary');
             } else {
-                badge.classList.remove('bg-primary');
+                badge.classList.remove('bg-brand-primary');
                 badge.classList.add('bg-light', 'text-dark');
             }
         });
@@ -761,7 +763,7 @@ pageDescription = 'Create and manage user accounts';
                         <td>${statusBadge}</td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <button class="btn btn-outline-primary" onclick="viewUser(${request.id})" 
+                                <button class="btn btn-outline-brand-primary" onclick="viewUser(${request.id})" 
                                         title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </button>

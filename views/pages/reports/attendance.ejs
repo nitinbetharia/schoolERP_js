@@ -1,0 +1,1286 @@
+<!-- Attendance Reports -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/reports" class="breadcrumb-link">Reports</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Attendance Reports</span>
+            </nav>
+            
+            <h1 class="page-title">
+                <i class="fas fa-calendar-check"></i>
+                Attendance Reports
+            </h1>
+            <p class="page-description">Comprehensive attendance tracking, analysis and reporting system</p>
+        </div>
+        
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="markTodayAttendance()">
+                <i class="fas fa-calendar-plus"></i>
+                Mark Today's Attendance
+            </button>
+            <button class="btn btn-brand-primary" onclick="openExportModal()">
+                <i class="fas fa-download"></i>
+                Export Reports
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel d-none d-md-block">
+        <div class="filter-section">
+            <h4>Attendance Report Filters</h4>
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label for="reportTypeFilter">Report Type</label>
+                    <select id="reportTypeFilter" class="form-control">
+                        <option value="daily-attendance">Daily Attendance</option>
+                        <option value="monthly-summary">Monthly Summary</option>
+                        <option value="class-wise-attendance">Class-wise Attendance</option>
+                        <option value="student-attendance">Student Attendance</option>
+                        <option value="defaulter-report">Defaulter Report</option>
+                        <option value="attendance-trends">Attendance Trends</option>
+                        <option value="subject-wise">Subject-wise Attendance</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateFromFilter">From Date</label>
+                    <input type="date" id="dateFromFilter" class="form-control" value="2024-01-01">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="dateToFilter">To Date</label>
+                    <input type="date" id="dateToFilter" class="form-control" value="2024-01-31">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="classFilter">Class</label>
+                    <select id="classFilter" class="form-control">
+                        <option value="">All Classes</option>
+                        <option value="nursery">Nursery</option>
+                        <option value="lkg">LKG</option>
+                        <option value="ukg">UKG</option>
+                        <option value="1st">1st</option>
+                        <option value="2nd">2nd</option>
+                        <option value="3rd">3rd</option>
+                        <option value="4th">4th</option>
+                        <option value="5th">5th</option>
+                        <option value="6th">6th</option>
+                        <option value="7th">7th</option>
+                        <option value="8th">8th</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="sectionFilter">Section</label>
+                    <select id="sectionFilter" class="form-control">
+                        <option value="">All Sections</option>
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                        <option value="D">Section D</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="attendanceStatusFilter">Status</label>
+                    <select id="attendanceStatusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                        <option value="late">Late</option>
+                        <option value="half-day">Half Day</option>
+                        <option value="holiday">Holiday</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn btn-brand-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Overview Cards -->
+    <div class="attendance-overview">
+        <div class="overview-card total-students d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="totalStudents">1,245</h3>
+                <p>Total Students</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        Today: <strong>1,180</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card attendance-rate d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="attendanceRate">94.8%</h3>
+                <p>Overall Attendance Rate</p>
+                <div class="sub-stats">
+                    <span class="stat-item positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +2.3% vs last month
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card present-today d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="presentToday">1,180</h3>
+                <p>Present Today</p>
+                <div class="sub-stats">
+                    <span class="stat-item">
+                        Rate: <strong>94.8%</strong>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overview-card absent-today d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="absentToday">65</h3>
+                <p>Absent Today</p>
+                <div class="sub-stats">
+                    <span class="stat-item negative">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>15</strong> without notice
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Charts -->
+    <div class="attendance-charts">
+        <div class="chart-container responsive attendance-trend">
+            <div class="chart-header">
+                <h4>Attendance Trends</h4>
+                <div class="chart-actions">
+                    <select id="trendPeriod" class="form-control small">
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days" selected>Last 30 Days</option>
+                        <option value="3months">Last 3 Months</option>
+                        <option value="6months">Last 6 Months</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="attendanceTrendChart" width="800" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive class-wise-chart">
+            <div class="chart-header">
+                <h4>Class-wise Attendance</h4>
+                <div class="chart-actions">
+                    <select id="classChartView" class="form-control small">
+                        <option value="percentage" selected>Attendance %</option>
+                        <option value="count">Student Count</option>
+                        <option value="comparison">vs Target</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="classWiseChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive monthly-distribution">
+            <div class="chart-header">
+                <h4>Monthly Distribution</h4>
+                <div class="chart-actions">
+                    <select id="distributionType" class="form-control small">
+                        <option value="status" selected>By Status</option>
+                        <option value="weekday">By Weekday</option>
+                        <option value="time">By Time</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="distributionChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Attendance Insights -->
+    <div class="attendance-insights">
+        <div class="insight-card best-performing">
+            <div class="insight-header">
+                <h5>Best Performing Classes</h5>
+                <span class="insight-badge success">Excellent</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 10-A</span>
+                        <span class="item-sublabel">45 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage excellent">98.2%</span>
+                        <i class="fas fa-trophy text-warning"></i>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 12-B</span>
+                        <span class="item-sublabel">42 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage excellent">97.8%</span>
+                        <i class="fas fa-medal text-silver"></i>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 9-C</span>
+                        <span class="item-sublabel">38 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage excellent">96.5%</span>
+                        <i class="fas fa-award text-bronze"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card needs-attention">
+            <div class="insight-header">
+                <h5>Needs Attention</h5>
+                <span class="insight-badge warning">Action Required</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 7-B</span>
+                        <span class="item-sublabel">35 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage poor">78.4%</span>
+                        <i class="fas fa-exclamation-triangle text-danger"></i>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 8-C</span>
+                        <span class="item-sublabel">32 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage poor">81.2%</span>
+                        <i class="fas fa-exclamation-circle text-warning"></i>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Class 6-A</span>
+                        <span class="item-sublabel">40 students</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="percentage average">83.7%</span>
+                        <i class="fas fa-flag text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card defaulter-summary">
+            <div class="insight-header">
+                <h5>Frequent Absentees</h5>
+                <span class="insight-badge danger">High Risk</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Absent >5 days</span>
+                        <span class="item-sublabel">This month</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="count-badge danger">12 students</span>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Absent >10 days</span>
+                        <span class="item-sublabel">This month</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="count-badge danger">3 students</span>
+                    </div>
+                </div>
+                <div class="insight-item">
+                    <div class="item-info">
+                        <span class="item-label">Without notice</span>
+                        <span class="item-sublabel">This week</span>
+                    </div>
+                    <div class="item-value">
+                        <span class="count-badge warning">8 students</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Data Table -->
+    <div class="attendance-data-section responsive-table">
+        <div class="section-header">
+            <h4>Attendance Records</h4>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" id="dataSearch" placeholder="Search students..." class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select id="recordsPerPage" class="form-control small">
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+                <button class="btn btn-outline small" onclick="bulkMarkAttendance()">
+                    <i class="fas fa-check-double"></i>
+                    Bulk Mark
+                </button>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table" id="attendanceDataTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th sortable="true" data-column="rollNo">Roll No</th>
+                        <th sortable="true" data-column="studentName">Student Name</th>
+                        <th sortable="true" data-column="class">Class</th>
+                        <th sortable="true" data-column="totalDays">Total Days</th>
+                        <th sortable="true" data-column="presentDays">Present</th>
+                        <th sortable="true" data-column="absentDays">Absent</th>
+                        <th sortable="true" data-column="lateDays">Late</th>
+                        <th sortable="true" data-column="percentage">Attendance %</th>
+                        <th sortable="true" data-column="lastAbsent">Last Absent</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="showingFrom">1</span> to <span id="showingTo">25</span> of <span id="totalRecords">1245</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" onclick="changePage(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="nextPage" onclick="changePage(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Export Attendance Reports</h3>
+            <button class="modal-close" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="exportForm" onsubmit="exportData(event)">
+                <div class="form-group">
+                    <label for="exportType">Report Type</label>
+                    <select id="exportType" name="type" class="form-control" required>
+                        <option value="daily-attendance">Daily Attendance Sheet</option>
+                        <option value="monthly-summary">Monthly Summary Report</option>
+                        <option value="student-wise">Student-wise Attendance</option>
+                        <option value="class-wise">Class-wise Attendance</option>
+                        <option value="defaulter-list">Defaulter List</option>
+                        <option value="attendance-register">Attendance Register</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" name="format" class="form-control" required>
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF Report</option>
+                        <option value="csv">CSV Data</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportDateRange">Date Range</label>
+                    <select id="exportDateRange" name="dateRange" class="form-control" required>
+                        <option value="today">Today Only</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="this-quarter">This Quarter</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                
+                <div class="custom-date-range" id="customDateRange" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="startDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" name="endDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Include Charts & Analytics</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="includeCharts" value="attendance-trends" checked> Attendance Trends</label>
+                        <label><input type="checkbox" name="includeCharts" value="class-wise-stats" checked> Class-wise Statistics</label>
+                        <label><input type="checkbox" name="includeCharts" value="monthly-distribution"> Monthly Distribution</label>
+                        <label><input type="checkbox" name="includeCharts" value="comparison-charts"> Comparison Charts</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportScope">Export Scope</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="scope" value="filtered" checked> Current Filtered Data</label>
+                        <label><input type="radio" name="scope" value="selected"> Selected Records Only</label>
+                        <label><input type="radio" name="scope" value="all-classes"> All Classes</label>
+                        <label><input type="radio" name="scope" value="complete"> Complete Database</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Options</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="options" value="parent-contact"> Include Parent Contact Info</label>
+                        <label><input type="checkbox" name="options" value="absence-reasons"> Include Absence Reasons</label>
+                        <label><input type="checkbox" name="options" value="teacher-remarks"> Include Teacher Remarks</label>
+                        <label><input type="checkbox" name="options" value="summary-stats"> Include Summary Statistics</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-brand-primary">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Attendance Reports Styles -->
+<style>
+.attendance-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.overview-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.overview-card.total-students {
+    border-left-color: #007bff;
+}
+
+.overview-card.attendance-rate {
+    border-left-color: #28a745;
+}
+
+.overview-card.present-today {
+    border-left-color: #17a2b8;
+}
+
+.overview-card.absent-today {
+    border-left-color: #dc3545;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+
+.total-students .card-icon {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.attendance-rate .card-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.present-today .card-icon {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+    color: white;
+}
+
+.absent-today .card-icon {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.card-details h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.card-details p {
+    margin: 0 0 0.5rem 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.sub-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #495057;
+}
+
+.stat-item.positive {
+    color: #28a745;
+}
+
+.stat-item.negative {
+    color: #dc3545;
+}
+
+.attendance-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.attendance-charts .attendance-trend {
+    grid-column: 1 / -1;
+}
+
+.attendance-charts .class-wise-chart,
+.attendance-charts .monthly-distribution {
+    display: inline-block;
+}
+
+@media (min-width: 1024px) {
+    .attendance-charts {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .attendance-charts .attendance-trend {
+        grid-column: 1 / -1;
+    }
+}
+
+.attendance-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.insight-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.insight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.insight-header h5 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.insight-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.insight-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.insight-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.insight-badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.insight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.insight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.insight-item:hover {
+    background: #e9ecef;
+    transform: translateX(2px);
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.item-label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.item-sublabel {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.item-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.percentage {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.percentage.excellent {
+    color: #28a745;
+}
+
+.percentage.good {
+    color: #20c997;
+}
+
+.percentage.average {
+    color: #ffc107;
+}
+
+.percentage.poor {
+    color: #dc3545;
+}
+
+.count-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.count-badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.count-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.text-success { color: #28a745 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-danger { color: #dc3545 !important; }
+.text-info { color: #17a2b8 !important; }
+.text-silver { color: #6c757d !important; }
+.text-bronze { color: #cd7f32 !important; }
+
+.attendance-data-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.attendance-percentage {
+    font-weight: bold;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.attendance-percentage.excellent {
+    background: #d4edda;
+    color: #155724;
+}
+
+.attendance-percentage.good {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.attendance-percentage.average {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.attendance-percentage.poor {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.custom-date-range {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+@media (max-width: 1024px) {
+    .attendance-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .attendance-insights {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .attendance-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .card-details h3 {
+        font-size: 1.5rem;
+    }
+    
+    .insight-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .item-value {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .attendance-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .overview-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+</style>
+
+<!-- Attendance Reports Scripts -->
+<script>
+let currentPage = 1;
+let recordsPerPage = 25;
+let totalRecords = 1245;
+let selectedRows = new Set();
+
+// Mock attendance data
+const mockAttendanceData = [
+    { rollNo: '001', studentName: 'Aarav Sharma', class: '10-A', totalDays: 22, presentDays: 21, absentDays: 1, lateDays: 2, percentage: 95.5, lastAbsent: '2024-01-10' },
+    { rollNo: '002', studentName: 'Priya Patel', class: '10-A', totalDays: 22, presentDays: 22, absentDays: 0, lateDays: 1, percentage: 100.0, lastAbsent: 'Never' },
+    { rollNo: '003', studentName: 'Rahul Kumar', class: '9-B', totalDays: 22, presentDays: 20, absentDays: 2, lateDays: 3, percentage: 90.9, lastAbsent: '2024-01-18' },
+    { rollNo: '004', studentName: 'Aisha Singh', class: '11-C', totalDays: 22, presentDays: 18, absentDays: 4, lateDays: 1, percentage: 81.8, lastAbsent: '2024-01-20' },
+    { rollNo: '005', studentName: 'Vikram Verma', class: '12-A', totalDays: 22, presentDays: 19, absentDays: 3, lateDays: 2, percentage: 86.4, lastAbsent: '2024-01-15' }
+];
+
+function applyFilters() {
+    showNotification('Attendance filters applied successfully!', 'success');
+    loadAttendanceData();
+    updateAttendanceCharts();
+    updateAttendanceStats();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-form select').forEach(select => select.value = '');
+    document.getElementById('dateFromFilter').value = '2024-01-01';
+    document.getElementById('dateToFilter').value = '2024-01-31';
+    showNotification('Filters cleared!', 'info');
+    loadAttendanceData();
+    updateAttendanceCharts();
+    updateAttendanceStats();
+}
+
+function resetFilters() {
+    clearFilters();
+}
+
+function loadAttendanceData() {
+    const tbody = document.getElementById('attendanceTableBody');
+    tbody.innerHTML = '';
+    
+    mockAttendanceData.forEach((record, index) => {
+        const attendanceClass = getAttendanceClass(record.percentage);
+        
+        const row = `
+            <tr>
+                <td><input type="checkbox" class="row-select" value="${record.rollNo}" onchange="toggleRowSelect('${record.rollNo}')"></td>
+                <td>${record.rollNo}</td>
+                <td>${record.studentName}</td>
+                <td>${record.class}</td>
+                <td>${record.totalDays}</td>
+                <td class="text-success">${record.presentDays}</td>
+                <td class="text-danger">${record.absentDays}</td>
+                <td class="text-warning">${record.lateDays}</td>
+                <td><span class="attendance-percentage ${attendanceClass}">${record.percentage}%</span></td>
+                <td>${record.lastAbsent}</td>
+                <td>
+                    <button class="action-btn view-btn" onclick="viewAttendanceDetails('${record.rollNo}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn calendar-btn" onclick="viewAttendanceCalendar('${record.rollNo}')">
+                        <i class="fas fa-calendar"></i>
+                    </button>
+                    <button class="action-btn edit-btn" onclick="markAttendance('${record.rollNo}')">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+    
+    updatePagination();
+}
+
+function getAttendanceClass(percentage) {
+    if (percentage >= 95) return 'excellent';
+    if (percentage >= 85) return 'good';
+    if (percentage >= 75) return 'average';
+    return 'poor';
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const showingFrom = (currentPage - 1) * recordsPerPage + 1;
+    const showingTo = Math.min(currentPage * recordsPerPage, totalRecords);
+    
+    document.getElementById('showingFrom').textContent = showingFrom;
+    document.getElementById('showingTo').textContent = showingTo;
+    document.getElementById('totalRecords').textContent = totalRecords;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('div');
+        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => goToPage(i);
+        pageNumbers.appendChild(pageBtn);
+    }
+    
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        goToPage(newPage);
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadAttendanceData();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+        if (selectAll.checked) {
+            selectedRows.add(checkbox.value);
+        } else {
+            selectedRows.delete(checkbox.value);
+        }
+    });
+}
+
+function toggleRowSelect(rollNo) {
+    if (selectedRows.has(rollNo)) {
+        selectedRows.delete(rollNo);
+    } else {
+        selectedRows.add(rollNo);
+    }
+    
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    const checkedRows = document.querySelectorAll('.row-select:checked');
+    
+    selectAll.indeterminate = checkedRows.length > 0 && checkedRows.length < rowSelects.length;
+    selectAll.checked = checkedRows.length === rowSelects.length;
+}
+
+function updateAttendanceCharts() {
+    console.log('Updating attendance charts...');
+    
+    // Attendance Trend Chart
+    const trendData = {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        datasets: [{
+            label: 'Present',
+            data: [1180, 1205, 1190, 1180],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4
+        }, {
+            label: 'Absent',
+            data: [65, 40, 55, 65],
+            borderColor: '#dc3545',
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            tension: 0.4
+        }]
+    };
+    console.log('Attendance trend data:', trendData);
+    
+    // Class-wise Chart
+    const classWiseData = {
+        labels: ['Nursery', 'LKG', 'UKG', '1st-5th', '6th-8th', '9th-10th', '11th-12th'],
+        datasets: [{
+            label: 'Attendance %',
+            data: [92.5, 94.2, 93.8, 95.1, 93.7, 94.8, 96.2],
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384']
+        }]
+    };
+    console.log('Class-wise chart data:', classWiseData);
+    
+    // Distribution Chart
+    const distributionData = {
+        labels: ['Present', 'Absent', 'Late', 'Half Day'],
+        datasets: [{
+            data: [85, 8, 5, 2],
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#17a2b8']
+        }]
+    };
+    console.log('Distribution chart data:', distributionData);
+}
+
+function updateAttendanceStats() {
+    document.getElementById('totalStudents').textContent = '1,245';
+    document.getElementById('attendanceRate').textContent = '94.8%';
+    document.getElementById('presentToday').textContent = '1,180';
+    document.getElementById('absentToday').textContent = '65';
+}
+
+function viewAttendanceDetails(rollNo) {
+    showNotification(`Viewing attendance details for Roll No: ${rollNo}`, 'info');
+}
+
+function viewAttendanceCalendar(rollNo) {
+    showNotification(`Opening attendance calendar for Roll No: ${rollNo}`, 'info');
+}
+
+function markAttendance(rollNo) {
+    showNotification(`Marking attendance for Roll No: ${rollNo}`, 'info');
+}
+
+function markTodayAttendance() {
+    showNotification('Opening today\'s attendance marking interface...', 'info');
+}
+
+function bulkMarkAttendance() {
+    if (selectedRows.size === 0) {
+        showNotification('Please select students to mark attendance', 'warning');
+        return;
+    }
+    showNotification(`Bulk marking attendance for ${selectedRows.size} students...`, 'info');
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function exportData(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const exportConfig = {
+        type: formData.get('type'),
+        format: formData.get('format'),
+        dateRange: formData.get('dateRange'),
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        includeCharts: formData.getAll('includeCharts'),
+        scope: formData.get('scope'),
+        options: formData.getAll('options')
+    };
+    
+    showNotification('Generating attendance report...', 'info');
+    
+    // Mock export process
+    setTimeout(() => {
+        const fileName = `attendance_${exportConfig.type}_${new Date().toISOString().split('T')[0]}.${exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format}`;
+        showNotification(`Report generated: ${fileName}`, 'success');
+        closeExportModal();
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 2500);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    if (type === 'warning') bgColor = '#ffc107';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadAttendanceData();
+    updateAttendanceCharts();
+    updateAttendanceStats();
+    
+    // Sort functionality
+    document.querySelectorAll('[sortable="true"]').forEach(header => {
+        header.addEventListener('click', () => {
+            console.log('Sorting by:', header.dataset.column);
+            showNotification(`Table sorted by ${header.dataset.column}`, 'info');
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('dataSearch').addEventListener('input', function(e) {
+        console.log('Searching attendance data for:', e.target.value);
+    });
+    
+    // Records per page change
+    document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+        recordsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        loadAttendanceData();
+    });
+    
+    // Chart controls
+    document.getElementById('trendPeriod').addEventListener('change', function(e) {
+        console.log('Changing trend period to:', e.target.value);
+        updateAttendanceCharts();
+    });
+    
+    document.getElementById('classChartView').addEventListener('change', function(e) {
+        console.log('Changing class chart view to:', e.target.value);
+        updateAttendanceCharts();
+    });
+    
+    document.getElementById('distributionType').addEventListener('change', function(e) {
+        console.log('Changing distribution type to:', e.target.value);
+        updateAttendanceCharts();
+    });
+    
+    // Date range handling
+    document.getElementById('exportDateRange').addEventListener('change', function() {
+        const customRange = document.getElementById('customDateRange');
+        if (this.value === 'custom') {
+            customRange.style.display = 'block';
+        } else {
+            customRange.style.display = 'none';
+        }
+    });
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.25rem;
+        }
+        
+        .view-btn:hover {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+        
+        .calendar-btn:hover {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .edit-btn:hover {
+            background: #e8f5e8;
+            color: #28a745;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('exportModal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+};
+</script>

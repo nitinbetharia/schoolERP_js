@@ -68,7 +68,7 @@
       <%- include('../../partials/header/authenticated') %>
 
       <div class="container-fluid">
-         <div class="row">
+         <div class="form-row">
             <!-- Sidebar -->
             <%- include('../../partials/nav/system-admin') %>
 
@@ -88,7 +88,7 @@
                <%- include('../../partials/flash-messages') %>
 
                <div class="row justify-content-center">
-                  <div class="col-lg-8">
+                  <div class="form-col">
                      <div class="card form-card">
                         <div class="card-body p-4">
                            <!-- Step Indicator -->
@@ -105,8 +105,8 @@
                               <div class="form-step active" id="form-step-1">
                                  <h4 class="mb-4"><i class="bi bi-info-circle"></i> Basic Information</h4>
 
-                                 <div class="row">
-                                    <div class="col-md-6">
+                                 <div class="form-row">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="trust_name" class="form-label"
                                              >Trust Name <span class="text-danger">*</span></label
@@ -120,7 +120,7 @@
                                           <div class="form-text">Full legal name of the educational trust</div>
                                        </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="trust_code" class="form-label"
                                              >Trust Code <span class="text-danger">*</span></label
@@ -140,8 +140,8 @@
                                     </div>
                                  </div>
 
-                                 <div class="row">
-                                    <div class="col-md-6">
+                                 <div class="form-row">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="subdomain" class="form-label"
                                              >Subdomain <span class="text-danger">*</span></label
@@ -159,7 +159,7 @@
                                           </div>
                                        </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <div class="subdomain-preview">
                                           <strong>Access URL:</strong><br />
                                           <code id="subdomain-preview">http://[subdomain].localhost:3000</code>
@@ -168,7 +168,7 @@
                                  </div>
 
                                  <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                    <button type="button" class="btn btn-brand-primary" onclick="nextStep(2)">
                                        Next: Contact Details <i class="bi bi-arrow-right"></i>
                                     </button>
                                  </div>
@@ -178,8 +178,8 @@
                               <div class="form-step" id="form-step-2">
                                  <h4 class="mb-4"><i class="bi bi-person-lines-fill"></i> Contact Information</h4>
 
-                                 <div class="row">
-                                    <div class="col-md-6">
+                                 <div class="form-row">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="contact_email" class="form-label"
                                              >Contact Email <span class="text-danger">*</span></label
@@ -193,7 +193,7 @@
                                           <div class="form-text">Primary contact email for administrative purposes</div>
                                        </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="contact_phone" class="form-label"
                                              >Contact Phone <span class="text-danger">*</span></label
@@ -219,7 +219,7 @@
                                     <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">
                                        <i class="bi bi-arrow-left"></i> Previous
                                     </button>
-                                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                    <button type="button" class="btn btn-brand-primary" onclick="nextStep(3)">
                                        Next: Configuration <i class="bi bi-arrow-right"></i>
                                     </button>
                                  </div>
@@ -229,8 +229,8 @@
                               <div class="form-step" id="form-step-3">
                                  <h4 class="mb-4"><i class="bi bi-gear"></i> Configuration</h4>
 
-                                 <div class="row">
-                                    <div class="col-md-6">
+                                 <div class="form-row">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="timezone" class="form-label">Timezone</label>
                                           <select class="form-select" id="timezone" name="timezone">
@@ -241,7 +241,7 @@
                                           </select>
                                        </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="form-col">
                                        <div class="mb-3">
                                           <label for="currency" class="form-label">Default Currency</label>
                                           <select class="form-select" id="currency" name="currency">
@@ -256,8 +256,8 @@
 
                                  <div class="mb-3">
                                     <label class="form-label">Features</label>
-                                    <div class="row">
-                                       <div class="col-md-6">
+                                    <div class="form-row">
+                                       <div class="form-col">
                                           <div class="form-check">
                                              <input
                                                 class="form-check-input"
@@ -283,7 +283,7 @@
                                              </label>
                                           </div>
                                        </div>
-                                       <div class="col-md-6">
+                                       <div class="form-col">
                                           <div class="form-check">
                                              <input
                                                 class="form-check-input"

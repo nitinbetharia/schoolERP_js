@@ -1,0 +1,1239 @@
+<!-- Financial Reports -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/reports" class="breadcrumb-link">Reports</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Financial Reports</span>
+            </nav>
+            
+            <h1 class="page-title">
+                <i class="fas fa-money-bill-wave"></i>
+                Financial Reports
+            </h1>
+            <p class="page-description">Comprehensive fee collection, payment analysis and financial insights</p>
+        </div>
+        
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="resetFilters()">
+                <i class="fas fa-undo"></i>
+                Reset Filters
+            </button>
+            <button class="btn btn-brand-primary" onclick="openExportModal()">
+                <i class="fas fa-download"></i>
+                Export Financial Data
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Panel -->
+    <div class="filter-panel d-none d-md-block">
+        <div class="filter-section">
+            <h4>Financial Report Filters</h4>
+            <div class="filter-form">
+                <div class="filter-group">
+                    <label for="reportTypeFilter">Report Type</label>
+                    <select id="reportTypeFilter" class="form-control">
+                        <option value="fee-collection">Fee Collection Report</option>
+                        <option value="payment-analysis">Payment Analysis</option>
+                        <option value="outstanding-dues">Outstanding Dues</option>
+                        <option value="refund-report">Refund Report</option>
+                        <option value="class-wise-collection">Class-wise Collection</option>
+                        <option value="monthly-summary">Monthly Summary</option>
+                        <option value="defaulter-list">Defaulter List</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="monthFilter">Month</label>
+                    <select id="monthFilter" class="form-control">
+                        <option value="">All Months</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="yearFilter">Year</label>
+                    <select id="yearFilter" class="form-control">
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="classFilter">Class</label>
+                    <select id="classFilter" class="form-control">
+                        <option value="">All Classes</option>
+                        <option value="nursery">Nursery</option>
+                        <option value="lkg">LKG</option>
+                        <option value="ukg">UKG</option>
+                        <option value="1st">1st</option>
+                        <option value="2nd">2nd</option>
+                        <option value="3rd">3rd</option>
+                        <option value="4th">4th</option>
+                        <option value="5th">5th</option>
+                        <option value="6th">6th</option>
+                        <option value="7th">7th</option>
+                        <option value="8th">8th</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="paymentMethodFilter">Payment Method</label>
+                    <select id="paymentMethodFilter" class="form-control">
+                        <option value="">All Methods</option>
+                        <option value="cash">Cash</option>
+                        <option value="bank-transfer">Bank Transfer</option>
+                        <option value="upi">UPI</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="card">Card Payment</option>
+                        <option value="online">Online Payment</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="statusFilter">Payment Status</label>
+                    <select id="statusFilter" class="form-control">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="partial">Partially Paid</option>
+                        <option value="pending">Pending</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn btn-brand-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Overview Cards -->
+    <div class="financial-overview">
+        <div class="overview-card total-collection d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="totalCollection">₹12,45,650</h3>
+                <p>Total Collection</p>
+                <span class="growth-indicator positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +15.5% vs last month
+                </span>
+            </div>
+        </div>
+        
+        <div class="overview-card pending-dues d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="pendingDues">₹2,85,400</h3>
+                <p>Pending Dues</p>
+                <span class="growth-indicator negative">
+                    <i class="fas fa-arrow-down"></i>
+                    -8.2% vs last month
+                </span>
+            </div>
+        </div>
+        
+        <div class="overview-card collection-rate d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="collectionRate">81.3%</h3>
+                <p>Collection Rate</p>
+                <span class="growth-indicator positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +2.1% vs last month
+                </span>
+            </div>
+        </div>
+        
+        <div class="overview-card defaulters d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="card-details">
+                <h3 id="totalDefaulters">45</h3>
+                <p>Total Defaulters</p>
+                <span class="growth-indicator negative">
+                    <i class="fas fa-arrow-down"></i>
+                    -12 vs last month
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Charts -->
+    <div class="financial-charts">
+        <div class="chart-container responsive revenue-chart">
+            <div class="chart-header">
+                <h4>Revenue Trends</h4>
+                <div class="chart-actions">
+                    <select id="revenueChartPeriod" class="form-control small">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="revenueChart" width="600" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive payment-methods-chart">
+            <div class="chart-header">
+                <h4>Payment Methods Distribution</h4>
+                <div class="chart-actions">
+                    <select id="paymentChartType" class="form-control small">
+                        <option value="pie" selected>Pie Chart</option>
+                        <option value="doughnut">Doughnut Chart</option>
+                        <option value="bar">Bar Chart</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="paymentMethodsChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive class-wise-chart">
+            <div class="chart-header">
+                <h4>Class-wise Fee Collection</h4>
+                <div class="chart-actions">
+                    <select id="classChartView" class="form-control small">
+                        <option value="collected" selected>Collected Amount</option>
+                        <option value="pending">Pending Amount</option>
+                        <option value="percentage">Collection %</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="classWiseChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive outstanding-chart">
+            <div class="chart-header">
+                <h4>Outstanding Dues Analysis</h4>
+                <div class="chart-actions">
+                    <select id="outstandingView" class="form-control small">
+                        <option value="age-wise" selected>Age-wise</option>
+                        <option value="amount-wise">Amount-wise</option>
+                        <option value="class-wise">Class-wise</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="outstandingChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Financial Insights -->
+    <div class="financial-insights">
+        <div class="insight-card">
+            <div class="insight-header">
+                <h5>Top Collecting Classes</h5>
+                <span class="insight-badge success">Excellent</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <span class="item-label">Class 10-A</span>
+                    <span class="item-value">₹85,400 (95.2%)</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Class 12-B</span>
+                    <span class="item-value">₹78,900 (92.8%)</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Class 9-C</span>
+                    <span class="item-value">₹67,300 (89.4%)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-header">
+                <h5>High Outstanding Classes</h5>
+                <span class="insight-badge warning">Attention Needed</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <span class="item-label">Class 8-B</span>
+                    <span class="item-value">₹45,600 (38.2%)</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Class 7-A</span>
+                    <span class="item-value">₹38,900 (42.1%)</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Class 11-C</span>
+                    <span class="item-value">₹34,200 (48.5%)</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-card">
+            <div class="insight-header">
+                <h5>Payment Trends</h5>
+                <span class="insight-badge info">Trending</span>
+            </div>
+            <div class="insight-list">
+                <div class="insight-item">
+                    <span class="item-label">UPI Payments</span>
+                    <span class="item-value">↑ 35% increase</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Cash Payments</span>
+                    <span class="item-value">↓ 18% decrease</span>
+                </div>
+                <div class="insight-item">
+                    <span class="item-label">Online Payments</span>
+                    <span class="item-value">↑ 28% increase</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Data Table -->
+    <div class="financial-data-section responsive-table">
+        <div class="section-header">
+            <h4>Fee Collection Details</h4>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" id="dataSearch" placeholder="Search payments..." class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select id="recordsPerPage" class="form-control small">
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table" id="financialDataTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th sortable="true" data-column="receiptNo">Receipt No</th>
+                        <th sortable="true" data-column="studentName">Student Name</th>
+                        <th sortable="true" data-column="class">Class</th>
+                        <th sortable="true" data-column="totalFee">Total Fee</th>
+                        <th sortable="true" data-column="paidAmount">Paid Amount</th>
+                        <th sortable="true" data-column="pendingAmount">Pending Amount</th>
+                        <th sortable="true" data-column="paymentMethod">Payment Method</th>
+                        <th sortable="true" data-column="paymentDate">Payment Date</th>
+                        <th sortable="true" data-column="status">Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="financialTableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="showingFrom">1</span> to <span id="showingTo">25</span> of <span id="totalRecords">1245</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" onclick="changePage(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="nextPage" onclick="changePage(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Export Financial Reports</h3>
+            <button class="modal-close" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="exportForm" onsubmit="exportData(event)">
+                <div class="form-group">
+                    <label for="exportType">Report Type</label>
+                    <select id="exportType" name="type" class="form-control" required>
+                        <option value="fee-collection">Fee Collection Report</option>
+                        <option value="payment-summary">Payment Summary</option>
+                        <option value="outstanding-dues">Outstanding Dues Report</option>
+                        <option value="class-wise">Class-wise Financial Report</option>
+                        <option value="defaulter-list">Defaulter List</option>
+                        <option value="refund-report">Refund Report</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" name="format" class="form-control" required>
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF Report</option>
+                        <option value="csv">CSV Data</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateRange">Date Range</label>
+                    <select id="dateRange" name="dateRange" class="form-control" required>
+                        <option value="current-month">Current Month</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="current-quarter">Current Quarter</option>
+                        <option value="current-year">Current Financial Year</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                </div>
+                
+                <div class="custom-date-range" id="customDateRange" style="display: none;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" name="startDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" name="endDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Include Financial Charts</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="includeCharts" value="revenue-trends" checked> Revenue Trends Chart</label>
+                        <label><input type="checkbox" name="includeCharts" value="payment-methods" checked> Payment Methods Distribution</label>
+                        <label><input type="checkbox" name="includeCharts" value="class-wise-collection"> Class-wise Collection Chart</label>
+                        <label><input type="checkbox" name="includeCharts" value="outstanding-analysis"> Outstanding Dues Analysis</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportScope">Export Scope</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="scope" value="current" checked> Current Filtered Results</label>
+                        <label><input type="radio" name="scope" value="selected"> Selected Records Only</label>
+                        <label><input type="radio" name="scope" value="all-classes"> All Classes</label>
+                        <label><input type="radio" name="scope" value="complete"> Complete Financial Data</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Options</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="options" value="detailed-breakdown"> Include Detailed Fee Breakdown</label>
+                        <label><input type="checkbox" name="options" value="payment-history"> Include Payment History</label>
+                        <label><input type="checkbox" name="options" value="defaulter-details"> Include Defaulter Analysis</label>
+                        <label><input type="checkbox" name="options" value="summary-stats"> Include Summary Statistics</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-brand-primary">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Reports Styles -->
+<style>
+.financial-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.overview-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-left: 4px solid;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.overview-card.total-collection {
+    border-left-color: #28a745;
+}
+
+.overview-card.pending-dues {
+    border-left-color: #ffc107;
+}
+
+.overview-card.collection-rate {
+    border-left-color: #17a2b8;
+}
+
+.overview-card.defaulters {
+    border-left-color: #dc3545;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+
+.total-collection .card-icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.pending-dues .card-icon {
+    background: linear-gradient(135deg, #ffc107, #ffca2c);
+    color: white;
+}
+
+.collection-rate .card-icon {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+    color: white;
+}
+
+.defaulters .card-icon {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.card-details h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.card-details p {
+    margin: 0 0 0.5rem 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.growth-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+}
+
+.growth-indicator.positive {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.growth-indicator.negative {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.financial-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.financial-charts .revenue-chart {
+    grid-column: 1 / -1;
+}
+
+.financial-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.insight-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.insight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.insight-header h5 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.insight-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.insight-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.insight-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.insight-badge.info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.insight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.insight-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.insight-item:hover {
+    background: #e9ecef;
+}
+
+.item-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.item-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.financial-data-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-badge.paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.partial {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.pending {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.overdue {
+    background: #f5c6cb;
+    color: #721c24;
+}
+
+.status-badge.refunded {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.payment-method-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.payment-method-badge.cash {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.payment-method-badge.upi {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.payment-method-badge.card {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.payment-method-badge.bank-transfer {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.payment-method-badge.online {
+    background: #e0f2f1;
+    color: #00796b;
+}
+
+.amount-cell {
+    font-weight: 600;
+    text-align: right;
+}
+
+.amount-positive {
+    color: #28a745;
+}
+
+.amount-negative {
+    color: #dc3545;
+}
+
+.amount-pending {
+    color: #ffc107;
+}
+
+.custom-date-range {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+@media (max-width: 1024px) {
+    .financial-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .financial-insights {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .financial-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .financial-insights {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-details h3 {
+        font-size: 1.5rem;
+    }
+    
+    .insight-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .financial-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .overview-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+}
+</style>
+
+<!-- Financial Reports Scripts -->
+<script>
+let currentPage = 1;
+let recordsPerPage = 25;
+let totalRecords = 1245;
+let selectedRows = new Set();
+
+// Mock financial data
+const mockFinancialData = [
+    { receiptNo: 'RC001', studentName: 'Aarav Sharma', class: '10-A', totalFee: 25000, paidAmount: 25000, pendingAmount: 0, paymentMethod: 'UPI', paymentDate: '2024-01-15', status: 'Paid' },
+    { receiptNo: 'RC002', studentName: 'Priya Patel', class: '10-A', totalFee: 25000, paidAmount: 15000, pendingAmount: 10000, paymentMethod: 'Cash', paymentDate: '2024-01-10', status: 'Partial' },
+    { receiptNo: 'RC003', studentName: 'Rahul Kumar', class: '9-B', totalFee: 22000, paidAmount: 22000, pendingAmount: 0, paymentMethod: 'Bank Transfer', paymentDate: '2024-01-20', status: 'Paid' },
+    { receiptNo: 'RC004', studentName: 'Aisha Singh', class: '11-C', totalFee: 28000, paidAmount: 0, pendingAmount: 28000, paymentMethod: '', paymentDate: '', status: 'Pending' },
+    { receiptNo: 'RC005', studentName: 'Vikram Verma', class: '12-A', totalFee: 30000, paidAmount: 18000, pendingAmount: 12000, paymentMethod: 'Online', paymentDate: '2024-01-08', status: 'Partial' }
+];
+
+function applyFilters() {
+    showNotification('Financial filters applied successfully!', 'success');
+    loadFinancialData();
+    updateFinancialCharts();
+    updateFinancialStats();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-form select').forEach(select => {
+        if (select.id !== 'yearFilter') {
+            select.value = '';
+        }
+    });
+    showNotification('Filters cleared!', 'info');
+    loadFinancialData();
+    updateFinancialCharts();
+    updateFinancialStats();
+}
+
+function resetFilters() {
+    clearFilters();
+}
+
+function loadFinancialData() {
+    const tbody = document.getElementById('financialTableBody');
+    tbody.innerHTML = '';
+    
+    mockFinancialData.forEach((payment, index) => {
+        const paymentMethodBadge = payment.paymentMethod ? 
+            `<span class="payment-method-badge ${payment.paymentMethod.toLowerCase().replace(' ', '-')}">${payment.paymentMethod}</span>` : 
+            '-';
+            
+        const row = `
+            <tr>
+                <td><input type="checkbox" class="row-select" value="${payment.receiptNo}" onchange="toggleRowSelect('${payment.receiptNo}')"></td>
+                <td>${payment.receiptNo}</td>
+                <td>${payment.studentName}</td>
+                <td>${payment.class}</td>
+                <td class="amount-cell">₹${payment.totalFee.toLocaleString()}</td>
+                <td class="amount-cell ${payment.paidAmount > 0 ? 'amount-positive' : ''}">${payment.paidAmount > 0 ? '₹' + payment.paidAmount.toLocaleString() : '-'}</td>
+                <td class="amount-cell ${payment.pendingAmount > 0 ? 'amount-negative' : ''}">${payment.pendingAmount > 0 ? '₹' + payment.pendingAmount.toLocaleString() : '-'}</td>
+                <td>${paymentMethodBadge}</td>
+                <td>${payment.paymentDate || '-'}</td>
+                <td><span class="status-badge ${payment.status.toLowerCase()}">${payment.status}</span></td>
+                <td>
+                    <button class="action-btn view-btn" onclick="viewPaymentDetails('${payment.receiptNo}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn download-btn" onclick="downloadReceipt('${payment.receiptNo}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    ${payment.status === 'Pending' || payment.status === 'Partial' ? `
+                    <button class="action-btn edit-btn" onclick="recordPayment('${payment.receiptNo}')">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+    
+    updatePagination();
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const showingFrom = (currentPage - 1) * recordsPerPage + 1;
+    const showingTo = Math.min(currentPage * recordsPerPage, totalRecords);
+    
+    document.getElementById('showingFrom').textContent = showingFrom;
+    document.getElementById('showingTo').textContent = showingTo;
+    document.getElementById('totalRecords').textContent = totalRecords;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('div');
+        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => goToPage(i);
+        pageNumbers.appendChild(pageBtn);
+    }
+    
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        goToPage(newPage);
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadFinancialData();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+        if (selectAll.checked) {
+            selectedRows.add(checkbox.value);
+        } else {
+            selectedRows.delete(checkbox.value);
+        }
+    });
+}
+
+function toggleRowSelect(receiptNo) {
+    if (selectedRows.has(receiptNo)) {
+        selectedRows.delete(receiptNo);
+    } else {
+        selectedRows.add(receiptNo);
+    }
+    
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    const checkedRows = document.querySelectorAll('.row-select:checked');
+    
+    selectAll.indeterminate = checkedRows.length > 0 && checkedRows.length < rowSelects.length;
+    selectAll.checked = checkedRows.length === rowSelects.length;
+}
+
+function updateFinancialCharts() {
+    // Mock chart updates - replace with actual chart library implementation
+    console.log('Updating financial charts...');
+    
+    // Revenue Trends Chart
+    const revenueData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+            label: 'Revenue',
+            data: [850000, 920000, 1050000, 980000, 1120000, 1180000, 1250000, 1300000, 1150000, 1080000, 1200000, 1245000],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            tension: 0.4
+        }]
+    };
+    console.log('Revenue chart data:', revenueData);
+    
+    // Payment Methods Chart
+    const paymentMethodsData = {
+        labels: ['UPI', 'Cash', 'Bank Transfer', 'Online', 'Card', 'Cheque'],
+        datasets: [{
+            data: [35, 25, 15, 12, 8, 5],
+            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#17a2b8', '#dc3545', '#6f42c1']
+        }]
+    };
+    console.log('Payment methods chart data:', paymentMethodsData);
+    
+    // Class-wise Collection Chart
+    const classWiseData = {
+        labels: ['Nursery', 'LKG', 'UKG', '1st-5th', '6th-8th', '9th-10th', '11th-12th'],
+        datasets: [{
+            label: 'Collection Amount (₹)',
+            data: [45000, 52000, 48000, 350000, 280000, 250000, 220000],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2
+        }]
+    };
+    console.log('Class-wise chart data:', classWiseData);
+    
+    // Outstanding Dues Chart
+    const outstandingData = {
+        labels: ['0-30 days', '31-60 days', '61-90 days', '90+ days'],
+        datasets: [{
+            data: [45, 30, 15, 10],
+            backgroundColor: ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
+        }]
+    };
+    console.log('Outstanding dues chart data:', outstandingData);
+}
+
+function updateFinancialStats() {
+    document.getElementById('totalCollection').textContent = '₹12,45,650';
+    document.getElementById('pendingDues').textContent = '₹2,85,400';
+    document.getElementById('collectionRate').textContent = '81.3%';
+    document.getElementById('totalDefaulters').textContent = '45';
+}
+
+function viewPaymentDetails(receiptNo) {
+    showNotification(`Viewing payment details for: ${receiptNo}`, 'info');
+}
+
+function downloadReceipt(receiptNo) {
+    showNotification(`Downloading receipt: ${receiptNo}...`, 'info');
+    
+    setTimeout(() => {
+        const fileName = `receipt_${receiptNo}_${new Date().toISOString().split('T')[0]}.pdf`;
+        showNotification(`Receipt downloaded: ${fileName}`, 'success');
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 1500);
+}
+
+function recordPayment(receiptNo) {
+    showNotification(`Opening payment recording for: ${receiptNo}`, 'info');
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function exportData(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const exportConfig = {
+        type: formData.get('type'),
+        format: formData.get('format'),
+        dateRange: formData.get('dateRange'),
+        startDate: formData.get('startDate'),
+        endDate: formData.get('endDate'),
+        includeCharts: formData.getAll('includeCharts'),
+        scope: formData.get('scope'),
+        options: formData.getAll('options')
+    };
+    
+    showNotification('Generating financial report...', 'info');
+    
+    // Mock export process
+    setTimeout(() => {
+        const fileName = `financial_${exportConfig.type}_${new Date().toISOString().split('T')[0]}.${exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format}`;
+        showNotification(`Financial report generated: ${fileName}`, 'success');
+        closeExportModal();
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 3000);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadFinancialData();
+    updateFinancialCharts();
+    updateFinancialStats();
+    
+    // Sort functionality
+    document.querySelectorAll('[sortable="true"]').forEach(header => {
+        header.addEventListener('click', () => {
+            console.log('Sorting by:', header.dataset.column);
+            showNotification(`Table sorted by ${header.dataset.column}`, 'info');
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('dataSearch').addEventListener('input', function(e) {
+        console.log('Searching financial data for:', e.target.value);
+    });
+    
+    // Records per page change
+    document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+        recordsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        loadFinancialData();
+    });
+    
+    // Chart controls
+    document.getElementById('revenueChartPeriod').addEventListener('change', function(e) {
+        console.log('Changing revenue chart period to:', e.target.value);
+        updateFinancialCharts();
+    });
+    
+    document.getElementById('paymentChartType').addEventListener('change', function(e) {
+        console.log('Changing payment chart type to:', e.target.value);
+        updateFinancialCharts();
+    });
+    
+    // Date range handling
+    document.getElementById('dateRange').addEventListener('change', function() {
+        const customRange = document.getElementById('customDateRange');
+        if (this.value === 'custom') {
+            customRange.style.display = 'block';
+        } else {
+            customRange.style.display = 'none';
+        }
+    });
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.25rem;
+        }
+        
+        .view-btn:hover {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+        
+        .download-btn:hover {
+            background: #f0f8ff;
+            color: #0066cc;
+        }
+        
+        .edit-btn:hover {
+            background: #e8f5e8;
+            color: #28a745;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('exportModal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+};
+</script>

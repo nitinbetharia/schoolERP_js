@@ -4,15 +4,17 @@
   </div>
 
   <div class="row g-3">
-    <div class="col-lg-6">
+    <div class="form-col">
       <div class="card h-100">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-brand-primary text-white">
           <h5 class="mb-0">System Roles</h5>
         </div>
         <div class="card-body">
           <p class="text-muted">Predefined roles from configuration</p>
           <div class="table-responsive">
-            <table class="table table-sm">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="table table-sm">
               <thead><tr><th>Key</th><th>Name</th><th>Level</th></tr></thead>
               <tbody>
                 <% Object.entries(rbac.roles).forEach(([key, role]) => { %>
@@ -28,7 +30,7 @@
         </div>
       </div>
     </div>
-    <div class="col-lg-6">
+    <div class="form-col">
       <div class="card h-100">
         <div class="card-header bg-light">
           <h5 class="mb-0">Permission Hierarchy</h5>

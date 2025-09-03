@@ -44,6 +44,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/enhanced-data-tables.css">
     
     <!-- Dynamic Branding & Theme Variables -->
     <% 
@@ -180,13 +181,13 @@
         <footer class="bg-white border-top mt-auto py-3 no-print">
             <div class="container-fluid">
                 <div class="row align-items-center">
-                    <div class="col-md-6">
+                    <div class="form-col">
                         <small class="text-muted">
                             &copy; <%= new Date().getFullYear() %> School ERP System. All rights reserved.
                             <% if (tenant && tenant.name) { %> | <%= tenant.name %><% } %>
                         </small>
                     </div>
-                    <div class="col-md-6 text-md-end">
+                    <div class="form-col">
                         <small class="text-muted">
                             <a href="/help" class="text-decoration-none text-muted me-3">Help</a>
                             <a href="/privacy" class="text-decoration-none text-muted me-3">Privacy</a>
@@ -277,6 +278,10 @@
             popoverTriggerList.map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
         });
     </script>
+    
+        <!-- Custom JavaScript -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/enhanced-data-tables.js"></script>
     
     <%- script %>
 </body>

@@ -1,0 +1,1181 @@
+<!-- Academic Reports -->
+<div class="desktop-optimized">
+    <main class="main-content">
+        <!-- Page Header -->
+        <div class="page-header mb-3">
+            <div class="header-content">
+                <nav class="breadcrumb">
+                    <a href="/dashboard" class="breadcrumb-link">
+                        <i class="fas fa-home"></i>
+                        Dashboard
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="/reports" class="breadcrumb-link">Reports</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">Academic Reports</span>
+                </nav>
+                
+                <h1 class="page-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Academic Reports
+                </h1>
+                <p class="page-description">Comprehensive academic performance analysis and examination reports</p>
+            </div>
+            
+            <div class="header-actions">
+                <button class="btn btn-outline" onclick="resetFilters()">
+                    <i class="fas fa-undo"></i>
+                    Reset Filters
+                </button>
+                <button class="btn btn-brand-primary" onclick="openExportModal()">
+                    <i class="fas fa-download"></i>
+                    Export Reports
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Tab System -->
+        <div class="tab-system d-md-none mb-3">
+            <div class="tab-nav">
+                <button class="tab-btn" data-tab="filters">
+                    <i class="fas fa-filter"></i>
+                    Filters
+                </button>
+                <button class="tab-btn" data-tab="overview">
+                    <i class="fas fa-chart-bar"></i>
+                    Overview
+                </button>
+                <button class="tab-btn" data-tab="charts">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics
+                </button>
+                <button class="tab-btn" data-tab="data">
+                    <i class="fas fa-table"></i>
+                    Data
+                </button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Filters Tab -->
+                <div class="tab-pane" data-tab="filters">
+                    <h5 class="mb-3">Report Filters</h5>
+                    <div class="filter-form-mobile">
+                        <!-- Filter content will be moved here for mobile -->
+                    </div>
+                </div>
+                
+                <!-- Overview Tab -->
+                <div class="tab-pane" data-tab="overview">
+                    <div class="overview-mobile d-none d-md-grid">
+                        <!-- Overview cards will be moved here for mobile -->
+                    </div>
+                </div>
+                
+                <!-- Charts Tab -->
+                <div class="tab-pane" data-tab="charts">
+                    <div class="charts-mobile">
+                        <!-- Charts will be moved here for mobile -->
+                    </div>
+                </div>
+                
+                <!-- Data Tab -->
+                <div class="tab-pane" data-tab="data">
+                    <div class="data-mobile">
+                        <!-- Data table will be moved here for mobile -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Panel (Desktop) -->
+        <div class="filter-panel d-none d-md-block">
+            <div class="filter-section">
+                <h4>Report Filters</h4>
+                <div class="filter-form">
+                    <div class="filter-group">
+                        <label for="reportTypeFilter">Report Type</label>
+                        <select id="reportTypeFilter" class="form-control">
+                            <option value="exam-results">Examination Results</option>
+                            <option value="grade-analysis">Grade Analysis</option>
+                            <option value="subject-performance">Subject Performance</option>
+                            <option value="class-performance">Class Performance</option>
+                            <option value="progress-report">Progress Reports</option>
+                            <option value="rank-analysis">Rank Analysis</option>
+                            <option value="pass-fail">Pass/Fail Analysis</option>
+                        </select>
+                    </div>
+                
+                <div class="filter-group">
+                    <label for="examFilter">Examination</label>
+                    <select id="examFilter" class="form-control">
+                        <option value="">All Examinations</option>
+                        <option value="unit-test-1">Unit Test 1</option>
+                        <option value="unit-test-2">Unit Test 2</option>
+                        <option value="mid-term">Mid Term Examination</option>
+                        <option value="final-term">Final Term Examination</option>
+                        <option value="annual">Annual Examination</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="academicYearFilter">Academic Year</label>
+                    <select id="academicYearFilter" class="form-control">
+                        <option value="2024-25">2024-25</option>
+                        <option value="2023-24">2023-24</option>
+                        <option value="2022-23">2022-23</option>
+                        <option value="2021-22">2021-22</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="classFilter">Class</label>
+                    <select id="classFilter" class="form-control">
+                        <option value="">All Classes</option>
+                        <option value="nursery">Nursery</option>
+                        <option value="lkg">LKG</option>
+                        <option value="ukg">UKG</option>
+                        <option value="1st">1st</option>
+                        <option value="2nd">2nd</option>
+                        <option value="3rd">3rd</option>
+                        <option value="4th">4th</option>
+                        <option value="5th">5th</option>
+                        <option value="6th">6th</option>
+                        <option value="7th">7th</option>
+                        <option value="8th">8th</option>
+                        <option value="9th">9th</option>
+                        <option value="10th">10th</option>
+                        <option value="11th">11th</option>
+                        <option value="12th">12th</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="subjectFilter">Subject</label>
+                    <select id="subjectFilter" class="form-control">
+                        <option value="">All Subjects</option>
+                        <option value="mathematics">Mathematics</option>
+                        <option value="science">Science</option>
+                        <option value="english">English</option>
+                        <option value="hindi">Hindi</option>
+                        <option value="social-studies">Social Studies</option>
+                        <option value="physics">Physics</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="biology">Biology</option>
+                        <option value="computer">Computer Science</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="performanceFilter">Performance Range</label>
+                    <select id="performanceFilter" class="form-control">
+                        <option value="">All Ranges</option>
+                        <option value="excellent">Excellent (90-100%)</option>
+                        <option value="very-good">Very Good (80-89%)</option>
+                        <option value="good">Good (70-79%)</option>
+                        <option value="satisfactory">Satisfactory (60-69%)</option>
+                        <option value="needs-improvement">Needs Improvement (<60%)</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="btn btn-brand-primary" onclick="applyFilters()">
+                        <i class="fas fa-filter"></i>
+                        Apply Filters
+                    </button>
+                    <button class="btn btn-outline" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Academic Performance Overview (Desktop) -->
+        <div class="overview-grid d-none d-md-grid">
+            <div class="overview-card d-none d-md-grid">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="card-details">
+                <h3 id="totalStudents">1,245</h3>
+                <p>Total Students Evaluated</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-percentage"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="overallPassRate">94.8%</h3>
+                <p>Overall Pass Rate</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="averageScore">76.5</h3>
+                <p>Average Score</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-medal"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="topPerformers">156</h3>
+                <p>Top Performers (90%+)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Analytics Charts -->
+    <div class="performance-charts">
+        <div class="chart-container responsive full-width">
+            <div class="chart-header">
+                <h4>Grade Distribution Analysis</h4>
+                <div class="chart-actions">
+                    <select id="gradeChartType" class="form-control small">
+                        <option value="bar">Bar Chart</option>
+                        <option value="pie">Pie Chart</option>
+                        <option value="doughnut">Doughnut Chart</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="gradeDistributionChart" width="800" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive">
+            <div class="chart-header">
+                <h4>Subject-wise Performance</h4>
+                <div class="chart-actions">
+                    <select id="subjectChartView" class="form-control small">
+                        <option value="average">Average Scores</option>
+                        <option value="pass-rate">Pass Rates</option>
+                        <option value="highest">Highest Scores</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="subjectPerformanceChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-container responsive">
+            <div class="chart-header">
+                <h4>Performance Trends</h4>
+                <div class="chart-actions">
+                    <select id="trendPeriod" class="form-control small">
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-content">
+                <div class="chart-content">
+                    <div class="chart-content">
+                    <canvas id="performanceTrendChart" width="400" height="300"></div></div></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers & Improvement Needed -->
+    <div class="performance-insights">
+        <div class="insight-section">
+            <div class="section-header">
+                <h4>Top Performers</h4>
+                <button class="btn btn-outline small" onclick="viewAllTopPerformers()">
+                    <i class="fas fa-eye"></i>
+                    View All
+                </button>
+            </div>
+            <div class="performers-list">
+                <div class="performer-card top-performer">
+                    <div class="performer-rank">1</div>
+                    <div class="performer-info">
+                        <h5>Aarav Sharma</h5>
+                        <p>Class 10-A • Roll: 15</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">98.5%</span>
+                        <span class="subject">Overall</span>
+                    </div>
+                </div>
+                
+                <div class="performer-card top-performer">
+                    <div class="performer-rank">2</div>
+                    <div class="performer-info">
+                        <h5>Priya Patel</h5>
+                        <p>Class 12-B • Roll: 23</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">97.8%</span>
+                        <span class="subject">Overall</span>
+                    </div>
+                </div>
+                
+                <div class="performer-card top-performer">
+                    <div class="performer-rank">3</div>
+                    <div class="performer-info">
+                        <h5>Rahul Kumar</h5>
+                        <p>Class 11-A • Roll: 08</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">96.9%</span>
+                        <span class="subject">Overall</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="insight-section">
+            <div class="section-header">
+                <h4>Need Attention</h4>
+                <button class="btn btn-outline small" onclick="viewAllNeedAttention()">
+                    <i class="fas fa-eye"></i>
+                    View All
+                </button>
+            </div>
+            <div class="performers-list">
+                <div class="performer-card need-attention">
+                    <div class="performer-indicator">!</div>
+                    <div class="performer-info">
+                        <h5>Anjali Verma</h5>
+                        <p>Class 9-C • Roll: 45</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">45.2%</span>
+                        <span class="subject">Mathematics</span>
+                    </div>
+                </div>
+                
+                <div class="performer-card need-attention">
+                    <div class="performer-indicator">!</div>
+                    <div class="performer-info">
+                        <h5>Vikram Singh</h5>
+                        <p>Class 8-A • Roll: 32</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">52.8%</span>
+                        <span class="subject">Science</span>
+                    </div>
+                </div>
+                
+                <div class="performer-card need-attention">
+                    <div class="performer-indicator">!</div>
+                    <div class="performer-info">
+                        <h5>Sneha Gupta</h5>
+                        <p>Class 10-B • Roll: 19</p>
+                    </div>
+                    <div class="performer-score">
+                        <span class="score">48.5%</span>
+                        <span class="subject">English</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Academic Data -->
+    <div class="academic-data-section responsive-table">
+        <div class="section-header">
+            <h4>Academic Performance Data</h4>
+            <div class="section-actions">
+                <div class="search-box">
+                    <input type="text" id="dataSearch" placeholder="Search students..." class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+                <select id="recordsPerPage" class="form-control small">
+                    <option value="25">25 per page</option>
+                    <option value="50">50 per page</option>
+                    <option value="100">100 per page</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="data-table-container">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table" id="academicDataTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th sortable="true" data-column="rollNo">Roll No</th>
+                        <th sortable="true" data-column="name">Student Name</th>
+                        <th sortable="true" data-column="class">Class</th>
+                        <th sortable="true" data-column="mathematics">Mathematics</th>
+                        <th sortable="true" data-column="science">Science</th>
+                        <th sortable="true" data-column="english">English</th>
+                        <th sortable="true" data-column="hindi">Hindi</th>
+                        <th sortable="true" data-column="total">Total</th>
+                        <th sortable="true" data-column="percentage">Percentage</th>
+                        <th sortable="true" data-column="grade">Grade</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="academicTableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <span id="showingFrom">1</span> to <span id="showingTo">25</span> of <span id="totalRecords">1245</span> records
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" onclick="changePage(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="page-numbers" id="pageNumbers">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                <button class="pagination-btn" id="nextPage" onclick="changePage(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Export Modal -->
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Export Academic Reports</h3>
+            <button class="modal-close" onclick="closeExportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="exportForm" onsubmit="exportData(event)">
+                <div class="form-group">
+                    <label for="exportType">Report Type</label>
+                    <select id="exportType" name="type" class="form-control" required>
+                        <option value="exam-results">Examination Results</option>
+                        <option value="grade-analysis">Grade Analysis Report</option>
+                        <option value="subject-performance">Subject Performance Report</option>
+                        <option value="class-performance">Class Performance Summary</option>
+                        <option value="progress-report">Student Progress Report</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportFormat">Export Format</label>
+                    <select id="exportFormat" name="format" class="form-control" required>
+                        <option value="excel">Excel (.xlsx)</option>
+                        <option value="pdf">PDF Report</option>
+                        <option value="csv">CSV Data</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Include Charts & Graphics</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="includeCharts" value="grade-distribution" checked> Grade Distribution Chart</label>
+                        <label><input type="checkbox" name="includeCharts" value="subject-performance" checked> Subject Performance Charts</label>
+                        <label><input type="checkbox" name="includeCharts" value="trend-analysis"> Performance Trend Analysis</label>
+                        <label><input type="checkbox" name="includeCharts" value="comparison-charts"> Class Comparison Charts</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="exportScope">Export Scope</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="scope" value="current" checked> Current Filtered Results</label>
+                        <label><input type="radio" name="scope" value="selected"> Selected Records Only</label>
+                        <label><input type="radio" name="scope" value="class"> Entire Class Data</label>
+                        <label><input type="radio" name="scope" value="all"> All Academic Data</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Additional Options</label>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="options" value="detailed-analysis"> Include Detailed Analysis</label>
+                        <label><input type="checkbox" name="options" value="recommendations"> Include Recommendations</label>
+                        <label><input type="checkbox" name="options" value="parent-remarks"> Include Parent Remarks Section</label>
+                        <label><input type="checkbox" name="options" value="teacher-comments"> Include Teacher Comments</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeExportModal()">Cancel</button>
+                    <button type="submit" class="btn btn-brand-primary">
+                        <i class="fas fa-download"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Reports Styles -->
+<style>
+.academic-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.performance-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.performance-charts .chart-container.full-width {
+    grid-column: 1 / -1;
+}
+
+.performance-insights {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.insight-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+}
+
+.performers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.performer-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.performer-card.top-performer {
+    background: linear-gradient(135deg, #fff8e1 0%, #ffffff 100%);
+    border-left-color: #ffa000;
+}
+
+.performer-card.need-attention {
+    background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);
+    border-left-color: #f44336;
+}
+
+.performer-rank {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #ffa000;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.performer-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #f44336;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.performer-info {
+    flex: 1;
+}
+
+.performer-info h5 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.performer-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.performer-score {
+    text-align: right;
+}
+
+.performer-score .score {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.performer-card.top-performer .score {
+    color: #ffa000;
+}
+
+.performer-card.need-attention .score {
+    color: #f44336;
+}
+
+.performer-score .subject {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.academic-data-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+}
+
+.data-table th:first-child,
+.data-table td:first-child,
+.data-table th:nth-child(2),
+.data-table td:nth-child(2),
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+    text-align: left;
+}
+
+.grade-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.grade-a1 {
+    background: #c8e6c9;
+    color: #2e7d32;
+}
+
+.grade-a2 {
+    background: #dcedc8;
+    color: #689f38;
+}
+
+.grade-b1 {
+    background: #fff9c4;
+    color: #fbc02d;
+}
+
+.grade-b2 {
+    background: #ffecb3;
+    color: #ffa000;
+}
+
+.grade-c1 {
+    background: #ffcdd2;
+    color: #d32f2f;
+}
+
+.grade-c2 {
+    background: #ffcdd2;
+    color: #c62828;
+}
+
+.score-cell {
+    font-weight: 600;
+}
+
+.score-excellent {
+    color: #2e7d32;
+}
+
+.score-good {
+    color: #689f38;
+}
+
+.score-average {
+    color: #ffa000;
+}
+
+.score-poor {
+    color: #d32f2f;
+}
+
+.btn.small {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+    .performance-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-insights {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .academic-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .performer-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .performer-info {
+        order: 2;
+    }
+    
+    .performer-score {
+        order: 3;
+        text-align: center;
+    }
+    
+    .data-table {
+        font-size: 0.8rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 0.5rem 0.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .academic-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Academic Reports Scripts -->
+<script>
+let currentPage = 1;
+let recordsPerPage = 25;
+let totalRecords = 1245;
+let selectedRows = new Set();
+
+// Mock academic data
+const mockAcademicData = [
+    { rollNo: '001', name: 'Aarav Sharma', class: '10-A', mathematics: 98, science: 95, english: 92, hindi: 88, total: 373, percentage: 93.25, grade: 'A1' },
+    { rollNo: '002', name: 'Priya Patel', class: '10-A', mathematics: 89, science: 94, english: 96, hindi: 91, total: 370, percentage: 92.5, grade: 'A1' },
+    { rollNo: '003', name: 'Rahul Kumar', class: '10-B', mathematics: 85, science: 78, english: 82, hindi: 75, total: 320, percentage: 80.0, grade: 'A2' },
+    { rollNo: '004', name: 'Aisha Singh', class: '10-B', mathematics: 76, science: 81, english: 79, hindi: 84, total: 320, percentage: 80.0, grade: 'A2' },
+    { rollNo: '005', name: 'Vikram Verma', class: '10-C', mathematics: 65, science: 70, english: 68, hindi: 72, total: 275, percentage: 68.75, grade: 'B1' }
+];
+
+function applyFilters() {
+    showNotification('Academic filters applied successfully!', 'success');
+    loadAcademicData();
+    updateAcademicCharts();
+    updateAcademicStats();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-form select').forEach(select => select.value = '');
+    showNotification('Filters cleared!', 'info');
+    loadAcademicData();
+    updateAcademicCharts();
+    updateAcademicStats();
+}
+
+function resetFilters() {
+    clearFilters();
+}
+
+function loadAcademicData() {
+    const tbody = document.getElementById('academicTableBody');
+    tbody.innerHTML = '';
+    
+    mockAcademicData.forEach((student, index) => {
+        const row = `
+            <tr>
+                <td><input type="checkbox" class="row-select" value="${student.rollNo}" onchange="toggleRowSelect('${student.rollNo}')"></td>
+                <td>${student.rollNo}</td>
+                <td>${student.name}</td>
+                <td>${student.class}</td>
+                <td class="score-cell ${getScoreClass(student.mathematics)}">${student.mathematics}</td>
+                <td class="score-cell ${getScoreClass(student.science)}">${student.science}</td>
+                <td class="score-cell ${getScoreClass(student.english)}">${student.english}</td>
+                <td class="score-cell ${getScoreClass(student.hindi)}">${student.hindi}</td>
+                <td class="score-cell"><strong>${student.total}</strong></td>
+                <td class="score-cell ${getScoreClass(student.percentage)}"><strong>${student.percentage}%</strong></td>
+                <td><span class="grade-badge grade-${student.grade.toLowerCase()}">${student.grade}</span></td>
+                <td>
+                    <button class="action-btn view-btn" onclick="viewStudentReport('${student.rollNo}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn download-btn" onclick="downloadStudentReport('${student.rollNo}')">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+    
+    updatePagination();
+}
+
+function getScoreClass(score) {
+    if (score >= 90) return 'score-excellent';
+    if (score >= 80) return 'score-good';
+    if (score >= 60) return 'score-average';
+    return 'score-poor';
+}
+
+function updatePagination() {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const showingFrom = (currentPage - 1) * recordsPerPage + 1;
+    const showingTo = Math.min(currentPage * recordsPerPage, totalRecords);
+    
+    document.getElementById('showingFrom').textContent = showingFrom;
+    document.getElementById('showingTo').textContent = showingTo;
+    document.getElementById('totalRecords').textContent = totalRecords;
+    
+    // Generate page numbers
+    const pageNumbers = document.getElementById('pageNumbers');
+    pageNumbers.innerHTML = '';
+    
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('div');
+        pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => goToPage(i);
+        pageNumbers.appendChild(pageBtn);
+    }
+    
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+}
+
+function changePage(direction) {
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const newPage = currentPage + direction;
+    
+    if (newPage >= 1 && newPage <= totalPages) {
+        goToPage(newPage);
+    }
+}
+
+function goToPage(page) {
+    currentPage = page;
+    loadAcademicData();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    
+    rowSelects.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+        if (selectAll.checked) {
+            selectedRows.add(checkbox.value);
+        } else {
+            selectedRows.delete(checkbox.value);
+        }
+    });
+}
+
+function toggleRowSelect(rollNo) {
+    if (selectedRows.has(rollNo)) {
+        selectedRows.delete(rollNo);
+    } else {
+        selectedRows.add(rollNo);
+    }
+    
+    const selectAll = document.getElementById('selectAll');
+    const rowSelects = document.querySelectorAll('.row-select');
+    const checkedRows = document.querySelectorAll('.row-select:checked');
+    
+    selectAll.indeterminate = checkedRows.length > 0 && checkedRows.length < rowSelects.length;
+    selectAll.checked = checkedRows.length === rowSelects.length;
+}
+
+function updateAcademicCharts() {
+    // Mock chart updates - replace with actual chart library implementation
+    console.log('Updating academic charts...');
+    
+    // Grade Distribution Chart
+    const gradeData = {
+        labels: ['A1 (90-100%)', 'A2 (80-89%)', 'B1 (70-79%)', 'B2 (60-69%)', 'C1 (50-59%)', 'C2 (<50%)'],
+        datasets: [{
+            data: [156, 284, 367, 298, 98, 42],
+            backgroundColor: ['#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#F44336']
+        }]
+    };
+    console.log('Grade distribution data:', gradeData);
+    
+    // Subject Performance Chart
+    const subjectData = {
+        labels: ['Mathematics', 'Science', 'English', 'Hindi', 'Social Studies'],
+        datasets: [{
+            label: 'Average Scores',
+            data: [76.8, 78.2, 74.5, 71.3, 73.7],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2
+        }]
+    };
+    console.log('Subject performance data:', subjectData);
+    
+    // Performance Trend Chart
+    const trendData = {
+        labels: ['Unit Test 1', 'Unit Test 2', 'Mid Term', 'Final Term'],
+        datasets: [{
+            label: 'Average Percentage',
+            data: [72.5, 74.8, 76.2, 76.5],
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+            tension: 0.4
+        }]
+    };
+    console.log('Performance trend data:', trendData);
+}
+
+function updateAcademicStats() {
+    document.getElementById('totalStudents').textContent = '1,245';
+    document.getElementById('overallPassRate').textContent = '94.8%';
+    document.getElementById('averageScore').textContent = '76.5';
+    document.getElementById('topPerformers').textContent = '156';
+}
+
+function viewStudentReport(rollNo) {
+    showNotification(`Opening detailed report for Roll No: ${rollNo}`, 'info');
+}
+
+function downloadStudentReport(rollNo) {
+    showNotification(`Downloading report for Roll No: ${rollNo}...`, 'info');
+    
+    setTimeout(() => {
+        const fileName = `student_report_${rollNo}_${new Date().toISOString().split('T')[0]}.pdf`;
+        showNotification(`Report downloaded: ${fileName}`, 'success');
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 1500);
+}
+
+function viewAllTopPerformers() {
+    showNotification('Opening complete top performers list...', 'info');
+}
+
+function viewAllNeedAttention() {
+    showNotification('Opening complete attention needed list...', 'info');
+}
+
+function openExportModal() {
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+function closeExportModal() {
+    document.getElementById('exportModal').style.display = 'none';
+}
+
+function exportData(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const exportConfig = {
+        type: formData.get('type'),
+        format: formData.get('format'),
+        includeCharts: formData.getAll('includeCharts'),
+        scope: formData.get('scope'),
+        options: formData.getAll('options')
+    };
+    
+    showNotification('Generating academic report...', 'info');
+    
+    // Mock export process
+    setTimeout(() => {
+        const fileName = `academic_${exportConfig.type}_${new Date().toISOString().split('T')[0]}.${exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format}`;
+        showNotification(`Report generated successfully: ${fileName}`, 'success');
+        closeExportModal();
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 3000);
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    loadAcademicData();
+    updateAcademicCharts();
+    updateAcademicStats();
+    
+    // Add sort functionality to table headers
+    document.querySelectorAll('[sortable="true"]').forEach(header => {
+        header.addEventListener('click', () => {
+            // Implement sorting logic here
+            console.log('Sorting by:', header.dataset.column);
+            showNotification(`Table sorted by ${header.dataset.column}`, 'info');
+        });
+    });
+    
+    // Search functionality
+    document.getElementById('dataSearch').addEventListener('input', function(e) {
+        console.log('Searching academic data for:', e.target.value);
+    });
+    
+    // Records per page change
+    document.getElementById('recordsPerPage').addEventListener('change', function(e) {
+        recordsPerPage = parseInt(e.target.value);
+        currentPage = 1;
+        loadAcademicData();
+    });
+    
+    // Chart type changes
+    document.getElementById('gradeChartType').addEventListener('change', function(e) {
+        console.log('Changing grade chart type to:', e.target.value);
+        updateAcademicCharts();
+    });
+    
+    document.getElementById('subjectChartView').addEventListener('change', function(e) {
+        console.log('Changing subject chart view to:', e.target.value);
+        updateAcademicCharts();
+    });
+    
+    document.getElementById('trendPeriod').addEventListener('change', function(e) {
+        console.log('Changing trend period to:', e.target.value);
+        updateAcademicCharts();
+    });
+    
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 4px;
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 0.25rem;
+        }
+        
+        .view-btn:hover {
+            background: #e6f7ff;
+            color: #0066cc;
+        }
+        
+        .download-btn:hover {
+            background: #f0f8ff;
+            color: #0066cc;
+        }
+    `;
+    document.head.appendChild(style);
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('exportModal');
+    if (event.target === modal) {
+        closeExportModal();
+    }
+};
+</script>

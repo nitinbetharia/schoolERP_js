@@ -1,0 +1,348 @@
+<!-- Student List Page -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-user-graduate"></i>
+                Student Management
+            </h1>
+            <p class="page-description">Manage student records and information</p>
+        </div>
+        
+        <div class="header-actions">
+            <% if (userType === 'system' || userType === 'trust' || userType === 'school') { %>
+                <a href="/students/new" class="btn btn-brand-primary">
+                    <i class="fas fa-plus"></i>
+                    Add New Student
+                </a>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filters-section">
+        <form method="GET" class="filters-form">
+            <div class="filter-group">
+                <label for="search">Search Students</label>
+                <input 
+                    type="text" 
+                    id="search" 
+                    name="search" 
+                    value="<%= filters.search %>" 
+                    placeholder="Search by name or roll number..."
+                    class="form-control"
+                >
+            </div>
+            
+            <div class="filter-group">
+                <label for="class">Class</label>
+                <select id="class" name="class" class="form-control">
+                    <option value="">All Classes</option>
+                    <option value="1st" <%= filters.class === '1st' ? 'selected' : '' %>>1st</option>
+                    <option value="2nd" <%= filters.class === '2nd' ? 'selected' : '' %>>2nd</option>
+                    <option value="3rd" <%= filters.class === '3rd' ? 'selected' : '' %>>3rd</option>
+                    <option value="4th" <%= filters.class === '4th' ? 'selected' : '' %>>4th</option>
+                    <option value="5th" <%= filters.class === '5th' ? 'selected' : '' %>>5th</option>
+                    <option value="6th" <%= filters.class === '6th' ? 'selected' : '' %>>6th</option>
+                    <option value="7th" <%= filters.class === '7th' ? 'selected' : '' %>>7th</option>
+                    <option value="8th" <%= filters.class === '8th' ? 'selected' : '' %>>8th</option>
+                    <option value="9th" <%= filters.class === '9th' ? 'selected' : '' %>>9th</option>
+                    <option value="10th" <%= filters.class === '10th' ? 'selected' : '' %>>10th</option>
+                    <option value="11th" <%= filters.class === '11th' ? 'selected' : '' %>>11th</option>
+                    <option value="12th" <%= filters.class === '12th' ? 'selected' : '' %>>12th</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="section">Section</label>
+                <select id="section" name="section" class="form-control">
+                    <option value="">All Sections</option>
+                    <option value="A" <%= filters.section === 'A' ? 'selected' : '' %>>A</option>
+                    <option value="B" <%= filters.section === 'B' ? 'selected' : '' %>>B</option>
+                    <option value="C" <%= filters.section === 'C' ? 'selected' : '' %>>C</option>
+                    <option value="D" <%= filters.section === 'D' ? 'selected' : '' %>>D</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="Active" <%= filters.status === 'Active' ? 'selected' : '' %>>Active</option>
+                    <option value="Inactive" <%= filters.status === 'Inactive' ? 'selected' : '' %>>Inactive</option>
+                    <option value="Graduated" <%= filters.status === 'Graduated' ? 'selected' : '' %>>Graduated</option>
+                    <option value="Transferred" <%= filters.status === 'Transferred' ? 'selected' : '' %>>Transferred</option>
+                </select>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-search"></i>
+                    Filter
+                </button>
+                <a href="/students" class="btn btn-outline">
+                    <i class="fas fa-times"></i>
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Students Table -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>Students List</h3>
+            <span class="record-count">
+                Showing <%= students.length %> of <%= pagination.totalRecords %> students
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Admission Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (students && students.length > 0) { %>
+                        <% students.forEach(function(student) { %>
+                            <tr>
+                                <td class="roll-number">
+                                    <strong><%= student.rollNumber %></strong>
+                                </td>
+                                <td class="student-name">
+                                    <a href="/students/<%= student.id %>" class="student-link">
+                                        <%= student.firstName %> <%= student.lastName %>
+                                    </a>
+                                </td>
+                                <td><%= student.class %></td>
+                                <td><%= student.section %></td>
+                                <td>
+                                    <%= new Date(student.admissionDate).toLocaleDateString('en-IN') %>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-<%= student.status.toLowerCase() %>">
+                                        <%= student.status %>
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <a href="/students/<%= student.id %>" 
+                                       class="action-btn view-btn" 
+                                       title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <% if (userType === 'system' || userType === 'trust' || userType === 'school') { %>
+                                        <a href="/students/<%= student.id %>/edit" 
+                                           class="action-btn edit-btn" 
+                                           title="Edit Student">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7" class="no-data">
+                                <div class="no-data-message">
+                                    <i class="fas fa-user-graduate fa-3x"></i>
+                                    <h4>No Students Found</h4>
+                                    <p>No students match your current filters.</p>
+                                    <% if (userType === 'system' || userType === 'trust' || userType === 'school') { %>
+                                        <a href="/students/new" class="btn btn-brand-primary">
+                                            <i class="fas fa-plus"></i>
+                                            Add First Student
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <% if (pagination.totalPages > 1) { %>
+        <div class="pagination-container">
+            <nav aria-label="Students pagination">
+                <ul class="pagination">
+                    <% if (pagination.currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= pagination.currentPage - 1 %>&search=<%= filters.search %>&class=<%= filters.class %>&section=<%= filters.section %>&status=<%= filters.status %>">
+                                <i class="fas fa-chevron-left"></i>
+                                Previous
+                            </a>
+                        </li>
+                    <% } %>
+                    
+                    <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+                        <li class="page-item <%= i === pagination.currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>&search=<%= filters.search %>&class=<%= filters.class %>&section=<%= filters.section %>&status=<%= filters.status %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                    <% } %>
+                    
+                    <% if (pagination.currentPage < pagination.totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= pagination.currentPage + 1 %>&search=<%= filters.search %>&class=<%= filters.class %>&section=<%= filters.section %>&status=<%= filters.status %>">
+                                Next
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    <% } %>
+</main>
+
+<!-- Additional Styles for Students Page -->
+<style>
+.filters-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.filter-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.student-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.student-link:hover {
+    text-decoration: underline;
+}
+
+.roll-number {
+    font-family: 'Courier New', monospace;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-graduated {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-transferred {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: #6c757d;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    color: #495057;
+}
+
+.view-btn:hover {
+    background: #e7f3ff;
+    color: #0066cc;
+}
+
+.edit-btn:hover {
+    background: #fff0e6;
+    color: #cc6600;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.no-data-message i {
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.no-data-message h4 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .filters-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .filter-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+}
+</style>

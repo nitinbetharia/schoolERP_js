@@ -1,0 +1,1087 @@
+<!-- Reports Dashboard -->
+<main class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <nav class="breadcrumb">
+                <a href="/dashboard" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Reports</span>
+            </nav>
+            
+            <h1 class="page-title">Reports Dashboard</h1>
+            <p class="page-description">Comprehensive reporting and analytics for all school operations</p>
+        </div>
+        
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="openScheduleModal()">
+                <i class="fas fa-clock"></i>
+                Schedule Report
+            </button>
+            <button class="btn btn-brand-primary" onclick="openCustomReportModal()">
+                <i class="fas fa-chart-bar"></i>
+                Custom Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Reports Overview -->
+    <div class="reports-overview">
+        <div class="overview-card total-reports d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= reportsOverview.totalReports %></h3>
+                <p>Available Reports</p>
+            </div>
+        </div>
+        
+        <div class="overview-card favorite-reports d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= reportsOverview.favoriteReports %></h3>
+                <p>Favorite Reports</p>
+            </div>
+        </div>
+        
+        <div class="overview-card scheduled-reports d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= reportsOverview.scheduledReports %></h3>
+                <p>Scheduled Reports</p>
+            </div>
+        </div>
+        
+        <div class="overview-card recent-reports d-none d-md-grid">
+            <div class="card-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="card-details">
+                <h3><%= reportsOverview.recentlyGenerated %></h3>
+                <p>Recently Generated</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Categories -->
+    <div class="report-categories">
+        <h3>Report Categories</h3>
+        <div class="categories-grid">
+            <% reportCategories.forEach(function(category) { %>
+                <div class="category-card" data-category="<%= category.id %>" onclick="navigateToReports('<%= category.id %>')">
+                    <div class="category-header" style="border-left-color: <%= category.color %>">
+                        <div class="category-icon" style="color: <%= category.color %>">
+                            <i class="<%= category.icon %>"></i>
+                        </div>
+                        <div class="category-info">
+                            <h4><%= category.name %></h4>
+                            <p><%= category.description %></p>
+                        </div>
+                    </div>
+                    <div class="category-stats">
+                        <div class="stat-item">
+                            <span class="stat-number"><%= category.reportCount %></span>
+                            <span class="stat-label">Reports Available</span>
+                        </div>
+                        <button class="btn-view-reports" onclick="event.stopPropagation(); navigateToReports('<%= category.id %>')">
+                            View Reports
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Quick Reports Section -->
+    <div class="quick-reports">
+        <h3>Quick Reports</h3>
+        <div class="quick-reports-grid">
+            <div class="quick-report-card" onclick="generateQuickReport('daily-attendance')">
+                <div class="quick-report-icon">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="quick-report-info">
+                    <h5>Daily Attendance</h5>
+                    <p>Today's attendance summary</p>
+                </div>
+                <div class="quick-report-action">
+                    <i class="fas fa-download"></i>
+                </div>
+            </div>
+            
+            <div class="quick-report-card" onclick="generateQuickReport('fee-collection')">
+                <div class="quick-report-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="quick-report-info">
+                    <h5>Fee Collection</h5>
+                    <p>Current month collection</p>
+                </div>
+                <div class="quick-report-action">
+                    <i class="fas fa-download"></i>
+                </div>
+            </div>
+            
+            <div class="quick-report-card" onclick="generateQuickReport('student-list')">
+                <div class="quick-report-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="quick-report-info">
+                    <h5>Student List</h5>
+                    <p>Complete student directory</p>
+                </div>
+                <div class="quick-report-action">
+                    <i class="fas fa-download"></i>
+                </div>
+            </div>
+            
+            <div class="quick-report-card" onclick="generateQuickReport('exam-results')">
+                <div class="quick-report-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <div class="quick-report-info">
+                    <h5>Exam Results</h5>
+                    <p>Latest examination results</p>
+                </div>
+                <div class="quick-report-action">
+                    <i class="fas fa-download"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Reports -->
+    <div class="recent-reports">
+        <div class="section-header">
+            <h3>Recent Reports</h3>
+            <button class="btn btn-outline" onclick="viewAllReports()">
+                <i class="fas fa-list"></i>
+                View All
+            </button>
+        </div>
+        
+        <div class="reports-table">
+            <div class="data-table-container">
+                <div class="data-table-container">
+                <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Report Name</th>
+                        <th>Category</th>
+                        <th>Generated</th>
+                        <th>Format</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monthly Fee Collection Report</td>
+                        <td><span class="category-badge financial">Financial</span></td>
+                        <td>2 hours ago</td>
+                        <td><span class="format-badge excel">Excel</span></td>
+                        <td><span class="status-badge completed">Completed</span></td>
+                        <td class="actions">
+                            <button class="action-btn download-btn" onclick="downloadReport('fee-collection-monthly')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="action-btn view-btn" onclick="viewReport('fee-collection-monthly')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteReport('fee-collection-monthly')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Student Performance Analysis</td>
+                        <td><span class="category-badge academic">Academic</span></td>
+                        <td>5 hours ago</td>
+                        <td><span class="format-badge pdf">PDF</span></td>
+                        <td><span class="status-badge completed">Completed</span></td>
+                        <td class="actions">
+                            <button class="action-btn download-btn" onclick="downloadReport('student-performance')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="action-btn view-btn" onclick="viewReport('student-performance')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteReport('student-performance')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Attendance Summary Report</td>
+                        <td><span class="category-badge attendance">Attendance</span></td>
+                        <td>1 day ago</td>
+                        <td><span class="format-badge excel">Excel</span></td>
+                        <td><span class="status-badge processing">Processing</span></td>
+                        <td class="actions">
+                            <button class="action-btn view-btn" onclick="viewReport('attendance-summary')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteReport('attendance-summary')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Custom Report Modal -->
+<div id="customReportModal" class="modal">
+    <div class="modal-content large-modal">
+        <div class="modal-header">
+            <h3>Create Custom Report</h3>
+            <button class="modal-close" onclick="closeCustomReportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="customReportForm" onsubmit="generateCustomReport(event)">
+                <div class="form-step active" data-step="1">
+                    <h4>Step 1: Select Report Type</h4>
+                    <div class="report-type-grid">
+                        <label class="report-type-option">
+                            <input type="radio" name="reportType" value="student" required>
+                            <div class="option-content">
+                                <i class="fas fa-user-graduate"></i>
+                                <span>Student Report</span>
+                            </div>
+                        </label>
+                        <label class="report-type-option">
+                            <input type="radio" name="reportType" value="academic" required>
+                            <div class="option-content">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Academic Report</span>
+                            </div>
+                        </label>
+                        <label class="report-type-option">
+                            <input type="radio" name="reportType" value="financial" required>
+                            <div class="option-content">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <span>Financial Report</span>
+                            </div>
+                        </label>
+                        <label class="report-type-option">
+                            <input type="radio" name="reportType" value="attendance" required>
+                            <div class="option-content">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Attendance Report</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-step" data-step="2">
+                    <h4>Step 2: Configure Filters</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="dateRange">Date Range</label>
+                            <select id="dateRange" name="dateRange" class="form-control">
+                                <option value="current-month">Current Month</option>
+                                <option value="last-month">Last Month</option>
+                                <option value="current-quarter">Current Quarter</option>
+                                <option value="current-year">Current Academic Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="classFilter">Class</label>
+                            <select id="classFilter" name="classFilter" class="form-control">
+                                <option value="">All Classes</option>
+                                <option value="nursery">Nursery</option>
+                                <option value="lkg">LKG</option>
+                                <option value="ukg">UKG</option>
+                                <option value="1st">1st</option>
+                                <option value="2nd">2nd</option>
+                                <option value="3rd">3rd</option>
+                                <option value="4th">4th</option>
+                                <option value="5th">5th</option>
+                                <option value="6th">6th</option>
+                                <option value="7th">7th</option>
+                                <option value="8th">8th</option>
+                                <option value="9th">9th</option>
+                                <option value="10th">10th</option>
+                                <option value="11th">11th</option>
+                                <option value="12th">12th</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="groupBy">Group By</label>
+                            <select id="groupBy" name="groupBy" class="form-control">
+                                <option value="">No Grouping</option>
+                                <option value="class">Class</option>
+                                <option value="section">Section</option>
+                                <option value="gender">Gender</option>
+                                <option value="category">Category</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="format">Export Format</label>
+                            <select id="format" name="format" class="form-control" required>
+                                <option value="excel">Excel (.xlsx)</option>
+                                <option value="pdf">PDF</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="custom-date-range" id="customDateRange" style="display: none;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="startDate">Start Date</label>
+                                <input type="date" id="startDate" name="startDate" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="endDate">End Date</label>
+                                <input type="date" id="endDate" name="endDate" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-step" data-step="3">
+                    <h4>Step 3: Report Summary</h4>
+                    <div class="report-summary">
+                        <div class="summary-item">
+                            <strong>Report Type:</strong>
+                            <span id="summaryReportType">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Date Range:</strong>
+                            <span id="summaryDateRange">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Filters:</strong>
+                            <span id="summaryFilters">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Format:</strong>
+                            <span id="summaryFormat">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-navigation">
+                    <button type="button" id="prevBtn" class="btn btn-outline" onclick="changeStep(-1)" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        Previous
+                    </button>
+                    <button type="button" id="nextBtn" class="btn btn-brand-primary" onclick="changeStep(1)">
+                        Next
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" id="generateBtn" class="btn btn-brand-primary" style="display: none;">
+                        <i class="fas fa-file-export"></i>
+                        Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reports Dashboard Styles -->
+<style>
+.reports-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.overview-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+}
+
+.overview-card.total-reports {
+    border-left-color: #007bff;
+}
+
+.overview-card.favorite-reports {
+    border-left-color: #ffc107;
+}
+
+.overview-card.scheduled-reports {
+    border-left-color: #17a2b8;
+}
+
+.overview-card.recent-reports {
+    border-left-color: #28a745;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-size: 1.25rem;
+}
+
+.total-reports .card-icon {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+}
+
+.favorite-reports .card-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.scheduled-reports .card-icon {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.recent-reports .card-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.report-categories {
+    margin-bottom: 2rem;
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.category-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+    overflow: hidden;
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-left: 4px solid;
+}
+
+.category-icon {
+    font-size: 2rem;
+}
+
+.category-info h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.category-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.btn-view-reports {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-view-reports:hover {
+    background: #0056b3;
+}
+
+.quick-reports {
+    margin-bottom: 2rem;
+}
+
+.quick-reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.quick-report-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-report-card:hover {
+    border-color: #007bff;
+    background: #f8f9ff;
+}
+
+.quick-report-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    color: #6c757d;
+}
+
+.quick-report-info h5 {
+    margin: 0 0 0.25rem 0;
+}
+
+.quick-report-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.quick-report-action {
+    margin-left: auto;
+    color: #007bff;
+}
+
+.recent-reports {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.reports-table {
+    overflow-x: auto;
+}
+
+.category-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.category-badge.financial {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.category-badge.academic {
+    background: #d4edda;
+    color: #155724;
+}
+
+.category-badge.attendance {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.format-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.format-badge.excel {
+    background: #d4edda;
+    color: #155724;
+}
+
+.format-badge.pdf {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.format-badge.csv {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-badge.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.processing {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 4px;
+    border: none;
+    background: none;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.download-btn:hover {
+    background: #e6f7ff;
+    color: #0066cc;
+}
+
+.view-btn:hover {
+    background: #f0f8ff;
+    color: #0066cc;
+}
+
+.delete-btn:hover {
+    background: #ffe6e6;
+    color: #cc0000;
+}
+
+.large-modal .modal-content {
+    max-width: 800px;
+}
+
+.form-step {
+    display: none;
+    margin-bottom: 2rem;
+}
+
+.form-step.active {
+    display: block;
+}
+
+.report-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.report-type-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.report-type-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.report-type-option input:checked + .option-content {
+    border-color: #007bff;
+    background: #f8f9ff;
+}
+
+.option-content i {
+    font-size: 2rem;
+    color: #6c757d;
+}
+
+.report-type-option input:checked + .option-content i {
+    color: #007bff;
+}
+
+.custom-date-range {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.report-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-reports-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .report-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-reports-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .report-type-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Reports Dashboard Scripts -->
+<script>
+let currentStep = 1;
+const totalSteps = 3;
+
+function navigateToReports(category) {
+    window.location.href = `/reports/${category}`;
+}
+
+function generateQuickReport(reportType) {
+    showNotification(`Generating ${reportType} report...`, 'info');
+    
+    // Mock quick report generation
+    setTimeout(() => {
+        const fileName = `${reportType}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        showNotification(`${reportType} report generated successfully!`, 'success');
+        
+        // Mock download
+        const link = document.createElement('a');
+        link.href = '#';
+        link.download = fileName;
+        link.click();
+    }, 2000);
+}
+
+function viewAllReports() {
+    alert('View all reports interface will be opened.');
+}
+
+function downloadReport(reportId) {
+    showNotification('Downloading report...', 'info');
+    setTimeout(() => {
+        showNotification('Report downloaded successfully!', 'success');
+    }, 1500);
+}
+
+function viewReport(reportId) {
+    alert(`Viewing report: ${reportId}`);
+}
+
+function deleteReport(reportId) {
+    if (confirm('Are you sure you want to delete this report?')) {
+        showNotification('Report deleted successfully!', 'success');
+        setTimeout(() => location.reload(), 1000);
+    }
+}
+
+function openScheduleModal() {
+    alert('Schedule report modal will be opened.');
+}
+
+function openCustomReportModal() {
+    document.getElementById('customReportModal').style.display = 'block';
+    currentStep = 1;
+    showStep(1);
+}
+
+function closeCustomReportModal() {
+    document.getElementById('customReportModal').style.display = 'none';
+    document.getElementById('customReportForm').reset();
+    currentStep = 1;
+    showStep(1);
+}
+
+function changeStep(direction) {
+    if (direction === 1 && currentStep < totalSteps) {
+        if (validateCurrentStep()) {
+            currentStep++;
+            showStep(currentStep);
+            if (currentStep === totalSteps) {
+                updateSummary();
+            }
+        }
+    } else if (direction === -1 && currentStep > 1) {
+        currentStep--;
+        showStep(currentStep);
+    }
+}
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+    
+    // Show current step
+    document.querySelector(`.form-step[data-step="${step}"]`).classList.add('active');
+    
+    // Update navigation buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    prevBtn.style.display = step === 1 ? 'none' : 'inline-flex';
+    nextBtn.style.display = step === totalSteps ? 'none' : 'inline-flex';
+    generateBtn.style.display = step === totalSteps ? 'inline-flex' : 'none';
+}
+
+function validateCurrentStep() {
+    if (currentStep === 1) {
+        const reportType = document.querySelector('input[name="reportType"]:checked');
+        if (!reportType) {
+            alert('Please select a report type.');
+            return false;
+        }
+    }
+    return true;
+}
+
+function updateSummary() {
+    const formData = new FormData(document.getElementById('customReportForm'));
+    
+    document.getElementById('summaryReportType').textContent = 
+        formData.get('reportType') ? formData.get('reportType').toUpperCase() : '-';
+    document.getElementById('summaryDateRange').textContent = 
+        formData.get('dateRange') || '-';
+    document.getElementById('summaryFilters').textContent = 
+        formData.get('classFilter') ? `Class: ${formData.get('classFilter')}` : 'None';
+    document.getElementById('summaryFormat').textContent = 
+        formData.get('format') || '-';
+}
+
+function generateCustomReport(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const reportData = Object.fromEntries(formData.entries());
+    
+    showNotification('Generating custom report...', 'info');
+    
+    // Mock report generation
+    fetch('/reports/generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reportData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report generated successfully!', 'success');
+            closeCustomReportModal();
+            
+            // Mock export
+            setTimeout(() => {
+                exportReport(reportData.reportType, reportData.format, reportData);
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Report generation failed. Please try again.', 'error');
+    });
+}
+
+function exportReport(reportType, format, filters) {
+    const exportData = {
+        reportType,
+        format,
+        filters: JSON.stringify(filters)
+    };
+    
+    fetch('/reports/export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(exportData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Report exported successfully!', 'success');
+            
+            // Mock download
+            const link = document.createElement('a');
+            link.href = data.downloadUrl;
+            link.download = data.fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        showNotification('Export failed. Please try again.', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    
+    let bgColor = '#28a745';
+    if (type === 'error') bgColor = '#dc3545';
+    if (type === 'info') bgColor = '#17a2b8';
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${bgColor};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Handle date range change
+document.getElementById('dateRange').addEventListener('change', function() {
+    const customRange = document.getElementById('customDateRange');
+    if (this.value === 'custom') {
+        customRange.style.display = 'block';
+    } else {
+        customRange.style.display = 'none';
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('customReportModal');
+    if (event.target === modal) {
+        closeCustomReportModal();
+    }
+};
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Add CSS animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
