@@ -354,36 +354,36 @@ class TenantConfigurationService {
             name: 'Student Management',
             description: 'Student enrollment, numbering, and validation settings',
             icon: 'fas fa-user-graduate',
-            categories: ['numbering', 'validation', 'custom_fields']
+            categories: ['numbering', 'validation', 'custom_fields'],
          },
          {
             id: 'academic_settings',
             name: 'Academic Settings',
             description: 'Grading system, subjects, and academic year configuration',
             icon: 'fas fa-graduation-cap',
-            categories: ['grading', 'subjects', 'calendar']
+            categories: ['grading', 'subjects', 'calendar'],
          },
          {
             id: 'school_management',
             name: 'School Management',
             description: 'School capacity, types, and facilities configuration',
             icon: 'fas fa-school',
-            categories: ['capacity', 'facilities', 'structure']
+            categories: ['capacity', 'facilities', 'structure'],
          },
          {
             id: 'system_preferences',
             name: 'System Preferences',
             description: 'Locale, notifications, and backup settings',
             icon: 'fas fa-cog',
-            categories: ['locale', 'notifications', 'backup']
+            categories: ['locale', 'notifications', 'backup'],
          },
          {
             id: 'feature_flags',
             name: 'Feature Flags',
             description: 'Module and feature availability controls',
             icon: 'fas fa-toggle-on',
-            categories: ['modules', 'advanced', 'compliance']
-         }
+            categories: ['modules', 'advanced', 'compliance'],
+         },
       ];
    }
 
@@ -399,15 +399,15 @@ class TenantConfigurationService {
                   label: 'Admission Number Format',
                   description: 'Format for student admission numbers (e.g., ADM-{YYYY}-{####})',
                   immutable_after_activation: true,
-                  default: 'ADM-{YYYY}-{####}'
+                  default: 'ADM-{YYYY}-{####}',
                },
                roll_number_format: {
                   type: 'text',
                   label: 'Roll Number Format',
                   description: 'Format for student roll numbers',
                   immutable_after_activation: true,
-                  default: '{CLASS}-{##}'
-               }
+                  default: '{CLASS}-{##}',
+               },
             },
             validation: {
                admission_number_unique_across: {
@@ -415,10 +415,10 @@ class TenantConfigurationService {
                   label: 'Admission Number Uniqueness',
                   options: [
                      { value: 'trust', label: 'Across Trust' },
-                     { value: 'school', label: 'Within School' }
+                     { value: 'school', label: 'Within School' },
                   ],
                   high_impact: true,
-                  default: 'school'
+                  default: 'school',
                },
                age_limits: {
                   min_age_years: {
@@ -426,17 +426,17 @@ class TenantConfigurationService {
                      label: 'Minimum Age (Years)',
                      min: 2,
                      max: 25,
-                     default: 3
+                     default: 3,
                   },
                   max_age_years: {
                      type: 'number',
                      label: 'Maximum Age (Years)',
                      min: 5,
                      max: 30,
-                     default: 18
-                  }
-               }
-            }
+                     default: 18,
+                  },
+               },
+            },
          },
          academic_settings: {
             grading: {
@@ -446,34 +446,34 @@ class TenantConfigurationService {
                   options: [
                      { value: 'percentage', label: 'Percentage (0-100)' },
                      { value: 'grade', label: 'Letter Grade (A-F)' },
-                     { value: 'points', label: 'Points System' }
+                     { value: 'points', label: 'Points System' },
                   ],
                   immutable_after_activation: true,
-                  default: 'percentage'
+                  default: 'percentage',
                },
                passing_marks_percentage: {
                   type: 'number',
                   label: 'Passing Marks (%)',
                   min: 30,
                   max: 60,
-                  default: 40
-               }
+                  default: 40,
+               },
             },
             subjects: {
                core_subjects_mandatory: {
                   type: 'checkbox',
                   label: 'Core Subjects Mandatory',
                   description: 'Require core subjects for all students',
-                  default: true
+                  default: true,
                },
                max_subjects_per_class: {
                   type: 'number',
                   label: 'Maximum Subjects per Class',
                   min: 5,
                   max: 15,
-                  default: 8
-               }
-            }
+                  default: 8,
+               },
+            },
          },
          school_management: {
             capacity: {
@@ -484,8 +484,8 @@ class TenantConfigurationService {
                   min: 1,
                   max: 100,
                   high_impact: true,
-                  default: 5
-               }
+                  default: 5,
+               },
             },
             structure: {
                class_structure: {
@@ -506,12 +506,12 @@ class TenantConfigurationService {
                      { value: '9', label: 'Class 9' },
                      { value: '10', label: 'Class 10' },
                      { value: '11', label: 'Class 11' },
-                     { value: '12', label: 'Class 12' }
+                     { value: '12', label: 'Class 12' },
                   ],
                   high_impact: true,
-                  default: ['1', '2', '3', '4', '5']
-               }
-            }
+                  default: ['1', '2', '3', '4', '5'],
+               },
+            },
          },
          system_preferences: {
             locale: {
@@ -521,9 +521,9 @@ class TenantConfigurationService {
                   options: [
                      { value: 'Asia/Kolkata', label: 'India Standard Time' },
                      { value: 'Asia/Dubai', label: 'UAE Time' },
-                     { value: 'UTC', label: 'UTC' }
+                     { value: 'UTC', label: 'UTC' },
                   ],
-                  default: 'Asia/Kolkata'
+                  default: 'Asia/Kolkata',
                },
                currency: {
                   type: 'select',
@@ -531,24 +531,24 @@ class TenantConfigurationService {
                   options: [
                      { value: 'INR', label: 'Indian Rupee (₹)' },
                      { value: 'USD', label: 'US Dollar ($)' },
-                     { value: 'AED', label: 'UAE Dirham (AED)' }
+                     { value: 'AED', label: 'UAE Dirham (AED)' },
                   ],
                   immutable_after_activation: true,
-                  default: 'INR'
-               }
+                  default: 'INR',
+               },
             },
             notifications: {
                email_notifications: {
                   type: 'checkbox',
                   label: 'Email Notifications',
-                  default: true
+                  default: true,
                },
                sms_notifications: {
                   type: 'checkbox',
                   label: 'SMS Notifications',
-                  default: false
-               }
-            }
+                  default: false,
+               },
+            },
          },
          feature_flags: {
             modules: {
@@ -556,37 +556,37 @@ class TenantConfigurationService {
                   type: 'checkbox',
                   label: 'Student Management Module',
                   description: 'Enable student registration and management',
-                  default: true
+                  default: true,
                },
                fee_management: {
                   type: 'checkbox',
                   label: 'Fee Management Module',
                   description: 'Enable fee collection and tracking',
-                  default: true
+                  default: true,
                },
                examination_system: {
                   type: 'checkbox',
                   label: 'Examination System',
                   description: 'Enable exams and grade management',
                   high_impact: true,
-                  default: false
-               }
+                  default: false,
+               },
             },
             advanced: {
                custom_fields: {
                   type: 'checkbox',
                   label: 'Custom Fields',
                   description: 'Allow custom field creation',
-                  default: false
+                  default: false,
                },
                api_access: {
                   type: 'checkbox',
                   label: 'API Access',
                   description: 'Enable REST API access',
-                  default: false
-               }
-            }
-         }
+                  default: false,
+               },
+            },
+         },
       };
 
       return schemas[module] || {};
@@ -598,12 +598,12 @@ class TenantConfigurationService {
    async validateConfigChange(trustId, module, configData, isActive) {
       const schema = await this.getModuleSchema(module);
       const currentConfig = await this.getTenantConfiguration(trustId);
-      
+
       const result = {
          isValid: true,
          errors: [],
          warnings: [],
-         requiresConfirmation: false
+         requiresConfirmation: false,
       };
 
       // Check immutable fields
@@ -637,15 +637,15 @@ class TenantConfigurationService {
     */
    checkImmutableFields(schema, currentConfig, newConfig, module) {
       const violations = [];
-      
+
       const checkFields = (schemaObj, configPath = '') => {
          for (const [key, fieldSchema] of Object.entries(schemaObj)) {
             const fullPath = configPath ? `${configPath}.${key}` : key;
-            
+
             if (fieldSchema.immutable_after_activation) {
                const currentValue = this.getNestedValue(currentConfig, `${module}.${fullPath}`);
                const newValue = this.getNestedValue(newConfig, fullPath);
-               
+
                if (currentValue !== undefined && currentValue !== newValue) {
                   violations.push(`${fieldSchema.label || key} cannot be changed after tenant activation`);
                }
@@ -654,7 +654,7 @@ class TenantConfigurationService {
             }
          }
       };
-      
+
       checkFields(schema);
       return violations;
    }
@@ -664,15 +664,15 @@ class TenantConfigurationService {
     */
    checkHighImpactFields(schema, currentConfig, newConfig, module) {
       const warnings = [];
-      
+
       const checkFields = (schemaObj, configPath = '') => {
          for (const [key, fieldSchema] of Object.entries(schemaObj)) {
             const fullPath = configPath ? `${configPath}.${key}` : key;
-            
+
             if (fieldSchema.high_impact) {
                const currentValue = this.getNestedValue(currentConfig, `${module}.${fullPath}`);
                const newValue = this.getNestedValue(newConfig, fullPath);
-               
+
                if (currentValue !== newValue) {
                   warnings.push(`Changing ${fieldSchema.label || key} may affect existing data`);
                }
@@ -681,7 +681,7 @@ class TenantConfigurationService {
             }
          }
       };
-      
+
       checkFields(schema);
       return warnings;
    }
@@ -691,12 +691,12 @@ class TenantConfigurationService {
     */
    validateFieldConstraints(schema, configData) {
       const violations = [];
-      
+
       const validateFields = (schemaObj, data, configPath = '') => {
          for (const [key, fieldSchema] of Object.entries(schemaObj)) {
             const fullPath = configPath ? `${configPath}.${key}` : key;
             const value = this.getNestedValue(data, fullPath);
-            
+
             if (fieldSchema.type) {
                // Validate based on field type
                switch (fieldSchema.type) {
@@ -717,7 +717,7 @@ class TenantConfigurationService {
                      break;
                   case 'select':
                      if (value !== undefined && fieldSchema.options) {
-                        const validValues = fieldSchema.options.map(opt => opt.value);
+                        const validValues = fieldSchema.options.map((opt) => opt.value);
                         if (!validValues.includes(value)) {
                            violations.push(`${fieldSchema.label || key} must be one of: ${validValues.join(', ')}`);
                         }
@@ -729,7 +729,7 @@ class TenantConfigurationService {
             }
          }
       };
-      
+
       validateFields(schema, configData);
       return violations;
    }
@@ -739,20 +739,20 @@ class TenantConfigurationService {
     */
    async applyConfigChange(trustId, module, configData, userId) {
       const currentConfig = await this.getTenantConfiguration(trustId);
-      
+
       // Merge new configuration
       const updatedConfig = { ...currentConfig };
       updatedConfig[module] = { ...updatedConfig[module], ...configData };
-      
+
       // Save configuration (you'll need to implement the update method)
       await this.updateTenantConfiguration(trustId, updatedConfig);
-      
+
       // Log change for audit
       await this.logConfigChange(trustId, module, configData, userId);
-      
+
       // Clear cache
       this.clearCache(trustId);
-      
+
       return updatedConfig;
    }
 
@@ -764,12 +764,9 @@ class TenantConfigurationService {
          const { dbManager } = require('../models/system/database');
          const systemDb = await dbManager.getSystemDB();
          const TenantConfiguration = systemDb.models.TenantConfiguration;
-         
-         await TenantConfiguration.update(
-            configData,
-            { where: { trust_id: trustId } }
-         );
-         
+
+         await TenantConfiguration.update(configData, { where: { trust_id: trustId } });
+
          logger.info(`Updated tenant configuration for trust ${trustId}`);
       } catch (error) {
          logger.error('Error updating tenant configuration:', error);
@@ -798,7 +795,7 @@ class TenantConfigurationService {
             changes: 'Updated admission number format',
             changed_by: 'System Admin',
             changed_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-            impact: 'low'
+            impact: 'low',
          },
          {
             id: 2,
@@ -806,8 +803,8 @@ class TenantConfigurationService {
             changes: 'Enabled examination system',
             changed_by: 'System Admin',
             changed_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-            impact: 'high'
-         }
+            impact: 'high',
+         },
       ];
    }
 

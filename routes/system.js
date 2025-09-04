@@ -233,14 +233,17 @@ router.put(
  * Tenant Configuration Management Routes
  */
 // Get tenant configuration dashboard
-router.get('/tenants/:id/config', authenticate, requireSystemAdmin, 
+router.get(
+   '/tenants/:id/config',
+   authenticate,
+   requireSystemAdmin,
    asyncHandler(async (req, res) => {
       try {
          const trustId = req.params.id;
          const tenantConfig = await TenantConfigurationService.getTenantConfiguration(trustId);
          const configModules = await TenantConfigurationService.getConfigurableModules();
          const changeHistory = await TenantConfigurationService.getChangeHistory(trustId, 10);
-         
+
          res.render('pages/system/tenants/config/dashboard', {
             layout: 'main',
             title: 'Tenant Configuration',
@@ -248,7 +251,7 @@ router.get('/tenants/:id/config', authenticate, requireSystemAdmin,
             configModules,
             changeHistory,
             trustId,
-            currentPath: req.path
+            currentPath: req.path,
          });
       } catch (error) {
          console.error('Error loading tenant config dashboard:', error);
@@ -259,7 +262,10 @@ router.get('/tenants/:id/config', authenticate, requireSystemAdmin,
 );
 
 // Get module configuration form
-router.get('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
+router.get(
+   '/tenants/:id/config/:module',
+   authenticate,
+   requireSystemAdmin,
    asyncHandler(async (req, res) => {
       try {
          const { id: trustId, module } = req.params;
@@ -267,12 +273,12 @@ router.get('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
          const moduleSchema = await TenantConfigurationService.getModuleSchema(module);
          const customFields = await TenantConfigurationService.getCustomFields(trustId, module);
          const trust = await trustService.getTrustById(trustId);
-         
+
          // Check if tenant is active (affects immutable settings)
          const isActive = trust && trust.status === 'active';
-         
-         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-         
+
+         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+
          res.render('pages/system/tenants/config/module', {
             layout: 'main',
             title: `${moduleTitle} Configuration`,
@@ -282,7 +288,7 @@ router.get('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
             module,
             trustId,
             isActive,
-            currentPath: req.path
+            currentPath: req.path,
          });
       } catch (error) {
          console.error('Error loading module config:', error);
@@ -293,17 +299,20 @@ router.get('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
 );
 
 // Save module configuration
-router.post('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
+router.post(
+   '/tenants/:id/config/:module',
+   authenticate,
+   requireSystemAdmin,
    asyncHandler(async (req, res) => {
       try {
          const { id: trustId, module } = req.params;
          const configData = req.body;
          const userId = req.user.id;
-         
+
          // Get current tenant status
          const trust = await trustService.getTrustById(trustId);
          const isActive = trust && trust.status === 'active';
-         
+
          // Validate configuration changes
          const validationResult = await TenantConfigurationService.validateConfigChange(
             trustId,
@@ -311,27 +320,30 @@ router.post('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
             configData,
             isActive
          );
-         
+
          if (!validationResult.isValid) {
             req.flash('error', validationResult.errors.join(', '));
             return res.redirect(`/system/tenants/${trustId}/config/${module}`);
          }
-         
+
          // Check for high-impact changes
          if (validationResult.requiresConfirmation && !req.body.confirmed) {
             req.flash('warning', 'This change requires confirmation due to potential impact');
-            req.flash('pendingChanges', JSON.stringify({
-               module,
-               data: configData,
-               warnings: validationResult.warnings
-            }));
+            req.flash(
+               'pendingChanges',
+               JSON.stringify({
+                  module,
+                  data: configData,
+                  warnings: validationResult.warnings,
+               })
+            );
             return res.redirect(`/system/tenants/${trustId}/config/${module}?confirm=true`);
          }
-         
+
          // Apply configuration changes
          await TenantConfigurationService.applyConfigChange(trustId, module, configData, userId);
-         
-         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
          req.flash('success', `${moduleTitle} configuration updated successfully`);
          res.redirect(`/system/tenants/${trustId}/config`);
       } catch (error) {

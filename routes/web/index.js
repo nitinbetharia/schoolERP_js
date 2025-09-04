@@ -88,7 +88,7 @@ router.get('/', (req, res) => {
       // Check if user is already authenticated
       if (req.session && req.session.user) {
          const userType = req.session.userType || 'tenant';
-         
+
          // Redirect based on user type
          if (userType === 'system') {
             return res.redirect('/system');
@@ -96,7 +96,7 @@ router.get('/', (req, res) => {
             return res.redirect('/dashboard');
          }
       }
-      
+
       // If not authenticated, redirect to login
       res.redirect('/auth/login');
    } catch (error) {
