@@ -82,6 +82,29 @@ const utilityRoutes = require('./utils');
 router.use('/', authRoutes(middleware));
 router.use('/system', systemRoutes(middleware));
 
+// Root route handler
+router.get('/', (req, res) => {
+   try {
+      // Check if user is already authenticated
+      if (req.session && req.session.user) {
+         const userType = req.session.userType || 'tenant';
+         
+         // Redirect based on user type
+         if (userType === 'system') {
+            return res.redirect('/system');
+         } else {
+            return res.redirect('/dashboard');
+         }
+      }
+      
+      // If not authenticated, redirect to login
+      res.redirect('/auth/login');
+   } catch (error) {
+      logError(error, { context: 'root route handler' });
+      res.redirect('/auth/login');
+   }
+});
+
 // Core ERP functionality routes
 router.use('/students', studentsRoutes(middleware));
 router.use('/fees', feesRoutes(middleware));

@@ -16,6 +16,7 @@ const {
 } = require('../utils/validation');
 const { trustValidationSchemas } = require('../models/tenant/Trust');
 const { systemUserValidationSchemas } = require('../models/system/SystemUser');
+const TenantConfigurationService = require('../services/TenantConfigurationService');
 
 // Health check endpoint (public)
 router.get('/health', healthCheck);
@@ -225,6 +226,119 @@ router.put(
       const updatedUser = await systemAuthService.updateProfile(req.user.id, req.body);
 
       res.json(formatSuccessResponse(updatedUser, 'Profile updated successfully'));
+   })
+);
+
+/**
+ * Tenant Configuration Management Routes
+ */
+// Get tenant configuration dashboard
+router.get('/tenants/:id/config', authenticate, requireSystemAdmin, 
+   asyncHandler(async (req, res) => {
+      try {
+         const trustId = req.params.id;
+         const tenantConfig = await TenantConfigurationService.getTenantConfiguration(trustId);
+         const configModules = await TenantConfigurationService.getConfigurableModules();
+         const changeHistory = await TenantConfigurationService.getChangeHistory(trustId, 10);
+         
+         res.render('pages/system/tenants/config/dashboard', {
+            layout: 'main',
+            title: 'Tenant Configuration',
+            tenantConfig,
+            configModules,
+            changeHistory,
+            trustId,
+            currentPath: req.path
+         });
+      } catch (error) {
+         console.error('Error loading tenant config dashboard:', error);
+         req.flash('error', 'Failed to load tenant configuration');
+         res.redirect('/system/tenants');
+      }
+   })
+);
+
+// Get module configuration form
+router.get('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
+   asyncHandler(async (req, res) => {
+      try {
+         const { id: trustId, module } = req.params;
+         const tenantConfig = await TenantConfigurationService.getTenantConfiguration(trustId);
+         const moduleSchema = await TenantConfigurationService.getModuleSchema(module);
+         const customFields = await TenantConfigurationService.getCustomFields(trustId, module);
+         const trust = await trustService.getTrustById(trustId);
+         
+         // Check if tenant is active (affects immutable settings)
+         const isActive = trust && trust.status === 'active';
+         
+         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+         
+         res.render('pages/system/tenants/config/module', {
+            layout: 'main',
+            title: `${moduleTitle} Configuration`,
+            tenantConfig,
+            moduleSchema,
+            customFields,
+            module,
+            trustId,
+            isActive,
+            currentPath: req.path
+         });
+      } catch (error) {
+         console.error('Error loading module config:', error);
+         req.flash('error', 'Failed to load module configuration');
+         res.redirect(`/system/tenants/${req.params.id}/config`);
+      }
+   })
+);
+
+// Save module configuration
+router.post('/tenants/:id/config/:module', authenticate, requireSystemAdmin,
+   asyncHandler(async (req, res) => {
+      try {
+         const { id: trustId, module } = req.params;
+         const configData = req.body;
+         const userId = req.user.id;
+         
+         // Get current tenant status
+         const trust = await trustService.getTrustById(trustId);
+         const isActive = trust && trust.status === 'active';
+         
+         // Validate configuration changes
+         const validationResult = await TenantConfigurationService.validateConfigChange(
+            trustId,
+            module,
+            configData,
+            isActive
+         );
+         
+         if (!validationResult.isValid) {
+            req.flash('error', validationResult.errors.join(', '));
+            return res.redirect(`/system/tenants/${trustId}/config/${module}`);
+         }
+         
+         // Check for high-impact changes
+         if (validationResult.requiresConfirmation && !req.body.confirmed) {
+            req.flash('warning', 'This change requires confirmation due to potential impact');
+            req.flash('pendingChanges', JSON.stringify({
+               module,
+               data: configData,
+               warnings: validationResult.warnings
+            }));
+            return res.redirect(`/system/tenants/${trustId}/config/${module}?confirm=true`);
+         }
+         
+         // Apply configuration changes
+         await TenantConfigurationService.applyConfigChange(trustId, module, configData, userId);
+         
+         const moduleTitle = module.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+         req.flash('success', `${moduleTitle} configuration updated successfully`);
+         res.redirect(`/system/tenants/${trustId}/config`);
+      } catch (error) {
+         console.error('Error saving module config:', error);
+         req.flash('error', 'Failed to save configuration');
+         res.redirect(`/system/tenants/${req.params.id}/config/${req.params.module}`);
+      }
    })
 );
 

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .immutable-field { 
+            background-color: #f8f9fa; 
+            position: relative;
+        }
+        .high-impact-field {
+            border-left: 4px solid #ffc107;
+            padding-left: 12px;
+        }
+        .field-warning {
+            color: #856404;
+            font-size: 0.875rem;
+        }
+        .text-brand-primary {
+            color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- Page Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-0"><%= title %></h1>
+                        <p class="text-muted">Configure settings for this module</p>
+                    </div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="/system">System</a></li>
+                            <li class="breadcrumb-item"><a href="/system/tenants">Tenants</a></li>
+                            <li class="breadcrumb-item"><a href="/system/tenants/<%= trustId %>/config">Configuration</a></li>
+                            <li class="breadcrumb-item active"><%= module.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) %></li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <!-- Flash Messages -->
+                <% if (typeof flash !== 'undefined') { %>
+                    <% if (flash.error) { %>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i><%= flash.error %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <% } %>
+                    
+                    <% if (flash.success) { %>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i><%= flash.success %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <% } %>
+                    
+                    <% if (flash.warning && flash.pendingChanges) { %>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>High Impact Changes Detected</h5>
+                        <p class="mb-0"><%= flash.warning %></p>
+                        <% const pendingChanges = JSON.parse(flash.pendingChanges); %>
+                        <% if (pendingChanges.warnings) { %>
+                            <ul class="mt-2 mb-3">
+                                <% pendingChanges.warnings.forEach(warning => { %>
+                                <li><%= warning %></li>
+                                <% }) %>
+                            </ul>
+                        <% } %>
+                        <div class="mt-3">
+                            <form method="POST" class="d-inline">
+                                <% for (const [key, value] of Object.entries(pendingChanges.data)) { %>
+                                <input type="hidden" name="<%= key %>" value="<%= value %>">
+                                <% } %>
+                                <input type="hidden" name="confirmed" value="true">
+                                <button type="submit" class="btn btn-warning me-2">
+                                    <i class="fas fa-check me-1"></i> Confirm Changes
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="alert">
+                                <i class="fas fa-times me-1"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <% } %>
+                <% } %>
+
+                <!-- Configuration Form -->
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" id="configForm">
+                            <% 
+                            function getNestedValue(obj, path) {
+                                if (!obj || !path) return undefined;
+                                return path.split('.').reduce((current, key) => {
+                                    return current && current[key] !== undefined ? current[key] : undefined;
+                                }, obj);
+                            }
+
+                            function renderField(fieldName, fieldSchema, configPath = '', nestLevel = 0) {
+                                const fullPath = configPath ? `${configPath}.${fieldName}` : fieldName;
+                                const currentValue = tenantConfig && tenantConfig[module] ? getNestedValue(tenantConfig[module], fullPath) : undefined;
+                                const isImmutable = isActive && fieldSchema.immutable_after_activation;
+                                const isHighImpact = fieldSchema.high_impact;
+                                
+                                if (fieldSchema.type) {
+                            %>
+                            <div class="mb-3 <%= nestLevel > 0 ? 'ms-4' : '' %> <%= isHighImpact ? 'high-impact-field' : '' %>">
+                                <label for="<%= fullPath.replace(/\./g, '_') %>" class="form-label">
+                                    <%= fieldSchema.label || fieldName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                    <% if (isImmutable) { %>
+                                    <i class="fas fa-lock text-warning ms-1" title="Cannot be changed after activation"></i>
+                                    <% } else if (isHighImpact) { %>
+                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="High impact change"></i>
+                                    <% } %>
+                                </label>
+                                
+                                <% if (fieldSchema.type === 'text') { %>
+                                <input type="text" 
+                                       class="form-control <%= isImmutable ? 'immutable-field' : '' %>" 
+                                       id="<%= fullPath.replace(/\./g, '_') %>" 
+                                       name="<%= fullPath %>" 
+                                       value="<%= currentValue || fieldSchema.default || '' %>"
+                                       <%= isImmutable ? 'readonly' : '' %>
+                                       <%= fieldSchema.required ? 'required' : '' %>>
+                                       
+                                <% } else if (fieldSchema.type === 'number') { %>
+                                <input type="number" 
+                                       class="form-control <%= isImmutable ? 'immutable-field' : '' %>" 
+                                       id="<%= fullPath.replace(/\./g, '_') %>" 
+                                       name="<%= fullPath %>" 
+                                       value="<%= currentValue !== undefined ? currentValue : (fieldSchema.default || '') %>"
+                                       min="<%= fieldSchema.min || '' %>"
+                                       max="<%= fieldSchema.max || '' %>"
+                                       <%= isImmutable ? 'readonly' : '' %>
+                                       <%= fieldSchema.required ? 'required' : '' %>>
+                                       
+                                <% } else if (fieldSchema.type === 'select') { %>
+                                <select class="form-select <%= isImmutable ? 'immutable-field' : '' %>" 
+                                        id="<%= fullPath.replace(/\./g, '_') %>" 
+                                        name="<%= fullPath %>"
+                                        <%= isImmutable ? 'disabled' : '' %>
+                                        <%= fieldSchema.required ? 'required' : '' %>>
+                                    <% fieldSchema.options.forEach(option => { %>
+                                    <option value="<%= option.value %>" 
+                                            <%= (currentValue !== undefined ? currentValue : fieldSchema.default) === option.value ? 'selected' : '' %>>
+                                        <%= option.label %>
+                                    </option>
+                                    <% }) %>
+                                </select>
+                                
+                                <% } else if (fieldSchema.type === 'checkbox') { %>
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           id="<%= fullPath.replace(/\./g, '_') %>" 
+                                           name="<%= fullPath %>" 
+                                           value="true"
+                                           <% 
+                                           let isChecked = false;
+                                           if (currentValue !== undefined) {
+                                               isChecked = currentValue === true || currentValue === 'true';
+                                           } else {
+                                               isChecked = fieldSchema.default === true;
+                                           }
+                                           %>
+                                           <%= isChecked ? 'checked' : '' %>
+                                           <%= isImmutable ? 'disabled' : '' %>>
+                                    <label class="form-check-label" for="<%= fullPath.replace(/\./g, '_') %>">
+                                        Enable
+                                    </label>
+                                </div>
+                                
+                                <% } else if (fieldSchema.type === 'multiselect') { %>
+                                <select class="form-select <%= isImmutable ? 'immutable-field' : '' %>" 
+                                        id="<%= fullPath.replace(/\./g, '_') %>" 
+                                        name="<%= fullPath %>"
+                                        multiple
+                                        size="5"
+                                        <%= isImmutable ? 'disabled' : '' %>>
+                                    <% 
+                                    let selectedValues = [];
+                                    if (currentValue !== undefined) {
+                                        selectedValues = Array.isArray(currentValue) ? currentValue : [currentValue];
+                                    } else if (fieldSchema.default) {
+                                        selectedValues = Array.isArray(fieldSchema.default) ? fieldSchema.default : [fieldSchema.default];
+                                    }
+                                    %>
+                                    <% fieldSchema.options.forEach(option => { %>
+                                    <option value="<%= option.value %>" 
+                                            <%= selectedValues.includes(option.value) ? 'selected' : '' %>>
+                                        <%= option.label %>
+                                    </option>
+                                    <% }) %>
+                                </select>
+                                <% } %>
+                                
+                                <% if (fieldSchema.description) { %>
+                                <div class="form-text"><%= fieldSchema.description %></div>
+                                <% } %>
+                                
+                                <% if (isImmutable) { %>
+                                <div class="field-warning">
+                                    <i class="fas fa-info-circle me-1"></i>This setting cannot be changed after tenant activation
+                                </div>
+                                <% } else if (isHighImpact) { %>
+                                <div class="field-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Changes to this setting may affect existing data
+                                </div>
+                                <% } %>
+                            </div>
+                            <%
+                                } else if (typeof fieldSchema === 'object') {
+                                    // Render nested fields
+                            %>
+                            <div class="mb-4 <%= nestLevel > 0 ? 'ms-4' : '' %>">
+                                <h6 class="text-muted border-bottom pb-2">
+                                    <%= fieldName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                </h6>
+                                <% for (const [nestedFieldName, nestedFieldSchema] of Object.entries(fieldSchema)) { %>
+                                    <% renderField(nestedFieldName, nestedFieldSchema, fullPath, nestLevel + 1); %>
+                                <% } %>
+                            </div>
+                            <%
+                                }
+                            }
+                            %>
+                            
+                            <% for (const [categoryName, categoryFields] of Object.entries(moduleSchema)) { %>
+                            <div class="mb-4">
+                                <h5 class="text-brand-primary border-bottom pb-2 mb-3">
+                                    <%= categoryName.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) %>
+                                </h5>
+                                
+                                <% for (const [fieldName, fieldSchema] of Object.entries(categoryFields)) { %>
+                                    <% renderField(fieldName, fieldSchema); %>
+                                <% } %>
+                            </div>
+                            <% } %>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                <a href="/system/tenants/<%= trustId %>/config" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Back to Overview
+                                </a>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                        <i class="fas fa-undo me-1"></i> Reset
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i> Save Configuration
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('configForm');
+            const highImpactFields = document.querySelectorAll('.high-impact-field input, .high-impact-field select');
+            
+            // Store original values
+            highImpactFields.forEach(field => {
+                field.dataset.originalValue = field.value;
+            });
+            
+            // Form submission handling
+            form.addEventListener('submit', function(e) {
+                const hasHighImpactChanges = Array.from(highImpactFields).some(field => {
+                    return field.dataset.originalValue !== field.value;
+                });
+                
+                if (hasHighImpactChanges && !form.dataset.confirmed) {
+                    e.preventDefault();
+                    if (confirm('You are making high-impact changes that may affect existing data. Continue?')) {
+                        form.dataset.confirmed = 'true';
+                        form.submit();
+                    }
+                }
+            });
+        });
+
+        function resetForm() {
+            if (confirm('Reset all changes to original values?')) {
+                document.getElementById('configForm').reset();
+            }
+        }
+    </script>
+</body>
+</html>

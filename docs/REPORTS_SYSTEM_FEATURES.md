@@ -7,6 +7,7 @@ The Reports System provides comprehensive reporting and analytics capabilities f
 ## Core Features
 
 ### 1. Student Analytics Reports
+
 - **Enrollment Analysis**: Student distribution across classes and sections
 - **Demographics Breakdown**: Gender, age, locality distribution
 - **Academic Performance**: Grade analysis and progress tracking
@@ -14,6 +15,7 @@ The Reports System provides comprehensive reporting and analytics capabilities f
 - **Attendance Patterns**: Student attendance trends and analysis
 
 ### 2. Financial Analytics
+
 - **Collection Reports**: Daily, monthly, yearly collection analysis
 - **Outstanding Analysis**: Aged analysis of pending amounts
 - **Payment Method Breakdown**: Analysis by payment modes
@@ -21,12 +23,14 @@ The Reports System provides comprehensive reporting and analytics capabilities f
 - **Expense Tracking**: School expenditure analysis and budgeting
 
 ### 3. Administrative Reports
+
 - **Staff Reports**: Teacher performance and workload analysis
 - **System Usage**: User activity and system utilization
 - **Audit Reports**: Complete audit trail and compliance reports
 - **Custom Reports**: User-defined report templates
 
 ### 4. Advanced Visualization
+
 - **Interactive Charts**: Drill-down capability with real-time data
 - **Dashboard Widgets**: Customizable dashboard components
 - **Trend Analysis**: Historical data visualization with forecasting
@@ -35,6 +39,7 @@ The Reports System provides comprehensive reporting and analytics capabilities f
 ## Export Capabilities
 
 ### Excel Export Features
+
 - **Formatted Worksheets**: Professional formatting with headers
 - **Multiple Sheets**: Complex reports with multiple data views
 - **Formula Integration**: Calculated fields and totals
@@ -42,6 +47,7 @@ The Reports System provides comprehensive reporting and analytics capabilities f
 - **Template System**: Reusable report templates
 
 ### PDF Export Features
+
 - **Professional Layout**: Branded PDF reports with logos
 - **Chart Integration**: Vector graphics for clear printing
 - **Multi-page Support**: Automatic page breaks and formatting
@@ -63,6 +69,7 @@ class AdvancedReportingService {
 ```
 
 ### Database Integration
+
 - **Multi-table Joins**: Complex queries across related entities
 - **Aggregation Functions**: Statistical calculations and summaries
 - **Caching System**: Report result caching for performance
@@ -71,18 +78,21 @@ class AdvancedReportingService {
 ### Report Categories
 
 #### Student Reports
+
 - **Student List Reports**: Complete student directory with filters
 - **Admission Reports**: New admissions analysis by period
 - **Academic Progress**: Class-wise performance analysis
 - **Fee Status Reports**: Payment status and outstanding amounts
 
-#### Financial Reports  
+#### Financial Reports
+
 - **Collection Summary**: Total collections with breakdowns
 - **Outstanding Reports**: Pending amounts with aging analysis
 - **Payment Analysis**: Payment method and timing analysis
 - **Budget Reports**: Budget vs actual analysis
 
 #### Administrative Reports
+
 - **User Activity**: System usage and user behavior analysis
 - **Audit Trail**: Complete system activity logging
 - **Performance Metrics**: System performance and efficiency
@@ -91,18 +101,21 @@ class AdvancedReportingService {
 ## User Interface Features
 
 ### Report Dashboard
+
 - **Quick Stats Cards**: Key metrics at a glance
-- **Recent Reports**: Last generated reports for quick access  
+- **Recent Reports**: Last generated reports for quick access
 - **Favorite Reports**: Bookmarked frequently used reports
 - **Scheduled Reports**: Automated report generation status
 
 ### Report Builder
+
 - **Filter System**: Date range, class, section, user filters
 - **Column Selection**: Customizable report columns
 - **Sorting Options**: Multiple sort criteria
 - **Preview Mode**: Report preview before generation
 
 ### Analytics Dashboard
+
 - **Chart Library**: Various chart types (bar, line, pie, area)
 - **Interactive Elements**: Click-to-drill functionality
 - **Export Options**: Direct export from dashboard
@@ -113,6 +126,7 @@ class AdvancedReportingService {
 ### Standard Reports
 
 #### Financial Reports
+
 1. **Fee Collection Report**
    - Daily/Monthly/Yearly collection analysis
    - Payment method breakdown
@@ -125,7 +139,8 @@ class AdvancedReportingService {
    - Class-wise outstanding summary
    - Recovery rate analysis
 
-#### Student Reports  
+#### Student Reports
+
 1. **Student Directory Report**
    - Complete student information
    - Contact details and demographics
@@ -139,6 +154,7 @@ class AdvancedReportingService {
    - Subject-wise analytics
 
 #### Administrative Reports
+
 1. **System Usage Report**
    - User activity analysis
    - Feature utilization metrics
@@ -146,6 +162,7 @@ class AdvancedReportingService {
    - System performance indicators
 
 ### Custom Reports
+
 - **Report Builder Tool**: Drag-and-drop report creation
 - **Template System**: Reusable report templates
 - **Conditional Formatting**: Dynamic styling based on data
@@ -154,18 +171,21 @@ class AdvancedReportingService {
 ## Advanced Analytics Features
 
 ### Data Analysis Engine
+
 - **Statistical Functions**: Mean, median, mode, standard deviation
 - **Trend Analysis**: Growth rates and pattern recognition
 - **Correlation Analysis**: Relationship between variables
 - **Forecasting**: Predictive analytics for planning
 
 ### Comparative Analysis
+
 - **Year-over-Year**: Historical data comparison
 - **Class Comparison**: Performance across different classes
 - **Benchmark Analysis**: Comparison against standards
 - **Peer Analysis**: Comparison with similar institutions
 
 ### Key Performance Indicators (KPIs)
+
 - **Collection Efficiency**: Payment collection percentage
 - **Student Retention**: Student retention rates
 - **Academic Performance**: Overall grade averages
@@ -174,6 +194,7 @@ class AdvancedReportingService {
 ## Configuration Options
 
 ### Report Settings
+
 ```javascript
 {
   "reportSettings": {
@@ -192,6 +213,7 @@ class AdvancedReportingService {
 ```
 
 ### Access Controls
+
 - **Role-based Reports**: Different report access per role
 - **Data Filtering**: Automatic data filtering by user permissions
 - **Export Restrictions**: Control over export functionality
@@ -200,18 +222,21 @@ class AdvancedReportingService {
 ## Integration Points
 
 ### With Fee Management
+
 - Real-time fee collection data
 - Outstanding amount calculations
 - Payment method analysis
 - Revenue recognition reports
 
 ### With Student Management
+
 - Student demographic analysis
 - Enrollment trend reports
 - Academic performance integration
 - Parent communication tracking
 
 ### With User Management
+
 - User activity reporting
 - Permission audit reports
 - Login pattern analysis
@@ -220,12 +245,14 @@ class AdvancedReportingService {
 ## Performance Optimization
 
 ### Caching Strategy
+
 - **Query Result Caching**: Cache complex query results
 - **Report Template Caching**: Pre-compiled report templates
 - **Chart Data Caching**: Cached visualization data
 - **Incremental Updates**: Delta-based cache updates
 
 ### Database Optimization
+
 - **Indexed Queries**: Optimized database indexes
 - **Query Partitioning**: Partitioned tables for large datasets
 - **Aggregation Tables**: Pre-calculated summary tables
@@ -234,12 +261,14 @@ class AdvancedReportingService {
 ## Security Features
 
 ### Data Protection
+
 - **Role-based Access**: Report access based on user roles
 - **Data Masking**: Automatic sensitive data protection
 - **Audit Logging**: Complete report access audit trail
 - **Export Controls**: Controlled export functionality
 
 ### Privacy Compliance
+
 - **Data Anonymization**: Student data anonymization options
 - **Retention Policies**: Automatic data retention management
 - **Consent Management**: Parent consent tracking
@@ -248,29 +277,35 @@ class AdvancedReportingService {
 ## Usage Examples
 
 ### Generate Student Analytics
-```javascript
-const report = await reportingService.generateStudentAnalyticsReport({
-  startDate: '2024-01-01',
-  endDate: '2024-06-30',
-  classId: 10,
-  reportType: 'comprehensive'
-}, tenantDb);
-```
 
-### Export to Excel
 ```javascript
-const excelBuffer = await reportingService.exportToExcel(
-  reportData, 
-  'Student Analytics'
+const report = await reportingService.generateStudentAnalyticsReport(
+   {
+      startDate: '2024-01-01',
+      endDate: '2024-06-30',
+      classId: 10,
+      reportType: 'comprehensive',
+   },
+   tenantDb
 );
 ```
 
-### Generate Financial Report
+### Export to Excel
+
 ```javascript
-const financialReport = await reportingService.generateFinancialAnalyticsReport({
-  startDate: '2024-01-01',
-  endDate: '2024-12-31'
-}, tenantDb);
+const excelBuffer = await reportingService.exportToExcel(reportData, 'Student Analytics');
+```
+
+### Generate Financial Report
+
+```javascript
+const financialReport = await reportingService.generateFinancialAnalyticsReport(
+   {
+      startDate: '2024-01-01',
+      endDate: '2024-12-31',
+   },
+   tenantDb
+);
 ```
 
 ## API Endpoints
@@ -287,6 +322,6 @@ GET    /reports/templates      # Report templates
 
 ---
 
-*Last Updated: September 3, 2025*  
-*Module Version: 2.0*  
-*Implementation Status: Complete*
+_Last Updated: September 3, 2025_  
+_Module Version: 2.0_  
+_Implementation Status: Complete_
