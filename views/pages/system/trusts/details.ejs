@@ -1,0 +1,171 @@
+<!-- Trust Details Page -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">
+         <i class="fas fa-building"></i> <%= trust.trust_name %> - Details
+      </h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+         <a href="/system/trusts/<%= trust.id %>/edit" class="btn btn-brand-primary me-2">
+            <i class="bi bi-pencil"></i> Edit Trust
+         </a>
+         <a href="/system/trusts" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Trusts
+         </a>
+      </div>
+   </div>
+
+   <div class="row g-4">
+      <!-- Basic Information -->
+      <div class="col-12 col-lg-8">
+         <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+               <h5 class="card-title mb-0">Trust Information</h5>
+               <span class="badge <%= trust.status === 'ACTIVE' ? 'bg-success' : trust.status === 'SETUP_PENDING' ? 'bg-warning' : 'bg-secondary' %>">
+                  <%= trust.status.replace('_', ' ') %>
+               </span>
+            </div>
+            <div class="card-body">
+               <div class="row g-3">
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Trust Name</label>
+                     <p class="fw-semibold"><%= trust.trust_name %></p>
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Trust Code</label>
+                     <p class="fw-semibold"><code><%= trust.trust_code %></code></p>
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Registration Number</label>
+                     <p class="fw-semibold"><%= trust.registration_number || 'Not provided' %></p>
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Subdomain</label>
+                     <p class="fw-semibold">
+                        <a href="http://<%= trust.subdomain %>.localhost:3000" target="_blank" class="text-decoration-none">
+                           <%= trust.subdomain %>.localhost:3000
+                           <i class="bi bi-box-arrow-up-right small"></i>
+                        </a>
+                     </p>
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Database Name</label>
+                     <p class="fw-semibold"><code><%= trust.database_name %></code></p>
+                  </div>
+                  <div class="col-md-6">
+                     <label class="form-label text-muted">Created Date</label>
+                     <p class="fw-semibold"><%= new Date(trust.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                     }) %></p>
+                  </div>
+                  <% if (trust.address) { %>
+                  <div class="col-12">
+                     <label class="form-label text-muted">Address</label>
+                     <p class="fw-semibold"><%= trust.address %></p>
+                  </div>
+                  <% } %>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="col-12 col-lg-4">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">Contact Information</h5>
+            </div>
+            <div class="card-body">
+               <div class="mb-3">
+                  <label class="form-label text-muted">Email</label>
+                  <p class="fw-semibold">
+                     <a href="mailto:<%= trust.contact_email %>"><%= trust.contact_email %></a>
+                  </p>
+               </div>
+               <div class="mb-3">
+                  <label class="form-label text-muted">Phone</label>
+                  <p class="fw-semibold">
+                     <a href="tel:<%= trust.contact_phone %>"><%= trust.contact_phone %></a>
+                  </p>
+               </div>
+               <% if (trust.website) { %>
+               <div class="mb-3">
+                  <label class="form-label text-muted">Website</label>
+                  <p class="fw-semibold">
+                     <a href="<%= trust.website %>" target="_blank" class="text-decoration-none">
+                        <%= trust.website %>
+                        <i class="bi bi-box-arrow-up-right small"></i>
+                     </a>
+                  </p>
+               </div>
+               <% } %>
+            </div>
+         </div>
+
+         <!-- Quick Actions -->
+         <div class="card mt-4">
+            <div class="card-header">
+               <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+               <div class="d-grid gap-2">
+                  <% if (trust.status === 'ACTIVE') { %>
+                     <button class="btn btn-outline-warning" onclick="suspendTrust('<%= trust.id %>')">
+                        <i class="bi bi-pause-circle"></i> Suspend Trust
+                     </button>
+                  <% } else if (trust.status === 'SUSPENDED') { %>
+                     <button class="btn btn-outline-success" onclick="activateTrust('<%= trust.id %>')">
+                        <i class="bi bi-play-circle"></i> Activate Trust
+                     </button>
+                  <% } %>
+                  <a href="/system/trusts/<%= trust.id %>/config" class="btn btn-outline-secondary">
+                     <i class="fas fa-cog"></i> Configuration
+                  </a>
+                  <button class="btn btn-outline-info" onclick="viewAuditLog('<%= trust.id %>')">
+                     <i class="fas fa-clock-history"></i> Audit Log
+                  </button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <% if (trust.description) { %>
+   <!-- Description -->
+   <div class="row mt-4">
+      <div class="col-12">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">Description</h5>
+            </div>
+            <div class="card-body">
+               <p><%= trust.description %></p>
+            </div>
+         </div>
+      </div>
+   </div>
+   <% } %>
+</div>
+
+<!-- Scripts -->
+<script>
+function suspendTrust(trustId) {
+   if (confirm('Are you sure you want to suspend this trust? This will disable access for all users.')) {
+      // TODO: Implement trust suspension
+      alert('Trust suspension functionality will be implemented soon.');
+   }
+}
+
+function activateTrust(trustId) {
+   if (confirm('Are you sure you want to activate this trust?')) {
+      // TODO: Implement trust activation
+      alert('Trust activation functionality will be implemented soon.');
+   }
+}
+
+function viewAuditLog(trustId) {
+   // TODO: Implement audit log viewer
+   alert('Audit log viewer will be implemented soon.');
+}
+</script>

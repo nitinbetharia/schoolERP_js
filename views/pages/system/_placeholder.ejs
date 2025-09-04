@@ -3,12 +3,12 @@
 
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">
-        <i class="<%= icon || 'bi bi-gear' %>"></i> <%= title %>
+        <i class="<%= icon || 'fas fa-cog' %>"></i> <%= title %>
     </h1>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group me-2">
             <button type="button" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
+                <i class="fas fa-refresh"></i> Refresh
             </button>
         </div>
     </div>
@@ -48,7 +48,7 @@
                                 <% } %>
 
                                 <div class="alert alert-info border-0 bg-light">
-                                    <i class="bi bi-info-circle me-2"></i>
+                                    <i class="fas fa-info-circle me-2"></i>
                                     <strong>Development Status:</strong> This feature is currently under development.
                                     <% if (typeof eta !== 'undefined' && eta) { %>
                                         Expected completion: <strong><%= eta %></strong>
@@ -75,7 +75,7 @@
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">
-                                        <i class="bi bi-graph-up"></i> Development Progress
+                                        <i class="fas fa-chart-line"></i> Development Progress
                                     </h5>
                                 </div>
                                 <div class="card-body">

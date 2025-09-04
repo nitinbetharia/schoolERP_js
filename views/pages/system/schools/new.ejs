@@ -1,8 +1,12 @@
-<% layout('layout') %>
-<div class="container-fluid">
-   <div class="d-flex align-items-center justify-content-between mb-3">
-      <h1 class="h3 mb-0">Create School</h1>
-      <a href="/system/schools" class="btn btn-outline-secondary"> <i class="bi bi-arrow-left"></i> Back to Schools </a>
+<!-- Create School Page -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2"><i class="fas fa-plus"></i> Create School</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+         <a href="/system/schools" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Schools
+         </a>
+      </div>
    </div>
 
    <ul class="nav nav-pills mb-3" id="schoolWizard" role="tablist">
@@ -40,20 +44,30 @@
             <div class="card-body">
                <div class="row g-3">
                   <div class="form-col">
-                     <label class="form-label">School Name</label>
+                     <label class="form-label">School Name <span class="text-danger">*</span></label>
                      <input
                         type="text"
                         class="form-control"
                         id="schoolName"
-                        placeholder="e.g., Maroon International School" />
+                        name="schoolName"
+                        placeholder="e.g., Maroon International School"
+                        required />
                   </div>
                   <div class="form-col">
-                     <label class="form-label">Trust</label>
-                     <input
-                        type="text"
-                        class="form-control"
-                        id="trustName"
-                        placeholder="Select Trust (later: dropdown)" />
+                     <label class="form-label">Trust <span class="text-danger">*</span></label>
+                     <select class="form-select" id="trustId" name="trustId" required>
+                        <option value="">-- Select Trust --</option>
+                        <% if (locals.trusts && trusts.length > 0) { %>
+                           <% trusts.forEach(function(trust) { %>
+                              <option value="<%= trust.id %>" data-code="<%= trust.trust_code %>">
+                                 <%= trust.trust_name %> (<%= trust.trust_code.toUpperCase() %>)
+                              </option>
+                           <% }); %>
+                        <% } else { %>
+                           <option disabled>No active trusts available</option>
+                        <% } %>
+                     </select>
+                     <small class="form-text text-muted">School will be created under the selected trust</small>
                   </div>
                   <div class="form-col">
                      <label class="form-label">UDISE Code</label>

@@ -178,6 +178,20 @@ class SchoolERPServer {
       this.app.set('layout', 'layout'); // Use our single layout.ejs file
       this.app.set('layout extractScripts', true);
       this.app.set('layout extractStyles', true);
+
+      // Global template variables (simplified - no icon mapping)
+      this.app.use((req, res, next) => {
+         // Ensure common variables are always available with safe defaults
+         res.locals.title = res.locals.title || 'School ERP System';
+         res.locals.description = res.locals.description || 'Educational Management System';
+         res.locals.user = res.locals.user || null;
+         res.locals.tenant = res.locals.tenant || null;
+         res.locals.filters = res.locals.filters || {};
+         res.locals.pagination = res.locals.pagination || null;
+         res.locals.currentPath = res.locals.currentPath || req.path;
+
+         next();
+      });
    }
 
    /**

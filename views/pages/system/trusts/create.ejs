@@ -76,10 +76,10 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                <div
                   class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                  <h1 class="h2"><i class="bi bi-plus-circle"></i> Create New Trust</h1>
+                  <h1 class="h2"><i class="fas fa-plus"></i> Create New Trust</h1>
                   <div class="btn-toolbar mb-2 mb-md-0">
                      <a href="/system/trusts" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Back to Trusts
+                        <i class="fas fa-arrow-left"></i> Back to Trusts
                      </a>
                   </div>
                </div>
@@ -103,7 +103,7 @@
                            <form id="createTrustForm" action="/system/trusts" method="POST">
                               <!-- Step 1: Basic Information -->
                               <div class="form-step active" id="form-step-1">
-                                 <h4 class="mb-4"><i class="bi bi-info-circle"></i> Basic Information</h4>
+                                 <h4 class="mb-4"><i class="fas fa-info-circle"></i> Basic Information</h4>
 
                                  <div class="form-row">
                                     <div class="form-col">
@@ -169,14 +169,14 @@
 
                                  <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-brand-primary" onclick="nextStep(2)">
-                                       Next: Contact Details <i class="bi bi-arrow-right"></i>
+                                       Next: Contact Details <i class="fas fa-arrow-right"></i>
                                     </button>
                                  </div>
                               </div>
 
                               <!-- Step 2: Contact Information -->
                               <div class="form-step" id="form-step-2">
-                                 <h4 class="mb-4"><i class="bi bi-person-lines-fill"></i> Contact Information</h4>
+                                 <h4 class="mb-4"><i class="fas fa-user-lines-fill"></i> Contact Information</h4>
 
                                  <div class="form-row">
                                     <div class="form-col">
@@ -217,17 +217,17 @@
 
                                  <div class="d-flex justify-content-between">
                                     <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">
-                                       <i class="bi bi-arrow-left"></i> Previous
+                                       <i class="fas fa-arrow-left"></i> Previous
                                     </button>
                                     <button type="button" class="btn btn-brand-primary" onclick="nextStep(3)">
-                                       Next: Configuration <i class="bi bi-arrow-right"></i>
+                                       Next: Configuration <i class="fas fa-arrow-right"></i>
                                     </button>
                                  </div>
                               </div>
 
                               <!-- Step 3: Configuration -->
                               <div class="form-step" id="form-step-3">
-                                 <h4 class="mb-4"><i class="bi bi-gear"></i> Configuration</h4>
+                                 <h4 class="mb-4"><i class="fas fa-cog"></i> Configuration</h4>
 
                                  <div class="form-row">
                                     <div class="form-col">
@@ -313,7 +313,7 @@
                                  </div>
 
                                  <div class="alert alert-info">
-                                    <h6><i class="bi bi-info-circle"></i> What happens next?</h6>
+                                    <h6><i class="fas fa-info-circle"></i> What happens next?</h6>
                                     <ul class="mb-0">
                                        <li>Trust will be created with "Setup Pending" status</li>
                                        <li>Database will be automatically configured</li>
@@ -324,10 +324,10 @@
 
                                  <div class="d-flex justify-content-between">
                                     <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">
-                                       <i class="bi bi-arrow-left"></i> Previous
+                                       <i class="fas fa-arrow-left"></i> Previous
                                     </button>
                                     <button type="submit" class="btn btn-success">
-                                       <i class="bi bi-check-circle"></i> Create Trust
+                                       <i class="fas fa-check-circle"></i> Create Trust
                                     </button>
                                  </div>
                               </div>

@@ -1,0 +1,165 @@
+<!-- Staff Management Page -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">
+         <i class="fas fa-users"></i> Staff Management
+      </h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+         <a href="/staff/new" class="btn btn-brand-primary">
+            <i class="fas fa-user-plus"></i> Add New Staff
+         </a>
+      </div>
+   </div>
+
+   <!-- Search and Filters -->
+   <div class="search-filters">
+      <form method="GET" action="/staff" class="row g-3">
+         <div class="col-md-3">
+            <label for="search" class="form-label">Search Staff</label>
+            <input type="text" class="form-control" id="search" name="search" 
+                   placeholder="Search by name, email..." value="<%= filters.search || '' %>">
+         </div>
+         <div class="col-md-2">
+            <label for="role" class="form-label">Role</label>
+            <select class="form-select" id="role" name="role">
+               <option value="">All Roles</option>
+               <option value="Principal" <%= filters.role === 'Principal' ? 'selected' : '' %>>Principal</option>
+               <option value="Teacher" <%= filters.role === 'Teacher' ? 'selected' : '' %>>Teacher</option>
+               <option value="Admin Staff" <%= filters.role === 'Admin Staff' ? 'selected' : '' %>>Admin Staff</option>
+               <option value="Support Staff" <%= filters.role === 'Support Staff' ? 'selected' : '' %>>Support Staff</option>
+            </select>
+         </div>
+         <div class="col-md-2">
+            <label for="department" class="form-label">Department</label>
+            <select class="form-select" id="department" name="department">
+               <option value="">All Departments</option>
+               <option value="Administration" <%= filters.department === 'Administration' ? 'selected' : '' %>>Administration</option>
+               <option value="Mathematics" <%= filters.department === 'Mathematics' ? 'selected' : '' %>>Mathematics</option>
+               <option value="English" <%= filters.department === 'English' ? 'selected' : '' %>>English</option>
+               <option value="Science" <%= filters.department === 'Science' ? 'selected' : '' %>>Science</option>
+            </select>
+         </div>
+         <div class="col-md-2">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+               <option value="">All Status</option>
+               <option value="Active" <%= filters.status === 'Active' ? 'selected' : '' %>>Active</option>
+               <option value="On Leave" <%= filters.status === 'On Leave' ? 'selected' : '' %>>On Leave</option>
+               <option value="Suspended" <%= filters.status === 'Suspended' ? 'selected' : '' %>>Suspended</option>
+            </select>
+         </div>
+         <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-outline-secondary me-2">
+               <i class="fas fa-search"></i> Search
+            </button>
+            <a href="/staff" class="btn btn-outline-secondary">
+               <i class="fas fa-times"></i> Clear
+            </a>
+         </div>
+      </form>
+   </div>
+
+   <!-- Staff List -->
+   <div class="row mt-4">
+      <div class="col-12">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">Staff Members (<%= staff.length %>)</h5>
+            </div>
+            <div class="card-body">
+               <% if (staff && staff.length > 0) { %>
+                  <div class="table-responsive">
+                     <table class="table table-hover">
+                        <thead class="table-light">
+                           <tr>
+                              <th>Name</th>
+                              <th>Role</th>
+                              <th>Department</th>
+                              <th>School</th>
+                              <th>Contact</th>
+                              <th>Status</th>
+                              <th>Actions</th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <% staff.forEach(function(member) { %>
+                              <tr>
+                                 <td>
+                                    <div class="d-flex align-items-center">
+                                       <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                          <%= member.name.split(' ').map(n => n[0]).join('').substring(0, 2) %>
+                                       </div>
+                                       <div>
+                                          <div class="fw-medium"><%= member.name %></div>
+                                          <small class="text-muted">Joined: <%= new Date(member.joinDate).toLocaleDateString() %></small>
+                                       </div>
+                                    </div>
+                                 </td>
+                                 <td><%= member.role %></td>
+                                 <td><%= member.department %></td>
+                                 <td><%= member.school %></td>
+                                 <td>
+                                    <div>
+                                       <a href="mailto:<%= member.email %>" class="text-decoration-none">
+                                          <%= member.email %>
+                                       </a>
+                                    </div>
+                                    <small class="text-muted"><%= member.phone %></small>
+                                 </td>
+                                 <td>
+                                    <span class="badge <%= member.status === 'Active' ? 'bg-success' : member.status === 'On Leave' ? 'bg-warning' : 'bg-secondary' %>">
+                                       <%= member.status %>
+                                    </span>
+                                 </td>
+                                 <td>
+                                    <div class="btn-group" role="group">
+                                       <a href="/staff/<%= member.id %>" class="btn btn-sm btn-outline-primary">
+                                          <i class="fas fa-eye"></i>
+                                       </a>
+                                       <a href="/staff/<%= member.id %>/edit" class="btn btn-sm btn-outline-secondary">
+                                          <i class="fas fa-edit"></i>
+                                       </a>
+                                       <button class="btn btn-sm btn-outline-danger" onclick="removeStaff(<%= member.id %>)">
+                                          <i class="fas fa-trash"></i>
+                                       </button>
+                                    </div>
+                                 </td>
+                              </tr>
+                           <% }); %>
+                        </tbody>
+                     </table>
+                  </div>
+               <% } else { %>
+                  <div class="text-center py-5">
+                     <i class="fas fa-users display-1 text-muted mb-3"></i>
+                     <h4>No Staff Members Found</h4>
+                     <p class="text-muted">No staff members match your current filters.</p>
+                     <a href="/staff/new" class="btn btn-brand-primary">
+                        <i class="fas fa-user-plus"></i> Add First Staff Member
+                     </a>
+                  </div>
+               <% } %>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Scripts -->
+<script>
+function removeStaff(staffId) {
+   if (confirm('Are you sure you want to remove this staff member?')) {
+      // TODO: Implement staff removal
+      alert('Staff removal functionality will be implemented soon.');
+   }
+}
+</script>
+
+<style>
+.avatar-sm {
+   width: 40px;
+   height: 40px;
+   font-size: 14px;
+   font-weight: 600;
+}
+</style>

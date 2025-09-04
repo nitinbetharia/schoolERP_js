@@ -1,8 +1,12 @@
-<% layout('layout') %>
-<div class="container-fluid">
-   <div class="d-flex align-items-center justify-content-between mb-3">
-      <h1 class="h3 mb-0">Edit Trust</h1>
-      <a href="/system/trusts" class="btn btn-outline-secondary"> <i class="bi bi-arrow-left"></i> Back to Trusts </a>
+<!-- Edit Trust Page -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2"><i class="bi bi-pencil"></i> Edit Trust</h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+         <a href="/system/trusts" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Trusts
+         </a>
+      </div>
    </div>
 
    <div class="alert alert-info">Editing trust ID: <%= trustId %></div>
@@ -61,11 +65,24 @@
                <div class="row g-3">
                   <div class="form-col">
                      <label class="form-label">Trust Name</label>
-                     <input type="text" class="form-control" id="trustName" value="" />
+                     <input type="text" class="form-control" id="trustName" value="<%= trust.trust_name || '' %>" />
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Trust Code</label>
+                     <input type="text" class="form-control" id="trustCode" value="<%= trust.trust_code || '' %>" readonly />
+                     <div class="form-text">Trust code cannot be changed after creation</div>
                   </div>
                   <div class="form-col">
                      <label class="form-label">Registration No.</label>
-                     <input type="text" class="form-control" id="trustRegNo" value="" />
+                     <input type="text" class="form-control" id="trustRegNo" value="<%= trust.registration_number || '' %>" />
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Subdomain</label>
+                     <div class="input-group">
+                        <input type="text" class="form-control" id="subdomain" value="<%= trust.subdomain || '' %>" readonly />
+                        <span class="input-group-text">.localhost:3000</span>
+                     </div>
+                     <div class="form-text">Subdomain cannot be changed after creation</div>
                   </div>
                </div>
             </div>
@@ -81,11 +98,19 @@
                <div class="row g-3">
                   <div class="form-col">
                      <label class="form-label">Primary Contact</label>
-                     <input type="text" class="form-control" id="primaryContact" value="" />
+                     <input type="text" class="form-control" id="primaryContact" value="<%= trust.primary_contact || '' %>" />
                   </div>
                   <div class="form-col">
                      <label class="form-label">Email</label>
-                     <input type="email" class="form-control" id="email" value="" />
+                     <input type="email" class="form-control" id="email" value="<%= trust.contact_email || '' %>" />
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Phone</label>
+                     <input type="tel" class="form-control" id="phone" value="<%= trust.contact_phone || '' %>" />
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Address</label>
+                     <textarea class="form-control" id="address" rows="3"><%= trust.address || '' %></textarea>
                   </div>
                </div>
             </div>
@@ -103,9 +128,27 @@
                   <div class="form-col">
                      <label class="form-label">Status</label>
                      <select class="form-select" id="status">
-                        <option value="active">Active</option>
-                        <option value="suspended">Suspended</option>
+                        <option value="ACTIVE" <%= trust.status === 'ACTIVE' ? 'selected' : '' %>>Active</option>
+                        <option value="SUSPENDED" <%= trust.status === 'SUSPENDED' ? 'selected' : '' %>>Suspended</option>
+                        <option value="SETUP_PENDING" <%= trust.status === 'SETUP_PENDING' ? 'selected' : '' %>>Setup Pending</option>
                      </select>
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Database Name</label>
+                     <input type="text" class="form-control" id="databaseName" value="<%= trust.database_name || '' %>" readonly />
+                     <div class="form-text">Database name is auto-generated and cannot be changed</div>
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Created Date</label>
+                     <input type="text" class="form-control" value="<%= new Date(trust.created_at).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                     }) %>" readonly />
+                  </div>
+                  <div class="form-col">
+                     <label class="form-label">Description (Optional)</label>
+                     <textarea class="form-control" id="description" rows="3" placeholder="Enter trust description..."><%= trust.description || '' %></textarea>
                   </div>
                </div>
             </div>

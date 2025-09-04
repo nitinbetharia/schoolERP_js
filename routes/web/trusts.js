@@ -24,7 +24,25 @@ module.exports = function (middleware) {
             return res.redirect('/dashboard');
          }
 
-         // Implementation will be added in next phase
+         // Fetch actual trusts data from the service
+         const { trustService } = require('../../services/systemServices');
+         let trusts = [];
+         let pagination = null;
+
+         try {
+            const result = await trustService.listTrusts({
+               page: req.query.page || 1,
+               limit: req.query.limit || 10,
+               status: req.query.status,
+               search: req.query.search,
+            });
+            trusts = result.trusts || [];
+            pagination = result.pagination || null;
+         } catch (serviceError) {
+            logError(serviceError, { context: 'trusts fetch' });
+            req.flash('error', 'Unable to load trusts data. Please try again.');
+         }
+
          res.render('pages/system/trusts/index', {
             title: 'Manage Trusts',
             description: 'View and manage all educational trusts in the system',
@@ -32,9 +50,12 @@ module.exports = function (middleware) {
             tenant: null,
             userType: userType,
             currentPath: '/system/trusts',
-            trusts: [],
-            pagination: null,
-            filters: {},
+            trusts: trusts,
+            pagination: pagination,
+            filters: {
+               status: req.query.status || '',
+               search: req.query.search || '',
+            },
          });
       } catch (error) {
          logError(error, { context: 'system/trusts GET' });
@@ -76,12 +97,24 @@ module.exports = function (middleware) {
     * @desc Wizard: Edit trust
     * @access Private (System Admin only)
     */
-   router.get('/:id/edit', requireAuth, (req, res) => {
+   router.get('/:id/edit', requireAuth, async (req, res) => {
       try {
          const userType = req.session.userType;
          if (userType !== 'system') {
             req.flash('error', 'Access denied. System admin privileges required.');
             return res.redirect('/dashboard');
+         }
+
+         // Fetch trust data from the service
+         const { trustService } = require('../../services/systemServices');
+         let trust = null;
+
+         try {
+            trust = await trustService.getTrust(req.params.id);
+         } catch (serviceError) {
+            logError(serviceError, { context: 'trust edit fetch', trustId: req.params.id });
+            req.flash('error', 'Trust not found or unable to load trust data.');
+            return res.redirect('/system/trusts');
          }
 
          res.render('pages/system/trusts/edit', {
@@ -92,6 +125,7 @@ module.exports = function (middleware) {
             userType: userType,
             currentPath: '/system/trusts/edit',
             trustId: req.params.id,
+            trust: trust,
          });
       } catch (error) {
          logError(error, { context: 'system/trusts/:id/edit GET' });
@@ -152,6 +186,47 @@ module.exports = function (middleware) {
       } catch (error) {
          logError(error, { context: 'system/trusts/setup GET' });
          req.flash('error', 'Unable to load setup page');
+         res.redirect('/system/trusts');
+      }
+   });
+
+   /**
+    * @route GET /:id/details
+    * @desc Trust details page
+    * @access Private (System Admin only)
+    */
+   router.get('/:id/details', requireAuth, async (req, res) => {
+      try {
+         const userType = req.session.userType;
+         if (userType !== 'system') {
+            req.flash('error', 'Access denied. System admin privileges required.');
+            return res.redirect('/dashboard');
+         }
+
+         // Fetch trust details from the service
+         const { trustService } = require('../../services/systemServices');
+         let trust = null;
+
+         try {
+            trust = await trustService.getTrust(req.params.id);
+         } catch (serviceError) {
+            logError(serviceError, { context: 'trust details fetch', trustId: req.params.id });
+            req.flash('error', 'Trust not found or unable to load details.');
+            return res.redirect('/system/trusts');
+         }
+
+         res.render('pages/system/trusts/details', {
+            title: `${trust.trust_name} - Details`,
+            description: 'Detailed view of trust information and settings',
+            user: req.session.user,
+            tenant: null,
+            userType: userType,
+            currentPath: `/system/trusts/${req.params.id}/details`,
+            trust: trust,
+         });
+      } catch (error) {
+         logError(error, { context: 'system/trusts/:id/details GET' });
+         req.flash('error', 'Unable to load trust details page');
          res.redirect('/system/trusts');
       }
    });

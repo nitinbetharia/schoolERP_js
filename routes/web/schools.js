@@ -44,12 +44,27 @@ module.exports = function (middleware) {
     * @desc Wizard: Create new school
     * @access Private (System Admin only)
     */
-   router.get('/new', requireAuth, (req, res) => {
+   router.get('/new', requireAuth, async (req, res) => {
       try {
          const userType = req.session.userType;
          if (userType !== 'system') {
             req.flash('error', 'Access denied. System admin privileges required.');
             return res.redirect('/dashboard');
+         }
+
+         // Fetch available trusts for dropdown
+         const { trustService } = require('../../services/systemServices');
+         let trusts = [];
+
+         try {
+            const result = await trustService.listTrusts({
+               status: 'ACTIVE', // Only show active trusts
+               limit: 1000, // Get all active trusts
+            });
+            trusts = result.trusts || [];
+         } catch (serviceError) {
+            logError(serviceError, { context: 'schools/new trusts fetch' });
+            req.flash('error', 'Unable to load active trusts. Please try again.');
          }
 
          res.render('pages/system/schools/new', {
@@ -59,6 +74,7 @@ module.exports = function (middleware) {
             tenant: null,
             userType: userType,
             currentPath: '/system/schools/new',
+            trusts: trusts, // Pass trusts to template
          });
       } catch (error) {
          logError(error, { context: 'system/schools/new GET' });
@@ -72,12 +88,27 @@ module.exports = function (middleware) {
     * @desc Wizard: Edit school
     * @access Private (System Admin only)
     */
-   router.get('/:id/edit', requireAuth, (req, res) => {
+   router.get('/:id/edit', requireAuth, async (req, res) => {
       try {
          const userType = req.session.userType;
          if (userType !== 'system') {
             req.flash('error', 'Access denied. System admin privileges required.');
             return res.redirect('/dashboard');
+         }
+
+         // Fetch available trusts for dropdown
+         const { trustService } = require('../../services/systemServices');
+         let trusts = [];
+
+         try {
+            const result = await trustService.listTrusts({
+               status: 'ACTIVE', // Only show active trusts
+               limit: 1000, // Get all active trusts
+            });
+            trusts = result.trusts || [];
+         } catch (serviceError) {
+            logError(serviceError, { context: 'schools/edit trusts fetch' });
+            req.flash('error', 'Unable to load active trusts. Please try again.');
          }
 
          res.render('pages/system/schools/edit', {
@@ -88,6 +119,7 @@ module.exports = function (middleware) {
             userType: userType,
             currentPath: '/system/schools/edit',
             schoolId: req.params.id,
+            trusts: trusts, // Pass trusts to template
          });
       } catch (error) {
          logError(error, { context: 'system/schools/:id/edit GET' });

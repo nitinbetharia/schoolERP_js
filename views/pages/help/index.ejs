@@ -1,0 +1,145 @@
+<!-- Help Center -->
+<div class="container-fluid py-4">
+   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">
+         <i class="fas fa-question-circle"></i> Help Center
+      </h1>
+      <div class="btn-toolbar mb-2 mb-md-0">
+         <a href="/help/contact" class="btn btn-brand-primary">
+            <i class="fas fa-envelope"></i> Contact Support
+         </a>
+      </div>
+   </div>
+
+   <!-- Search Box -->
+   <div class="row mb-4">
+      <div class="col-12 col-md-8 mx-auto">
+         <div class="card">
+            <div class="card-body">
+               <form action="/help/search" method="GET" class="d-flex">
+                  <input type="text" name="q" class="form-control form-control-lg" 
+                         placeholder="Search help articles, guides, and FAQs..." 
+                         value="<%= query || '' %>">
+                  <button type="submit" class="btn btn-outline-secondary ms-2">
+                     <i class="fas fa-search"></i>
+                  </button>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Help Categories -->
+   <div class="row g-4">
+      <% helpCategories.forEach(function(category) { %>
+         <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100">
+               <div class="card-body">
+                  <div class="d-flex align-items-start mb-3">
+                     <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <i class="<%= category.icon %>"></i>
+                     </div>
+                     <div>
+                        <h5 class="card-title mb-1"><%= category.title %></h5>
+                        <p class="text-muted small mb-0"><%= category.description %></p>
+                     </div>
+                  </div>
+                  
+                  <div class="help-articles">
+                     <% category.articles.forEach(function(article) { %>
+                        <div class="mb-2">
+                           <a href="<%= article.url %>" class="text-decoration-none d-flex align-items-center">
+                              <i class="fas fa-file-alt text-muted me-2 small"></i>
+                              <span><%= article.title %></span>
+                           </a>
+                        </div>
+                     <% }); %>
+                  </div>
+               </div>
+            </div>
+         </div>
+      <% }); %>
+   </div>
+
+   <!-- Quick Access -->
+   <div class="row mt-5">
+      <div class="col-12">
+         <div class="card bg-light">
+            <div class="card-body text-center py-4">
+               <h4 class="mb-3">Need More Help?</h4>
+               <p class="text-muted mb-4">Can't find what you're looking for? Our support team is here to help.</p>
+               <div class="d-flex justify-content-center gap-3">
+                  <a href="/help/contact" class="btn btn-outline-primary">
+                     <i class="fas fa-envelope me-1"></i> Contact Support
+                  </a>
+                  <a href="/help/search" class="btn btn-outline-secondary">
+                     <i class="fas fa-search me-1"></i> Search Articles
+                  </a>
+                  <a href="mailto:support@schoolerp.com" class="btn btn-outline-success">
+                     <i class="fas fa-at me-1"></i> Email Us
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Popular Articles -->
+   <div class="row mt-4">
+      <div class="col-12">
+         <h4 class="mb-3">Popular Articles</h4>
+         <div class="row g-3">
+            <div class="col-12 col-md-6 col-lg-4">
+               <div class="card">
+                  <div class="card-body">
+                     <h6 class="card-title">
+                        <a href="/help/getting-started/overview" class="text-decoration-none">
+                           <i class="fas fa-star text-warning me-1"></i>
+                           System Overview
+                        </a>
+                     </h6>
+                     <p class="card-text small text-muted">Learn about the main features and capabilities of the School ERP system.</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+               <div class="card">
+                  <div class="card-body">
+                     <h6 class="card-title">
+                        <a href="/help/students/adding" class="text-decoration-none">
+                           <i class="fas fa-star text-warning me-1"></i>
+                           Adding Students
+                        </a>
+                     </h6>
+                     <p class="card-text small text-muted">Step-by-step guide to adding new students to the system.</p>
+                  </div>
+               </div>
+            </div>
+            <div class="col-12 col-md-6 col-lg-4">
+               <div class="card">
+                  <div class="card-body">
+                     <h6 class="card-title">
+                        <a href="/help/fees/setup" class="text-decoration-none">
+                           <i class="fas fa-star text-warning me-1"></i>
+                           Fee Structure Setup
+                        </a>
+                     </h6>
+                     <p class="card-text small text-muted">Configure fee categories and payment structures for your school.</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<style>
+.help-articles a {
+   transition: all 0.2s ease;
+}
+
+.help-articles a:hover {
+   color: var(--bs-primary) !important;
+   transform: translateX(4px);
+}
+</style>

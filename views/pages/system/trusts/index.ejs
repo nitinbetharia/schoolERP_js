@@ -2,13 +2,13 @@
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">
-            <i class="bi bi-building"></i> Manage Trusts
-                    </h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <a href="/system/trusts/new" class="btn btn-brand-primary">
-                            <i class="bi bi-plus-circle"></i> Add New Trust
-                        </a>
-                    </div>
+            <i class="fas fa-building"></i> Manage Trusts
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="/system/trusts/new" class="btn btn-brand-primary">
+                <i class="fas fa-plus"></i> Add New Trust
+            </a>
+        </div>
                 </div>
 
                 <!-- Search and Filters -->
@@ -31,10 +31,10 @@
                         </div>
                         <div class="form-col">
                             <button type="submit" class="btn btn-outline-brand-primary me-2">
-                                <i class="bi bi-search"></i> Search
+                                <i class="fas fa-search"></i> Search
                             </button>
                             <a href="/system/trusts" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-clockwise"></i> Reset
+                                <i class="fas fa-refresh"></i> Reset
                             </a>
                         </div>
                     </form>
@@ -60,7 +60,7 @@
                                             <strong>Subdomain:</strong> 
                                             <a href="http://<%= trust.subdomain %>.localhost:3000" target="_blank" class="text-decoration-none">
                                                 <%= trust.subdomain %>.localhost:3000
-                                                <i class="bi bi-box-arrow-up-right small"></i>
+                                                <i class="fas fa-external-link-alt small"></i>
                                             </a>
                                         </div>
                                         <div class="mb-2">
@@ -83,19 +83,19 @@
                                     </div>
                                     <div class="card-footer bg-transparent trust-actions">
                                         <a href="/system/trusts/<%= trust.id %>/edit" class="btn btn-sm btn-outline-brand-primary">
-                                            <i class="bi bi-pencil"></i> Edit
+                                            <i class="fas fa-edit"></i> Edit
                                         </a>
                                         <% if (trust.status === 'ACTIVE') { %>
                                             <button class="btn btn-sm btn-outline-warning" onclick="suspendTrust('<%= trust.id %>')">
-                                                <i class="bi bi-pause-circle"></i> Suspend
+                                                <i class="fas fa-pause-circle"></i> Suspend
                                             </button>
                                         <% } else if (trust.status === 'SUSPENDED') { %>
                                             <button class="btn btn-sm btn-outline-success" onclick="activateTrust('<%= trust.id %>')">
-                                                <i class="bi bi-play-circle"></i> Activate
+                                                <i class="fas fa-play-circle"></i> Activate
                                             </button>
                                         <% } %>
                                         <a href="/system/trusts/<%= trust.id %>/details" class="btn btn-sm btn-outline-info">
-                                            <i class="bi bi-info-circle"></i> Details
+                                            <i class="fas fa-info-circle"></i> Details
                                         </a>
                                     </div>
                                 </div>
@@ -105,11 +105,11 @@
                         <div class="form-col">
                             <div class="card">
                                 <div class="card-body text-center py-5">
-                                    <i class="bi bi-building display-1 text-muted mb-3"></i>
+                                    <i class="fas fa-building display-1 text-muted mb-3"></i>
                                     <h4>No Trusts Found</h4>
                                     <p class="text-muted">No educational trusts match your current filters.</p>
                                     <a href="/system/trusts/new" class="btn btn-brand-primary">
-                                        <i class="bi bi-plus-circle"></i> Create First Trust
+                                        <i class="fas fa-plus"></i> Create First Trust
                                     </a>
                                 </div>
                             </div>

@@ -86,7 +86,7 @@ module.exports = function (middleware) {
     * @desc New student form page
     * @access Private (School Admin, Trust Admin)
     */
-   router.get('/new', requireAuth, (req, res) => {
+   router.get('/new', requireAuth, async (req, res) => {
       try {
          const userType = req.session.userType;
          const allowedTypes = ['system', 'trust', 'school'];
@@ -96,6 +96,55 @@ module.exports = function (middleware) {
             return res.redirect('/students');
          }
 
+         // Initialize empty arrays for classes and sections
+         let classes = [];
+         let sections = [];
+         let schools = [];
+
+         try {
+            // Get tenant models for dynamic data fetching
+            const { dbManager } = require('../../models/system/database');
+            const tenantModels = await dbManager.getTenantModels(req.tenant.code);
+
+            // Fetch active classes from tenant database
+            classes = await tenantModels.Class.findAll({
+               where: { is_active: true },
+               order: [['class_order', 'ASC']],
+               attributes: ['id', 'name', 'code', 'level', 'class_order']
+            });
+
+            // Fetch active sections from tenant database
+            sections = await tenantModels.Section.findAll({
+               where: { is_active: true },
+               order: [['name', 'ASC']],
+               attributes: ['id', 'name', 'code', 'class_id']
+            });
+
+            // For system/trust admins, also fetch schools within tenant
+            if (userType === 'system' || userType === 'trust') {
+               schools = await tenantModels.School.findAll({
+                  where: { status: 'ACTIVE' },
+                  order: [['name', 'ASC']],
+                  attributes: ['id', 'name', 'code']
+               });
+            }
+
+            const tenantCode = req.tenant.code;
+            const msg = `Loaded ${classes.length} classes, ${sections.length} sections`;
+            console.log(`${msg} for ${tenantCode}`);
+
+         } catch (serviceError) {
+            logError(serviceError, { 
+               context: 'students/new tenant data fetch',
+               tenant: req.tenant?.code,
+               userType 
+            });
+            req.flash(
+               'warning',
+               'Using fallback class/section options. Contact administrator if limited.'
+            );
+         }
+
          res.render('pages/students/new', {
             title: 'Add New Student',
             description: 'Register a new student in the system',
@@ -103,6 +152,9 @@ module.exports = function (middleware) {
             tenant: req.tenant,
             userType: userType,
             currentPath: '/students/new',
+            classes: classes, // Pass classes to template
+            sections: sections, // Pass sections to template
+            schools: schools, // Pass schools to template
          });
       } catch (error) {
          logError(error, { context: 'students new GET' });
