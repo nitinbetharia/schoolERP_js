@@ -1,0 +1,370 @@
+<%- include('../../../partials/header', { title: title }) %>
+
+<div class="container-fluid mt-4">
+   <!-- Page Header -->
+   <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+         <h1 class="h3 mb-0">
+            <i class="fas fa-plus-circle text-success me-2"></i>
+            Create New Section
+         </h1>
+         <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb">
+               <% breadcrumb.forEach((item, index) => { %>
+                  <% if (index === breadcrumb.length - 1) { %>
+                     <li class="breadcrumb-item active" aria-current="page"><%= item.title %></li>
+                  <% } else { %>
+                     <li class="breadcrumb-item"><a href="<%= item.url %>"><%= item.title %></a></li>
+                  <% } %>
+               <% }) %>
+            </ol>
+         </nav>
+      </div>
+      <div>
+         <a href="/admin/sections" class="btn btn-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Sections
+         </a>
+      </div>
+   </div>
+
+   <!-- Flash Messages -->
+   <%- include('../../../partials/flash-messages') %>
+
+   <!-- Create Section Form -->
+   <div class="row">
+      <div class="col-lg-8">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">
+                  <i class="fas fa-users me-2"></i>
+                  Section Information
+               </h5>
+            </div>
+            <div class="card-body">
+               <form method="POST" action="/admin/sections" id="createSectionForm">
+                  <div class="row">
+                     <!-- Class Selection -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="class_id" class="form-label">
+                              Class <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="class_id" name="class_id" required>
+                              <option value="">Select Class</option>
+                              <% classes.forEach(function(cls) { %>
+                                 <option value="<%= cls.id %>" data-level="<%= cls.level %>">
+                                    <%= cls.name %> (<%= cls.code %>) - <%= cls.level %>
+                                 </option>
+                              <% }); %>
+                           </select>
+                           <div class="form-text">Select the class for this section</div>
+                        </div>
+                     </div>
+
+                     <!-- Section Name -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="name" class="form-label">
+                              Section Name <span class="text-danger">*</span>
+                           </label>
+                           <input 
+                              type="text" 
+                              class="form-control" 
+                              id="name" 
+                              name="name" 
+                              placeholder="e.g., A, B, Blue, Red" 
+                              required>
+                           <div class="form-text">Section identifier (usually single letter)</div>
+                        </div>
+                     </div>
+
+                     <!-- Capacity -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="capacity" class="form-label">
+                              Maximum Capacity
+                           </label>
+                           <input 
+                              type="number" 
+                              class="form-control" 
+                              id="capacity" 
+                              name="capacity" 
+                              min="1" 
+                              max="100" 
+                              placeholder="40">
+                           <div class="form-text">Maximum number of students (1-100)</div>
+                        </div>
+                     </div>
+
+                     <!-- Room Number -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="room_number" class="form-label">
+                              Room Number
+                           </label>
+                           <input 
+                              type="text" 
+                              class="form-control" 
+                              id="room_number" 
+                              name="room_number" 
+                              placeholder="e.g., R101, Room A1">
+                           <div class="form-text">Physical classroom location</div>
+                        </div>
+                     </div>
+
+                     <!-- Section Teacher -->
+                     <div class="col-md-12">
+                        <div class="mb-3">
+                           <label for="section_teacher_id" class="form-label">
+                              Section Teacher
+                           </label>
+                           <select class="form-select" id="section_teacher_id" name="section_teacher_id">
+                              <option value="">No Teacher Assigned</option>
+                              <% teachers.forEach(function(teacher) { %>
+                                 <option value="<%= teacher.id %>">
+                                    <%= teacher.name %> (<%= teacher.employee_id %>)
+                                 </option>
+                              <% }); %>
+                           </select>
+                           <div class="form-text">Primary teacher responsible for this section</div>
+                        </div>
+                     </div>
+
+                     <!-- Description -->
+                     <div class="col-12">
+                        <div class="mb-3">
+                           <label for="description" class="form-label">
+                              Description
+                           </label>
+                           <textarea 
+                              class="form-control" 
+                              id="description" 
+                              name="description" 
+                              rows="3" 
+                              placeholder="Additional information about this section (optional)"></textarea>
+                           <div class="form-text">Optional notes or special instructions</div>
+                        </div>
+                     </div>
+
+                     <!-- Status -->
+                     <div class="col-12">
+                        <div class="mb-3">
+                           <div class="form-check">
+                              <input 
+                                 class="form-check-input" 
+                                 type="checkbox" 
+                                 id="is_active" 
+                                 name="is_active" 
+                                 value="1" 
+                                 checked>
+                              <label class="form-check-label" for="is_active">
+                                 Active Section
+                              </label>
+                              <div class="form-text">Uncheck to create as inactive section</div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="row">
+                     <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                           <div>
+                              <button type="submit" class="btn btn-success">
+                                 <i class="fas fa-save me-1"></i>
+                                 Create Section
+                              </button>
+                              <button type="reset" class="btn btn-light">
+                                 <i class="fas fa-undo me-1"></i>
+                                 Reset Form
+                              </button>
+                           </div>
+                           <div>
+                              <a href="/admin/sections" class="btn btn-secondary">
+                                 <i class="fas fa-times me-1"></i>
+                                 Cancel
+                              </a>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+
+      <!-- Help Panel -->
+      <div class="col-lg-4">
+         <div class="card">
+            <div class="card-header">
+               <h6 class="card-title mb-0">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Section Guidelines
+               </h6>
+            </div>
+            <div class="card-body">
+               <h6 class="mb-2">Naming Conventions:</h6>
+               <ul class="list-unstyled mb-3">
+                  <li><i class="fas fa-check text-success me-1"></i> Use single letters: A, B, C</li>
+                  <li><i class="fas fa-check text-success me-1"></i> Use colors: Red, Blue, Green</li>
+                  <li><i class="fas fa-check text-success me-1"></i> Use numbers: 1, 2, 3</li>
+                  <li><i class="fas fa-times text-danger me-1"></i> Avoid special characters</li>
+               </ul>
+
+               <h6 class="mb-2">Capacity Guidelines:</h6>
+               <ul class="list-unstyled mb-3">
+                  <li><i class="fas fa-info text-info me-1"></i> Nursery: 15-20 students</li>
+                  <li><i class="fas fa-info text-info me-1"></i> Primary: 30-40 students</li>
+                  <li><i class="fas fa-info text-info me-1"></i> Secondary: 35-45 students</li>
+                  <li><i class="fas fa-info text-info me-1"></i> Higher Secondary: 40-50 students</li>
+               </ul>
+
+               <h6 class="mb-2">Best Practices:</h6>
+               <ul class="list-unstyled">
+                  <li><i class="fas fa-lightbulb text-warning me-1"></i> Assign section teachers early</li>
+                  <li><i class="fas fa-lightbulb text-warning me-1"></i> Keep room assignments updated</li>
+                  <li><i class="fas fa-lightbulb text-warning me-1"></i> Balance section sizes</li>
+                  <li><i class="fas fa-lightbulb text-warning me-1"></i> Consider student mix</li>
+               </ul>
+            </div>
+         </div>
+
+         <!-- Quick Actions -->
+         <div class="card mt-3">
+            <div class="card-header">
+               <h6 class="card-title mb-0">
+                  <i class="fas fa-bolt me-2"></i>
+                  Quick Actions
+               </h6>
+            </div>
+            <div class="card-body">
+               <div class="d-grid gap-2">
+                  <a href="/admin/classes" class="btn btn-outline-primary btn-sm">
+                     <i class="fas fa-chalkboard me-1"></i>
+                     Manage Classes
+                  </a>
+                  <a href="/admin/teachers" class="btn btn-outline-info btn-sm">
+                     <i class="fas fa-chalkboard-teacher me-1"></i>
+                     Manage Teachers
+                  </a>
+                  <a href="/admin/students" class="btn btn-outline-success btn-sm">
+                     <i class="fas fa-user-graduate me-1"></i>
+                     View Students
+                  </a>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Form Validation Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+   const form = document.getElementById('createSectionForm');
+   const classSelect = document.getElementById('class_id');
+   const nameInput = document.getElementById('name');
+   const capacityInput = document.getElementById('capacity');
+
+   // Auto-suggest section name based on class
+   classSelect.addEventListener('change', function() {
+      if (this.value && !nameInput.value) {
+         // Suggest next available section name (A, B, C, etc.)
+         const existingSections = ['A', 'B']; // TODO: Get from server
+         const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+         
+         for (let i = 0; i < alphabet.length; i++) {
+            if (!existingSections.includes(alphabet[i])) {
+               nameInput.value = alphabet[i];
+               break;
+            }
+         }
+      }
+   });
+
+   // Auto-suggest capacity based on class level
+   classSelect.addEventListener('change', function() {
+      if (this.value && !capacityInput.value) {
+         const selectedOption = this.options[this.selectedIndex];
+         const level = selectedOption.getAttribute('data-level');
+         
+         switch (level) {
+            case 'NURSERY':
+               capacityInput.value = 20;
+               break;
+            case 'PRIMARY':
+               capacityInput.value = 35;
+               break;
+            case 'SECONDARY':
+               capacityInput.value = 40;
+               break;
+            case 'HIGHER_SECONDARY':
+               capacityInput.value = 45;
+               break;
+            default:
+               capacityInput.value = 40;
+         }
+      }
+   });
+
+   // Form submission validation
+   form.addEventListener('submit', function(e) {
+      const requiredFields = ['class_id', 'name'];
+      let isValid = true;
+
+      requiredFields.forEach(function(fieldName) {
+         const field = document.getElementById(fieldName);
+         if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+         } else {
+            field.classList.remove('is-invalid');
+         }
+      });
+
+      // Validate section name format
+      const sectionNamePattern = /^[A-Z][a-zA-Z0-9]*$/;
+      if (nameInput.value && !sectionNamePattern.test(nameInput.value)) {
+         nameInput.classList.add('is-invalid');
+         isValid = false;
+         alert('Section name must start with a letter and contain only letters and numbers.');
+      }
+
+      // Validate capacity range
+      const capacity = parseInt(capacityInput.value);
+      if (capacity && (capacity < 1 || capacity > 100)) {
+         capacityInput.classList.add('is-invalid');
+         isValid = false;
+         alert('Capacity must be between 1 and 100 students.');
+      }
+
+      if (!isValid) {
+         e.preventDefault();
+         alert('Please fix the highlighted fields before submitting.');
+      }
+   });
+
+   // Real-time validation
+   nameInput.addEventListener('input', function() {
+      const pattern = /^[A-Z][a-zA-Z0-9]*$/;
+      if (this.value && !pattern.test(this.value)) {
+         this.classList.add('is-invalid');
+      } else {
+         this.classList.remove('is-invalid');
+      }
+   });
+
+   capacityInput.addEventListener('input', function() {
+      const capacity = parseInt(this.value);
+      if (this.value && (capacity < 1 || capacity > 100)) {
+         this.classList.add('is-invalid');
+      } else {
+         this.classList.remove('is-invalid');
+      }
+   });
+});
+</script>
+
+<%- include('../../../partials/footer') %>
