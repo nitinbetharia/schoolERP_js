@@ -77,6 +77,7 @@ const feesRoutes = require('./fees');
 const teacherRoutes = require('./teacher');
 const staffRoutes = require('./staff');
 const helpRoutes = require('./help');
+const classesRoutes = require('./classes');
 const apiRoutes = require('./api');
 const utilityRoutes = require('./utils');
 
@@ -112,6 +113,7 @@ router.use('/students', studentsRoutes(middleware));
 router.use('/fees', feesRoutes(middleware));
 router.use('/teacher', teacherRoutes(middleware));
 router.use('/staff', staffRoutes(middleware));
+router.use('/admin/classes', classesRoutes(middleware));
 router.use('/help', helpRoutes(middleware));
 
 // Backward-compatible redirects for legacy URLs

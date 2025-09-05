@@ -1,0 +1,230 @@
+<%- include('../../../partials/header', { title: title }) %>
+
+<div class="container-fluid mt-4">
+   <!-- Page Header -->
+   <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+         <h1 class="h3 mb-0">
+            <i class="fas fa-chalkboard text-primary me-2"></i>
+            Classes Management
+         </h1>
+         <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb">
+               <% breadcrumb.forEach((item, index) => { %>
+                  <% if (index === breadcrumb.length - 1) { %>
+                     <li class="breadcrumb-item active" aria-current="page"><%= item.title %></li>
+                  <% } else { %>
+                     <li class="breadcrumb-item"><a href="<%= item.url %>"><%= item.title %></a></li>
+                  <% } %>
+               <% }) %>
+            </ol>
+         </nav>
+      </div>
+      <div>
+         <a href="/admin/classes/create" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>
+            Add New Class
+         </a>
+      </div>
+   </div>
+
+   <!-- Flash Messages -->
+   <%- include('../../../partials/flash-messages') %>
+
+   <!-- Classes Table -->
+   <div class="card">
+      <div class="card-header">
+         <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            All Classes
+         </h5>
+      </div>
+      <div class="card-body">
+         <% if (classes && classes.length > 0) { %>
+            <div class="table-responsive">
+               <table class="table table-hover" id="classesTable">
+                  <thead class="table-light">
+                     <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>School</th>
+                        <th>Academic Year</th>
+                        <th>Max Students</th>
+                        <th>Current Strength</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <% classes.forEach(cls => { %>
+                        <tr>
+                           <td>
+                              <span class="badge bg-secondary"><%= cls.code %></span>
+                           </td>
+                           <td>
+                              <strong><%= cls.name %></strong>
+                              <% if (cls.room_number) { %>
+                                 <br><small class="text-muted"><i class="fas fa-door-open me-1"></i>Room: <%= cls.room_number %></small>
+                              <% } %>
+                           </td>
+                           <td>
+                              <% 
+                                 let levelColor = 'info';
+                                 if (cls.level === 'NURSERY') levelColor = 'success';
+                                 else if (cls.level === 'PRIMARY') levelColor = 'primary';
+                                 else if (cls.level === 'SECONDARY') levelColor = 'warning';
+                                 else if (cls.level === 'HIGHER_SECONDARY') levelColor = 'danger';
+                              %>
+                              <span class="badge bg-<%= levelColor %>"><%= cls.level.replace('_', ' ') %></span>
+                           </td>
+                           <td>
+                              <% if (cls.School) { %>
+                                 <%= cls.School.name %>
+                                 <br><small class="text-muted"><%= cls.School.code %></small>
+                              <% } else { %>
+                                 <span class="text-muted">Not assigned</span>
+                              <% } %>
+                           </td>
+                           <td>
+                              <i class="fas fa-calendar-alt text-primary me-1"></i>
+                              <%= cls.academic_year %>
+                           </td>
+                           <td class="text-center">
+                              <span class="badge bg-light text-dark"><%= cls.max_students || 'N/A' %></span>
+                           </td>
+                           <td class="text-center">
+                              <% 
+                                 let strengthColor = 'success';
+                                 if (cls.current_strength && cls.max_students) {
+                                    const percentage = (cls.current_strength / cls.max_students) * 100;
+                                    if (percentage > 90) strengthColor = 'danger';
+                                    else if (percentage > 75) strengthColor = 'warning';
+                                 }
+                              %>
+                              <span class="badge bg-<%= strengthColor %>"><%= cls.current_strength || 0 %></span>
+                           </td>
+                           <td>
+                              <% if (cls.is_active) { %>
+                                 <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Active
+                                 </span>
+                              <% } else { %>
+                                 <span class="badge bg-danger">
+                                    <i class="fas fa-times me-1"></i>Inactive
+                                 </span>
+                              <% } %>
+                           </td>
+                           <td>
+                              <div class="btn-group btn-group-sm" role="group">
+                                 <a href="/admin/classes/<%= cls.id %>/edit" 
+                                    class="btn btn-outline-primary btn-sm" 
+                                    data-bs-toggle="tooltip" 
+                                    title="Edit Class">
+                                    <i class="fas fa-edit"></i>
+                                 </a>
+                                 <button type="button" 
+                                         class="btn btn-outline-danger btn-sm" 
+                                         data-bs-toggle="modal" 
+                                         data-bs-target="#deleteModal" 
+                                         data-class-id="<%= cls.id %>" 
+                                         data-class-name="<%= cls.name %>"
+                                         title="Delete Class">
+                                    <i class="fas fa-trash"></i>
+                                 </button>
+                              </div>
+                           </td>
+                        </tr>
+                     <% }) %>
+                  </tbody>
+               </table>
+            </div>
+         <% } else { %>
+            <div class="text-center py-5">
+               <i class="fas fa-chalkboard fa-3x text-muted mb-3"></i>
+               <h5 class="text-muted">No Classes Found</h5>
+               <p class="text-muted">Get started by creating your first class.</p>
+               <a href="/admin/classes/create" class="btn btn-primary">
+                  <i class="fas fa-plus me-1"></i>
+                  Create First Class
+               </a>
+            </div>
+         <% } %>
+      </div>
+   </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">
+               <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+               Confirm Deletion
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">
+            <p>Are you sure you want to delete the class "<strong id="classNameToDelete"></strong>"?</p>
+            <div class="alert alert-warning">
+               <i class="fas fa-info-circle me-2"></i>
+               This action cannot be undone. Make sure there are no sections associated with this class.
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form method="POST" id="deleteForm" style="display: inline;">
+               <input type="hidden" name="_method" value="DELETE">
+               <button type="submit" class="btn btn-danger">
+                  <i class="fas fa-trash me-1"></i>
+                  Delete Class
+               </button>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script>
+   // DataTable initialization
+   document.addEventListener('DOMContentLoaded', function() {
+      // Initialize tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+         return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      // Delete modal functionality
+      const deleteModal = document.getElementById('deleteModal');
+      if (deleteModal) {
+         deleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const classId = button.getAttribute('data-class-id');
+            const className = button.getAttribute('data-class-name');
+            
+            const classNameElement = deleteModal.querySelector('#classNameToDelete');
+            const deleteForm = deleteModal.querySelector('#deleteForm');
+            
+            classNameElement.textContent = className;
+            deleteForm.setAttribute('action', '/admin/classes/' + classId);
+         });
+      }
+
+      // Initialize DataTable if there are classes
+      <% if (classes && classes.length > 0) { %>
+         const table = document.getElementById('classesTable');
+         if (table && typeof DataTable !== 'undefined') {
+            new DataTable(table, {
+               pageLength: 25,
+               order: [[8, 'desc']], // Order by status (active first)
+               columnDefs: [
+                  { orderable: false, targets: [8] } // Actions column not orderable
+               ]
+            });
+         }
+      <% } %>
+   });
+</script>
+
+<%- include('../../../partials/footer') %>

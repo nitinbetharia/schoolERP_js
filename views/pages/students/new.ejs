@@ -92,8 +92,8 @@
                      <option value="">-- Select Class --</option>
                      <% if (locals.classes && classes.length > 0) { %>
                         <% classes.forEach(function(cls) { %>
-                           <option value="<%= cls.id %>" data-name="<%= cls.name || cls.class_name %>">
-                              <%= cls.name || cls.class_name %> (<%= cls.grade || cls.class_order %>)
+                           <option value="<%= cls.id %>" data-level="<%= cls.level %>">
+                              <%= cls.name %> (<%= cls.code %>)
                            </option>
                         <% }); %>
                      <% } else { %>
@@ -125,10 +125,7 @@
                      <% if (locals.sections && sections.length > 0) { %>
                         <% sections.forEach(function(section) { %>
                            <option value="<%= section.id %>" data-class-id="<%= section.class_id %>">
-                              <%= section.name %> 
-                              <% if (section.capacity) { %>
-                                 (Capacity: <%= section.capacity %>)
-                              <% } %>
+                              <%= section.name %> (<%= section.code %>)
                            </option>
                         <% }); %>
                      <% } else { %>
@@ -141,13 +138,6 @@
                   </select>
                   <small class="form-text text-muted">Choose section within the selected class</small>
                </div>
-                     <option value="">Select Section</option>
-                     <option value="A">A</option>
-                     <option value="B">B</option>
-                     <option value="C">C</option>
-                     <option value="D">D</option>
-                     <option value="E">E</option>
-                  </select>
                </div>
 
                <div class="form-group">

@@ -365,42 +365,44 @@ class UserManagement {
    }
 
    initializeEventListeners() {
+      const self = this;
+      
       // Filter form
-      document.getElementById('filterForm').addEventListener('input', () => {
-         this.applyFilters();
+      document.getElementById('filterForm').addEventListener('input', function() {
+         self.applyFilters();
       });
 
       // Search input with debounce
       let searchTimeout;
-      document.getElementById('searchInput').addEventListener('input', () => {
+      document.getElementById('searchInput').addEventListener('input', function() {
          clearTimeout(searchTimeout);
-         searchTimeout = setTimeout(() => this.applyFilters(), 300);
+         searchTimeout = setTimeout(function() { self.applyFilters(); }, 300);
       });
 
       // Clear filters
-      document.getElementById('clearFilters').addEventListener('click', () => {
-         this.clearFilters();
+      document.getElementById('clearFilters').addEventListener('click', function() {
+         self.clearFilters();
       });
 
       // View type toggle
-      document.querySelectorAll('input[name="viewType"]').forEach(radio => {
-         radio.addEventListener('change', (e) => {
-            this.toggleView(e.target.id === 'tableView' ? 'table' : 'card');
+      document.querySelectorAll('input[name="viewType"]').forEach(function(radio) {
+         radio.addEventListener('change', function(e) {
+            self.toggleView(e.target.id === 'tableView' ? 'table' : 'card');
          });
       });
 
       // Bulk actions
-      document.getElementById('bulkActionsBtn').addEventListener('click', () => {
-         this.toggleBulkActions();
+      document.getElementById('bulkActionsBtn').addEventListener('click', function() {
+         self.toggleBulkActions();
       });
       
-      document.getElementById('closeBulkActions').addEventListener('click', () => {
-         this.toggleBulkActions(false);
+      document.getElementById('closeBulkActions').addEventListener('click', function() {
+         self.toggleBulkActions(false);
       });
 
       // Export users
-      document.getElementById('exportUsers').addEventListener('click', () => {
-         this.exportUsers();
+      document.getElementById('exportUsers').addEventListener('click', function() {
+         self.exportUsers();
       });
    }
 
@@ -468,7 +470,7 @@ class UserManagement {
          return;
       }
 
-      const cardsHtml = users.map(user => {
+      const cardsHtml = users.map(function(user) {
          const initials = this.getInitials(user.fullName || user.name || 'U');
          const roleColor = this.getRoleColor(user.userType || user.role);
          const statusColor = this.getStatusColor(user.status || 'active');
@@ -536,7 +538,7 @@ class UserManagement {
          return;
       }
 
-      const rowsHtml = users.map(user => {
+      const rowsHtml = users.map(function(user) {
          const initials = this.getInitials(user.fullName || user.name || 'U');
          const roleColor = this.getRoleColor(user.userType || user.role);
          const statusColor = this.getStatusColor(user.status || 'active');
@@ -672,7 +674,7 @@ class UserManagement {
 
    // Helper methods
    getInitials(name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+      return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
    }
 
    getRoleColor(role) {
@@ -699,8 +701,10 @@ class UserManagement {
    }
 
    formatRole(role) {
-      return role ? role.replace(/_/g, ' ').replace(/\w\S*/g, 
-         (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : 'Unknown';
+      if (!role) return 'Unknown';
+      return role.replace(/_/g, ' ').replace(/\w\S*/g, function(txt) {
+         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
    }
 
    formatStatus(status) {

@@ -110,14 +110,14 @@ module.exports = function (middleware) {
             classes = await tenantModels.Class.findAll({
                where: { is_active: true },
                order: [['class_order', 'ASC']],
-               attributes: ['id', 'name', 'code', 'level', 'class_order']
+               attributes: ['id', 'name', 'code', 'level', 'class_order'],
             });
 
             // Fetch active sections from tenant database
             sections = await tenantModels.Section.findAll({
                where: { is_active: true },
                order: [['name', 'ASC']],
-               attributes: ['id', 'name', 'code', 'class_id']
+               attributes: ['id', 'name', 'code', 'class_id'],
             });
 
             // For system/trust admins, also fetch schools within tenant
@@ -125,24 +125,20 @@ module.exports = function (middleware) {
                schools = await tenantModels.School.findAll({
                   where: { status: 'ACTIVE' },
                   order: [['name', 'ASC']],
-                  attributes: ['id', 'name', 'code']
+                  attributes: ['id', 'name', 'code'],
                });
             }
 
             const tenantCode = req.tenant.code;
             const msg = `Loaded ${classes.length} classes, ${sections.length} sections`;
             console.log(`${msg} for ${tenantCode}`);
-
          } catch (serviceError) {
-            logError(serviceError, { 
+            logError(serviceError, {
                context: 'students/new tenant data fetch',
                tenant: req.tenant?.code,
-               userType 
+               userType,
             });
-            req.flash(
-               'warning',
-               'Using fallback class/section options. Contact administrator if limited.'
-            );
+            req.flash('warning', 'Using fallback class/section options. Contact administrator if limited.');
          }
 
          res.render('pages/students/new', {

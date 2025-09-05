@@ -1,0 +1,359 @@
+<%- include('../../../partials/header', { title: title }) %>
+
+<div class="container-fluid mt-4">
+   <!-- Page Header -->
+   <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+         <h1 class="h3 mb-0">
+            <i class="fas fa-edit text-warning me-2"></i>
+            Edit Class
+         </h1>
+         <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb">
+               <% breadcrumb.forEach((item, index) => { %>
+                  <% if (index === breadcrumb.length - 1) { %>
+                     <li class="breadcrumb-item active" aria-current="page"><%= item.title %></li>
+                  <% } else { %>
+                     <li class="breadcrumb-item"><a href="<%= item.url %>"><%= item.title %></a></li>
+                  <% } %>
+               <% }) %>
+            </ol>
+         </nav>
+      </div>
+      <div>
+         <a href="/admin/classes" class="btn btn-secondary me-2">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Classes
+         </a>
+         <a href="/admin/classes/<%= classData.id %>" class="btn btn-info">
+            <i class="fas fa-eye me-1"></i>
+            View Class
+         </a>
+      </div>
+   </div>
+
+   <!-- Flash Messages -->
+   <%- include('../../../partials/flash-messages') %>
+
+   <!-- Edit Class Form -->
+   <div class="row">
+      <div class="col-lg-8">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">
+                  <i class="fas fa-chalkboard me-2"></i>
+                  Edit Class Information
+               </h5>
+            </div>
+            <div class="card-body">
+               <form method="POST" action="/admin/classes/<%= classData.id %>" id="editClassForm">
+                  <div class="row">
+                     <!-- Basic Information -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="name" class="form-label">
+                              Class Name <span class="text-danger">*</span>
+                           </label>
+                           <input 
+                              type="text" 
+                              class="form-control" 
+                              id="name" 
+                              name="name" 
+                              value="<%= classData.name %>"
+                              placeholder="e.g., Class 1, Nursery" 
+                              required>
+                           <div class="form-text">Full name of the class</div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="code" class="form-label">
+                              Class Code <span class="text-danger">*</span>
+                           </label>
+                           <input 
+                              type="text" 
+                              class="form-control" 
+                              id="code" 
+                              name="code" 
+                              value="<%= classData.code %>"
+                              placeholder="e.g., C1, NUR" 
+                              required>
+                           <div class="form-text">Short code for the class</div>
+                        </div>
+                     </div>
+
+                     <!-- School Assignment -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="school_id" class="form-label">
+                              School <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="school_id" name="school_id" required>
+                              <option value="">Select School</option>
+                              <% schools.forEach(function(school) { %>
+                                 <option value="<%= school.id %>" 
+                                         <%= classData.school_id == school.id ? 'selected' : '' %>>
+                                    <%= school.name %> (<%= school.code %>)
+                                 </option>
+                              <% }); %>
+                           </select>
+                           <div class="form-text">School where this class belongs</div>
+                        </div>
+                     </div>
+
+                     <!-- Level -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="level" class="form-label">
+                              Education Level <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="level" name="level" required>
+                              <option value="">Select Level</option>
+                              <option value="NURSERY" <%= classData.level === 'NURSERY' ? 'selected' : '' %>>Nursery</option>
+                              <option value="PRIMARY" <%= classData.level === 'PRIMARY' ? 'selected' : '' %>>Primary</option>
+                              <option value="SECONDARY" <%= classData.level === 'SECONDARY' ? 'selected' : '' %>>Secondary</option>
+                              <option value="HIGHER_SECONDARY" <%= classData.level === 'HIGHER_SECONDARY' ? 'selected' : '' %>>Higher Secondary</option>
+                           </select>
+                           <div class="form-text">Educational level category</div>
+                        </div>
+                     </div>
+
+                     <!-- Class Order -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="class_order" class="form-label">
+                              Class Order <span class="text-danger">*</span>
+                           </label>
+                           <input 
+                              type="number" 
+                              class="form-control" 
+                              id="class_order" 
+                              name="class_order" 
+                              value="<%= classData.class_order %>"
+                              min="1" 
+                              max="20" 
+                              required>
+                           <div class="form-text">Numeric order for sorting (1-20)</div>
+                        </div>
+                     </div>
+
+                     <!-- Max Students -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="max_students" class="form-label">
+                              Maximum Students
+                           </label>
+                           <input 
+                              type="number" 
+                              class="form-control" 
+                              id="max_students" 
+                              name="max_students" 
+                              value="<%= classData.max_students || 40 %>"
+                              min="1" 
+                              max="100">
+                           <div class="form-text">Maximum capacity (default: 40)</div>
+                        </div>
+                     </div>
+
+                     <!-- Academic Configuration -->
+                     <div class="col-12">
+                        <div class="mb-3">
+                           <label for="description" class="form-label">
+                              Description
+                           </label>
+                           <textarea 
+                              class="form-control" 
+                              id="description" 
+                              name="description" 
+                              rows="3" 
+                              placeholder="Optional description for the class"><%= classData.description || '' %></textarea>
+                           <div class="form-text">Additional information about the class</div>
+                        </div>
+                     </div>
+
+                     <!-- Status -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <div class="form-check">
+                              <input 
+                                 class="form-check-input" 
+                                 type="checkbox" 
+                                 id="is_active" 
+                                 name="is_active" 
+                                 value="1"
+                                 <%= classData.is_active ? 'checked' : '' %>>
+                              <label class="form-check-label" for="is_active">
+                                 Active Class
+                              </label>
+                              <div class="form-text">Uncheck to deactivate this class</div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="row">
+                     <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                           <div>
+                              <button type="submit" class="btn btn-warning">
+                                 <i class="fas fa-save me-1"></i>
+                                 Update Class
+                              </button>
+                              <button type="reset" class="btn btn-light">
+                                 <i class="fas fa-undo me-1"></i>
+                                 Reset Form
+                              </button>
+                           </div>
+                           <div>
+                              <a href="/admin/classes" class="btn btn-secondary">
+                                 <i class="fas fa-times me-1"></i>
+                                 Cancel
+                              </a>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+
+      <!-- Quick Info Panel -->
+      <div class="col-lg-4">
+         <div class="card">
+            <div class="card-header">
+               <h6 class="card-title mb-0">
+                  <i class="fas fa-info-circle me-2"></i>
+                  Class Information
+               </h6>
+            </div>
+            <div class="card-body">
+               <div class="row g-2">
+                  <div class="col-6">
+                     <small class="text-muted">Class ID:</small>
+                     <div class="fw-bold">#<%= classData.id %></div>
+                  </div>
+                  <div class="col-6">
+                     <small class="text-muted">Created:</small>
+                     <div class="fw-bold"><%= new Date(classData.created_at).toLocaleDateString() %></div>
+                  </div>
+                  <div class="col-6">
+                     <small class="text-muted">Status:</small>
+                     <div>
+                        <% if (classData.is_active) { %>
+                           <span class="badge bg-success">Active</span>
+                        <% } else { %>
+                           <span class="badge bg-secondary">Inactive</span>
+                        <% } %>
+                     </div>
+                  </div>
+                  <div class="col-6">
+                     <small class="text-muted">Updated:</small>
+                     <div class="fw-bold"><%= new Date(classData.updated_at).toLocaleDateString() %></div>
+                  </div>
+               </div>
+
+               <hr class="my-3">
+
+               <h6 class="mb-2">Quick Actions</h6>
+               <div class="d-grid gap-2">
+                  <a href="/admin/classes/<%= classData.id %>/sections" class="btn btn-outline-primary btn-sm">
+                     <i class="fas fa-users me-1"></i>
+                     Manage Sections
+                  </a>
+                  <a href="/admin/classes/<%= classData.id %>/students" class="btn btn-outline-info btn-sm">
+                     <i class="fas fa-user-graduate me-1"></i>
+                     View Students
+                  </a>
+                  <a href="/admin/classes/<%= classData.id %>/subjects" class="btn btn-outline-success btn-sm">
+                     <i class="fas fa-book me-1"></i>
+                     Manage Subjects
+                  </a>
+               </div>
+            </div>
+         </div>
+
+         <!-- Class Statistics -->
+         <div class="card mt-3">
+            <div class="card-header">
+               <h6 class="card-title mb-0">
+                  <i class="fas fa-chart-bar me-2"></i>
+                  Statistics
+               </h6>
+            </div>
+            <div class="card-body">
+               <div class="row g-2 text-center">
+                  <div class="col-6">
+                     <div class="border rounded p-2">
+                        <div class="h5 text-primary mb-0">0</div>
+                        <small class="text-muted">Sections</small>
+                     </div>
+                  </div>
+                  <div class="col-6">
+                     <div class="border rounded p-2">
+                        <div class="h5 text-success mb-0">0</div>
+                        <small class="text-muted">Students</small>
+                     </div>
+                  </div>
+                  <div class="col-6">
+                     <div class="border rounded p-2">
+                        <div class="h5 text-info mb-0">0</div>
+                        <small class="text-muted">Teachers</small>
+                     </div>
+                  </div>
+                  <div class="col-6">
+                     <div class="border rounded p-2">
+                        <div class="h5 text-warning mb-0">0</div>
+                        <small class="text-muted">Subjects</small>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Form Validation Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+   const form = document.getElementById('editClassForm');
+   const nameInput = document.getElementById('name');
+   const codeInput = document.getElementById('code');
+
+   // Auto-generate code from name
+   nameInput.addEventListener('input', function() {
+      if (!codeInput.value) {
+         const code = this.value.toUpperCase()
+            .replace(/[^A-Z0-9]/g, '')
+            .substring(0, 10);
+         codeInput.value = code;
+      }
+   });
+
+   // Form submission validation
+   form.addEventListener('submit', function(e) {
+      const requiredFields = ['name', 'code', 'school_id', 'level', 'class_order'];
+      let isValid = true;
+
+      requiredFields.forEach(function(fieldName) {
+         const field = document.getElementById(fieldName);
+         if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+         } else {
+            field.classList.remove('is-invalid');
+         }
+      });
+
+      if (!isValid) {
+         e.preventDefault();
+         alert('Please fill in all required fields');
+      }
+   });
+});
+</script>
+
+<%- include('../../../partials/footer') %>

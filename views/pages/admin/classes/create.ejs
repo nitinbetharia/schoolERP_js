@@ -1,0 +1,342 @@
+<%- include('../../../partials/header', { title: title }) %>
+
+<div class="container-fluid mt-4">
+   <!-- Page Header -->
+   <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+         <h1 class="h3 mb-0">
+            <i class="fas fa-plus text-success me-2"></i>
+            Create New Class
+         </h1>
+         <nav aria-label="breadcrumb" class="mt-2">
+            <ol class="breadcrumb">
+               <% breadcrumb.forEach((item, index) => { %>
+                  <% if (index === breadcrumb.length - 1) { %>
+                     <li class="breadcrumb-item active" aria-current="page"><%= item.title %></li>
+                  <% } else { %>
+                     <li class="breadcrumb-item"><a href="<%= item.url %>"><%= item.title %></a></li>
+                  <% } %>
+               <% }) %>
+            </ol>
+         </nav>
+      </div>
+      <div>
+         <a href="/admin/classes" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>
+            Back to Classes
+         </a>
+      </div>
+   </div>
+
+   <!-- Flash Messages -->
+   <%- include('../../../partials/flash-messages') %>
+
+   <!-- Create Class Form -->
+   <div class="row">
+      <div class="col-lg-8">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">
+                  <i class="fas fa-chalkboard me-2"></i>
+                  Class Information
+               </h5>
+            </div>
+            <div class="card-body">
+               <form method="POST" action="/admin/classes" id="createClassForm">
+                  <div class="row">
+                     <!-- Basic Information -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="name" class="form-label">
+                              <i class="fas fa-tag text-primary me-1"></i>
+                              Class Name <span class="text-danger">*</span>
+                           </label>
+                           <input type="text" 
+                                  class="form-control" 
+                                  id="name" 
+                                  name="name" 
+                                  placeholder="e.g., Class 1, Nursery, Pre-KG"
+                                  required>
+                           <div class="form-text">Enter the display name for the class</div>
+                        </div>
+                     </div>
+
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="code" class="form-label">
+                              <i class="fas fa-code text-primary me-1"></i>
+                              Class Code <span class="text-danger">*</span>
+                           </label>
+                           <input type="text" 
+                                  class="form-control" 
+                                  id="code" 
+                                  name="code" 
+                                  placeholder="e.g., C1, NUR, PKG"
+                                  required>
+                           <div class="form-text">Short unique code for the class</div>
+                        </div>
+                     </div>
+
+                     <!-- School Assignment -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="school_id" class="form-label">
+                              <i class="fas fa-school text-primary me-1"></i>
+                              School <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="school_id" name="school_id" required>
+                              <option value="">Select School</option>
+                              <% schools.forEach(school => { %>
+                                 <option value="<%= school.id %>">
+                                    <%= school.name %> (<%= school.code %>)
+                                 </option>
+                              <% }) %>
+                           </select>
+                        </div>
+                     </div>
+
+                     <!-- Academic Year -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="academic_year" class="form-label">
+                              <i class="fas fa-calendar-alt text-primary me-1"></i>
+                              Academic Year <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="academic_year" name="academic_year" required>
+                              <option value="">Select Academic Year</option>
+                              <% academicYears.forEach(year => { %>
+                                 <option value="<%= year.year %>" <%= year.is_current ? 'selected' : '' %>>
+                                    <%= year.year %> <%= year.is_current ? '(Current)' : '' %>
+                                 </option>
+                              <% }) %>
+                           </select>
+                        </div>
+                     </div>
+
+                     <!-- Level -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="level" class="form-label">
+                              <i class="fas fa-layer-group text-primary me-1"></i>
+                              Education Level <span class="text-danger">*</span>
+                           </label>
+                           <select class="form-select" id="level" name="level" required>
+                              <option value="">Select Level</option>
+                              <option value="NURSERY">Nursery</option>
+                              <option value="PRIMARY">Primary</option>
+                              <option value="SECONDARY">Secondary</option>
+                              <option value="HIGHER_SECONDARY">Higher Secondary</option>
+                           </select>
+                        </div>
+                     </div>
+
+                     <!-- Class Order -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="class_order" class="form-label">
+                              <i class="fas fa-sort-numeric-up text-primary me-1"></i>
+                              Display Order <span class="text-danger">*</span>
+                           </label>
+                           <input type="number" 
+                                  class="form-control" 
+                                  id="class_order" 
+                                  name="class_order" 
+                                  min="1" 
+                                  max="100"
+                                  placeholder="1"
+                                  required>
+                           <div class="form-text">Number for sorting classes (1, 2, 3...)</div>
+                        </div>
+                     </div>
+
+                     <!-- Capacity Information -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="max_students" class="form-label">
+                              <i class="fas fa-users text-primary me-1"></i>
+                              Maximum Students
+                           </label>
+                           <input type="number" 
+                                  class="form-control" 
+                                  id="max_students" 
+                                  name="max_students" 
+                                  min="1" 
+                                  max="100"
+                                  placeholder="40">
+                           <div class="form-text">Maximum number of students allowed</div>
+                        </div>
+                     </div>
+
+                     <!-- Room Number -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <label for="room_number" class="form-label">
+                              <i class="fas fa-door-open text-primary me-1"></i>
+                              Room Number
+                           </label>
+                           <input type="text" 
+                                  class="form-control" 
+                                  id="room_number" 
+                                  name="room_number" 
+                                  placeholder="e.g., A-101, Room 1">
+                        </div>
+                     </div>
+
+                     <!-- Description -->
+                     <div class="col-12">
+                        <div class="mb-3">
+                           <label for="description" class="form-label">
+                              <i class="fas fa-align-left text-primary me-1"></i>
+                              Description
+                           </label>
+                           <textarea class="form-control" 
+                                     id="description" 
+                                     name="description" 
+                                     rows="3"
+                                     placeholder="Optional description for this class"></textarea>
+                        </div>
+                     </div>
+
+                     <!-- Status -->
+                     <div class="col-md-6">
+                        <div class="mb-3">
+                           <div class="form-check">
+                              <input type="checkbox" 
+                                     class="form-check-input" 
+                                     id="is_active" 
+                                     name="is_active" 
+                                     value="true"
+                                     checked>
+                              <label class="form-check-label" for="is_active">
+                                 <i class="fas fa-check-circle text-success me-1"></i>
+                                 Active Class
+                              </label>
+                           </div>
+                           <div class="form-text">Unchecked classes will be hidden from student enrollment</div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <!-- Form Actions -->
+                  <div class="d-flex justify-content-end gap-2 mt-4">
+                     <a href="/admin/classes" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i>
+                        Cancel
+                     </a>
+                     <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>
+                        Create Class
+                     </button>
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+
+      <!-- Help Panel -->
+      <div class="col-lg-4">
+         <div class="card">
+            <div class="card-header">
+               <h5 class="card-title mb-0">
+                  <i class="fas fa-info-circle text-info me-2"></i>
+                  Help & Guidelines
+               </h5>
+            </div>
+            <div class="card-body">
+               <h6><i class="fas fa-lightbulb text-warning me-1"></i> Quick Tips</h6>
+               <ul class="list-unstyled">
+                  <li class="mb-2">
+                     <i class="fas fa-check text-success me-2"></i>
+                     Class codes should be unique within the school
+                  </li>
+                  <li class="mb-2">
+                     <i class="fas fa-check text-success me-2"></i>
+                     Use display order to control class listing sequence
+                  </li>
+                  <li class="mb-2">
+                     <i class="fas fa-check text-success me-2"></i>
+                     Maximum students helps track capacity
+                  </li>
+                  <li class="mb-2">
+                     <i class="fas fa-check text-success me-2"></i>
+                     Inactive classes are hidden from enrollment
+                  </li>
+               </ul>
+
+               <hr>
+
+               <h6><i class="fas fa-graduation-cap text-primary me-1"></i> Education Levels</h6>
+               <div class="mb-2">
+                  <span class="badge bg-success me-1">Nursery</span>
+                  <small>Pre-school classes</small>
+               </div>
+               <div class="mb-2">
+                  <span class="badge bg-primary me-1">Primary</span>
+                  <small>Classes 1-5</small>
+               </div>
+               <div class="mb-2">
+                  <span class="badge bg-warning me-1">Secondary</span>
+                  <small>Classes 6-10</small>
+               </div>
+               <div class="mb-2">
+                  <span class="badge bg-danger me-1">Higher Secondary</span>
+                  <small>Classes 11-12</small>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+      // Auto-generate class code from name
+      const nameInput = document.getElementById('name');
+      const codeInput = document.getElementById('code');
+      
+      nameInput.addEventListener('input', function() {
+         if (!codeInput.value || codeInput.dataset.autoGenerated) {
+            let code = this.value
+               .replace(/class\s*/i, 'C')
+               .replace(/nursery/i, 'NUR')
+               .replace(/pre-kg/i, 'PKG')
+               .replace(/kg/i, 'KG')
+               .replace(/\s+/g, '')
+               .toUpperCase()
+               .substring(0, 10);
+            
+            codeInput.value = code;
+            codeInput.dataset.autoGenerated = 'true';
+         }
+      });
+      
+      codeInput.addEventListener('input', function() {
+         if (this.value) {
+            this.dataset.autoGenerated = 'false';
+         }
+      });
+
+      // Form validation
+      const form = document.getElementById('createClassForm');
+      form.addEventListener('submit', function(e) {
+         const requiredFields = form.querySelectorAll('[required]');
+         let isValid = true;
+         
+         requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+               field.classList.add('is-invalid');
+               isValid = false;
+            } else {
+               field.classList.remove('is-invalid');
+            }
+         });
+         
+         if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+         }
+      });
+   });
+</script>
+
+<%- include('../../../partials/footer') %>
