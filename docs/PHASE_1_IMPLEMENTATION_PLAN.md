@@ -5,8 +5,9 @@
 Based on the comprehensive database analysis, we need to implement frontend interfaces for the core academic management tables that already contain data in the demo tenant.
 
 ### Current Data Status
+
 - **academic_years**: 1 record (ACTIVE DATA)
-- **classes**: 2 records (ACTIVE DATA)  
+- **classes**: 2 records (ACTIVE DATA)
 - **sections**: 2 records (ACTIVE DATA)
 - **schools**: 1 record (ACTIVE DATA)
 - **students**: 0 records (NEEDS IMPLEMENTATION)
@@ -82,6 +83,7 @@ Based on the comprehensive database analysis, we need to implement frontend inte
 ## Task 4: Enhance Students Management
 
 ### Current Issues with Students Route
+
 - Exists but lacks proper class/section dropdowns
 - No integration with academic year
 - Missing enrollment workflow
@@ -124,40 +126,48 @@ Based on the comprehensive database analysis, we need to implement frontend inte
 ## Navigation Menu Updates
 
 ### Add New Menu Items
+
 Update the main navigation to include:
+
 ```html
 <!-- Academic Management -->
 <li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-    <i class="fas fa-graduation-cap"></i> Academic
-  </a>
-  <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="/admin/academic-years"><i class="fas fa-calendar-alt"></i> Academic Years</a></li>
-    <li><a class="dropdown-item" href="/admin/classes"><i class="fas fa-chalkboard"></i> Classes</a></li>
-    <li><a class="dropdown-item" href="/admin/sections"><i class="fas fa-users"></i> Sections</a></li>
-  </ul>
+   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+      <i class="fas fa-graduation-cap"></i> Academic
+   </a>
+   <ul class="dropdown-menu">
+      <li>
+         <a class="dropdown-item" href="/admin/academic-years"><i class="fas fa-calendar-alt"></i> Academic Years</a>
+      </li>
+      <li>
+         <a class="dropdown-item" href="/admin/classes"><i class="fas fa-chalkboard"></i> Classes</a>
+      </li>
+      <li>
+         <a class="dropdown-item" href="/admin/sections"><i class="fas fa-users"></i> Sections</a>
+      </li>
+   </ul>
 </li>
 
 <!-- Users Management -->
 <li class="nav-item">
-  <a class="nav-link" href="/admin/tenant-users">
-    <i class="fas fa-user-friends"></i> Users
-  </a>
+   <a class="nav-link" href="/admin/tenant-users"> <i class="fas fa-user-friends"></i> Users </a>
 </li>
 ```
 
 ## Database Foreign Key Relationships
 
 ### Key Relationships to Implement
+
 ```
 academic_years (id) <- classes (academic_year_id)
-classes (id) <- sections (class_id)  
+classes (id) <- sections (class_id)
 sections (id) <- students (section_id)
 schools (id) <- students (school_id)
 users (id) <- students (created_by, updated_by)
 ```
 
 ### Dropdown Population Logic
+
 1. **Classes Dropdown**: Filter by current academic year
 2. **Sections Dropdown**: Filter by selected class (AJAX)
 3. **Schools Dropdown**: Filter by current tenant
@@ -165,11 +175,13 @@ users (id) <- students (created_by, updated_by)
 ## Implementation Order
 
 ### Week 1
+
 1. **Day 1-2**: Classes Management (route, model, views)
-2. **Day 3-4**: Sections Management (route, model, views) 
+2. **Day 3-4**: Sections Management (route, model, views)
 3. **Day 5**: Academic Years Management (route, model, views)
 
-### Week 2  
+### Week 2
+
 1. **Day 1-2**: Enhance Students Management
 2. **Day 3-4**: Tenant Users Management
 3. **Day 5**: Navigation updates, testing, bug fixes
@@ -177,13 +189,15 @@ users (id) <- students (created_by, updated_by)
 ## Success Criteria
 
 ### Functional Requirements
+
 - ✅ All CRUD operations work for classes, sections, academic years
 - ✅ Foreign key relationships enforced at UI level
 - ✅ Cascading dropdowns work correctly
 - ✅ Data validation prevents orphaned records
 - ✅ Navigation is intuitive and consistent
 
-### Technical Requirements  
+### Technical Requirements
+
 - ✅ Consistent with existing code architecture
 - ✅ Proper error handling and flash messages
 - ✅ Responsive design with Bootstrap
@@ -193,11 +207,13 @@ users (id) <- students (created_by, updated_by)
 ## Risk Mitigation
 
 ### Potential Issues
+
 1. **Data Integrity**: Existing data might have inconsistencies
 2. **Performance**: Large datasets might slow down dropdowns
 3. **User Experience**: Complex relationships might confuse users
 
 ### Mitigation Strategies
+
 1. **Data Validation**: Add comprehensive validation at model level
 2. **AJAX Loading**: Use AJAX for dynamic dropdown population
 3. **Progressive Disclosure**: Show information in logical steps
@@ -205,10 +221,13 @@ users (id) <- students (created_by, updated_by)
 ## Post-Implementation
 
 ### Immediate Next Phase
+
 After Phase 1 completion, prioritize:
+
 1. **Subjects Management** (connects to classes)
 2. **Fee Management** (critical business function)
 3. **Attendance System** (daily operations)
 
 ### Long-term Roadmap
+
 Continue with remaining 65+ missing frontend implementations based on user feedback and business priorities.

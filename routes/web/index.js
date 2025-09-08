@@ -64,6 +64,8 @@ const requireUserCreationAccess = async (req, res, next) => {
 const middleware = {
    requireAuth,
    requireUserCreationAccess,
+   // Models will be injected by the main app
+   models: null,
 };
 
 // Import route modules
@@ -72,12 +74,17 @@ const systemRoutes = require('./system');
 const userRoutes = require('./users');
 const trustRoutes = require('./trusts');
 const schoolRoutes = require('./schools');
-const studentsRoutes = require('./students');
+const studentsRoutes = require('./students-simple');
 const feesRoutes = require('./fees');
 const teacherRoutes = require('./teacher');
 const staffRoutes = require('./staff');
 const helpRoutes = require('./help');
 const classesRoutes = require('./classes');
+const sectionsRoutes = require('./sections');
+const financeRoutes = require('./finance');
+const paymentsRoutes = require('./payments');
+const feeAssignmentsRoutes = require('./fee-assignments');
+const libraryRoutes = require('./library');
 const apiRoutes = require('./api');
 const utilityRoutes = require('./utils');
 
@@ -114,6 +121,24 @@ router.use('/fees', feesRoutes(middleware));
 router.use('/teacher', teacherRoutes(middleware));
 router.use('/staff', staffRoutes(middleware));
 router.use('/admin/classes', classesRoutes(middleware));
+router.use('/admin/sections', sectionsRoutes(middleware));
+
+// Financial Management routes
+router.use('/admin/finance', financeRoutes(middleware));
+router.use('/payments', paymentsRoutes(middleware));
+router.use('/fee-assignments', feeAssignmentsRoutes(middleware));
+
+// Library Management routes
+router.use('/library', libraryRoutes(middleware));
+
+// Inventory Management routes - Phase 7
+const inventoryRoutes = require('./inventory');
+router.use('/inventory', inventoryRoutes(middleware));
+
+// Communication & Notification routes - Phase 8
+const communicationRoutes = require('./communication');
+router.use('/communication', communicationRoutes(middleware));
+
 router.use('/help', helpRoutes(middleware));
 
 // Backward-compatible redirects for legacy URLs
@@ -141,6 +166,14 @@ router.get('/health/web-router', (req, res) => {
             users: 'mounted',
             trusts: 'mounted',
             schools: 'mounted',
+            classes: 'mounted',
+            sections: 'mounted',
+            finance: 'mounted',
+            payments: 'mounted',
+            feeAssignments: 'mounted',
+            library: 'mounted',
+            inventory: 'mounted',
+            communication: 'mounted',
             api: 'mounted',
             utils: 'mounted',
          },

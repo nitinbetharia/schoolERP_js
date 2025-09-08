@@ -45,7 +45,9 @@ const RETRYABLE_ERRORS = [
  * Check if an error is retryable
  */
 function isRetryableError(error) {
-   if (!error) {return false;}
+   if (!error) {
+      return false;
+   }
 
    // Check error code
    if (error.code && RETRYABLE_ERRORS.includes(error.code)) {
@@ -167,20 +169,29 @@ async function withSequelizeRetry(sequelizeOperation, context = {}) {
 
 /**
  * Retry wrapper for critical business operations
+ * Fixed to prevent hanging with proper timeout
  */
 async function withCriticalRetry(operation, context = {}) {
-   return withRetry(
-      operation,
-      {
-         ...context,
-         operation: context.operation || 'critical_operation',
-      },
-      {
-         maxAttempts: 5, // More attempts for critical operations
-         baseDelayMs: 2000,
-         maxDelayMs: 10000,
-      }
-   );
+   const startTime = Date.now();
+   const timeout = context.timeout || 30000; // 30 second timeout
+
+   return Promise.race([
+      withRetry(
+         operation,
+         {
+            ...context,
+            operation: context.operation || 'critical_operation',
+         },
+         {
+            maxAttempts: 3, // Reduced from 5 to prevent hanging
+            baseDelayMs: 1000, // Reduced from 2000
+            maxDelayMs: 5000, // Reduced from 10000
+         }
+      ),
+      new Promise((_, reject) =>
+         setTimeout(() => reject(new Error(`Critical operation timeout after ${timeout}ms`)), timeout)
+      ),
+   ]);
 }
 
 /**

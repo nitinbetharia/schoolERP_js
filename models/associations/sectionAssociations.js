@@ -16,25 +16,25 @@ const setupSectionAssociations = (models) => {
       foreignKey: 'class_id',
       as: 'sections',
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE',
    });
 
    Section.belongsTo(Class, {
       foreignKey: 'class_id',
-      as: 'class'
+      as: 'class',
    });
 
    // User (Teacher) ↔ Section (One-to-Many)
    User.hasMany(Section, {
       foreignKey: 'section_teacher_id',
       as: 'sectionsTaught',
-      constraints: false
+      constraints: false,
    });
 
    Section.belongsTo(User, {
       foreignKey: 'section_teacher_id',
       as: 'sectionTeacher',
-      constraints: false
+      constraints: false,
    });
 
    // Section ↔ Student (One-to-Many) - if Student model exists
@@ -43,12 +43,12 @@ const setupSectionAssociations = (models) => {
          foreignKey: 'section_id',
          as: 'students',
          onDelete: 'SET NULL',
-         onUpdate: 'CASCADE'
+         onUpdate: 'CASCADE',
       });
 
       Student.belongsTo(Section, {
          foreignKey: 'section_id',
-         as: 'section'
+         as: 'section',
       });
    }
 
@@ -56,5 +56,5 @@ const setupSectionAssociations = (models) => {
 };
 
 module.exports = {
-   setupSectionAssociations
+   setupSectionAssociations,
 };

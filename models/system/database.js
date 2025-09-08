@@ -72,62 +72,74 @@ function createDatabaseManager() {
    }
 
    /**
-    * Initialize system database connection with retry logic
+    * Initialize system database connection with retry logic and timeout
     */
    async function initializeSystemDB() {
-      return await withCriticalRetry(
-         async () => {
-            logSystem('Initializing system database connection');
+      try {
+         return await withCriticalRetry(
+            async () => {
+               logSystem('Initializing system database connection');
 
-            const config = {
-               host: appConfig.database.connection.host,
-               port: appConfig.database.connection.port,
-               username: process.env.DB_USER,
-               password: process.env.DB_PASSWORD,
-               database: appConfig.database.system.name,
-               dialect: 'mysql',
-               timezone: appConfig.database.connection.timezone,
-               dialectOptions: {
-                  charset: appConfig.database.system.charset,
-                  connectTimeout: appConfig.database.connection.connectTimeout,
-                  ssl: appConfig.database.connection.ssl
-                     ? {
-                          require: true,
-                          rejectUnauthorized: false,
-                       }
-                     : false,
-               },
-               pool: {
-                  max: connectionPool.max,
-                  min: connectionPool.min,
-                  acquire: connectionPool.acquire,
-                  idle: connectionPool.idle,
-                  evict: connectionPool.evict || 5000,
-                  handleDisconnects: connectionPool.handleDisconnects || true,
-               },
-               logging: (msg) => logDB(msg),
-               define: {
-                  underscored: true,
-                  freezeTableName: true,
-               },
-            };
+               const config = {
+                  host: appConfig.database.connection.host,
+                  port: appConfig.database.connection.port,
+                  username: process.env.DB_USER,
+                  password: process.env.DB_PASSWORD,
+                  database: appConfig.database.system.name,
+                  dialect: 'mysql',
+                  timezone: appConfig.database.connection.timezone,
+                  dialectOptions: {
+                     charset: appConfig.database.system.charset,
+                     connectTimeout: 10000, // 10 second connection timeout
+                     acquireTimeout: 10000, // 10 second acquire timeout
+                     ssl: appConfig.database.connection.ssl
+                        ? {
+                             require: true,
+                             rejectUnauthorized: false,
+                          }
+                        : false,
+                  },
+                  pool: {
+                     max: connectionPool.max,
+                     min: connectionPool.min,
+                     acquire: 10000, // 10 second acquire timeout
+                     idle: connectionPool.idle,
+                     evict: connectionPool.evict || 5000,
+                     handleDisconnects: connectionPool.handleDisconnects || true,
+                  },
+                  logging: (msg) => logDB(msg),
+                  define: {
+                     underscored: true,
+                     freezeTableName: true,
+                  },
+               };
 
-            systemDB = new Sequelize(config);
+               systemDB = new Sequelize(config);
 
-            // Test connection with retry
-            await systemDB.authenticate();
-            logSystem('System database connection established successfully');
+               // Test connection with explicit timeout
+               const authPromise = systemDB.authenticate();
+               const timeoutPromise = new Promise((_, reject) =>
+                  setTimeout(() => reject(new Error('Database authentication timeout')), 15000)
+               );
 
-            // Start connection cleanup
-            startConnectionCleanup();
+               await Promise.race([authPromise, timeoutPromise]);
+               logSystem('System database connection established successfully');
 
-            return systemDB;
-         },
-         {
-            operation: 'initializeSystemDB',
-            context: 'system_database_initialization',
-         }
-      );
+               // Start connection cleanup
+               startConnectionCleanup();
+
+               return systemDB;
+            },
+            {
+               operation: 'initializeSystemDB',
+               context: 'system_database_initialization',
+               timeout: 25000, // 25 second overall timeout
+            }
+         );
+      } catch (error) {
+         logSystem(`Failed to initialize system database: ${error.message}`);
+         throw new Error(`Database initialization failed: ${error.message}`);
+      }
    }
 
    /**

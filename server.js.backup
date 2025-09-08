@@ -77,48 +77,18 @@ class SchoolERPServer {
    }
 
    /**
-    * Initialize database connections and models with timeout and retry logic
+    * Initialize database connections and models
     */
    async initializeDatabase() {
       try {
          logSystem('Initializing database connections');
 
-         // Add timeout wrapper for database initialization
-         const dbInitPromise = initializeSystemModels();
-         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Database initialization timeout after 60 seconds')), 60000)
-         );
+         // Initialize system models
+         await initializeSystemModels();
 
-         await Promise.race([dbInitPromise, timeoutPromise]);
          logSystem('Database initialized successfully');
       } catch (error) {
          logError(error, { context: 'database initialization' });
-
-         // Provide helpful error messages for common issues
-         if (error.message.includes('timeout') || error.code === 'ETIMEDOUT') {
-            console.error('\n❌ Database initialization timed out!');
-            console.error('💡 Possible causes:');
-            console.error('   - Database server is unreachable');
-            console.error('   - Network connectivity issues');
-            console.error('   - Database server is overloaded');
-            console.error('   - Incorrect database credentials');
-         } else if (error.code === 'ECONNREFUSED') {
-            console.error('\n❌ Database connection refused!');
-            console.error('💡 Check if MySQL server is running on the configured host/port');
-         } else if (error.code === 'ENOTFOUND') {
-            console.error('\n❌ Database host not found!');
-            console.error('💡 Check the database host configuration');
-         } else if (error.code === 'ER_ACCESS_DENIED_ERROR') {
-            console.error('\n❌ Database access denied!');
-            console.error('💡 Check database username and password');
-         }
-
-         console.error('\n🔍 Database configuration check:');
-         console.error('Host:', appConfig.database.connection.host);
-         console.error('Port:', appConfig.database.connection.port);
-         console.error('Database:', appConfig.database.system.name);
-         console.error('User:', process.env.DB_USER);
-
          throw error;
       }
    }

@@ -38,7 +38,7 @@ class SectionsService {
                { name: { [Op.like]: `%${search}%` } },
                { room_number: { [Op.like]: `%${search}%` } },
                { '$Class.name$': { [Op.like]: `%${search}%` } },
-               { '$Class.code$': { [Op.like]: `%${search}%` } }
+               { '$Class.code$': { [Op.like]: `%${search}%` } },
             ];
          }
 
@@ -71,22 +71,22 @@ class SectionsService {
                   as: 'class',
                   required: true,
                   where: classWhereConditions,
-                  attributes: ['id', 'name', 'code', 'level', 'school_id']
+                  attributes: ['id', 'name', 'code', 'level', 'school_id'],
                },
                {
                   model: this.User,
                   as: 'sectionTeacher',
                   required: false,
-                  attributes: ['id', 'first_name', 'last_name', 'email']
-               }
+                  attributes: ['id', 'first_name', 'last_name', 'email'],
+               },
             ],
             order: [
                ['class_id', 'ASC'],
-               ['name', 'ASC']
+               ['name', 'ASC'],
             ],
             limit: parseInt(limit),
             offset: parseInt(offset),
-            distinct: true
+            distinct: true,
          });
 
          // Calculate current strength for each section (student count)
@@ -95,15 +95,16 @@ class SectionsService {
                const currentStrength = await this.Student.count({
                   where: {
                      section_id: section.id,
-                     is_active: true
-                  }
+                     is_active: true,
+                  },
                });
 
                return {
                   ...section.get({ plain: true }),
                   current_strength: currentStrength,
-                  section_teacher_name: section.sectionTeacher ? 
-                     `${section.sectionTeacher.first_name} ${section.sectionTeacher.last_name}` : null
+                  section_teacher_name: section.sectionTeacher
+                     ? `${section.sectionTeacher.first_name} ${section.sectionTeacher.last_name}`
+                     : null,
                };
             })
          );
@@ -114,10 +115,9 @@ class SectionsService {
                currentPage: parseInt(page),
                totalPages: Math.ceil(count / limit),
                pageSize: parseInt(limit),
-               totalRecords: count
-            }
+               totalRecords: count,
+            },
          };
-
       } catch (error) {
          logError(error, { context: 'SectionsService.getAllSections', tenantCode });
          throw new Error('Failed to retrieve sections');
@@ -142,15 +142,15 @@ class SectionsService {
                   as: 'class',
                   required: true,
                   where: classWhereConditions,
-                  attributes: ['id', 'name', 'code', 'level', 'school_id']
+                  attributes: ['id', 'name', 'code', 'level', 'school_id'],
                },
                {
                   model: this.User,
                   as: 'sectionTeacher',
                   required: false,
-                  attributes: ['id', 'first_name', 'last_name', 'email']
-               }
-            ]
+                  attributes: ['id', 'first_name', 'last_name', 'email'],
+               },
+            ],
          });
 
          if (!section) {
@@ -161,17 +161,17 @@ class SectionsService {
          const currentStrength = await this.Student.count({
             where: {
                section_id: sectionId,
-               is_active: true
-            }
+               is_active: true,
+            },
          });
 
          return {
             ...section.get({ plain: true }),
             current_strength: currentStrength,
-            section_teacher_name: section.sectionTeacher ? 
-               `${section.sectionTeacher.first_name} ${section.sectionTeacher.last_name}` : null
+            section_teacher_name: section.sectionTeacher
+               ? `${section.sectionTeacher.first_name} ${section.sectionTeacher.last_name}`
+               : null,
          };
-
       } catch (error) {
          logError(error, { context: 'SectionsService.getSectionById', sectionId, tenantCode });
          throw error;
@@ -193,7 +193,7 @@ class SectionsService {
          }
 
          const classExists = await this.Class.findOne({
-            where: classWhereConditions
+            where: classWhereConditions,
          });
 
          if (!classExists) {
@@ -204,8 +204,8 @@ class SectionsService {
          const existingSection = await this.Section.findOne({
             where: {
                class_id: sectionData.class_id,
-               name: sectionData.name
-            }
+               name: sectionData.name,
+            },
          });
 
          if (existingSection) {
@@ -215,7 +215,7 @@ class SectionsService {
          // Verify teacher exists if provided
          if (sectionData.section_teacher_id) {
             const teacher = await this.User.findOne({
-               where: { id: sectionData.section_teacher_id }
+               where: { id: sectionData.section_teacher_id },
             });
 
             if (!teacher) {
@@ -226,11 +226,10 @@ class SectionsService {
          const newSection = await this.Section.create({
             ...sectionData,
             current_strength: 0,
-            is_active: sectionData.is_active !== undefined ? sectionData.is_active : true
+            is_active: sectionData.is_active !== undefined ? sectionData.is_active : true,
          });
 
          return await this.getSectionById(newSection.id, tenantCode);
-
       } catch (error) {
          logError(error, { context: 'SectionsService.createSection', sectionData, tenantCode });
          throw error;
@@ -257,7 +256,7 @@ class SectionsService {
             }
 
             const classExists = await this.Class.findOne({
-               where: classWhereConditions
+               where: classWhereConditions,
             });
 
             if (!classExists) {
@@ -271,8 +270,8 @@ class SectionsService {
                where: {
                   class_id: updateData.class_id || existingSection.class_id,
                   name: updateData.name,
-                  id: { [Op.ne]: sectionId }
-               }
+                  id: { [Op.ne]: sectionId },
+               },
             });
 
             if (conflictingSection) {
@@ -283,7 +282,7 @@ class SectionsService {
          // Verify teacher exists if being updated
          if (updateData.section_teacher_id) {
             const teacher = await this.User.findOne({
-               where: { id: updateData.section_teacher_id }
+               where: { id: updateData.section_teacher_id },
             });
 
             if (!teacher) {
@@ -292,11 +291,10 @@ class SectionsService {
          }
 
          await this.Section.update(updateData, {
-            where: { id: sectionId }
+            where: { id: sectionId },
          });
 
          return await this.getSectionById(sectionId, tenantCode);
-
       } catch (error) {
          logError(error, { context: 'SectionsService.updateSection', sectionId, updateData, tenantCode });
          throw error;
@@ -318,22 +316,20 @@ class SectionsService {
          const studentCount = await this.Student.count({
             where: {
                section_id: sectionId,
-               is_active: true
-            }
+               is_active: true,
+            },
          });
 
          if (studentCount > 0) {
-            throw new Error(`Cannot delete section with ${studentCount} active students. Please transfer students first.`);
+            throw new Error(
+               `Cannot delete section with ${studentCount} active students. Please transfer students first.`
+            );
          }
 
          // Soft delete by marking as inactive
-         await this.Section.update(
-            { is_active: false },
-            { where: { id: sectionId } }
-         );
+         await this.Section.update({ is_active: false }, { where: { id: sectionId } });
 
          return true;
-
       } catch (error) {
          logError(error, { context: 'SectionsService.deleteSection', sectionId, tenantCode });
          throw error;
@@ -351,44 +347,54 @@ class SectionsService {
 
          const [totalSections, activeSections, totalCapacity, totalStudents] = await Promise.all([
             this.Section.count({
-               include: [{
-                  model: this.Class,
-                  as: 'class',
-                  required: true,
-                  where: classWhereConditions
-               }]
-            }),
-            this.Section.count({
-               where: { is_active: true },
-               include: [{
-                  model: this.Class,
-                  as: 'class',
-                  required: true,
-                  where: classWhereConditions
-               }]
-            }),
-            this.Section.sum('capacity', {
-               include: [{
-                  model: this.Class,
-                  as: 'class',
-                  required: true,
-                  where: classWhereConditions
-               }]
-            }),
-            this.Student.count({
-               where: { is_active: true },
-               include: [{
-                  model: this.Section,
-                  as: 'section',
-                  required: true,
-                  include: [{
+               include: [
+                  {
                      model: this.Class,
                      as: 'class',
                      required: true,
-                     where: classWhereConditions
-                  }]
-               }]
-            })
+                     where: classWhereConditions,
+                  },
+               ],
+            }),
+            this.Section.count({
+               where: { is_active: true },
+               include: [
+                  {
+                     model: this.Class,
+                     as: 'class',
+                     required: true,
+                     where: classWhereConditions,
+                  },
+               ],
+            }),
+            this.Section.sum('capacity', {
+               include: [
+                  {
+                     model: this.Class,
+                     as: 'class',
+                     required: true,
+                     where: classWhereConditions,
+                  },
+               ],
+            }),
+            this.Student.count({
+               where: { is_active: true },
+               include: [
+                  {
+                     model: this.Section,
+                     as: 'section',
+                     required: true,
+                     include: [
+                        {
+                           model: this.Class,
+                           as: 'class',
+                           required: true,
+                           where: classWhereConditions,
+                        },
+                     ],
+                  },
+               ],
+            }),
          ]);
 
          return {
@@ -398,9 +404,8 @@ class SectionsService {
             totalCapacity: totalCapacity || 0,
             totalStudents: totalStudents || 0,
             averageCapacity: totalSections > 0 ? Math.round((totalCapacity || 0) / totalSections) : 0,
-            capacityUtilization: totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0
+            capacityUtilization: totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0,
          };
-
       } catch (error) {
          logError(error, { context: 'SectionsService.getSectionsStatistics', tenantCode });
          throw new Error('Failed to retrieve sections statistics');
@@ -416,7 +421,7 @@ class SectionsService {
       try {
          const whereConditions = {
             role: 'TEACHER',
-            is_active: true
+            is_active: true,
          };
 
          if (tenantCode) {
@@ -426,15 +431,17 @@ class SectionsService {
          const teachers = await this.User.findAll({
             where: whereConditions,
             attributes: ['id', 'first_name', 'last_name', 'email'],
-            order: [['first_name', 'ASC'], ['last_name', 'ASC']]
+            order: [
+               ['first_name', 'ASC'],
+               ['last_name', 'ASC'],
+            ],
          });
 
-         return teachers.map(teacher => ({
+         return teachers.map((teacher) => ({
             id: teacher.id,
             name: `${teacher.first_name} ${teacher.last_name}`,
-            email: teacher.email
+            email: teacher.email,
          }));
-
       } catch (error) {
          logError(error, { context: 'SectionsService.getAvailableTeachers', tenantCode });
          throw new Error('Failed to retrieve available teachers');
