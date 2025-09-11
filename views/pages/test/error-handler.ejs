@@ -94,35 +94,35 @@
 <script>
    function triggerServerError() {
       // Trigger a server error via AJAX
-      fetch('/test-500-error', {
+      fetch('/utils/500-error', {
          method: 'GET',
       })
          .then((response) => {
             if (!response.ok) {
                // Redirect to show the error page
-               window.location.href = '/test-500-error';
+               window.location.href = '/utils/500-error';
             }
          })
          .catch(() => {
             // If AJAX fails, try direct navigation
-            window.location.href = '/test-500-error';
+            window.location.href = '/utils/500-error';
          });
    }
 
    function triggerGenericError() {
       // Trigger a generic error
-      fetch('/test-generic-error', {
+      fetch('/utils/generic-error', {
          method: 'GET',
       })
          .then((response) => {
             if (!response.ok) {
                // Redirect to show the error page
-               window.location.href = '/test-generic-error';
+               window.location.href = '/utils/generic-error';
             }
          })
          .catch(() => {
             // If AJAX fails, try direct navigation
-            window.location.href = '/test-generic-error';
+            window.location.href = '/utils/generic-error';
          });
    }
 </script>

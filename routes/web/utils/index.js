@@ -1,5 +1,4 @@
 const express = require('express');
-const path = require('path');
 const { logError } = require('../../../utils/logger');
 
 /**
@@ -13,11 +12,11 @@ module.exports = function (_middleware) {
 
    /**
     * @route GET /frontend
-    * @desc Test Bootstrap 5 and Font Awesome implementation
+    * @desc Frontend test redirect (file removed during cleanup)
     * @access Public
     */
    router.get('/frontend', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../public/test-bootstrap.html'));
+      res.redirect('/auth/login?message=Frontend test file was removed during codebase cleanup');
    });
 
    /**
@@ -27,7 +26,7 @@ module.exports = function (_middleware) {
     */
    router.get('/error-handler', (req, res) => {
       try {
-         res.render('pages/test-error-handler', {
+         res.render('pages/test/error-handler', {
             title: 'Error Handler Test',
             description: 'Test different error scenarios and flash message types',
             user: req.session?.user || null,

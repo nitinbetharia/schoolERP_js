@@ -17,19 +17,9 @@ module.exports = function (_middleware) {
    // Import password reset routes
    const passwordResetRoutes = require('./password-reset');
 
-   // Frontend test route (no auth required)
+   // Frontend test route redirect (view removed during cleanup)
    router.get('/test-frontend', (req, res) => {
-      try {
-         res.render('pages/test-frontend', {
-            title: 'Frontend Test',
-            subtitle: 'Testing Bootstrap 5, Font Awesome, and Vanilla JavaScript',
-            user: null, // No user for this test
-            tenant: null,
-         });
-      } catch (error) {
-         console.error('Frontend test route error:', error);
-         res.status(500).send('Error rendering test page');
-      }
+      res.redirect('/auth/login?message=Frontend test page was removed during codebase cleanup');
    });
 
    /**

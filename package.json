@@ -19,11 +19,7 @@
       "lint": "eslint .",
       "lint:fix": "eslint . --fix",
       "format": "prettier --write .",
-      "cleanup:temp": "node -e \"const fs=require('fs'),path=require('path'); try{fs.rmSync(path.join(__dirname,'temp'),{recursive:true,force:true}); console.log('Temp files cleaned');}catch(e){console.log('No temp files to clean');}\"",
-      "check:frontend": "node scripts/check-frontend-coverage.js",
-      "check:links": "node scripts/check-frontend-links.js",
-      "check:routes": "node scripts/analyze-route-view-coverage.js",
-      "optimize:viewport": "node scripts/optimize-ejs-viewport.js"
+      "cleanup:temp": "node -e \"const fs=require('fs'),path=require('path'); try{fs.rmSync(path.join(__dirname,'temp'),{recursive:true,force:true}); console.log('Temp files cleaned');}catch(e){console.log('No temp files to clean');}\""
    },
    "keywords": [
       "school",

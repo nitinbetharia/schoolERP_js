@@ -98,7 +98,7 @@ function testDatabaseConnection() {
          log('✅ Database authentication successful', colors.green);
 
          // Test basic query
-         const [results] = await sequelize.query('SELECT 1 as test, NOW() as current_time');
+         const [results] = await sequelize.query('SELECT 1 AS test_value, NOW() AS server_time');
          log(`✅ Database query successful: ${JSON.stringify(results[0])}`, colors.green);
 
          resolve();
